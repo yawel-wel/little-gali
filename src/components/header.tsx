@@ -10,64 +10,22 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigationItems = [
-    { name: "בית", href: "#", active: true },
-    { name: "אודותינו", href: "#" },
-    { name: "מוצרים", href: "#" },
-    { name: "בלוג", href: "#" },
     { name: "צור קשר", href: "#" },
+    { name: "בלוג", href: "#" },
+    { name: "מוצרים", href: "#" },
+    { name: "אודותינו", href: "#" },
+    { name: "בית", href: "#", active: true },
   ];
 
   return (
-    <header className="relative bg-white border-b border-soft-peach-light">
-      {/* Decorative wave pattern */}
-      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-soft-peach via-primary-orange to-soft-peach opacity-60">
-        <div className="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjIwIiB2aWV3Qm94PSIwIDAgMTAwIDIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAxMEMxMCA1IDIwIDE1IDMwIDEwQzQwIDUgNTAgMTUgNjAgMTBDNzAgNSA4MCAxNSA5MCAxMEMxMDAgNSAxMDAgMTAgMTAwIDEwVjIwSDBWMTBaIiBmaWxsPSIjRkZGRkZGIiBmaWxsLW9wYWNpdHk9IjAuMyIvPgo8L3N2Zz4K')] opacity-30"></div>
-      </div>
-
+    <header className="relative bg-[#F9F7EE] border-b border-soft-peach-light">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center py-2">
-          {/* Mobile Header Row */}
-          <div className="flex items-center justify-between w-full md:hidden h-12">
-            {/* Mobile Menu Button */}
-            <div className="flex-shrink-0">
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-dark-gray hover:text-primary-orange"
-                  >
-                    <Menu className="h-6 w-6" />
-                    <span className="sr-only">Open menu</span>
-                  </Button>
-                </SheetTrigger>
-              </Sheet>
-            </div>
-
-            {/* Mobile Logo */}
-            <div className="flex-shrink-0">
-              <img
-                src="/logo-mobile.png"
-                alt="Little Gali"
-                width={150}
-                height={45}
-                className="h-8 w-auto"
-              />
-            </div>
-
-            {/* Empty div for spacing */}
-            <div className="w-10"></div>
-          </div>
-
-          {/* Desktop Logo */}
-          <div className="hidden md:block flex-shrink-0 mb-4">
-            <img
-              src="/logo.png"
-              alt="Little Gali"
-              width={200}
-              height={60}
-              className="h-12 w-auto lg:h-16 lg:w-auto"
-            />
+        <div className="flex items-center justify-between py-4">
+          {/* CTA Button */}
+          <div className="hidden md:block">
+            <button className="border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
+              קנו תבנית
+            </button>
           </div>
 
           {/* Desktop Navigation */}
@@ -89,6 +47,33 @@ export function Header() {
               </a>
             ))}
           </nav>
+
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <img
+              src="/logo.png"
+              alt="Little Gali"
+              width={200}
+              height={60}
+              className="h-10 w-auto lg:h-12 lg:w-auto"
+            />
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-dark-gray hover:text-primary-orange"
+                >
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+            </Sheet>
+          </div>
 
           {/* Mobile Menu Content */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>

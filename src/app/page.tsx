@@ -22,125 +22,98 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-white py-16 lg:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              {/* Left Content - Text */}
-              <div className="space-y-8">
-                {/* Decorative accent */}
-                <div className="absolute top-8 left-8 w-6 h-6 bg-soft-yellow rounded-full opacity-60"></div>
+        <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-8 left-8 w-4 h-4 bg-primary-orange rounded-full opacity-60"></div>
+          <div className="absolute top-16 right-12 w-6 h-6 bg-soft-blue rounded-full opacity-40"></div>
+          <div className="absolute bottom-20 left-16 w-8 h-8 bg-soft-green rounded-full opacity-30"></div>
+          <div className="absolute bottom-12 right-8 w-5 h-5 bg-soft-yellow rounded-full opacity-50"></div>
 
-                {/* Main headline */}
-                <div className="space-y-4">
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-display text-dark-gray leading-tight">
-                    הדרך להורות טובה יותר{" "}
-                    <span className="relative">
-                      הפכה לקלה יותר.
-                      <span className="absolute -bottom-1 left-0 right-0 h-3 bg-soft-yellow-light -z-10 rounded-sm"></span>
-                    </span>
-                  </h1>
-                </div>
+          {/* Badge elements */}
+          <div className="absolute top-20 right-8 transform rotate-12">
+            <div className="bg-dark-gray text-white px-3 py-1 rounded-full text-xs font-body-bold">
+              100%
+            </div>
+          </div>
 
-                {/* Description */}
-                <p className="text-lg md:text-xl font-body text-medium-gray leading-relaxed max-w-lg">
-                  לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                  laboris.
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center space-y-4">
+              {/* Welcome text */}
+              <div className="space-y-2">
+                <p className="text-xs font-body-bold text-primary-orange uppercase tracking-widest">
+                  ברוכים הבאים לליטל גלי
                 </p>
 
-                {/* CTA Button */}
-                <div className="pt-4">
-                  <Button
-                    size="lg"
-                    className="bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105"
-                  >
-                    הרשמה עכשיו
-                    <svg
-                      className="ml-2 w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      ></path>
-                    </svg>
-                  </Button>
-                </div>
+                {/* Main headline */}
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-dark-gray leading-tight max-w-4xl mx-auto">
+                  אנחנו סוכנות דיגיטלית זוכת פרסים
+                </h1>
 
-                {/* Decorative swirl */}
-                <div className="absolute bottom-8 left-4 w-16 h-16 text-soft-peach opacity-40">
-                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                {/* Description */}
+                <p className="text-sm sm:text-base md:text-lg font-body text-medium-gray leading-relaxed max-w-2xl mx-auto">
+                  ליטל גלי היא סוכנות יצירתית ללא קוד - תבנית ווב פלו
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <div className="pt-2">
+                <Button
+                  size="lg"
+                  className="bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base sm:text-lg md:text-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  למדו עוד
+                  <svg
+                    className="mr-3 w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
-                      d="M20,20 Q30,10 40,20 Q50,30 60,20 Q70,10 80,20"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      fill="none"
                       strokeLinecap="round"
-                    />
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    ></path>
                   </svg>
+                </Button>
+              </div>
+
+              {/* Musicians Image */}
+              <div className="mt-4">
+                <div className="w-full max-w-6xl mx-auto">
+                  <img
+                    src="/musicians.png"
+                    alt="Famous Musicians"
+                    className="w-full h-auto object-contain"
+                    style={{ maxHeight: "250px" }}
+                  />
                 </div>
               </div>
 
-              {/* Right Content - Image */}
-              <div className="relative">
-                {/* Decorative sunburst */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 text-soft-peach opacity-60">
-                  <svg viewBox="0 0 100 100" className="w-full h-full">
+              {/* Scroll indicator */}
+              <div className="absolute bottom-8 right-8">
+                <div className="bg-dark-gray text-white p-3 rounded-full shadow-lg">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
-                      d="M50,10 L55,35 L80,35 L60,50 L65,75 L50,60 L35,75 L40,50 L20,35 L45,35 Z"
-                      fill="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
                     />
                   </svg>
                 </div>
-
-                {/* Main image container */}
-                <div className="relative">
-                  {/* Decorative background shape */}
-                  <div className="absolute -bottom-8 -right-8 w-full h-3/4 bg-soft-blue-light rounded-full opacity-30 -z-10"></div>
-
-                  {/* Placeholder image */}
-                  <div className="relative bg-gradient-to-br from-soft-peach-light to-soft-blue-light rounded-3xl p-8 lg:p-12">
-                    <div className="aspect-[4/5] bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                      <div className="text-center space-y-4">
-                        <div className="w-16 h-16 bg-soft-peach rounded-full mx-auto flex items-center justify-center">
-                          <svg
-                            className="w-8 h-8 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path
-                              fillRule="evenodd"
-                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <p className="text-medium-gray font-body">
-                          Placeholder Image
-                        </p>
-                        <p className="text-sm text-light-gray font-caption">
-                          Parent & Child
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Small decorative arch */}
-                <div className="absolute -bottom-2 -right-2 w-8 h-4 bg-soft-blue rounded-full opacity-60"></div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Choose Your Path Section */}
-        <section className="relative bg-white py-16 lg:py-24">
+        <section className="relative bg-[#F9F7EE] py-16 lg:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-12">
