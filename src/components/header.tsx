@@ -9,7 +9,18 @@ import { Menu, X } from "lucide-react";
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navigationItems = [
+  // Desktop navigation (left to right: Home, About, etc.)
+  const desktopNavigationItems = [
+    { name: "צור קשר", href: "#" },
+    { name: "השראה", href: "#" },
+    { name: "שאלות ותשובות", href: "#" },
+    { name: "הידעת", href: "#" },
+    { name: "אודותינו", href: "#" },
+    { name: "בית", href: "#", active: true },
+  ];
+
+  // Mobile navigation (top to bottom: Home, About, etc.)
+  const mobileNavigationItems = [
     { name: "בית", href: "#", active: true },
     { name: "אודותינו", href: "#" },
     { name: "הידעת", href: "#" },
@@ -31,7 +42,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => (
+            {desktopNavigationItems.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
@@ -85,7 +96,7 @@ export function Header() {
                 {/* Mobile Navigation */}
                 <nav className="flex-1 pt-14 pb-6">
                   <div className="space-y-3 pr-6">
-                    {navigationItems.map((item) => (
+                    {mobileNavigationItems.map((item) => (
                       <a
                         key={item.name}
                         href={item.href}
