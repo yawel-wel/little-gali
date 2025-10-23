@@ -23,90 +23,161 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-8 left-8 w-4 h-4 bg-primary-orange rounded-full opacity-60"></div>
-          <div className="absolute top-16 right-12 w-6 h-6 bg-soft-blue rounded-full opacity-40"></div>
-          <div className="absolute bottom-20 left-16 w-8 h-8 bg-soft-green rounded-full opacity-30"></div>
-          <div className="absolute bottom-12 right-8 w-5 h-5 bg-soft-yellow rounded-full opacity-50"></div>
-
-          {/* Badge elements */}
-          <div className="absolute top-20 right-8 transform rotate-12">
-            <div className="bg-dark-gray text-white px-3 py-1 rounded-full text-xs font-body-bold">
-              100%
-            </div>
-          </div>
-
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center space-y-4">
               {/* Welcome text */}
-              <div className="space-y-2">
-                <p className="text-xs font-body-bold text-primary-orange uppercase tracking-widest">
-                  ברוכים הבאים לליטל גלי
-                </p>
+              <div>
+                <div
+                  className="inline-block px-6 py-2 rounded-full"
+                  style={{ backgroundColor: "#FFE592" }}
+                >
+                  <p className="text-sm font-body-bold text-black uppercase tracking-widest">
+                    הדפסה אישית באיכות גבוהה
+                  </p>
+                </div>
 
                 {/* Main headline */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-dark-gray leading-tight max-w-4xl mx-auto">
-                  אנחנו סוכנות דיגיטלית זוכת פרסים
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-7xl font-black text-dark-gray leading-tight max-w-4xl mx-auto">
+                  ספרון תינוקות מותאם באופן{" "}
+                  <span className="relative inline-block">
+                    <span className="relative z-10">אישי</span>
+                    <span
+                      className="absolute bottom-0 left-0 right-0 transform -rotate-1 rounded-full"
+                      style={{
+                        height: "8px",
+                        borderRadius: "4px",
+                        transform: "rotate(-1deg) translateY(0px)",
+                        background:
+                          "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                        boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                        width: "110%",
+                        left: "-5%",
+                      }}
+                    ></span>
+                  </span>
                 </h1>
 
                 {/* Description */}
-                <p className="text-sm sm:text-base md:text-lg font-body text-medium-gray leading-relaxed max-w-2xl mx-auto">
-                  ליטל גלי היא סוכנות יצירתית ללא קוד - תבנית ווב פלו
+                <p
+                  className="text-base sm:text-lg md:text-xl font-normal text-medium-gray leading-relaxed max-w-2xl mx-auto mt-8 text-center"
+                  style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  הדרך הכי מתוקה להכיר לתינוק את המשפחה
                 </p>
               </div>
 
-              {/* CTA Button */}
-              <div className="pt-2">
-                <Button
-                  size="lg"
-                  className="bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base sm:text-lg md:text-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
-                >
-                  למדו עוד
+              {/* Hero Image with Arrow */}
+              <div className="w-full max-w-6xl mx-auto relative">
+                <img
+                  src="/musicians.png"
+                  alt="Baby book example"
+                  className="w-full h-auto object-contain"
+                  style={{ maxHeight: "220px" }}
+                />
+
+                {/* Decorative Arrow - Right side */}
+                <div className="absolute top-1/2 right-36 transform -translate-y-1/2 hidden lg:block">
+                  {/* Text above arrow */}
+                  <div
+                    className="absolute -top-6 left-26 transform -translate-x-1/2 text-dark-gray text-sm"
+                    style={{
+                      fontFamily: "'Playpen Sans Hebrew', cursive",
+                      fontWeight: "600",
+                      letterSpacing: "0.5px",
+                      transform: "translateX(-50%) rotate(5deg)",
+                      lineHeight: "1.2",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <div>מותאם לראיית</div>
+                    <div>תינוקות</div>
+                  </div>
+
+                  {/* Arrow */}
                   <svg
-                    className="mr-3 w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    width="100"
+                    height="80"
+                    viewBox="0 0 100 80"
+                    className="text-dark-gray"
+                    style={{ transform: "rotate(180deg)" }}
                   >
                     <path
+                      d="M10 40 Q50 20 90 50"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="none"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    ></path>
-                  </svg>
-                </Button>
-              </div>
-
-              {/* Musicians Image */}
-              <div className="mt-4">
-                <div className="w-full max-w-6xl mx-auto">
-                  <img
-                    src="/musicians.png"
-                    alt="Famous Musicians"
-                    className="w-full h-auto object-contain"
-                    style={{ maxHeight: "250px" }}
-                  />
-                </div>
-              </div>
-
-              {/* Scroll indicator */}
-              <div className="absolute bottom-8 right-8">
-                <div className="bg-dark-gray text-white p-3 rounded-full shadow-lg">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    />
                     <path
+                      d="M75 35 L90 50 L75 65"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="none"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
                     />
                   </svg>
                 </div>
+              </div>
+
+              {/* CTA Button with Arrow */}
+              <div className="pt-1 relative flex items-center justify-center">
+                {/* Hand-drawn Arrow and Text - Left side */}
+                <div className="hidden lg:block absolute right-1/2 mr-20 top-1/2 transform -translate-y-1/2">
+                  {/* Arrow */}
+                  <svg
+                    width="80"
+                    height="40"
+                    viewBox="0 0 80 40"
+                    className="text-dark-gray"
+                    style={{ transform: "rotate(-26deg)" }}
+                  >
+                    <path
+                      d="M8 30 Q25 20 50 25"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M45 15 L50 25 L45 35"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+
+                  {/* Text */}
+                  <div
+                    className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-dark-gray text-sm"
+                    style={{
+                      transform: "translateX(-50%) rotate(-32deg)",
+                      fontFamily: "'Playpen Sans Hebrew', cursive",
+                      fontWeight: "600",
+                      letterSpacing: "0.5px",
+                      lineHeight: "1.2",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <div>זה לוקח</div>
+                    <div>דקה</div>
+                  </div>
+                </div>
+
+                {/* Centered Button */}
+                <Button
+                  size="lg"
+                  className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  צרו ספרון עכשיו
+                </Button>
               </div>
             </div>
           </div>

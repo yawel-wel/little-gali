@@ -11,8 +11,9 @@ export function Header() {
 
   const navigationItems = [
     { name: "צור קשר", href: "#" },
-    { name: "בלוג", href: "#" },
-    { name: "מוצרים", href: "#" },
+    { name: "השראה", href: "#" },
+    { name: "שאלות ותשובות", href: "#" },
+    { name: "הידעת", href: "#" },
     { name: "אודותינו", href: "#" },
     { name: "בית", href: "#", active: true },
   ];
@@ -23,8 +24,8 @@ export function Header() {
         <div className="flex items-center justify-between py-4">
           {/* CTA Button */}
           <div className="hidden md:block">
-            <button className="border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
-              קנו תבנית
+            <button className="cursor-pointer border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
+              צרו ספרון
             </button>
           </div>
 
@@ -50,13 +51,15 @@ export function Header() {
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <img
-              src="/logo.png"
-              alt="Little Gali"
-              width={200}
-              height={60}
-              className="h-10 w-auto lg:h-12 lg:w-auto"
-            />
+            <a href="/" className="block">
+              <img
+                src="/logo.png"
+                alt="Little Gali"
+                width={200}
+                height={60}
+                className="h-10 w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              />
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
