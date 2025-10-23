@@ -1,65 +1,784 @@
-import Image from "next/image";
+import { Header } from "@/components/header";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen bg-white">
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative bg-white py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left Content - Text */}
+              <div className="space-y-8">
+                {/* Decorative accent */}
+                <div className="absolute top-8 left-8 w-6 h-6 bg-soft-yellow rounded-full opacity-60"></div>
+
+                {/* Main headline */}
+                <div className="space-y-4">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-display text-dark-gray leading-tight">
+                    הדרך להורות טובה יותר{" "}
+                    <span className="relative">
+                      הפכה לקלה יותר.
+                      <span className="absolute -bottom-1 left-0 right-0 h-3 bg-soft-yellow-light -z-10 rounded-sm"></span>
+                    </span>
+                  </h1>
+                </div>
+
+                {/* Description */}
+                <p className="text-lg md:text-xl font-body text-medium-gray leading-relaxed max-w-lg">
+                  לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris.
+                </p>
+
+                {/* CTA Button */}
+                <div className="pt-4">
+                  <Button
+                    size="lg"
+                    className="bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105"
+                  >
+                    הרשמה עכשיו
+                    <svg
+                      className="ml-2 w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      ></path>
+                    </svg>
+                  </Button>
+                </div>
+
+                {/* Decorative swirl */}
+                <div className="absolute bottom-8 left-4 w-16 h-16 text-soft-peach opacity-40">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <path
+                      d="M20,20 Q30,10 40,20 Q50,30 60,20 Q70,10 80,20"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Right Content - Image */}
+              <div className="relative">
+                {/* Decorative sunburst */}
+                <div className="absolute -top-4 -left-4 w-12 h-12 text-soft-peach opacity-60">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <path
+                      d="M50,10 L55,35 L80,35 L60,50 L65,75 L50,60 L35,75 L40,50 L20,35 L45,35 Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+
+                {/* Main image container */}
+                <div className="relative">
+                  {/* Decorative background shape */}
+                  <div className="absolute -bottom-8 -right-8 w-full h-3/4 bg-soft-blue-light rounded-full opacity-30 -z-10"></div>
+
+                  {/* Placeholder image */}
+                  <div className="relative bg-gradient-to-br from-soft-peach-light to-soft-blue-light rounded-3xl p-8 lg:p-12">
+                    <div className="aspect-[4/5] bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                      <div className="text-center space-y-4">
+                        <div className="w-16 h-16 bg-soft-peach rounded-full mx-auto flex items-center justify-center">
+                          <svg
+                            className="w-8 h-8 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path
+                              fillRule="evenodd"
+                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-medium-gray font-body">
+                          Placeholder Image
+                        </p>
+                        <p className="text-sm text-light-gray font-caption">
+                          Parent & Child
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Small decorative arch */}
+                <div className="absolute -bottom-2 -right-2 w-8 h-4 bg-soft-blue rounded-full opacity-60"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Choose Your Path Section */}
+        <section className="relative bg-white py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-12">
+              <h2 className="inline-block bg-soft-peach-light text-dark-gray px-6 py-3 rounded-full font-heading text-xl md:text-2xl">
+                בחרו את הדרך שלכם
+              </h2>
+            </div>
+
+            {/* Cards Grid */}
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Card 1 - Courses */}
+              <div className="bg-soft-peach-light rounded-2xl p-6 text-center relative overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-soft-blue rounded-full opacity-20"></div>
+
+                <div className="relative z-10">
+                  {/* Label */}
+                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide mb-4">
+                    קורסים
+                  </div>
+
+                  {/* Icon */}
+                  <div className="w-16 h-16 mx-auto mb-4 relative">
+                    <div className="w-full h-full bg-soft-peach rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-soft-yellow rounded-full flex items-center justify-center">
+                        <div className="w-4 h-4 bg-soft-blue rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-heading text-dark-gray text-lg mb-3">
+                    אקדמיית המשמעת החיובית
+                  </h3>
+
+                  {/* Description */}
+                  <p className="font-body text-medium-gray text-sm mb-6 leading-relaxed">
+                    לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua.
+                  </p>
+
+                  {/* CTA Link */}
+                  <a
+                    href="#"
+                    className="inline-flex items-center text-primary-orange font-body-bold text-sm hover:text-primary-orange/80 transition-colors"
+                  >
+                    למדו עוד
+                    <svg
+                      className="mr-2 w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      ></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+
+              {/* Card 2 - Membership */}
+              <div className="bg-soft-peach-light rounded-2xl p-6 text-center relative overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-soft-green rounded-full opacity-20"></div>
+
+                <div className="relative z-10">
+                  {/* Label */}
+                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide mb-4">
+                    חברות
+                  </div>
+
+                  {/* Icon */}
+                  <div className="w-16 h-16 mx-auto mb-4 relative">
+                    <div className="w-full h-full bg-gradient-to-br from-soft-peach to-soft-blue rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-soft-peach"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-heading text-dark-gray text-lg mb-3">
+                    הורות פורחת
+                  </h3>
+
+                  {/* Description */}
+                  <p className="font-body text-medium-gray text-sm mb-6 leading-relaxed">
+                    לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua.
+                  </p>
+
+                  {/* CTA Link */}
+                  <a
+                    href="#"
+                    className="inline-flex items-center text-primary-orange font-body-bold text-sm hover:text-primary-orange/80 transition-colors"
+                  >
+                    הרשמו עכשיו
+                    <svg
+                      className="mr-2 w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      ></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+
+              {/* Card 3 - Courses */}
+              <div className="bg-soft-peach-light rounded-2xl p-6 text-center relative overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute -bottom-4 -right-4 w-14 h-14 bg-soft-yellow rounded-full opacity-20"></div>
+
+                <div className="relative z-10">
+                  {/* Label */}
+                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide mb-4">
+                    קורסים
+                  </div>
+
+                  {/* Icon */}
+                  <div className="w-16 h-16 mx-auto mb-4 relative">
+                    <div className="w-full h-full bg-soft-blue rounded-2xl flex items-center justify-center">
+                      <div className="w-8 h-8 bg-soft-peach rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-heading text-dark-gray text-lg mb-3">
+                    מחנה גמילה מחיתולים
+                  </h3>
+
+                  {/* Description */}
+                  <p className="font-body text-medium-gray text-sm mb-6 leading-relaxed">
+                    לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua.
+                  </p>
+
+                  {/* CTA Link */}
+                  <a
+                    href="#"
+                    className="inline-flex items-center text-primary-orange font-body-bold text-sm hover:text-primary-orange/80 transition-colors"
+                  >
+                    עיינו
+                    <svg
+                      className="mr-2 w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      ></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Meet Dr. Jazmine Section */}
+        <section className="relative bg-white py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+              {/* Left Column - Image */}
+              <div className="relative">
+                {/* Organic shaped image container */}
+                <div className="relative">
+                  {/* Placeholder for portrait image with organic shape */}
+                  <div className="relative w-full h-96 lg:h-[500px] bg-gradient-to-br from-soft-peach-light to-soft-blue-light rounded-3xl overflow-hidden">
+                    {/* Organic shape using CSS clip-path */}
+                    <div
+                      className="w-full h-full bg-gradient-to-br from-soft-peach to-soft-blue rounded-3xl"
+                      style={{
+                        clipPath:
+                          "polygon(0% 20%, 30% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                      }}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-center space-y-4">
+                          <div className="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center">
+                            <svg
+                              className="w-12 h-12 text-soft-peach"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clipRule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                          <p className="text-white font-body text-sm">
+                            ד"ר ג'זמין
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Decorative crescent moon */}
+                  <div className="absolute -bottom-6 -right-6 w-16 h-8 bg-soft-peach rounded-full opacity-60"></div>
+                </div>
+              </div>
+
+              {/* Right Column - Text Content */}
+              <div className="relative">
+                {/* Decorative flower - top left */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 text-soft-peach opacity-60">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <path
+                      d="M50,10 L55,35 L80,35 L60,50 L65,75 L50,60 L35,75 L40,50 L20,35 L45,35 Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+
+                {/* Decorative lightbulb - top right */}
+                <div className="absolute -top-2 -left-4 w-6 h-8 text-soft-green opacity-60">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-full h-full"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zM9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z" />
+                  </svg>
+                </div>
+
+                {/* Content */}
+                <div className="space-y-6">
+                  {/* Subtitle */}
+                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide">
+                    פסיכולוגית ומחנכת
+                  </div>
+
+                  {/* Main heading with highlight */}
+                  <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight">
+                    הכירו את{" "}
+                    <span className="relative">
+                      ד"ר ג'זמין
+                      <span className="absolute -bottom-1 right-0 left-0 h-3 bg-soft-green-light -z-10 rounded-sm"></span>
+                    </span>
+                  </h2>
+
+                  {/* Body text */}
+                  <div className="space-y-4">
+                    <p className="font-body text-medium-gray leading-relaxed">
+                      לורם איפסום דולור סיט amet, consectetur adipiscing elit.
+                      Sed do eiusmod tempor incididunt ut labore et dolore magna
+                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    </p>
+                    <p className="font-body text-medium-gray leading-relaxed">
+                      Duis aute irure dolor in reprehenderit in voluptate velit
+                      esse cillum dolore eu fugiat nulla pariatur. Excepteur
+                      sint occaecat cupidatat non proident, sunt in culpa qui
+                      officia deserunt mollit anim id est laborum.
+                    </p>
+                  </div>
+
+                  {/* CTA Button */}
+                  <div className="pt-4">
+                    <Button className="bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
+                      למדו עוד
+                      <svg
+                        className="mr-2 w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 5l7 7-7 7"
+                        ></path>
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="relative bg-gradient-to-br from-soft-peach-light to-soft-blue-light py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-16">
+              <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray mb-4">
+                איך זה עובד?
+              </h2>
+              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
+                תהליך פשוט ומהנה שיעזור לכם להפוך להורים טובים יותר
+              </p>
+            </div>
+
+            {/* Steps Grid */}
+            <div className="grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto">
+              {/* Step 1 */}
+              <div className="text-center relative">
+                {/* Step Number */}
+                <div className="relative inline-block mb-6">
+                  <div className="w-16 h-16 bg-primary-orange rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-white font-heading text-xl font-bold">
+                      1
+                    </span>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-soft-yellow rounded-full opacity-60"></div>
+                  <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-soft-green rounded-full opacity-40"></div>
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-heading text-dark-gray">
+                    הרשמה והתחברות
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed">
+                    הירשמו לאתר שלנו וקבלו גישה לכל התוכן והקורסים שלנו. התהליך
+                    פשוט ומהיר!
+                  </p>
+                </div>
+
+                {/* Connecting line to next step */}
+                <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="text-center relative">
+                {/* Step Number */}
+                <div className="relative inline-block mb-6">
+                  <div className="w-16 h-16 bg-soft-peach rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-white font-heading text-xl font-bold">
+                      2
+                    </span>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute -top-3 -left-2 w-5 h-5 bg-soft-blue rounded-full opacity-50"></div>
+                  <div className="absolute -bottom-2 -right-2 w-3 h-3 bg-soft-yellow rounded-full opacity-60"></div>
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-heading text-dark-gray">
+                    בחירת הקורס
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed">
+                    בחרו את הקורס המתאים לכם מתוך המגוון הרחב שלנו. כל קורס
+                    מותאם לגיל הילד ולצרכים שלכם.
+                  </p>
+                </div>
+
+                {/* Connecting line to next step */}
+                <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="text-center relative">
+                {/* Step Number */}
+                <div className="relative inline-block mb-6">
+                  <div className="w-16 h-16 bg-soft-blue rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-white font-heading text-xl font-bold">
+                      3
+                    </span>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute -top-2 -right-3 w-4 h-4 bg-soft-green rounded-full opacity-50"></div>
+                  <div className="absolute -bottom-1 -left-2 w-6 h-6 bg-soft-peach rounded-full opacity-40"></div>
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-heading text-dark-gray">
+                    למידה והתקדמות
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed">
+                    למדו בקצב שלכם, תרגלו את החומר, וקבלו תמיכה מלאה לאורך כל
+                    הדרך. אתם לא לבד!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="text-center mt-16">
+              <Button className="bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
+                התחילו עכשיו
+                <svg
+                  className="mr-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </Button>
+            </div>
+
+            {/* Decorative background elements */}
+            <div className="absolute top-10 left-10 w-20 h-20 bg-soft-yellow rounded-full opacity-20"></div>
+            <div className="absolute bottom-10 right-10 w-16 h-16 bg-soft-green rounded-full opacity-20"></div>
+            <div className="absolute top-1/2 left-4 w-8 h-8 bg-soft-peach rounded-full opacity-30"></div>
+            <div className="absolute top-1/3 right-8 w-12 h-12 bg-soft-blue rounded-full opacity-25"></div>
+          </div>
+        </section>
+
+        {/* Q&A Section */}
+        <section className="relative bg-white py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-16">
+              <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray mb-4">
+                שאלו אותנו
+              </h2>
+              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
+                התשובות לשאלות הנפוצות ביותר על הקורסים והשירותים שלנו
+              </p>
+            </div>
+
+            {/* Accordion */}
+            <div className="max-w-4xl mx-auto">
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem
+                  value="item-1"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    איך הספרון נראה?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    הספרון שלנו מעוצב במיוחד עבור ילדים עם תמונות צבעוניות וטקסט
+                    ברור. הוא כולל דפים עבים ועמידים, איורים ידידותיים,
+                    ופעילויות אינטראקטיביות שיעזרו לילדכם ללמוד ולהתפתח.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-2"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    כמה תמונות צריך לבחור?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    אנו ממליצים לבחור 5-8 תמונות איכותיות שמציגות את הילד במצבים
+                    שונים. התמונות צריכות להיות ברורות, מוארות היטב, ולהציג את
+                    הילד במצבים טבעיים ונוחים.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-3"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    מי כדאי שיהיה בספרון?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    הספרון מיועד לילדכם, אבל אנו מעודדים את כל המשפחה להשתתף.
+                    אחים, הורים, וסבים יכולים להיות חלק מהתהליך, מה שיעזור לילד
+                    להרגיש בטוח ואהוב.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-4"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    איזה תמונה מתאימה?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    תמונות שמציגות את הילד במצבים חיוביים, עם הבעות פנים שמחות,
+                    ופעילויות שהוא אוהב. הימנעו מתמונות מטושטשות או עם תאורה
+                    גרועה.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-5"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    אפשר לשים כמה אנשים בתמונה אחת?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    כן, בהחלט! תמונות משפחתיות או עם חברים יכולות להיות נהדרות.
+                    העיקר שהילד יהיה במרכז התמונה ושהתמונה תהיה ברורה ומוארת
+                    היטב.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-6"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    האם הרקע משנה?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    הרקע חשוב אבל לא קריטי. רקע פשוט ונטול הסחות דעת יעזור
+                    להדגיש את הילד. אם הרקע צבעוני מדי, אנו יכולים לעזור לערוך
+                    אותו.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-7"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    איך מנקים את הספרון?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    הספרון עשוי מחומרים עמידים וניתן לניקוי. השתמשו במטלית לחה
+                    עדינה או במגבונים לחים. הימנעו מחומרי ניקוי אגרסיביים
+                    שעלולים לפגוע בדפים.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem
+                  value="item-8"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                    כמה זמן לוקח להכין את הספרון?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    תהליך ההכנה לוקח 7-10 ימי עבודה מרגע קבלת התמונות. אנו
+                    שולחים עדכון על התקדמות ומעדכנים אתכם כשהספרון מוכן לאיסוף
+                    או למשלוח.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="text-center mt-16">
+              <p className="font-body text-medium-gray mb-6">
+                לא מצאתם את התשובה שחיפשתם?
+              </p>
+              <Button className="bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
+                צרו איתנו קשר
+                <svg
+                  className="mr-2 w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-gradient-to-br from-[#1e3a8a] to-[#1e293b] text-white py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-8">
+            {/* Logo */}
+            <div className="flex justify-center">
+              <img
+                src="/logo-white.png"
+                alt="Little Gali"
+                width={200}
+                height={60}
+                className="h-16 w-auto"
+              />
+            </div>
+
+            {/* Main Text Content */}
+            <div className="max-w-4xl mx-auto">
+              <p className="text-lg font-body leading-relaxed text-center">
+                Little Gali הופך תמונות רגילות ליצירות שחור-לבן עדינות שמתאימות
+                במיוחד לראיית תינוקות. נולד מאמא שאהבה לראות את התינוקת שלה
+                נמשכת לפנים מוכרות - והפך למזכרת אישית, חמה ופשוטה ליצירה. מודפס
+                באיכות גבוהה בבית דפוס מקומי.
+              </p>
+            </div>
+
+            {/* Copyright */}
+            <div className="pt-8 border-t border-white/20">
+              <p className="text-sm font-body text-white/80">
+                © Little Gali 2025. כל הזכויות שמורות.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
