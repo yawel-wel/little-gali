@@ -36,8 +36,8 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* Main headline */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-7xl font-black text-dark-gray leading-tight max-w-4xl mx-auto">
+                {/* Main headline - made bigger and added more space */}
+                <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-dark-gray leading-tight max-w-4xl mx-auto mt-4">
                   ספרון תינוקות מותאם באופן{" "}
                   <span className="relative inline-block">
                     <span className="relative z-10">אישי</span>
@@ -59,7 +59,7 @@ export default function Home() {
 
                 {/* Description */}
                 <p
-                  className="text-base sm:text-lg md:text-xl font-normal text-medium-gray leading-relaxed max-w-2xl mx-auto mt-8 text-center"
+                  className="text-base sm:text-lg md:text-xl font-normal text-medium-gray leading-relaxed max-w-xl mx-auto mt-6 text-center"
                   style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                     letterSpacing: "0.5px",

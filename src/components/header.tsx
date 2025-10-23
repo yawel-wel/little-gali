@@ -10,12 +10,12 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigationItems = [
-    { name: "צור קשר", href: "#" },
-    { name: "השראה", href: "#" },
-    { name: "שאלות ותשובות", href: "#" },
-    { name: "הידעת", href: "#" },
-    { name: "אודותינו", href: "#" },
     { name: "בית", href: "#", active: true },
+    { name: "אודותינו", href: "#" },
+    { name: "הידעת", href: "#" },
+    { name: "שאלות ותשובות", href: "#" },
+    { name: "השראה", href: "#" },
+    { name: "צור קשר", href: "#" },
   ];
 
   return (
@@ -49,20 +49,7 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <a href="/" className="block">
-              <img
-                src="/logo.png"
-                alt="Little Gali"
-                width={200}
-                height={60}
-                className="h-10 w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
-              />
-            </a>
-          </div>
-
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - moved to left on mobile */}
           <div className="md:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
@@ -76,6 +63,19 @@ export function Header() {
                 </Button>
               </SheetTrigger>
             </Sheet>
+          </div>
+
+          {/* Logo - moved to right on mobile */}
+          <div className="flex-shrink-0">
+            <a href="/" className="block">
+              <img
+                src="/logo.png"
+                alt="Little Gali"
+                width={200}
+                height={60}
+                className="h-10 w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              />
+            </a>
           </div>
 
           {/* Mobile Menu Content */}
