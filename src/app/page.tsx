@@ -29,7 +29,7 @@ export default function Home() {
               <div>
                 <div
                   className="inline-block px-6 py-2 rounded-full"
-                  style={{ backgroundColor: "#FFE592" }}
+                  style={{ backgroundColor: "#F8D9C4" }}
                 >
                   <p className="text-sm font-body-bold text-black uppercase tracking-widest">
                     הדפסה אישית באיכות גבוהה
@@ -188,193 +188,131 @@ export default function Home() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-12">
-              <h2 className="inline-block bg-soft-peach-light text-dark-gray px-6 py-3 rounded-full font-heading text-xl md:text-2xl">
-                בחרו את הדרך שלכם
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-dark-gray leading-tight max-w-3xl mx-auto">
+                כי תינוקות רואים{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10">אחרת</span>
+                  <span
+                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                    style={{
+                      height: "6px",
+                      borderRadius: "6px 6px 0 0",
+                      transform: "rotate(-2deg) translateY(0px)",
+                      background:
+                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                      width: "110%",
+                      left: "-5%",
+                    }}
+                  ></span>
+                </span>{" "}
+                מאיתנו
               </h2>
             </div>
 
-            {/* Cards Grid */}
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Card 1 - Courses */}
-              <div className="bg-soft-peach-light rounded-2xl p-6 text-center relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 bg-soft-blue rounded-full opacity-20"></div>
-
-                <div className="relative z-10">
-                  {/* Label */}
-                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide mb-4">
-                    קורסים
-                  </div>
-
-                  {/* Icon */}
-                  <div className="w-16 h-16 mx-auto mb-4 relative">
-                    <div className="w-full h-full bg-soft-peach rounded-full flex items-center justify-center">
-                      <div className="w-8 h-8 bg-soft-yellow rounded-full flex items-center justify-center">
-                        <div className="w-4 h-4 bg-soft-blue rounded-full"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="font-heading text-dark-gray text-lg mb-3">
-                    אקדמיית המשמעת החיובית
-                  </h3>
-
-                  {/* Description */}
-                  <p className="font-body text-medium-gray text-sm mb-6 leading-relaxed">
-                    לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </p>
-
-                  {/* CTA Link */}
-                  <a
-                    href="#"
-                    className="inline-flex items-center text-primary-orange font-body-bold text-sm hover:text-primary-orange/80 transition-colors"
-                  >
-                    למדו עוד
-                    <svg
-                      className="mr-2 w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      ></path>
-                    </svg>
-                  </a>
+            {/* 4 Column Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto">
+              {/* Column 1 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/couple.png"
+                    alt="Couple"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                  להסתכל על הקרובים ביותר{" "}
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                  הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר
+                  מימיו הראשונים
+                </p>
               </div>
 
-              {/* Card 2 - Membership */}
-              <div className="bg-soft-peach-light rounded-2xl p-6 text-center relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-soft-green rounded-full opacity-20"></div>
-
-                <div className="relative z-10">
-                  {/* Label */}
-                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide mb-4">
-                    חברות
-                  </div>
-
-                  {/* Icon */}
-                  <div className="w-16 h-16 mx-auto mb-4 relative">
-                    <div className="w-full h-full bg-gradient-to-br from-soft-peach to-soft-blue rounded-full flex items-center justify-center">
-                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-soft-peach"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                            clipRule="evenodd"
-                          ></path>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="font-heading text-dark-gray text-lg mb-3">
-                    הורות פורחת
-                  </h3>
-
-                  {/* Description */}
-                  <p className="font-body text-medium-gray text-sm mb-6 leading-relaxed">
-                    לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </p>
-
-                  {/* CTA Link */}
-                  <a
-                    href="#"
-                    className="inline-flex items-center text-primary-orange font-body-bold text-sm hover:text-primary-orange/80 transition-colors"
-                  >
-                    הרשמו עכשיו
-                    <svg
-                      className="mr-2 w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      ></path>
-                    </svg>
-                  </a>
+              {/* Column 2 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/sister.png"
+                    alt="Young Sister"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                  להכיר את המשפחה
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                  הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק
+                </p>
               </div>
 
-              {/* Card 3 - Courses */}
-              <div className="bg-soft-peach-light rounded-2xl p-6 text-center relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute -bottom-4 -right-4 w-14 h-14 bg-soft-yellow rounded-full opacity-20"></div>
-
-                <div className="relative z-10">
-                  {/* Label */}
-                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide mb-4">
-                    קורסים
-                  </div>
-
-                  {/* Icon */}
-                  <div className="w-16 h-16 mx-auto mb-4 relative">
-                    <div className="w-full h-full bg-soft-blue rounded-2xl flex items-center justify-center">
-                      <div className="w-8 h-8 bg-soft-peach rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="font-heading text-dark-gray text-lg mb-3">
-                    מחנה גמילה מחיתולים
-                  </h3>
-
-                  {/* Description */}
-                  <p className="font-body text-medium-gray text-sm mb-6 leading-relaxed">
-                    לורם איפסום דולור סיט amet, consectetur adipiscing elit. Sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </p>
-
-                  {/* CTA Link */}
-                  <a
-                    href="#"
-                    className="inline-flex items-center text-primary-orange font-body-bold text-sm hover:text-primary-orange/80 transition-colors"
-                  >
-                    עיינו
-                    <svg
-                      className="mr-2 w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      ></path>
-                    </svg>
-                  </a>
+              {/* Column 3 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/baby.png"
+                    alt="Baby"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
                 </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                  מזכרת מתוקה
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                  ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק
+                </p>
               </div>
+
+              {/* Column 4 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/dad-and-son.png"
+                    alt="Dad and Son"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                  לא עוד מוצר גנרי
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                  במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה
+                </p>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center mt-16">
+              <p className="font-body text-medium-gray text-sm">
+                מעוניינים לדעת עוד על ראיית תינוקות?{" "}
+                <a
+                  href="#"
+                  className="text-[#F4A261] hover:text-[#F4A261]/80 underline cursor-pointer transition-colors duration-200"
+                >
+                  גלו כאן
+                </a>
+              </p>
             </div>
           </div>
         </section>
