@@ -413,11 +413,11 @@ export default function Home() {
                 {/* Pagination Dots */}
                 <div className="flex justify-center mt-6 space-x-2">
                   <button
-                    className="w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer"
+                    className="cursor-pointer w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer"
                     data-slide="0"
                   ></button>
                   <button
-                    className="w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer"
+                    className="cursor-pointer w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer"
                     data-slide="1"
                   ></button>
                 </div>
@@ -770,7 +770,7 @@ export default function Home() {
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
-              <Button className="bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
+              <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
                 התחילו עכשיו
               </Button>
             </div>
@@ -784,15 +784,34 @@ export default function Home() {
         </section>
 
         {/* Q&A Section */}
-        <section className="relative bg-white py-16 lg:py-24">
+        <section
+          className="relative py-16 lg:py-24"
+          style={{ backgroundColor: "#F9F7EE" }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray mb-4">
-                שאלו אותנו
+                שאלו{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10">אותנו</span>
+                  <span
+                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                    style={{
+                      height: "6px",
+                      borderRadius: "6px 6px 0 0",
+                      transform: "rotate(-2deg) translateY(0px)",
+                      background:
+                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                      width: "110%",
+                      left: "-5%",
+                    }}
+                  ></span>
+                </span>
               </h2>
               <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                התשובות לשאלות הנפוצות ביותר על הקורסים והשירותים שלנו
+                התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו
               </p>
             </div>
 
@@ -801,113 +820,117 @@ export default function Home() {
               <Accordion type="single" collapsible className="space-y-4">
                 <AccordionItem
                   value="item-1"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
-                    איך הספרון נראה?
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                    ממה הספרון עשוי?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    הספרון שלנו מעוצב במיוחד עבור ילדים עם תמונות צבעוניות וטקסט
-                    ברור. הוא כולל דפים עבים ועמידים, איורים ידידותיים,
-                    ופעילויות אינטראקטיביות שיעזרו לילדכם ללמוד ולהתפתח.
+                    הספרון עשוי מנייר איכותי ועבה שנעבר למינציה.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-2"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     כמה תמונות צריך לבחור?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    אנו ממליצים לבחור 5-8 תמונות איכותיות שמציגות את הילד במצבים
-                    שונים. התמונות צריכות להיות ברורות, מוארות היטב, ולהציג את
-                    הילד במצבים טבעיים ונוחים.
+                    5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד
+                    השני בצבעוני.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-3"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     מי כדאי שיהיה בספרון?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    הספרון מיועד לילדכם, אבל אנו מעודדים את כל המשפחה להשתתף.
-                    אחים, הורים, וסבים יכולים להיות חלק מהתהליך, מה שיעזור לילד
-                    להרגיש בטוח ואהוב.
+                    אנשים קרובים שתינוקכם יכיר ויתחבר אליהם – הורים, סבים, אחים,
+                    חבר קרוב ואפילו חיית המחמד המשפחתית.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-4"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     איזה תמונה מתאימה?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    תמונות שמציגות את הילד במצבים חיוביים, עם הבעות פנים שמחות,
-                    ופעילויות שהוא אוהב. הימנעו מתמונות מטושטשות או עם תאורה
-                    גרועה.
+                    תמונה ברורה של הפנים, בלי משקפי שמש ועדיף עם חיוך. לא קרובה
+                    מדי לפנים. הימנעו מתמונות מטושטשות או עם תאורה גרועה.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-5"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     אפשר לשים כמה אנשים בתמונה אחת?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    כן, בהחלט! תמונות משפחתיות או עם חברים יכולות להיות נהדרות.
-                    העיקר שהילד יהיה במרכז התמונה ושהתמונה תהיה ברורה ומוארת
-                    היטב.
+                    כן, בהחלט! ניתן להעלות תמונה עם שני אנשים במידה והתמונה תהיה
+                    ברורה ומוארת היטב. עדיף להימנע מתמונות עם יותר משני אנשים
+                    מאחר ועיבוד התמונה עלול להיפגע וגם כי תמונה עם יותר מדיי
+                    פרטים אינה מותאמת לתינוקות.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-6"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     האם הרקע משנה?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    הרקע חשוב אבל לא קריטי. רקע פשוט ונטול הסחות דעת יעזור
-                    להדגיש את הילד. אם הרקע צבעוני מדי, אנו יכולים לעזור לערוך
-                    אותו.
+                    לא. הרקע מוסר אוטומטית ומוחלף בלבן.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-7"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     איך מנקים את הספרון?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    הספרון עשוי מחומרים עמידים וניתן לניקוי. השתמשו במטלית לחה
-                    עדינה או במגבונים לחים. הימנעו מחומרי ניקוי אגרסיביים
-                    שעלולים לפגוע בדפים.
+                    אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם מים.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem
                   value="item-8"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors">
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
                     כמה זמן לוקח להכין את הספרון?
                   </AccordionTrigger>
                   <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
                     תהליך ההכנה לוקח 7-10 ימי עבודה מרגע קבלת התמונות. אנו
                     שולחים עדכון על התקדמות ומעדכנים אתכם כשהספרון מוכן לאיסוף
                     או למשלוח.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="item-9"
+                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                >
+                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                    מה אם אני לא מרוצה מהספרון?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                    המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם זה לא
+                    המצב שאנחנו מאפשרים להחזיר את הספרון ולקבל את התשלום בחזרה.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -918,21 +941,8 @@ export default function Home() {
               <p className="font-body text-medium-gray mb-6">
                 לא מצאתם את התשובה שחיפשתם?
               </p>
-              <Button className="bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
+              <Button className="cursor-pointer bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
                 צרו איתנו קשר
-                <svg
-                  className="mr-2 w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 5l7 7-7 7"
-                  ></path>
-                </svg>
               </Button>
             </div>
           </div>
