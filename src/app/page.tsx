@@ -610,23 +610,47 @@ export default function Home() {
             </div>
 
             {/* Steps Grid */}
-            <div className="grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto">
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0">
               {/* Step 1 */}
               <div className="text-center relative">
+                {/* Step Image */}
+                <div className="mb-4">
+                  <div
+                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    style={{ backgroundColor: "#F3EEE8" }}
+                  >
+                    <img
+                      src="/upload-images.jpg"
+                      alt="Upload Images"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
                 {/* Step Number */}
-                <div className="relative inline-block mb-6">
-                  <div className="w-16 h-16 bg-primary-orange rounded-full flex items-center justify-center mx-auto">
-                    <span className="text-white font-heading text-xl font-bold">
+                <div className="relative inline-block mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
+                    style={{ backgroundColor: "#FFEDD4" }}
+                  >
+                    <span className="text-dark-gray font-heading text-sm font-bold">
                       1
                     </span>
                   </div>
                   {/* Decorative elements */}
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-soft-yellow rounded-full opacity-60"></div>
-                  <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-soft-green rounded-full opacity-40"></div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-soft-yellow rounded-full opacity-60"></div>
+                  <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-soft-green rounded-full opacity-40"></div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-4">
+                <div className="space-y-4 mt-3 max-w-sm mx-auto">
+                  {/* Step Text */}
+                  <div className="mb-1">
+                    <p className="text-primary-orange text-sm font-body-bold">
+                      אתם עושים
+                    </p>
+                  </div>
+
                   <h3 className="text-xl font-heading text-dark-gray">
                     מעלים תמונות
                   </h3>
@@ -637,25 +661,49 @@ export default function Home() {
                 </div>
 
                 {/* Connecting line to next step */}
-                <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
+                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
               </div>
 
               {/* Step 2 */}
               <div className="text-center relative">
+                {/* Step Image */}
+                <div className="mb-4">
+                  <div
+                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    style={{ backgroundColor: "#F3EEE8" }}
+                  >
+                    <img
+                      src="/transform-images.png"
+                      alt="Transform Images"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
                 {/* Step Number */}
-                <div className="relative inline-block mb-6">
-                  <div className="w-16 h-16 bg-soft-peach rounded-full flex items-center justify-center mx-auto">
-                    <span className="text-white font-heading text-xl font-bold">
+                <div className="relative inline-block mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
+                    style={{ backgroundColor: "#FFEDD4" }}
+                  >
+                    <span className="text-dark-gray font-heading text-sm font-bold">
                       2
                     </span>
                   </div>
                   {/* Decorative elements */}
-                  <div className="absolute -top-3 -left-2 w-5 h-5 bg-soft-blue rounded-full opacity-50"></div>
-                  <div className="absolute -bottom-2 -right-2 w-3 h-3 bg-soft-yellow rounded-full opacity-60"></div>
+                  <div className="absolute -top-1 -left-1 w-2 h-2 bg-soft-blue rounded-full opacity-50"></div>
+                  <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-soft-yellow rounded-full opacity-60"></div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-4">
+                <div className="space-y-4 mt-3 max-w-sm mx-auto">
+                  {/* Step Text */}
+                  <div className="mb-1">
+                    <p className="text-primary-orange text-sm font-body-bold">
+                      אנחנו עושים
+                    </p>
+                  </div>
+
                   <h3 className="text-xl font-heading text-dark-gray">
                     מעבדים את התמונות
                   </h3>
@@ -666,25 +714,49 @@ export default function Home() {
                 </div>
 
                 {/* Connecting line to next step */}
-                <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
+                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
               </div>
 
               {/* Step 3 */}
               <div className="text-center relative">
+                {/* Step Image */}
+                <div className="mb-4">
+                  <div
+                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    style={{ backgroundColor: "#F3EEE8" }}
+                  >
+                    <img
+                      src="/print-book.png"
+                      alt="Print Book"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
                 {/* Step Number */}
-                <div className="relative inline-block mb-6">
-                  <div className="w-16 h-16 bg-soft-blue rounded-full flex items-center justify-center mx-auto">
-                    <span className="text-white font-heading text-xl font-bold">
+                <div className="relative inline-block mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
+                    style={{ backgroundColor: "#FFEDD4" }}
+                  >
+                    <span className="text-dark-gray font-heading text-sm font-bold">
                       3
                     </span>
                   </div>
                   {/* Decorative elements */}
-                  <div className="absolute -top-2 -right-3 w-4 h-4 bg-soft-green rounded-full opacity-50"></div>
-                  <div className="absolute -bottom-1 -left-2 w-6 h-6 bg-soft-peach rounded-full opacity-40"></div>
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-soft-green rounded-full opacity-50"></div>
+                  <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-soft-peach rounded-full opacity-40"></div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-4">
+                <div className="space-y-4 mt-3 max-w-sm mx-auto">
+                  {/* Step Text */}
+                  <div className="mb-1">
+                    <p className="text-primary-orange text-sm font-body-bold">
+                      אנחנו עושים
+                    </p>
+                  </div>
+
                   <h3 className="text-xl font-heading text-dark-gray">
                     מדפיסים את הספרון
                   </h3>
