@@ -515,93 +515,51 @@ export default function Home() {
           }}
         />
 
-        {/* Meet Dr. Jazmine Section */}
-        <section className="relative bg-white py-16 lg:py-24">
+        {/* Meet Us Section */}
+        <section className="relative bg-[#F3EEE8]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
               <div className="relative">
-                {/* Organic shaped image container */}
-                <div className="relative">
-                  {/* Placeholder for portrait image with organic shape */}
-                  <div className="relative w-full h-96 lg:h-[500px] bg-gradient-to-br from-soft-peach-light to-soft-blue-light rounded-3xl overflow-hidden">
-                    {/* Organic shape using CSS clip-path */}
-                    <div
-                      className="w-full h-full bg-gradient-to-br from-soft-peach to-soft-blue rounded-3xl"
-                      style={{
-                        clipPath:
-                          "polygon(0% 20%, 30% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                      }}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-center space-y-4">
-                          <div className="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center">
-                            <svg
-                              className="w-12 h-12 text-soft-peach"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clipRule="evenodd"
-                              ></path>
-                            </svg>
-                          </div>
-                          <p className="text-white font-body text-sm">
-                            ד"ר ג'זמין
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Decorative crescent moon */}
-                  <div className="absolute -bottom-6 -right-6 w-16 h-8 bg-soft-peach rounded-full opacity-60"></div>
-                </div>
+                <img
+                  src="/about-us.png"
+                  alt="About Us"
+                  className="w-full h-auto rounded-3xl"
+                />
               </div>
 
               {/* Right Column - Text Content */}
               <div className="relative">
-                {/* Decorative flower - top left */}
-                <div className="absolute -top-4 -right-4 w-8 h-8 text-soft-peach opacity-60">
-                  <svg viewBox="0 0 100 100" className="w-full h-full">
-                    <path
-                      d="M50,10 L55,35 L80,35 L60,50 L65,75 L50,60 L35,75 L40,50 L20,35 L45,35 Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </div>
-
-                {/* Decorative lightbulb - top right */}
-                <div className="absolute -top-2 -left-4 w-6 h-8 text-soft-green opacity-60">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-full h-full"
-                    fill="currentColor"
-                  >
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zM9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z" />
-                  </svg>
-                </div>
-
                 {/* Content */}
-                <div className="space-y-6">
-                  {/* Subtitle */}
-                  <div className="text-soft-peach font-body-bold text-sm uppercase tracking-wide">
-                    פסיכולוגית ומחנכת
+                <div className="space-y-4">
+                  {/* Brand name */}
+                  <div className="text-primary-orange font-body-bold text-sm uppercase tracking-wide mb-0">
+                    ליטל גלי
                   </div>
 
-                  {/* Main heading with highlight */}
-                  <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight">
-                    הכירו את{" "}
-                    <span className="relative">
-                      ד"ר ג'זמין
-                      <span className="absolute -bottom-1 right-0 left-0 h-3 bg-soft-green-light -z-10 rounded-sm"></span>
+                  {/* Main heading */}
+                  <h2 className="text-3xl lg:text-4xl font-black text-dark-gray leading-tight">
+                    מי{" "}
+                    <span className="relative inline-block">
+                      <span className="relative z-10">אנחנו</span>
+                      <span
+                        className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                        style={{
+                          height: "6px",
+                          borderRadius: "6px 6px 0 0",
+                          transform: "rotate(-2deg) translateY(0px)",
+                          background:
+                            "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                          boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                          width: "110%",
+                          left: "-5%",
+                        }}
+                      ></span>
                     </span>
                   </h2>
 
                   {/* Body text */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 pt-2">
                     <p className="font-body text-medium-gray leading-relaxed">
                       לורם איפסום דולור סיט amet, consectetur adipiscing elit.
                       Sed do eiusmod tempor incididunt ut labore et dolore magna
@@ -614,26 +572,6 @@ export default function Home() {
                       sint occaecat cupidatat non proident, sunt in culpa qui
                       officia deserunt mollit anim id est laborum.
                     </p>
-                  </div>
-
-                  {/* CTA Button */}
-                  <div className="pt-4">
-                    <Button className="bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
-                      למדו עוד
-                      <svg
-                        className="mr-2 w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5l7 7-7 7"
-                        ></path>
-                      </svg>
-                    </Button>
                   </div>
                 </div>
               </div>
