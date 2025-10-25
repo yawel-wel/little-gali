@@ -342,13 +342,19 @@ export default function Home() {
                 </span>{" "}
                 עיצובים
               </h2>
+              <p className="text-base sm:text-lg font-body text-medium-gray leading-relaxed max-w-xl mx-auto mt-4">
+                אנחנו נעבד את התמונה וניצור ממנה שתי גרסאות שונות
+              </p>
             </div>
 
             {/* Mobile Carousel / Desktop Grid */}
-            <div className="max-w-4xl mx-auto relative">
-              {/* Center Image - Overlapping carousel on mobile, above on desktop */}
-              <div className="text-center mb-0 md:mb-8">
-                <div className="w-24 h-24 md:w-30 md:h-30 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg relative z-10 -mb-6 md:mb-0">
+            <div className="max-w-4xl mx-auto relative mt-16 md:mt-24">
+              {/* Center Image - Overlapping both mobile and desktop */}
+              <div
+                className="absolute top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 md:top-0 md:-translate-y-3/4"
+                style={{ top: "38px" }}
+              >
+                <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
                   <img
                     src="/original-example.jpeg"
                     alt="Original Example"
@@ -361,13 +367,13 @@ export default function Home() {
               <div className="md:hidden">
                 <div className="relative overflow-hidden">
                   <div
-                    className="flex transition-transform duration-300 ease-in-out"
+                    className="flex transition-transform duration-300 ease-in-out pt-12"
                     id="carousel-container"
                   >
                     {/* Slide 1 - Colorful (Left) */}
                     <div className="w-4/5 flex-shrink-0 pr-4">
                       <div className="bg-orange-100 rounded-2xl p-6 text-center">
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-4 md:mt-0">
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
                           צבעוני
                         </h3>
                         <p className="text-xs font-body text-medium-gray mb-4">
@@ -386,7 +392,7 @@ export default function Home() {
                     {/* Slide 2 - Black and White (Right) */}
                     <div className="w-4/5 flex-shrink-0 pr-4">
                       <div className="bg-gray-100 rounded-2xl p-6 text-center">
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-4 md:mt-0">
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
                           שחור לבן
                         </h3>
                         <p className="text-xs font-body text-medium-gray mb-4">
@@ -407,20 +413,20 @@ export default function Home() {
                 {/* Pagination Dots */}
                 <div className="flex justify-center mt-6 space-x-2">
                   <button
-                    className="w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200"
+                    className="w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer"
                     data-slide="0"
                   ></button>
                   <button
-                    className="w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200"
+                    className="w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer"
                     data-slide="1"
                   ></button>
                 </div>
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid md:grid-cols-2 gap-0">
+              <div className="hidden md:grid md:grid-cols-2 gap-0 relative">
                 {/* Left Side - Black and White */}
-                <div className="bg-gray-100 rounded-l-2xl p-8 text-center relative">
+                <div className="bg-gray-100 rounded-l-2xl p-8 text-center relative pt-16">
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
                     שחור לבן
                   </h3>
@@ -437,7 +443,7 @@ export default function Home() {
                 </div>
 
                 {/* Right Side - Colorful */}
-                <div className="bg-orange-100 rounded-r-2xl p-8 text-center relative">
+                <div className="bg-orange-100 rounded-r-2xl p-8 text-center relative pt-16">
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
                     צבעוני
                   </h3>
@@ -478,9 +484,9 @@ export default function Home() {
                       
                       // Update active dot
                       dots.forEach(d => {
-                        d.className = 'w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200';
+                        d.className = 'w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer';
                       });
-                      dot.className = 'w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200';
+                      dot.className = 'w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer';
                       
                       // Move carousel - index 0 = first slide, index 1 = second slide
                       if (index === 0) {
