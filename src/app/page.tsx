@@ -317,6 +317,198 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Dual Design Section */}
+        <section className="relative bg-white py-8 lg:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-dark-gray leading-tight max-w-2xl mx-auto">
+                תמונה אחת,{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10">שני</span>
+                  <span
+                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                    style={{
+                      height: "4px",
+                      borderRadius: "4px 4px 0 0",
+                      transform: "rotate(-2deg) translateY(0px)",
+                      background:
+                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                      width: "110%",
+                      left: "-5%",
+                    }}
+                  ></span>
+                </span>{" "}
+                עיצובים
+              </h2>
+            </div>
+
+            {/* Mobile Carousel / Desktop Grid */}
+            <div className="max-w-4xl mx-auto relative">
+              {/* Center Image - Overlapping carousel on mobile, above on desktop */}
+              <div className="text-center mb-0 md:mb-8">
+                <div className="w-24 h-24 md:w-30 md:h-30 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg relative z-10 -mb-6 md:mb-0">
+                  <img
+                    src="/original-example.jpeg"
+                    alt="Original Example"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* Mobile Carousel */}
+              <div className="md:hidden">
+                <div className="relative overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out"
+                    id="carousel-container"
+                  >
+                    {/* Slide 1 - Colorful (Left) */}
+                    <div className="w-4/5 flex-shrink-0 pr-4">
+                      <div className="bg-orange-100 rounded-2xl p-6 text-center">
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-4 md:mt-0">
+                          צבעוני
+                        </h3>
+                        <p className="text-xs font-body text-medium-gray mb-4">
+                          מתאים מגיל 3 חודשים ומעלה
+                        </p>
+                        <div className="w-40 h-40 mx-auto">
+                          <img
+                            src="/colorful-example.png"
+                            alt="Colorful Example"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 2 - Black and White (Right) */}
+                    <div className="w-4/5 flex-shrink-0 pr-4">
+                      <div className="bg-gray-100 rounded-2xl p-6 text-center">
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-4 md:mt-0">
+                          שחור לבן
+                        </h3>
+                        <p className="text-xs font-body text-medium-gray mb-4">
+                          מתאים במיוחד מגיל לידה ועד גיל 3 חודשים
+                        </p>
+                        <div className="w-40 h-40 mx-auto">
+                          <img
+                            src="/black-and-white-example.png"
+                            alt="Black and White Example"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="flex justify-center mt-6 space-x-2">
+                  <button
+                    className="w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200"
+                    data-slide="0"
+                  ></button>
+                  <button
+                    className="w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200"
+                    data-slide="1"
+                  ></button>
+                </div>
+              </div>
+
+              {/* Desktop Grid */}
+              <div className="hidden md:grid md:grid-cols-2 gap-0">
+                {/* Left Side - Black and White */}
+                <div className="bg-gray-100 rounded-l-2xl p-8 text-center relative">
+                  <h3 className="text-xl font-heading text-dark-gray mb-2">
+                    שחור לבן
+                  </h3>
+                  <p className="text-sm font-body text-medium-gray mb-4">
+                    מתאים במיוחד מגיל לידה ועד גיל 3 חודשים
+                  </p>
+                  <div className="w-56 h-56 mx-auto">
+                    <img
+                      src="/black-and-white-example.png"
+                      alt="Black and White Example"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Side - Colorful */}
+                <div className="bg-orange-100 rounded-r-2xl p-8 text-center relative">
+                  <h3 className="text-xl font-heading text-dark-gray mb-2">
+                    צבעוני
+                  </h3>
+                  <p className="text-sm font-body text-medium-gray mb-4">
+                    מתאים מגיל 3 חודשים ומעלה
+                  </p>
+                  <div className="w-56 h-56 mx-auto">
+                    <img
+                      src="/colorful-example.png"
+                      alt="Colorful Example"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Carousel Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              function initCarousel() {
+                const container = document.getElementById('carousel-container');
+                const dots = document.querySelectorAll('[data-slide]');
+                
+                console.log('Carousel container:', container);
+                console.log('Dots found:', dots.length);
+                
+                if (container && dots.length > 0) {
+                  // Set initial position to show first slide
+                  container.style.transform = 'translateX(0%)';
+                  
+                  dots.forEach((dot, index) => {
+                    dot.addEventListener('click', (e) => {
+                      e.preventDefault();
+                      
+                      // Update active dot
+                      dots.forEach(d => {
+                        d.className = 'w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200';
+                      });
+                      dot.className = 'w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200';
+                      
+                      // Move carousel - index 0 = first slide, index 1 = second slide
+                      if (index === 0) {
+                        // Show first slide (black & white) - move right to show left image
+                        container.style.transform = 'translateX(0%)';
+                        } else if (index === 1) {
+                          // Show second slide (black & white) - move right to show black & white with hint of colorful
+                          container.style.transform = 'translateX(60%)';
+                        }
+                    });
+                  });
+                } else {
+                  console.log('Carousel elements not found, retrying...');
+                  setTimeout(initCarousel, 100);
+                }
+              }
+              
+              // Try multiple times to ensure DOM is ready
+              document.addEventListener('DOMContentLoaded', initCarousel);
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCarousel);
+              } else {
+                initCarousel();
+              }
+            `,
+          }}
+        />
+
         {/* Meet Dr. Jazmine Section */}
         <section className="relative bg-white py-16 lg:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
