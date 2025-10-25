@@ -188,7 +188,7 @@ export default function Home() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-dark-gray leading-tight max-w-3xl mx-auto">
+              <h2 className="text-[1.8rem] sm:text-3xl md:text-4xl font-black text-dark-gray leading-tight max-w-3xl mx-auto">
                 כי תינוקות רואים{" "}
                 <span className="relative inline-block">
                   <span className="relative z-10">אחרת</span>
@@ -224,12 +224,12 @@ export default function Home() {
                 </div>
 
                 {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
                   להסתכל על הקרובים ביותר{" "}
                 </h3>
 
                 {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר
                   מימיו הראשונים
                 </p>
@@ -247,12 +247,12 @@ export default function Home() {
                 </div>
 
                 {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
                   להכיר את המשפחה
                 </h3>
 
                 {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק
                 </p>
               </div>
@@ -269,12 +269,12 @@ export default function Home() {
                 </div>
 
                 {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
                   מזכרת מתוקה
                 </h3>
 
                 {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק
                 </p>
               </div>
@@ -291,12 +291,12 @@ export default function Home() {
                 </div>
 
                 {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2">
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
                   לא עוד מוצר גנרי
                 </h3>
 
                 {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed">
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה
                 </p>
               </div>
