@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only when API key is available
+const getResend = () => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+  return new Resend(apiKey);
+};
 
 // Simple HTML escape function to prevent XSS
 function escapeHtml(text: string): string {
@@ -35,6 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email using Resend
+    const resend = getResend();
     const { data, error } = await resend.emails.send({
       from: "Little Gali <onboarding@resend.dev>",
       to: ["yaelromashkano@gmail.com"],
