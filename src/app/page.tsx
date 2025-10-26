@@ -560,141 +560,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Choose Your Path Section */}
-        <section className="relative bg-[#F9F7EE] py-16 lg:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Title */}
-            <div className="text-center mb-12">
-              <h2 className="text-[1.8rem] sm:text-3xl md:text-4xl font-black text-dark-gray leading-tight max-w-3xl mx-auto">
-                מה הופך את הספרון שלנו{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10">למיוחד</span>
-                  <span
-                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
-                    style={{
-                      height: "6px",
-                      borderRadius: "6px 6px 0 0",
-                      transform: "rotate(-2deg) translateY(0px)",
-                      background:
-                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
-                      width: "110%",
-                      left: "-5%",
-                    }}
-                  ></span>
-                </span>
-              </h2>
-            </div>
-
-            {/* 4 Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto">
-              {/* Column 1 */}
-              <div className="text-center">
-                {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
-                    src="/couple.png"
-                    alt="Couple"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  להסתכל על הקרובים ביותר{" "}
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר
-                  מימיו הראשונים
-                </p>
-              </div>
-
-              {/* Column 2 */}
-              <div className="text-center">
-                {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
-                    src="/sister.png"
-                    alt="Young Sister"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  להכיר את המשפחה
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק
-                </p>
-              </div>
-
-              {/* Column 3 */}
-              <div className="text-center">
-                {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
-                    src="/parent-and-son.png"
-                    alt="Parent and Son"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  מזכרת מתוקה
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק
-                </p>
-              </div>
-
-              {/* Column 4 */}
-              <div className="text-center">
-                {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
-                    src="/dad-and-son.png"
-                    alt="Dad and Son"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  לא עוד מוצר גנרי
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה
-                </p>
-              </div>
-            </div>
-
-            {/* CTA Section */}
-            <div className="text-center mt-16">
-              <p className="font-body text-medium-gray text-sm">
-                מעוניינים לדעת עוד על ראיית תינוקות?{" "}
-                <a
-                  href="#"
-                  className="text-[#F4A261] hover:text-[#F4A261]/80 underline cursor-pointer transition-colors duration-200"
-                >
-                  גלו כאן
-                </a>
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* How It Works Section */}
-        <section className="relative bg-gradient-to-br from-soft-peach-light to-soft-blue-light py-16 lg:py-24">
+        <section
+          className="relative py-16 lg:py-24"
+          style={{ backgroundColor: "#F9F7EE" }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-16">
@@ -878,6 +748,139 @@ export default function Home() {
               <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
                 התחילו עכשיו
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Choose Your Path Section */}
+        <section className="relative bg-[#F3EEE8] py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-12">
+              <h2 className="text-[1.8rem] sm:text-3xl md:text-4xl font-black text-dark-gray leading-tight max-w-3xl mx-auto">
+                מה הופך את הספרון שלנו{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10">למיוחד</span>
+                  <span
+                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                    style={{
+                      height: "6px",
+                      borderRadius: "6px 6px 0 0",
+                      transform: "rotate(-2deg) translateY(0px)",
+                      background:
+                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                      width: "110%",
+                      left: "-5%",
+                    }}
+                  ></span>
+                </span>
+              </h2>
+            </div>
+
+            {/* 4 Column Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto">
+              {/* Column 1 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/couple.png"
+                    alt="Couple"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
+                  להסתכל על הקרובים ביותר{" "}
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
+                  הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר
+                  מימיו הראשונים
+                </p>
+              </div>
+
+              {/* Column 2 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/sister.png"
+                    alt="Young Sister"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
+                  להכיר את המשפחה
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
+                  הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק
+                </p>
+              </div>
+
+              {/* Column 3 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/parent-and-son.png"
+                    alt="Parent and Son"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
+                  מזכרת מתוקה
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
+                  ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק
+                </p>
+              </div>
+
+              {/* Column 4 */}
+              <div className="text-center">
+                {/* Image */}
+                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                  <img
+                    src="/dad-and-son.png"
+                    alt="Dad and Son"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
+                  לא עוד מוצר גנרי
+                </h3>
+
+                {/* Subtitle */}
+                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
+                  במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה
+                </p>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center mt-16">
+              <p className="font-body text-medium-gray text-sm">
+                מעוניינים לדעת עוד על ראיית תינוקות?{" "}
+                <a
+                  href="#"
+                  className="text-[#F4A261] hover:text-[#F4A261]/80 underline cursor-pointer transition-colors duration-200"
+                >
+                  גלו כאן
+                </a>
+              </p>
             </div>
           </div>
         </section>
