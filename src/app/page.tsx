@@ -1157,7 +1157,7 @@ export default function Home() {
               <ul className="space-y-3">
                 <li>
                   <a
-                    href="#"
+                    href="/terms"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     תנאי שירות
@@ -1165,7 +1165,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/privacy"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     פרטיות
@@ -1173,7 +1173,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/shipping"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     משלוחים
@@ -1181,7 +1181,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/returns"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     החזרות
