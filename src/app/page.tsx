@@ -124,12 +124,12 @@ export default function Home() {
           const swipeThreshold = 50; // Minimum distance for swipe
 
           if (Math.abs(swipeDistance) > swipeThreshold) {
-            if (swipeDistance > 0 && currentSlide < 1) {
-              // Swipe left - go to next slide
-              goToSlide(currentSlide + 1, container, dots);
-            } else if (swipeDistance < 0 && currentSlide > 0) {
-              // Swipe right - go to previous slide
+            if (swipeDistance > 0 && currentSlide > 0) {
+              // Swipe left - go to previous slide
               goToSlide(currentSlide - 1, container, dots);
+            } else if (swipeDistance < 0 && currentSlide < 1) {
+              // Swipe right - go to next slide
+              goToSlide(currentSlide + 1, container, dots);
             } else {
               // Return to current slide
               goToSlide(currentSlide, container, dots);
