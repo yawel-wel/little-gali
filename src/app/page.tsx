@@ -1008,18 +1008,6 @@ export default function Home() {
                 </Button>
               </a>
             </div>
-
-            {/* Bottom CTA */}
-            <div className="text-center mt-16">
-              <a href="/contact" className="block">
-                <p className="font-body text-medium-gray mb-6 cursor-pointer hover:text-dark-gray transition-colors">
-                  לא מצאתם את התשובה שחיפשתם?
-                </p>
-                <Button className="cursor-pointer bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
-                  צרו איתנו קשר
-                </Button>
-              </a>
-            </div>
           </div>
         </section>
       </main>

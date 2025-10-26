@@ -11,11 +11,53 @@ export default function ContactPage() {
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          type: "success",
+          message: data.message || "ההודעה נשלחה בהצלחה!",
+        });
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          message: "",
+        });
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: data.error || "שגיאה בשליחת ההודעה. אנא נסה שוב.",
+        });
+      }
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: "שגיאה בשרת. אנא נסה שוב מאוחר יותר.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -25,6 +67,10 @@ export default function ContactPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear status when user starts typing
+    if (submitStatus.type) {
+      setSubmitStatus({ type: null, message: "" });
+    }
   };
 
   return (
@@ -139,13 +185,29 @@ export default function ContactPage() {
                       />
                     </div>
 
+                    {/* Status Messages */}
+                    {submitStatus.type && (
+                      <div
+                        className={`p-4 rounded-lg ${
+                          submitStatus.type === "success"
+                            ? "bg-green-50 border border-green-200 text-green-800"
+                            : "bg-red-50 border border-red-200 text-red-800"
+                        }`}
+                      >
+                        <p className="font-body text-sm">
+                          {submitStatus.message}
+                        </p>
+                      </div>
+                    )}
+
                     {/* Submit Button */}
                     <div>
                       <Button
                         type="submit"
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105"
+                        disabled={isSubmitting}
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                       >
-                        שלח הודעה
+                        {isSubmitting ? "שולח..." : "שלח הודעה"}
                       </Button>
                     </div>
                   </form>
