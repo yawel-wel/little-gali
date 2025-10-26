@@ -1,7 +1,32 @@
+"use client";
+
+import { useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-export default function ShippingPage() {
+export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
+    console.log("Form submitted:", formData);
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F9F7EE" }}>
       <Header />
@@ -12,99 +37,118 @@ export default function ShippingPage() {
           style={{ backgroundColor: "#F9F7EE" }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              {/* Page Title */}
-              <div className="text-center mb-12">
-                <h1 className="text-3xl lg:text-4xl font-black text-dark-gray leading-tight mb-4">
-                  מדיניות משלוחים
-                </h1>
-              </div>
+            <div className="max-w-6xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                {/* Left Side - Title and Image Placeholder */}
+                <div className="order-1 lg:order-1">
+                  <div className="space-y-6">
+                    {/* Title */}
+                    <div>
+                      <h1 className="text-3xl lg:text-4xl font-black text-dark-gray leading-tight">
+                        צרו איתנו{" "}
+                        <span className="relative inline-block">
+                          <span className="relative z-10">קשר</span>
+                          <span
+                            className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                            style={{
+                              height: "6px",
+                              borderRadius: "6px 6px 0 0",
+                              transform: "rotate(-2deg) translateY(0px)",
+                              background:
+                                "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                              boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                              width: "110%",
+                              left: "-5%",
+                            }}
+                          ></span>
+                        </span>
+                      </h1>
+                    </div>
 
-              {/* Content */}
-              <div className="space-y-8 font-body text-medium-gray leading-relaxed">
-                {/* זמן אספקה */}
-                <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    זמן אספקה
-                  </h2>
-                  <p className="mb-4">
-                    הספרון האישי שלכם מופק במיוחד עבורכם בתהליך ייצור אישי
-                    וייחודי. זמן ההפקה והמשלוח המשוער הוא עד 14 ימי עסקים ממועד
-                    ביצוע ההזמנה.
-                  </p>
-                  <p className="mb-4">
-                    אנו עושות את מירב המאמצים לעמוד בזמנים אלו, אך ייתכנו
-                    עיכובים שאינם בשליטתנו (כגון עיכובי דואר, תקלה טכנית או
-                    עומסים אצל חברת השילוח).
-                  </p>
-                  <p>
-                    במקרים חריגים של עיכוב ממושך, נעדכן אתכם במייל או בהודעה.
-                  </p>
+                    {/* Image */}
+                    <div className="w-full h-64 lg:h-80 rounded-lg overflow-hidden md:mt-20">
+                      <img
+                        src="/contact-us.png"
+                        alt="Contact Us"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* עלויות משלוח */}
-                <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    עלויות משלוח
-                  </h2>
-                  <p className="mb-4">
-                    עלות המשלוח מוצגת ללקוח בעת ההזמנה ומתווספת למחיר הספרון.
-                    המשלוחים מבוצעים באמצעות דואר ישראל או שליח עד הבית, בהתאם
-                    לאפשרויות הקיימות בעת ההזמנה.
-                  </p>
-                  <p>
-                    במקרה של הזנה שגויה של כתובת או פרטים לא מדויקים, עלול
-                    להיגבות תשלום נוסף עבור משלוח חוזר.
-                  </p>
-                </div>
+                {/* Right Side - Form */}
+                <div className="order-2 lg:order-2">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Name Field */}
+                    <div>
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-body-bold text-dark-gray mb-2"
+                      >
+                        שם <span className="text-primary-orange">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white"
+                        placeholder="הכנס את שמך"
+                      />
+                    </div>
 
-                {/* מעקב משלוח */}
-                <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    מעקב משלוח
-                  </h2>
-                  <p>
-                    לאחר שההזמנה נשלחת, תישלח אליכם הודעה עם פרטי מעקב או אישור
-                    משלוח. האחריות למעקב אחר סטטוס המשלוח לאחר יציאתו מהסטודיו
-                    חלה על הלקוח.
-                  </p>
-                </div>
+                    {/* Email Field */}
+                    <div>
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-body-bold text-dark-gray mb-2"
+                      >
+                        אימייל <span className="text-primary-orange">*</span>
+                      </label>
+                      <Input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white"
+                        placeholder="הכנס את כתובת האימייל שלך"
+                      />
+                    </div>
 
-                {/* אזורי משלוח */}
-                <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    אזורי משלוח
-                  </h2>
-                  <p>
-                    נכון לעכשיו אנו מבצעות משלוחים בישראל בלבד. בהמשך נרחיב את
-                    השירות למדינות נוספות, והמידע יתעדכן בעמוד זה.
-                  </p>
-                </div>
+                    {/* Message Field */}
+                    <div>
+                      <label
+                        htmlFor="message"
+                        className="block text-sm font-body-bold text-dark-gray mb-2"
+                      >
+                        הודעה <span className="text-primary-orange">*</span>
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        required
+                        value={formData.message}
+                        onChange={handleChange}
+                        rows={8}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white resize-none font-body text-dark-gray"
+                        placeholder="השאר את הודעתך כאן..."
+                      />
+                    </div>
 
-                {/* מוצר שניזוק במשלוח */}
-                <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    מוצר שניזוק במשלוח
-                  </h2>
-                  <p className="mb-4">
-                    אם הספרון הגיע פגום עקב תהליך המשלוח, יש ליצור קשר תוך 48
-                    שעות מקבלת ההזמנה ולצרף תמונות ברורות של הנזק, באמצעות עמוד{" "}
-                    <a
-                      href="/#contact"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
-                    >
-                      צור קשר
-                    </a>{" "}
-                    או במייל:{" "}
-                    <a
-                      href="mailto:yaelromashkano@gmail.com"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
-                    >
-                      yaelromashkano@gmail.com
-                    </a>
-                    .
-                  </p>
-                  <p>לאחר האימות נדאג להחליף את המוצר ללא עלות נוספת.</p>
+                    {/* Submit Button */}
+                    <div>
+                      <Button
+                        type="submit"
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105"
+                      >
+                        שלח הודעה
+                      </Button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
@@ -278,11 +322,9 @@ export default function ShippingPage() {
               <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
                 צרו קשר
               </h3>
-              <a href="/contact">
-                <Button className="cursor-pointer bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
-                  צרו איתנו קשר
-                </Button>
-              </a>
+              <Button className="cursor-pointer bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
+                צרו איתנו קשר
+              </Button>
             </div>
           </div>
         </div>

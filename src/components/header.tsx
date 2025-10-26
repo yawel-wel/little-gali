@@ -50,7 +50,7 @@ export function Header() {
 
   // Desktop navigation (left to right: Home, About, etc.)
   const desktopNavigationItems = [
-    { name: "צור קשר", href: "#" },
+    { name: "צור קשר", href: "/contact" },
     { name: "השראה", href: "#" },
     { name: "שאלות ותשובות", href: "/#qa" },
     { name: "הידעת", href: "#" },
@@ -65,7 +65,7 @@ export function Header() {
     { name: "הידעת", href: "#" },
     { name: "שאלות ותשובות", href: "/#qa" },
     { name: "השראה", href: "#" },
-    { name: "צור קשר", href: "#" },
+    { name: "צור קשר", href: "/contact" },
   ];
 
   return (

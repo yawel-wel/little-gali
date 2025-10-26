@@ -1060,12 +1060,14 @@ export default function Home() {
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
-              <p className="font-body text-medium-gray mb-6">
-                לא מצאתם את התשובה שחיפשתם?
-              </p>
-              <Button className="cursor-pointer bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
-                צרו איתנו קשר
-              </Button>
+              <a href="/contact" className="block">
+                <p className="font-body text-medium-gray mb-6 cursor-pointer hover:text-dark-gray transition-colors">
+                  לא מצאתם את התשובה שחיפשתם?
+                </p>
+                <Button className="cursor-pointer bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
+                  צרו איתנו קשר
+                </Button>
+              </a>
             </div>
           </div>
         </section>
@@ -1223,7 +1225,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/contact"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     צרו קשר
@@ -1237,9 +1239,11 @@ export default function Home() {
               <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
                 צרו קשר
               </h3>
-              <Button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
-                צרו איתנו קשר
-              </Button>
+              <a href="/contact">
+                <Button className="cursor-pointer bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
+                  צרו איתנו קשר
+                </Button>
+              </a>
             </div>
           </div>
         </div>

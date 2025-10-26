@@ -263,7 +263,7 @@ export default function ReturnsPage() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/contact"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     צרו קשר
@@ -277,9 +277,11 @@ export default function ReturnsPage() {
               <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
                 צרו קשר
               </h3>
-              <Button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
-                צרו איתנו קשר
-              </Button>
+              <a href="/contact">
+                <Button className="cursor-pointer bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
+                  צרו איתנו קשר
+                </Button>
+              </a>
             </div>
           </div>
         </div>
