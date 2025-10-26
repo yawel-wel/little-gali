@@ -25,6 +25,41 @@ export default function Home() {
       element: Element;
       handler: (e: Event) => void;
     }> = [];
+    const touchHandlers: Array<{
+      element: Element;
+      handlers: { event: string; handler: (e: Event) => void }[];
+    }> = [];
+
+    let currentSlide = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isDragging = false;
+
+    function goToSlide(
+      index: number,
+      container: HTMLElement,
+      dots: NodeListOf<Element>
+    ) {
+      currentSlide = index;
+
+      // Update active dot
+      dots.forEach((d, i) => {
+        if (i === index) {
+          d.className =
+            "w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer";
+        } else {
+          d.className =
+            "w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer";
+        }
+      });
+
+      // Move carousel
+      if (index === 0) {
+        container.style.transform = "translateX(0%)";
+      } else if (index === 1) {
+        container.style.transform = "translateX(60%)";
+      }
+    }
 
     function initCarousel() {
       const container = document.getElementById("carousel-container");
@@ -32,30 +67,102 @@ export default function Home() {
 
       if (container && dots.length > 0) {
         // Set initial position to show first slide
-        container.style.transform = "translateX(0%)";
+        goToSlide(0, container, dots);
 
+        // Dot click handlers
         dots.forEach((dot, index) => {
           const handler = (e: Event) => {
             e.preventDefault();
-
-            // Update active dot
-            dots.forEach((d) => {
-              d.className =
-                "w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer";
-            });
-            dot.className =
-              "w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer";
-
-            // Move carousel - index 0 = first slide, index 1 = second slide
-            if (index === 0) {
-              container.style.transform = "translateX(0%)";
-            } else if (index === 1) {
-              container.style.transform = "translateX(60%)";
-            }
+            goToSlide(index, container, dots);
           };
 
           dot.addEventListener("click", handler);
           clickHandlers.push({ element: dot, handler });
+        });
+
+        // Touch/swipe handlers for mobile
+        const touchStartHandler = (e: TouchEvent) => {
+          touchStartX = e.touches[0].clientX;
+          touchEndX = touchStartX;
+          isDragging = true;
+          container.style.transition = "none";
+        };
+
+        const touchMoveHandler = (e: TouchEvent) => {
+          if (!isDragging) return;
+
+          touchEndX = e.touches[0].clientX;
+          const diff = touchStartX - touchEndX;
+
+          // Only prevent default if swiping horizontally
+          if (Math.abs(diff) > 10) {
+            e.preventDefault();
+          }
+
+          // Calculate current position
+          const currentTranslate = currentSlide === 0 ? 0 : 60;
+          const newTranslate =
+            currentTranslate + (diff / container.offsetWidth) * 100;
+
+          // Constrain movement
+          const minTranslate = 0;
+          const maxTranslate = 60;
+          const constrainedTranslate = Math.max(
+            minTranslate,
+            Math.min(maxTranslate, newTranslate)
+          );
+
+          container.style.transform = `translateX(${constrainedTranslate}%)`;
+        };
+
+        const touchEndHandler = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          container.style.transition = "transform 0.3s ease-in-out";
+
+          const swipeDistance = touchStartX - touchEndX;
+          const swipeThreshold = 50; // Minimum distance for swipe
+
+          if (Math.abs(swipeDistance) > swipeThreshold) {
+            if (swipeDistance > 0 && currentSlide < 1) {
+              // Swipe left - go to next slide
+              goToSlide(currentSlide + 1, container, dots);
+            } else if (swipeDistance < 0 && currentSlide > 0) {
+              // Swipe right - go to previous slide
+              goToSlide(currentSlide - 1, container, dots);
+            } else {
+              // Return to current slide
+              goToSlide(currentSlide, container, dots);
+            }
+          } else {
+            // Return to current slide if swipe wasn't significant
+            goToSlide(currentSlide, container, dots);
+          }
+        };
+
+        container.addEventListener(
+          "touchstart",
+          touchStartHandler as EventListener
+        );
+        container.addEventListener(
+          "touchmove",
+          touchMoveHandler as EventListener
+        );
+        container.addEventListener(
+          "touchend",
+          touchEndHandler as EventListener
+        );
+
+        touchHandlers.push({
+          element: container,
+          handlers: [
+            {
+              event: "touchstart",
+              handler: touchStartHandler as EventListener,
+            },
+            { event: "touchmove", handler: touchMoveHandler as EventListener },
+            { event: "touchend", handler: touchEndHandler as EventListener },
+          ],
         });
       } else {
         timeoutId = setTimeout(initCarousel, 100);
@@ -72,6 +179,11 @@ export default function Home() {
       }
       clickHandlers.forEach(({ element, handler }) => {
         element.removeEventListener("click", handler);
+      });
+      touchHandlers.forEach(({ element, handlers }) => {
+        handlers.forEach(({ event, handler }) => {
+          element.removeEventListener(event, handler);
+        });
       });
     };
   }, []);
@@ -426,8 +538,9 @@ export default function Home() {
               <div className="md:hidden">
                 <div className="relative overflow-hidden">
                   <div
-                    className="flex transition-transform duration-300 ease-in-out pt-12"
+                    className="flex transition-transform duration-300 ease-in-out pt-12 cursor-grab active:cursor-grabbing"
                     id="carousel-container"
+                    style={{ touchAction: "pan-x pan-y" }}
                   >
                     {/* Slide 1 - Colorful (Left) */}
                     <div className="w-4/5 flex-shrink-0 pr-4">
