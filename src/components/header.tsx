@@ -30,7 +30,7 @@ export function Header() {
   ];
 
   return (
-    <header className="relative bg-[#F9F7EE] border-b border-soft-peach-light">
+    <header className="relative bg-white border-b border-soft-peach-light">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4">
           {/* CTA Button */}

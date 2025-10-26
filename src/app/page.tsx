@@ -433,8 +433,8 @@ export default function Home() {
                 {/* Image */}
                 <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
                   <img
-                    src="/baby.png"
-                    alt="Baby"
+                    src="/parent-and-son.png"
+                    alt="Parent and Son"
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
