@@ -2,35 +2,74 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href.startsWith("/#")) {
+      e.preventDefault();
+      const hash = href.substring(1); // Remove the leading "/"
+
+      if (pathname !== "/") {
+        // If not on home page, navigate first
+        router.push(href);
+        // Scroll after navigation - wait a bit longer for page to load
+        setTimeout(() => {
+          const element = document.querySelector(hash);
+          if (element) {
+            const yOffset = -80; // Offset for header
+            const y =
+              element.getBoundingClientRect().top +
+              window.pageYOffset +
+              yOffset;
+            window.scrollTo({ top: y, behavior: "smooth" });
+          }
+        }, 300);
+      } else {
+        // If already on home page, just scroll
+        const element = document.querySelector(hash);
+        if (element) {
+          const yOffset = -80; // Offset for header
+          const y =
+            element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }
+    }
+  };
 
   // Desktop navigation (left to right: Home, About, etc.)
   const desktopNavigationItems = [
     { name: "צור קשר", href: "#" },
     { name: "השראה", href: "#" },
-    { name: "שאלות ותשובות", href: "#" },
+    { name: "שאלות ותשובות", href: "/#qa" },
     { name: "הידעת", href: "#" },
-    { name: "אודותינו", href: "#" },
-    { name: "בית", href: "#", active: true },
+    { name: "אודותינו", href: "/#about" },
+    { name: "בית", href: "/", active: true },
   ];
 
   // Mobile navigation (top to bottom: Home, About, etc.)
   const mobileNavigationItems = [
-    { name: "בית", href: "#", active: true },
-    { name: "אודותינו", href: "#" },
+    { name: "בית", href: "/", active: true },
+    { name: "אודותינו", href: "/#about" },
     { name: "הידעת", href: "#" },
-    { name: "שאלות ותשובות", href: "#" },
+    { name: "שאלות ותשובות", href: "/#qa" },
     { name: "השראה", href: "#" },
     { name: "צור קשר", href: "#" },
   ];
 
   return (
-    <header className="relative bg-white border-b border-soft-peach-light">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-soft-peach-light">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4">
           {/* CTA Button */}
@@ -46,6 +85,7 @@ export function Header() {
               <a
                 key={item.name}
                 href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className={`relative text-sm font-body-bold transition-colors duration-200 ${
                   item.active
                     ? "text-primary-orange"
@@ -100,12 +140,15 @@ export function Header() {
                       <a
                         key={item.name}
                         href={item.href}
+                        onClick={(e) => {
+                          setIsOpen(false);
+                          handleNavClick(e, item.href);
+                        }}
                         className={`block text-lg font-body-bold transition-colors duration-200 ${
                           item.active
                             ? "text-primary-orange"
                             : "text-dark-gray hover:text-primary-orange"
                         }`}
-                        onClick={() => setIsOpen(false)}
                       >
                         {item.name}
                       </a>

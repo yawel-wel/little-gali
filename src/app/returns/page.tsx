@@ -6,7 +6,7 @@ export default function ReturnsPage() {
     <div className="min-h-screen" style={{ backgroundColor: "#F9F7EE" }}>
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         <section
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}

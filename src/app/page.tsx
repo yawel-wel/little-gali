@@ -19,6 +19,22 @@ import {
 } from "@/components/ui/accordion";
 
 export default function Home() {
+  // Handle hash scrolling on page load
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          const yOffset = -80; // Offset for header
+          const y =
+            element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, []);
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
     const clickHandlers: Array<{
@@ -191,7 +207,7 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         {/* Hero Section */}
         <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -636,7 +652,7 @@ export default function Home() {
         </section>
 
         {/* Meet Us Section */}
-        <section className="relative bg-[#F3EEE8] pb-6">
+        <section id="about" className="relative bg-[#F3EEE8] pb-6">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
@@ -890,6 +906,7 @@ export default function Home() {
 
         {/* Q&A Section */}
         <section
+          id="qa"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
         >
