@@ -203,7 +203,7 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/qa"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     שאלות ותשובות

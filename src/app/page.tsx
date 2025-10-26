@@ -378,9 +378,9 @@ export default function Home() {
             {/* Section Title */}
             <div className="text-center mb-12">
               <h2 className="text-[1.8rem] sm:text-3xl md:text-4xl font-black text-dark-gray leading-tight max-w-3xl mx-auto">
-                כי תינוקות רואים{" "}
+                מה הופך את הספרון שלנו{" "}
                 <span className="relative inline-block">
-                  <span className="relative z-10">אחרת</span>
+                  <span className="relative z-10">למיוחד</span>
                   <span
                     className="absolute bottom-0 left-0 right-0 transform -rotate-1"
                     style={{
@@ -394,8 +394,7 @@ export default function Home() {
                       left: "-5%",
                     }}
                   ></span>
-                </span>{" "}
-                מאיתנו
+                </span>
               </h2>
             </div>
 
@@ -502,6 +501,195 @@ export default function Home() {
                   גלו כאן
                 </a>
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="relative bg-gradient-to-br from-soft-peach-light to-soft-blue-light py-16 lg:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-16">
+              <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray mb-4">
+                איך זה{" "}
+                <span className="relative inline-block">
+                  <span className="relative z-10">עובד</span>
+                  <span
+                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                    style={{
+                      height: "6px",
+                      borderRadius: "6px 6px 0 0",
+                      transform: "rotate(-2deg) translateY(0px)",
+                      background:
+                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                      width: "110%",
+                      left: "-5%",
+                    }}
+                  ></span>
+                </span>
+                ?
+              </h2>
+              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
+                כל מה שצריך זה כמה תמונות. אנחנו נטפל בכל השאר
+              </p>
+            </div>
+
+            {/* Steps Grid */}
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0">
+              {/* Step 1 */}
+              <div className="text-center relative">
+                {/* Step Image */}
+                <div className="mb-4">
+                  <div
+                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    style={{ backgroundColor: "#F3EEE8" }}
+                  >
+                    <img
+                      src="/upload-images.jpg"
+                      alt="Upload Images"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Step Number */}
+                <div className="relative inline-block mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
+                    style={{ backgroundColor: "#FFEDD4" }}
+                  >
+                    <span className="text-dark-gray font-heading text-sm font-bold">
+                      1
+                    </span>
+                  </div>
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4 mt-3 max-w-sm mx-auto">
+                  {/* Step Text */}
+                  <div className="mb-1">
+                    <p className="text-primary-orange text-sm font-body-bold">
+                      אתם עושים
+                    </p>
+                  </div>
+
+                  <h3 className="text-xl font-heading text-dark-gray">
+                    מעלים תמונות
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed">
+                    מעלים 5 תמונות אהובות של התינוק או המשפחה – זה לוקח פחות
+                    מדקה, ואפשר גם מהטלפון
+                  </p>
+                </div>
+
+                {/* Connecting line to next step */}
+                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="text-center relative">
+                {/* Step Image */}
+                <div className="mb-4">
+                  <div
+                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    style={{ backgroundColor: "#F3EEE8" }}
+                  >
+                    <img
+                      src="/transform-images.png"
+                      alt="Transform Images"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Step Number */}
+                <div className="relative inline-block mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
+                    style={{ backgroundColor: "#FFEDD4" }}
+                  >
+                    <span className="text-dark-gray font-heading text-sm font-bold">
+                      2
+                    </span>
+                  </div>
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4 mt-3 max-w-sm mx-auto">
+                  {/* Step Text */}
+                  <div className="mb-1">
+                    <p className="text-primary-orange text-sm font-body-bold">
+                      אנחנו עושים
+                    </p>
+                  </div>
+
+                  <h3 className="text-xl font-heading text-dark-gray">
+                    מעבדים את התמונות
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed">
+                    בעזרת בינה מלאכותית (AI) אנחנו ממירים את התמונות לגרסאות
+                    ברורות וידידותיות לתינוק – בשחור-לבן ובצבע.
+                  </p>
+                </div>
+
+                {/* Connecting line to next step */}
+                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="text-center relative">
+                {/* Step Image */}
+                <div className="mb-4">
+                  <div
+                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    style={{ backgroundColor: "#F3EEE8" }}
+                  >
+                    <img
+                      src="/print-book.png"
+                      alt="Print Book"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Step Number */}
+                <div className="relative inline-block mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
+                    style={{ backgroundColor: "#FFEDD4" }}
+                  >
+                    <span className="text-dark-gray font-heading text-sm font-bold">
+                      3
+                    </span>
+                  </div>
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4 mt-3 max-w-sm mx-auto">
+                  {/* Step Text */}
+                  <div className="mb-1">
+                    <p className="text-primary-orange text-sm font-body-bold">
+                      אנחנו עושים
+                    </p>
+                  </div>
+
+                  <h3 className="text-xl font-heading text-dark-gray">
+                    מדפיסים את הספרון
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed">
+                    אנחנו מדפיסים את הספרון האישי שלכם באיכות גבוהה ושולחים אותו
+                    עד הבית – מוכן לשימוש ולמזכרת.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="text-center mt-16">
+              <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
+                התחילו עכשיו
+              </Button>
             </div>
           </div>
         </section>
@@ -699,209 +887,26 @@ export default function Home() {
                   {/* Body text */}
                   <div className="space-y-3 pt-2">
                     <p className="font-body text-medium-gray leading-relaxed">
-                      לורם איפסום דולור סיט amet, consectetur adipiscing elit.
-                      Sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                      התחלתי לעבוד על הפרויקט אחרי שגלי נולדה. מצאתי את עצמי
+                      נשאבת לזה – חושבת על זה, מתכננת, מעצבת את האתר, ובכל פעם
+                      שמישהי העלתה תמונות לספרון – זה היה הדבר הראשון שרציתי
+                      לראות.
                     </p>
                     <p className="font-body text-medium-gray leading-relaxed">
-                      Duis aute irure dolor in reprehenderit in voluptate velit
-                      esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                      sint occaecat cupidatat non proident, sunt in culpa qui
-                      officia deserunt mollit anim id est laborum.
+                      נהניתי מהתהליך עצמו, מליצור משהו חדש, ובעיקר מלראות את
+                      התגובות של האמהות כשהספרונים הגיעו אליהן. הרגשתי שאני עושה
+                      משהו מיוחד, שיש לו מקום, ושגם אני הייתי רוצה אותו בשביל
+                      גלי שלי (ואל דאגה – הכנתי לה כבר כמה וכמה ספרונים משלה).
+                    </p>
+                    <p className="font-body text-medium-gray leading-relaxed">
+                      אני מקווה שכמוני יהיו עוד אמהות שימצאו בספרון הזה ערך,
+                      שירצו אחד כזה לתינוק שלהן. ובסוף – זה גם בשבילנו. לראות את
+                      התינוק שלנו מסתכל על התמונות של המשפחה בסקרנות ולהתרגש בכל
+                      פעם מחדש.
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="relative bg-gradient-to-br from-soft-peach-light to-soft-blue-light py-16 lg:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Title */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray mb-4">
-                איך זה{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10">עובד</span>
-                  <span
-                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
-                    style={{
-                      height: "6px",
-                      borderRadius: "6px 6px 0 0",
-                      transform: "rotate(-2deg) translateY(0px)",
-                      background:
-                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
-                      width: "110%",
-                      left: "-5%",
-                    }}
-                  ></span>
-                </span>
-                ?
-              </h2>
-              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                כל מה שצריך זה כמה תמונות. אנחנו נטפל בכל השאר
-              </p>
-            </div>
-
-            {/* Steps Grid */}
-            <div className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0">
-              {/* Step 1 */}
-              <div className="text-center relative">
-                {/* Step Image */}
-                <div className="mb-4">
-                  <div
-                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
-                    style={{ backgroundColor: "#F3EEE8" }}
-                  >
-                    <img
-                      src="/upload-images.jpg"
-                      alt="Upload Images"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* Step Number */}
-                <div className="relative inline-block mb-4">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFEDD4" }}
-                  >
-                    <span className="text-dark-gray font-heading text-sm font-bold">
-                      1
-                    </span>
-                  </div>
-                </div>
-
-                {/* Step Content */}
-                <div className="space-y-4 mt-3 max-w-sm mx-auto">
-                  {/* Step Text */}
-                  <div className="mb-1">
-                    <p className="text-primary-orange text-sm font-body-bold">
-                      אתם עושים
-                    </p>
-                  </div>
-
-                  <h3 className="text-xl font-heading text-dark-gray">
-                    מעלים תמונות
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed">
-                    מעלים 5 תמונות אהובות של התינוק או המשפחה – זה לוקח פחות
-                    מדקה, ואפשר גם מהטלפון
-                  </p>
-                </div>
-
-                {/* Connecting line to next step */}
-                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="text-center relative">
-                {/* Step Image */}
-                <div className="mb-4">
-                  <div
-                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
-                    style={{ backgroundColor: "#F3EEE8" }}
-                  >
-                    <img
-                      src="/transform-images.png"
-                      alt="Transform Images"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* Step Number */}
-                <div className="relative inline-block mb-4">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFEDD4" }}
-                  >
-                    <span className="text-dark-gray font-heading text-sm font-bold">
-                      2
-                    </span>
-                  </div>
-                </div>
-
-                {/* Step Content */}
-                <div className="space-y-4 mt-3 max-w-sm mx-auto">
-                  {/* Step Text */}
-                  <div className="mb-1">
-                    <p className="text-primary-orange text-sm font-body-bold">
-                      אנחנו עושים
-                    </p>
-                  </div>
-
-                  <h3 className="text-xl font-heading text-dark-gray">
-                    מעבדים את התמונות
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed">
-                    בעזרת בינה מלאכותית (AI) אנחנו ממירים את התמונות לגרסאות
-                    ברורות וידידותיות לתינוק – בשחור-לבן ובצבע.
-                  </p>
-                </div>
-
-                {/* Connecting line to next step */}
-                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="text-center relative">
-                {/* Step Image */}
-                <div className="mb-4">
-                  <div
-                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
-                    style={{ backgroundColor: "#F3EEE8" }}
-                  >
-                    <img
-                      src="/print-book.png"
-                      alt="Print Book"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* Step Number */}
-                <div className="relative inline-block mb-4">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFEDD4" }}
-                  >
-                    <span className="text-dark-gray font-heading text-sm font-bold">
-                      3
-                    </span>
-                  </div>
-                </div>
-
-                {/* Step Content */}
-                <div className="space-y-4 mt-3 max-w-sm mx-auto">
-                  {/* Step Text */}
-                  <div className="mb-1">
-                    <p className="text-primary-orange text-sm font-body-bold">
-                      אנחנו עושים
-                    </p>
-                  </div>
-
-                  <h3 className="text-xl font-heading text-dark-gray">
-                    מדפיסים את הספרון
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed">
-                    אנחנו מדפיסים את הספרון האישי שלכם באיכות גבוהה ושולחים אותו
-                    עד הבית – מוכן לשימוש ולמזכרת.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom CTA */}
-            <div className="text-center mt-16">
-              <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
-                התחילו עכשיו
-              </Button>
             </div>
           </div>
         </section>
@@ -981,71 +986,6 @@ export default function Home() {
                 </AccordionItem>
 
                 <AccordionItem
-                  value="item-4"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    איזה תמונה מתאימה?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    תמונה ברורה של הפנים, בלי משקפי שמש ועדיף עם חיוך. לא קרובה
-                    מדי לפנים. הימנעו מתמונות מטושטשות או עם תאורה גרועה.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem
-                  value="item-5"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    אפשר לשים כמה אנשים בתמונה אחת?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    כן, בהחלט! ניתן להעלות תמונה עם שני אנשים במידה והתמונה תהיה
-                    ברורה ומוארת היטב. עדיף להימנע מתמונות עם יותר משני אנשים
-                    מאחר ועיבוד התמונה עלול להיפגע וגם כי תמונה עם יותר מדיי
-                    פרטים אינה מותאמת לתינוקות.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem
-                  value="item-6"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    האם הרקע משנה?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    לא. הרקע מוסר אוטומטית ומוחלף בלבן.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem
-                  value="item-7"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    איך מנקים את הספרון?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם מים.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem
-                  value="item-8"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    כמה זמן לוקח להכין את הספרון?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    תהליך ההכנה לוקח 7-10 ימי עבודה מרגע קבלת התמונות. אנו
-                    שולחים עדכון על התקדמות ומעדכנים אתכם כשהספרון מוכן לאיסוף
-                    או למשלוח.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem
                   value="item-9"
                   className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
@@ -1058,6 +998,15 @@ export default function Home() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+            </div>
+
+            {/* Button to navigate to Q&A page */}
+            <div className="text-center mt-12">
+              <a href="/qa">
+                <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
+                  לכל השאלות והתשובות
+                </Button>
+              </a>
             </div>
 
             {/* Bottom CTA */}
@@ -1153,7 +1102,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/qa"
                     className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                   >
                     שאלות ותשובות

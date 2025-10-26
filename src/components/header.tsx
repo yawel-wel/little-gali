@@ -45,6 +45,10 @@ export function Header() {
           window.scrollTo({ top: y, behavior: "smooth" });
         }
       }
+    } else if (href.startsWith("/") && !href.startsWith("/#")) {
+      // Regular page navigation
+      e.preventDefault();
+      router.push(href);
     }
   };
 
@@ -52,7 +56,7 @@ export function Header() {
   const desktopNavigationItems = [
     { name: "צור קשר", href: "/contact" },
     { name: "השראה", href: "#" },
-    { name: "שאלות ותשובות", href: "/#qa" },
+    { name: "שאלות ותשובות", href: "/qa" },
     { name: "הידעת", href: "#" },
     { name: "אודותינו", href: "/#about" },
     { name: "בית", href: "/", active: true },
@@ -63,7 +67,7 @@ export function Header() {
     { name: "בית", href: "/", active: true },
     { name: "אודותינו", href: "/#about" },
     { name: "הידעת", href: "#" },
-    { name: "שאלות ותשובות", href: "/#qa" },
+    { name: "שאלות ותשובות", href: "/qa" },
     { name: "השראה", href: "#" },
     { name: "צור קשר", href: "/contact" },
   ];
