@@ -757,9 +757,6 @@ export default function Home() {
                       1
                     </span>
                   </div>
-                  {/* Decorative elements */}
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-soft-yellow rounded-full opacity-60"></div>
-                  <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-soft-green rounded-full opacity-40"></div>
                 </div>
 
                 {/* Step Content */}
@@ -810,9 +807,6 @@ export default function Home() {
                       2
                     </span>
                   </div>
-                  {/* Decorative elements */}
-                  <div className="absolute -top-1 -left-1 w-2 h-2 bg-soft-blue rounded-full opacity-50"></div>
-                  <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-soft-yellow rounded-full opacity-60"></div>
                 </div>
 
                 {/* Step Content */}
@@ -863,9 +857,6 @@ export default function Home() {
                       3
                     </span>
                   </div>
-                  {/* Decorative elements */}
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-soft-green rounded-full opacity-50"></div>
-                  <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-soft-peach rounded-full opacity-40"></div>
                 </div>
 
                 {/* Step Content */}
@@ -894,12 +885,6 @@ export default function Home() {
                 התחילו עכשיו
               </Button>
             </div>
-
-            {/* Decorative background elements */}
-            <div className="absolute top-10 left-10 w-20 h-20 bg-soft-yellow rounded-full opacity-20"></div>
-            <div className="absolute bottom-10 right-10 w-16 h-16 bg-soft-green rounded-full opacity-20"></div>
-            <div className="absolute top-1/2 left-4 w-8 h-8 bg-soft-peach rounded-full opacity-30"></div>
-            <div className="absolute top-1/3 right-8 w-12 h-12 bg-soft-blue rounded-full opacity-25"></div>
           </div>
         </section>
 
