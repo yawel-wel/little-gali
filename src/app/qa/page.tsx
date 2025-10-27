@@ -1,6 +1,7 @@
 "use client";
 
 import { Header } from "@/components/header";
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -23,25 +24,9 @@ export default function QAPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-heading text-dark-gray mb-4">
-                שאלו{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10">אותנו</span>
-                  <span
-                    className="absolute bottom-0 left-0 right-0 transform -rotate-1"
-                    style={{
-                      height: "6px",
-                      borderRadius: "6px 6px 0 0",
-                      transform: "rotate(-2deg) translateY(0px)",
-                      background:
-                        "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-                      boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
-                      width: "110%",
-                      left: "-5%",
-                    }}
-                  ></span>
-                </span>
-              </h2>
+              <Title highlightText="אותנו" size="lg" className="mb-4">
+                שאלו אותנו
+              </Title>
               <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
                 התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו
               </p>

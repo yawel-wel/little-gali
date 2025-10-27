@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -91,25 +92,9 @@ export default function ContactPage() {
                   <div className="space-y-6">
                     {/* Title */}
                     <div>
-                      <h1 className="text-3xl lg:text-4xl font-black text-dark-gray leading-tight">
-                        צרו איתנו{" "}
-                        <span className="relative inline-block">
-                          <span className="relative z-10">קשר</span>
-                          <span
-                            className="absolute bottom-0 left-0 right-0 transform -rotate-1"
-                            style={{
-                              height: "6px",
-                              borderRadius: "6px 6px 0 0",
-                              transform: "rotate(-2deg) translateY(0px)",
-                              background:
-                                "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-                              boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
-                              width: "110%",
-                              left: "-5%",
-                            }}
-                          ></span>
-                        </span>
-                      </h1>
+                      <Title highlightText="קשר" size="lg">
+                        צרו איתנו קשר
+                      </Title>
                     </div>
 
                     {/* Image */}

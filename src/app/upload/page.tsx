@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { Upload, Info, X } from "lucide-react";
 import { useState, useRef } from "react";
@@ -97,25 +98,9 @@ export default function UploadPage() {
             <div className="max-w-3xl mx-auto space-y-8">
               {/* Main Title */}
               <div className="text-center">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-dark-gray leading-tight">
-                  בואו ניצור לתינוק שלכם ספרון{" "}
-                  <span className="relative inline-block">
-                    <span className="relative z-10">אישי</span>
-                    <span
-                      className="absolute bottom-0 left-0 right-0 transform -rotate-1 rounded-full"
-                      style={{
-                        height: "8px",
-                        borderRadius: "4px",
-                        transform: "rotate(-1deg) translateY(0px)",
-                        background:
-                          "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-                        boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
-                        width: "110%",
-                        left: "-5%",
-                      }}
-                    ></span>
-                  </span>
-                </h1>
+                <Title highlightText="אישי" size="xl" roundedUnderline>
+                  בואו ניצור לתינוק שלכם ספרון אישי
+                </Title>
               </div>
 
               {/* First Paragraph */}
