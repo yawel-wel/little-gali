@@ -5,15 +5,50 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { Upload, Info, X } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { blobToBase64 } from "@/lib/utils";
 
 export default function UploadPage() {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [selectedImagesCount, setSelectedImagesCount] = useState(0);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Restore images from sessionStorage on mount
+  useEffect(() => {
+    const base64ToBlob = (base64String: string): string => {
+      const [metadata, data] = base64String.split(",");
+      const byteCharacters = atob(data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      // Extract mime type from metadata (e.g., "data:image/png;base64")
+      const mimeMatch = metadata.match(/:(.*?);/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      const blob = new Blob([byteArray], { type: mimeType });
+      return URL.createObjectURL(blob);
+    };
+
+    const storedImages = sessionStorage.getItem("previewImages");
+    if (storedImages && selectedImages.length === 0) {
+      try {
+        const parsedImages = JSON.parse(storedImages);
+        const blobUrls = parsedImages.map((base64: string) =>
+          base64ToBlob(base64)
+        );
+        setSelectedImages(blobUrls);
+        setSelectedImagesCount(blobUrls.length);
+      } catch (error) {
+        console.error("Error restoring images:", error);
+      }
+    }
+  }, [selectedImages.length]);
 
   const handleUploadClick = () => {
     // Show modal only if it hasn't been seen before
@@ -80,9 +115,24 @@ export default function UploadPage() {
     selectedImages.forEach((url) => URL.revokeObjectURL(url));
     setSelectedImages([]);
     setSelectedImagesCount(0);
+    // Clear sessionStorage as well
+    sessionStorage.removeItem("previewImages");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleNavigateToPreview = async () => {
+    // Convert blob URLs to base64 and store in sessionStorage
+    const base64Images = await Promise.all(
+      selectedImages.map((url) => blobToBase64(url))
+    );
+
+    // Store images in sessionStorage
+    sessionStorage.setItem("previewImages", JSON.stringify(base64Images));
+
+    // Navigate to preview page
+    router.push("/preview");
   };
 
   return (
@@ -167,7 +217,10 @@ export default function UploadPage() {
                   {/* Action Buttons */}
                   {selectedImagesCount >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      <button className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer">
+                      <button
+                        onClick={handleNavigateToPreview}
+                        className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer"
+                      >
                         המשך
                       </button>
                       <button
