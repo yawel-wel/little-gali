@@ -364,12 +364,14 @@ export default function Home() {
                 </div>
 
                 {/* Centered Button */}
-                <Button
-                  size="lg"
-                  className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 transform hover:scale-105 shadow-lg"
-                >
-                  צרו ספרון עכשיו
-                </Button>
+                <a href="/upload">
+                  <Button
+                    size="lg"
+                    className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 transform hover:scale-105 shadow-lg"
+                  >
+                    צרו ספרון עכשיו
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
@@ -745,9 +747,11 @@ export default function Home() {
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
-              <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
-                התחילו עכשיו
-              </Button>
+              <a href="/upload">
+                <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
+                  התחילו עכשיו
+                </Button>
+              </a>
             </div>
           </div>
         </section>

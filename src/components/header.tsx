@@ -78,9 +78,11 @@ export function Header() {
         <div className="flex items-center justify-between py-4">
           {/* CTA Button */}
           <div className="hidden md:block">
-            <button className="cursor-pointer border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
-              צרו ספרון
-            </button>
+            <a href="/upload">
+              <button className="cursor-pointer border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
+                צרו ספרון
+              </button>
+            </a>
           </div>
 
           {/* Desktop Navigation */}
