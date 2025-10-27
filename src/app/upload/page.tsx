@@ -150,7 +150,7 @@ export default function UploadPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-20 md:pt-16">
             <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
-              <div className="text-center">
+              <div className="text-center md:mt-4">
                 <Title
                   highlightText="אישי"
                   size="xl"
