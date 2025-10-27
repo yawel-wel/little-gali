@@ -206,14 +206,14 @@ export default function Home() {
     };
   }, []);
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Header />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden">
+        <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden pt-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-4 pt-16 md:pt-20 lg:pt-24">
               {/* Welcome text */}
               <div>
                 <div
@@ -376,14 +376,14 @@ export default function Home() {
                   <div>
                     <Title
                       highlightText="הספרון"
-                      className="text-3xl lg:text-4xl text-right"
+                      className="text-3xl lg:text-4xl text-center lg:text-right"
                     >
                       הספרון שלנו
                     </Title>
                   </div>
 
                   {/* Description Text */}
-                  <div className="space-y-3 text-right">
+                  <div className="space-y-3 text-center lg:text-right">
                     <p className="font-body text-medium-gray leading-relaxed">
                       ספרון דו צדדי עם תמונות מועבדות ב AI
                       <br />
@@ -395,14 +395,14 @@ export default function Home() {
                   </div>
 
                   {/* Price */}
-                  <div className="flex items-center justify-start gap-2">
+                  <div className="flex items-center justify-center lg:justify-start gap-2">
                     <span className="text-2xl font-heading text-dark-gray">
                       120 ₪
                     </span>
                   </div>
 
                   {/* CTA Button */}
-                  <div className="flex justify-start pt-2">
+                  <div className="flex justify-center lg:justify-start pt-2">
                     <a href="/upload">
                       <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105">
                         התחל ליצור את הספרון
@@ -451,7 +451,7 @@ export default function Home() {
                 {/* Step Image */}
                 <div className="mb-4">
                   <div
-                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
                     style={{ backgroundColor: "#F3EEE8" }}
                   >
                     <img
@@ -501,7 +501,7 @@ export default function Home() {
                 {/* Step Image */}
                 <div className="mb-4">
                   <div
-                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
                     style={{ backgroundColor: "#F3EEE8" }}
                   >
                     <img
@@ -551,7 +551,7 @@ export default function Home() {
                 {/* Step Image */}
                 <div className="mb-4">
                   <div
-                    className="w-48 md:w-56 h-48 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                    className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
                     style={{ backgroundColor: "#F3EEE8" }}
                   >
                     <img
@@ -616,7 +616,7 @@ export default function Home() {
             </div>
 
             {/* 4 Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto">
               {/* Column 1 */}
               <div className="text-center">
                 {/* Image */}

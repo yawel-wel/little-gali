@@ -76,15 +76,18 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F9F7EE" }}>
+    <div
+      className="min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: "#F9F7EE" }}
+    >
       <Header />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1">
         <section
-          className="relative py-16 lg:py-24"
+          className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F9F7EE" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
                 {/* Left Side - Title and Image Placeholder */}

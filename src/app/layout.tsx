@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" className="overflow-x-hidden">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -45,7 +45,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${nunito.variable} ${nunitoSans.variable} antialiased`}>
+      <body
+        className={`${nunito.variable} ${nunitoSans.variable} antialiased overflow-x-hidden`}
+      >
         {children}
       </body>
     </html>

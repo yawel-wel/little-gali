@@ -120,6 +120,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior-y: none;
+  }
+  html {
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
   }
 }
 

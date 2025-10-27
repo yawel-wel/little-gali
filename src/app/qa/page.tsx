@@ -12,16 +12,16 @@ import {
 
 export default function QAPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Header />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1">
         {/* Q&A Section */}
         <section
-          className="relative py-16 lg:py-24"
+          className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F9F7EE" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             {/* Section Title */}
             <div className="text-center mb-16">
               <Title highlightText="אותנו" size="lg" className="mb-4">

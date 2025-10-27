@@ -48,11 +48,17 @@ export function UploadModal({
               <h3 className="text-md font-semibold text-dark-gray mb-2">
                 כדאי לבחור
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="text-[18px]">✅</span>
                   <p className="text-dark-gray font-body text-base leading-6">
-                    פנים ברורות, רואים עיניים
+                    פנים ברורות
+                  </p>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[18px]">✅</span>
+                  <p className="text-dark-gray font-body text-base leading-6">
+                    רואים את העיניים
                   </p>
                 </li>
                 <li className="flex items-start gap-2">
@@ -64,13 +70,7 @@ export function UploadModal({
                 <li className="flex items-start gap-2">
                   <span className="text-[18px]">✅</span>
                   <p className="text-dark-gray font-body text-base leading-6">
-                    אדם אחד בתמונה
-                  </p>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[18px]">✅</span>
-                  <p className="text-dark-gray font-body text-base leading-6">
-                    גם שני אנשים או זוג עם תינוק – אם הפנים ברורות
+                    אדם אחד או שניים בתמונה
                   </p>
                 </li>
                 <li className="flex items-start gap-2">
@@ -87,32 +87,32 @@ export function UploadModal({
               <h3 className="text-md font-semibold text-dark-gray mb-2">
                 כדאי להימנע
               </h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
                   <span className="text-[18px]">🚫</span>
                   <p className="text-dark-gray font-body text-base leading-5">
                     פילטר שחור-לבן
                   </p>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="text-[18px]">🚫</span>
                   <p className="text-dark-gray font-body text-base leading-5">
                     קרוב מדי לפנים
                   </p>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="text-[18px]">🚫</span>
                   <p className="text-dark-gray font-body text-base leading-5">
                     מטושטשת או רחוקה
                   </p>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="text-[18px]">🚫</span>
                   <p className="text-dark-gray font-body text-base leading-5">
                     תמונה קבוצתית
                   </p>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="text-[18px]">🚫</span>
                   <p className="text-dark-gray font-body text-base leading-5">
                     משקפי שמש או כובע

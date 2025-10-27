@@ -98,15 +98,18 @@ export default function PreviewPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F3EEE8" }}>
+    <div
+      className="min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: "#F3EEE8" }}
+    >
       <Header />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1">
         <section
-          className="relative py-10 lg:py-16"
+          className="relative py-10 lg:py-16 pt-20 md:pt-16"
           style={{ backgroundColor: "#F3EEE8" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             <div className="max-w-3xl mx-auto space-y-8">
               {/* Back Button */}
               <button
