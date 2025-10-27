@@ -5,7 +5,6 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
-import { RotateCw } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,8 +21,6 @@ import {
 } from "@/components/ui/accordion";
 
 export default function Home() {
-  const [isFlipped, setIsFlipped] = useState(false);
-
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
@@ -368,167 +365,61 @@ export default function Home() {
           </div>
         </section>
 
-        {/* What Is This Section */}
-        <section className="relative bg-white py-16 lg:py-24">
+        {/* הספרון שלנו Section */}
+        <section className="relative bg-white py-12 lg:py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Title */}
-            <div className="text-center mb-12">
-              <Title highlightText="הספרון" className="max-w-3xl mx-auto">
-                הספרון שלנו
-              </Title>
-            </div>
-
-            {/* Content Grid - Image in Center with Text Blocks Around */}
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-20 items-start">
-                {/* Mobile: First Text Block (Left) */}
-                <div className="order-1 lg:order-1 col-span-1 lg:col-span-1 flex flex-col lg:items-center lg:justify-start lg:space-y-16">
-                  <div className="flex flex-col items-center w-full">
-                    <div className="w-full">
-                      {/* Text Content */}
-                      <div className="flex flex-col items-center">
-                        <h3 className="font-heading text-dark-gray text-lg mb-2 uppercase text-center">
-                          דו צדדי
-                        </h3>
-                        <p className="font-body text-medium-gray text-sm leading-relaxed text-center">
-                          צד אחד עם תמונות בשחור לבן וצד שני צבעוני. יכול לעניין
-                          את תינוקכם במשך חודשיו הראשונים לחיים
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Desktop: Second Text Block (hidden on mobile) */}
-                  <div className="hidden lg:flex flex-col items-center w-full">
-                    <div className="w-full">
-                      {/* Text Content */}
-                      <div className="flex flex-col items-center">
-                        <h3 className="font-heading text-dark-gray text-lg mb-2 uppercase text-center">
-                          מותאם לראיית תינוקות
-                        </h3>
-                        <p className="font-body text-medium-gray text-sm leading-relaxed text-center">
-                          צד השחור לבן כולל קונטרסט גבוה שמותאם לראיית תינוקות
-                          בשלושת החודשים הראשונים
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mobile: First Text Block (Right) */}
-                <div className="order-2 lg:order-3 col-span-1 lg:col-span-1 flex flex-col lg:items-center lg:justify-start lg:space-y-16">
-                  <div className="flex flex-col items-center w-full">
-                    <div className="w-full">
-                      {/* Text Content */}
-                      <div className="flex flex-col items-center">
-                        <h3 className="font-heading text-dark-gray text-lg mb-2 uppercase text-center">
-                          מתאים לזמן בטן
-                        </h3>
-                        <p className="font-body text-medium-gray text-sm leading-relaxed text-center">
-                          ספרון עומד שמתאים במיוחד להעמדה מול התינוק ולעניין
-                          אותו בזמן הבטן
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Desktop: Second Text Block (hidden on mobile) */}
-                  <div className="hidden lg:flex flex-col items-center w-full">
-                    <div className="w-full">
-                      {/* Text Content */}
-                      <div className="flex flex-col items-center">
-                        <h3 className="font-heading text-dark-gray text-lg mb-2 uppercase text-center">
-                          ייחודי לכם
-                        </h3>
-                        <p className="font-body text-medium-gray text-sm leading-relaxed text-center">
-                          כולל את התמונות שלכם, של המשפחה שלכם, של בעלי החיים
-                          שלכם, של כל מי שחשוב לכם
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Center Column - Large Image */}
-                <div className="flex flex-col justify-center items-center py-8 lg:py-0 order-3 lg:order-2 gap-4 col-span-2 lg:col-span-1">
-                  <div
-                    className="relative"
-                    style={{
-                      perspective: "1000px",
-                      width: "420px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        transform: isFlipped
-                          ? "rotateY(180deg)"
-                          : "rotateY(0deg)",
-                        transformStyle: "preserve-3d",
-                        transition: "transform 0.6s",
-                        width: "100%",
-                        position: "relative",
-                      }}
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                {/* Left Column - Text Content */}
+                <div className="order-2 lg:order-1 space-y-6">
+                  {/* Title with Highlight */}
+                  <div>
+                    <Title
+                      highlightText="הספרון"
+                      className="text-3xl lg:text-4xl text-right"
                     >
-                      {/* Front side - Black and White */}
-                      <img
-                        src="/book-example-bnw.png"
-                        alt="Baby book example - Black and White"
-                        className="h-auto object-contain"
-                        style={{
-                          width: "100%",
-                          backfaceVisibility: "hidden",
-                          WebkitBackfaceVisibility: "hidden",
-                        }}
-                      />
-                      {/* Back side - Colorful */}
-                      <img
-                        src="/book-example-colorful.png"
-                        alt="Baby book example - Colorful"
-                        className="h-auto object-contain absolute top-0 left-0"
-                        style={{
-                          width: "100%",
-                          backfaceVisibility: "hidden",
-                          WebkitBackfaceVisibility: "hidden",
-                          transform: "rotateY(180deg)",
-                        }}
-                      />
-                    </div>
+                      הספרון שלנו
+                    </Title>
                   </div>
-                  <button
-                    onClick={() => setIsFlipped(!isFlipped)}
-                    className="flex items-center gap-2 text-dark-gray hover:text-primary-orange font-body-bold text-sm transition-colors duration-200 cursor-pointer"
-                  >
-                    <span>סובב אותי</span>
-                    <RotateCw className="w-5 h-5" />
-                  </button>
-                </div>
 
-                {/* Mobile: Second Text Block (Left) */}
-                <div className="order-4 lg:hidden col-span-1 flex flex-col items-center">
-                  <div className="w-full">
-                    {/* Text Content */}
-                    <div className="flex flex-col items-center">
-                      <h3 className="font-heading text-dark-gray text-lg mb-2 uppercase text-center">
-                        מותאם לראיית תינוקות
-                      </h3>
-                      <p className="font-body text-medium-gray text-sm leading-relaxed text-center">
-                        צד השחור לבן כולל קונטרסט גבוה שמותאם לראיית תינוקות
-                        בשלושת החודשים הראשונים
-                      </p>
-                    </div>
+                  {/* Description Text */}
+                  <div className="space-y-3 text-right">
+                    <p className="font-body text-medium-gray leading-relaxed">
+                      ספרון דו צדדי עם תמונות מועבדות ב AI
+                      <br />
+                      שנוצרו מהתמונות המיוחדות שלכם: צד אחד שחור לבן ומתאים
+                      לתינוקות בגילאי 0-3 חודשים וצד שני צבעוני.
+                      <br />
+                      הספרון מתאים במיוחד לזמן בטן, לשידת החתלה ולעגלה.
+                    </p>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-center justify-start gap-2">
+                    <span className="text-2xl font-heading text-dark-gray">
+                      120 ₪
+                    </span>
+                  </div>
+
+                  {/* CTA Button */}
+                  <div className="flex justify-start pt-2">
+                    <a href="/upload">
+                      <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105">
+                        התחל ליצור את הספרון
+                      </Button>
+                    </a>
                   </div>
                 </div>
 
-                {/* Mobile: Second Text Block (Right) */}
-                <div className="order-5 lg:hidden col-span-1 flex flex-col items-center">
+                {/* Right Column - Single Image */}
+                <div className="order-1 lg:order-2">
                   <div className="w-full">
-                    {/* Text Content */}
-                    <div className="flex flex-col items-center">
-                      <h3 className="font-heading text-dark-gray text-lg mb-2 uppercase text-center">
-                        Placeholder Title 4
-                      </h3>
-                      <p className="font-body text-medium-gray text-sm leading-relaxed text-center">
-                        Placeholder description text for the fourth feature
-                        block. This text will be replaced with actual content.
-                      </p>
+                    <div className="aspect-square rounded-lg overflow-hidden">
+                      <img
+                        src="/carousel-img-1.jpeg"
+                        alt="Book showcase"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
                 </div>
