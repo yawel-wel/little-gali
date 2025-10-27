@@ -12,9 +12,15 @@ export default function PreviewPage() {
   const [images, setImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     fullName: "",
+    email: "",
     phoneNumber: "",
     hearAbout: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
 
   useEffect(() => {
     // Get images from sessionStorage
@@ -33,11 +39,52 @@ export default function PreviewPage() {
     router.push("/upload");
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    // You can add your API call or navigation logic here
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      const response = await fetch("/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          hearAbout: formData.hearAbout,
+          images: images,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          type: "success",
+          message: data.message || "ההזמנה נשלחה בהצלחה!",
+        });
+        // Clear session storage after successful submission
+        setTimeout(() => {
+          sessionStorage.removeItem("previewImages");
+        }, 2000);
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: data.error || "שגיאה בשליחת ההזמנה. אנא נסה שוב.",
+        });
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      setSubmitStatus({
+        type: "error",
+        message: "שגיאה בשרת. אנא נסה שוב מאוחר יותר.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (
@@ -129,6 +176,26 @@ export default function PreviewPage() {
                     />
                   </div>
 
+                  {/* Email Field */}
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block font-body-bold text-dark-gray mb-2"
+                    >
+                      אימייל *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="name@example.com"
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right"
+                    />
+                  </div>
+
                   {/* Phone Number Field */}
                   <div>
                     <label
@@ -174,10 +241,24 @@ export default function PreviewPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="w-full bg-primary-orange hover:bg-primary-orange/90 disabled:bg-primary-orange/70 disabled:cursor-not-allowed text-white font-body-bold text-lg py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2"
                   >
-                    יאללה תכינו לי את הספרון 🎉
+                    {isSubmitting ? "שולח..." : "יאללה תכינו לי את הספרון 🎉"}
                   </button>
+
+                  {/* Status Message */}
+                  {submitStatus.type && (
+                    <div
+                      className={`w-full mt-4 p-4 rounded-lg text-center font-body-bold ${
+                        submitStatus.type === "success"
+                          ? "bg-green-50 text-green-700 border border-green-200"
+                          : "bg-red-50 text-red-700 border border-red-200"
+                      }`}
+                    >
+                      {submitStatus.message}
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
