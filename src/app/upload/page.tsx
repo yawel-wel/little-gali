@@ -91,20 +91,25 @@ export default function UploadPage() {
 
       <main className="flex-1 pt-20">
         <section
-          className="relative py-16 lg:py-24"
+          className="relative py-10 lg:py-16"
           style={{ backgroundColor: "#F3EEE8" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto space-y-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
+            <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
               <div className="text-center">
-                <Title highlightText="אישי" size="xl" roundedUnderline>
+                <Title
+                  highlightText="אישי"
+                  size="xl"
+                  roundedUnderline
+                  className="text-2xl md:text-4xl font-bold"
+                >
                   בואו ניצור לתינוק שלכם ספרון אישי
                 </Title>
               </div>
 
               {/* First Paragraph */}
-              <div className="text-center">
+              <div className="text-center mb-8">
                 <p className="text-lg font-body text-dark-gray leading-relaxed">
                   בחרו 5 תמונות שיופיעו בספרון.
                   <br />
@@ -138,50 +143,36 @@ export default function UploadPage() {
               {/* Selected Images Display */}
               {selectedImages.length > 0 && (
                 <div className="space-y-4">
-                  {/* Images Scrollable Container */}
-                  <div className="relative">
-                    <div className="flex gap-4 overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide">
-                      {selectedImages.slice(0, 5).map((url, index) => (
-                        <div
-                          key={index}
-                          className="relative flex-shrink-0 w-40 h-40 rounded-lg overflow-hidden border-2 border-primary-orange group"
+                  <div className="flex flex-nowrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-none mx-auto px-4 overflow-visible">
+                    {selectedImages.slice(0, 5).map((url, index) => (
+                      <div
+                        key={index}
+                        className="relative w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0"
+                      >
+                        <img
+                          src={url}
+                          alt={`Selected ${index + 1}`}
+                          className="w-full h-full object-cover border-2 border-primary-orange rounded-lg"
+                        />
+                        <button
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
                         >
-                          <img
-                            src={url}
-                            alt={`Selected ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            onClick={() => handleRemoveImage(index)}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-2 border-white"
-                          >
-                            <X className="w-4 h-4 text-white" strokeWidth={3} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Privacy Statement */}
-                  <div className="flex items-start gap-3 text-dark-gray bg-white p-4 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 rounded-full bg-primary-orange flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Info className="w-4 h-4 text-white" />
-                    </div>
-                    <p className="font-body text-sm leading-relaxed">
-                      התמונות ישמשו אך ורק ליצירת הספרון האישי שלכם ולא יפורסמו
-                      או יישמרו לשום שימוש אחר
-                    </p>
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
 
                   {/* Action Buttons */}
                   {selectedImagesCount >= 5 && (
-                    <div className="flex flex-col gap-4">
-                      <button className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-4 rounded-xl transition-opacity">
+                    <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
+                      <button className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer">
                         המשך
                       </button>
                       <button
                         onClick={handleStartOver}
-                        className="w-full bg-white hover:bg-gray-50 text-dark-gray font-body-bold text-base py-3 rounded-xl border border-gray-300 transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-white hover:bg-gray-50 text-dark-gray font-body-bold text-base py-3 sm:py-4 rounded-xl border border-gray-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <svg
                           className="w-5 h-5"
