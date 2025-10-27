@@ -109,7 +109,7 @@ export default function PreviewPage() {
           className="relative py-10 lg:py-16 pt-20 md:pt-16"
           style={{ backgroundColor: "#F3EEE8" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
             <div className="max-w-3xl mx-auto space-y-8">
               {/* Back Button */}
               <button
@@ -140,11 +140,11 @@ export default function PreviewPage() {
                 <h2 className="text-2xl font-bold text-dark-gray text-center mb-8">
                   התמונות שלך
                 </h2>
-                <div className="flex flex-nowrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-none mx-auto px-4 overflow-visible">
+                <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
                   {images.map((url, index) => (
                     <div
                       key={index}
-                      className="relative w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] flex-shrink-0 rounded-lg overflow-hidden border-2 border-primary-orange"
+                      className="relative w-full aspect-square max-w-[110px] sm:max-w-[120px] md:max-w-none md:w-[120px] md:h-[120px] flex-shrink-0 mx-auto rounded-lg overflow-hidden border-2 border-primary-orange"
                     >
                       <img
                         src={url}
@@ -175,7 +175,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       placeholder="הכנס את שמך המלא"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right text-sm sm:text-base"
                     />
                   </div>
 
@@ -195,7 +195,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       placeholder="name@example.com"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right text-sm sm:text-base"
                     />
                   </div>
 
@@ -215,9 +215,9 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       placeholder="050-1234567"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right text-sm sm:text-base"
                     />
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 mt-2">
                       כדי שנוכל לעדכן אותך כשהספרון מוכן
                     </p>
                   </div>
@@ -237,7 +237,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       rows={3}
                       placeholder="שתף איתנו איך שמעת עלינו..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent resize-none text-right"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent resize-none text-right text-sm sm:text-base"
                     />
                   </div>
 
@@ -245,7 +245,7 @@ export default function PreviewPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-primary-orange hover:bg-primary-orange/90 disabled:bg-primary-orange/70 disabled:cursor-not-allowed text-white font-body-bold text-lg py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full bg-primary-orange hover:bg-primary-orange/90 disabled:bg-primary-orange/70 disabled:cursor-not-allowed text-white font-body-bold text-base sm:text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? "שולח..." : "יאללה תכינו לי את הספרון 🎉"}
                   </button>

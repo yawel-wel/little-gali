@@ -21,7 +21,7 @@ export default function QAPage() {
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F9F7EE" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
             {/* Section Title */}
             <div className="text-center mb-16">
               <Title highlightText="אותנו" size="lg" className="mb-4">

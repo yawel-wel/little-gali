@@ -147,7 +147,7 @@ export default function UploadPage() {
           className="relative py-10 lg:py-16 pt-20 md:pt-16"
           style={{ backgroundColor: "#F3EEE8" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-20 md:pt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-16 md:pt-16">
             <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
               <div className="text-center md:mt-4">
@@ -196,11 +196,11 @@ export default function UploadPage() {
               {/* Selected Images Display */}
               {selectedImages.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex flex-nowrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-none mx-auto px-4 overflow-visible">
+                  <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
                     {selectedImages.slice(0, 5).map((url, index) => (
                       <div
                         key={index}
-                        className="relative w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0"
+                        className="relative w-full aspect-square max-w-[110px] sm:max-w-[120px] md:max-w-none md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto"
                       >
                         <img
                           src={url}
@@ -222,13 +222,15 @@ export default function UploadPage() {
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       <button
                         onClick={handleNavigateToPreview}
-                        className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer"
+                        className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10"
+                        style={{ touchAction: "manipulation" }}
                       >
                         המשך
                       </button>
                       <button
                         onClick={handleStartOver}
                         className="w-full bg-white hover:bg-gray-50 text-dark-gray font-body-bold text-base py-3 sm:py-4 rounded-xl border border-gray-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                        style={{ touchAction: "manipulation" }}
                       >
                         <svg
                           className="w-5 h-5"
@@ -255,10 +257,10 @@ export default function UploadPage() {
                 <>
                   <div className="text-center">
                     <div
-                      className="w-48 h-48 mx-auto rounded-full bg-white border-2 border-gray-300 flex items-center justify-center hover:border-primary-orange transition-all duration-200 cursor-pointer"
+                      className="w-40 h-40 md:w-48 md:h-48 mx-auto rounded-full bg-white border-2 border-gray-300 flex items-center justify-center hover:border-primary-orange transition-all duration-200 cursor-pointer"
                       onClick={handleUploadClick}
                     >
-                      <Upload className="w-12 h-12 text-primary-orange" />
+                      <Upload className="w-10 h-10 md:w-12 md:h-12 text-primary-orange" />
                     </div>
                   </div>
 
