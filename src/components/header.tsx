@@ -55,22 +55,28 @@ export function Header() {
   // Desktop navigation (left to right: Home, About, etc.)
   const desktopNavigationItems = [
     { name: "צור קשר", href: "/contact" },
-    { name: "השראה", href: "#" },
+    { name: "השראה", href: "/inspiration" },
     { name: "שאלות ותשובות", href: "/qa" },
     { name: "הידעת", href: "#" },
     { name: "אודותינו", href: "/#about" },
-    { name: "בית", href: "/", active: true },
-  ];
+    { name: "בית", href: "/" },
+  ].map((item) => ({
+    ...item,
+    active: pathname === item.href,
+  }));
 
   // Mobile navigation (top to bottom: Home, About, etc.)
   const mobileNavigationItems = [
-    { name: "בית", href: "/", active: true },
+    { name: "בית", href: "/" },
     { name: "אודותינו", href: "/#about" },
     { name: "הידעת", href: "#" },
     { name: "שאלות ותשובות", href: "/qa" },
-    { name: "השראה", href: "#" },
+    { name: "השראה", href: "/inspiration" },
     { name: "צור קשר", href: "/contact" },
-  ];
+  ].map((item) => ({
+    ...item,
+    active: pathname === item.href,
+  }));
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-soft-peach-light">

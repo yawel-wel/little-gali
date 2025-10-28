@@ -441,6 +441,18 @@ export default function Home() {
                         className="w-full h-full object-cover"
                       />
                     </div>
+                    {/* Link to more examples */}
+                    <div className="text-center mt-4">
+                      <p className="text-sm font-body text-medium-gray">
+                        רוצים לראות עוד דוגמאות?{" "}
+                        <a
+                          href="/inspiration"
+                          className="text-primary-orange hover:text-primary-orange/80 underline cursor-pointer transition-colors duration-200"
+                        >
+                          גלו כאן
+                        </a>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
