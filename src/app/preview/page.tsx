@@ -5,11 +5,13 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useUploadImages } from "@/lib/UploadImagesContext";
+import { blobToBase64 } from "@/lib/utils";
 
 export default function PreviewPage() {
   const router = useRouter();
-  const [images, setImages] = useState<string[]>([]);
+  const { images } = useUploadImages();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -22,19 +24,6 @@ export default function PreviewPage() {
     message: string;
   }>({ type: null, message: "" });
 
-  useEffect(() => {
-    // Get images from sessionStorage
-    const storedImages = sessionStorage.getItem("previewImages");
-    if (storedImages) {
-      try {
-        const parsedImages = JSON.parse(storedImages);
-        setImages(parsedImages);
-      } catch (error) {
-        console.error("Error parsing images:", error);
-      }
-    }
-  }, []);
-
   const handleGoBack = () => {
     router.push("/upload");
   };
@@ -45,6 +34,10 @@ export default function PreviewPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
+      // Convert current blob URLs to base64 for sending
+      const base64Images = await Promise.all(
+        images.map((url) => blobToBase64(url))
+      );
       const response = await fetch("/api/order", {
         method: "POST",
         headers: {
@@ -55,7 +48,7 @@ export default function PreviewPage() {
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           hearAbout: formData.hearAbout,
-          images: images,
+          images: base64Images,
         }),
       });
 
@@ -66,10 +59,7 @@ export default function PreviewPage() {
           type: "success",
           message: data.message || "ההזמנה נשלחה בהצלחה!",
         });
-        // Clear session storage after successful submission
-        setTimeout(() => {
-          sessionStorage.removeItem("previewImages");
-        }, 2000);
+        // Nothing to clear now; context will keep state until user navigates away
       } else {
         setSubmitStatus({
           type: "error",

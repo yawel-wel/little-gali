@@ -5,50 +5,18 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { Upload, Info, X } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { blobToBase64 } from "@/lib/utils";
+import { useUploadImages } from "@/lib/UploadImagesContext";
 
 export default function UploadPage() {
   const router = useRouter();
+  const { images, setImages, clearImages } = useUploadImages();
   const [showModal, setShowModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
-  const [selectedImagesCount, setSelectedImagesCount] = useState(0);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImagesCount, setSelectedImagesCount] = useState(images.length);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Restore images from sessionStorage on mount
-  useEffect(() => {
-    const base64ToBlob = (base64String: string): string => {
-      const [metadata, data] = base64String.split(",");
-      const byteCharacters = atob(data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      // Extract mime type from metadata (e.g., "data:image/png;base64")
-      const mimeMatch = metadata.match(/:(.*?);/);
-      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
-      const blob = new Blob([byteArray], { type: mimeType });
-      return URL.createObjectURL(blob);
-    };
-
-    const storedImages = sessionStorage.getItem("previewImages");
-    if (storedImages && selectedImages.length === 0) {
-      try {
-        const parsedImages = JSON.parse(storedImages);
-        const blobUrls = parsedImages.map((base64: string) =>
-          base64ToBlob(base64)
-        );
-        setSelectedImages(blobUrls);
-        setSelectedImagesCount(blobUrls.length);
-      } catch (error) {
-        console.error("Error restoring images:", error);
-      }
-    }
-  }, [selectedImages.length]);
 
   const handleUploadClick = () => {
     // Show modal only if it hasn't been seen before
@@ -87,7 +55,7 @@ export default function UploadPage() {
 
       // Create URLs for preview and add to existing images
       const imageUrls = imageFiles.map((file) => URL.createObjectURL(file));
-      const newImages = [...selectedImages, ...imageUrls];
+      const newImages = [...images, ...imageUrls];
 
       // Only keep first 5 images
       const limitedImages = newImages.slice(0, 5);
@@ -97,41 +65,30 @@ export default function UploadPage() {
         newImages.slice(5).forEach((url) => URL.revokeObjectURL(url));
       }
 
-      setSelectedImages(limitedImages);
+      setImages(limitedImages);
       setSelectedImagesCount(limitedImages.length);
     }
   };
 
   const handleRemoveImage = (index: number) => {
     // Revoke the URL to prevent memory leaks
-    URL.revokeObjectURL(selectedImages[index]);
-    const newImages = selectedImages.filter((_, i) => i !== index);
-    setSelectedImages(newImages);
+    URL.revokeObjectURL(images[index]);
+    const newImages = images.filter((_, i) => i !== index);
+    setImages(newImages);
     setSelectedImagesCount(newImages.length);
   };
 
   const handleStartOver = () => {
     // Revoke all URLs
-    selectedImages.forEach((url) => URL.revokeObjectURL(url));
-    setSelectedImages([]);
+    images.forEach((url) => URL.revokeObjectURL(url));
+    clearImages();
     setSelectedImagesCount(0);
-    // Clear sessionStorage as well
-    sessionStorage.removeItem("previewImages");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   const handleNavigateToPreview = async () => {
-    // Convert blob URLs to base64 and store in sessionStorage
-    const base64Images = await Promise.all(
-      selectedImages.map((url) => blobToBase64(url))
-    );
-
-    // Store images in sessionStorage
-    sessionStorage.setItem("previewImages", JSON.stringify(base64Images));
-
-    // Navigate to preview page
     router.push("/preview");
   };
 
@@ -194,10 +151,10 @@ export default function UploadPage() {
               />
 
               {/* Selected Images Display */}
-              {selectedImages.length > 0 && (
+              {images.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
-                    {selectedImages.slice(0, 5).map((url, index) => (
+                    {images.slice(0, 5).map((url, index) => (
                       <div
                         key={index}
                         className="relative w-full aspect-square max-w-[110px] sm:max-w-[120px] md:max-w-none md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto"
