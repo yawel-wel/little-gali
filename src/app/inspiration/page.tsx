@@ -162,8 +162,8 @@ export default function InspirationPage() {
                       הכירו את שאר המשפחה
                     </h3>
                     <p className="text-base font-body text-medium-gray leading-relaxed">
-                      סבים, סבתות, דודים ודודות – כל מי שאוהב ומכיר את התינוק.
-                      דרך מתוקה לעודד היכרות וחיבור גם מרחוק
+                      סבים, סבתות, דודים, בני דודים – כל מי שאוהב ומכיר את
+                      התינוק. דרך מתוקה לעודד היכרות וחיבור גם מרחוק
                     </p>
                     {/* Switch Button */}
                     <button
@@ -228,8 +228,8 @@ export default function InspirationPage() {
                         <img
                           src={
                             cardStates.card2
-                              ? "/extended-family-color-4.png"
-                              : "/extended-family-4.png"
+                              ? "/extended-family-color-4.jpg"
+                              : "/extended-family-4.jpg"
                           }
                           alt="Extended family illustration"
                           className="w-full h-full object-cover rounded-lg"
