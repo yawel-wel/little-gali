@@ -372,8 +372,20 @@ export default function Home() {
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 {/* Left Column - Text Content */}
                 <div className="order-2 lg:order-1 space-y-6">
+                  {/* New Badge */}
+                  <div className="flex justify-center lg:justify-start">
+                    <div
+                      className="inline-flex items-center justify-center px-4 py-1 rounded-full"
+                      style={{ backgroundColor: "#F8D9C4" }}
+                    >
+                      <span className="text-sm font-body-bold text-black">
+                        חדש
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Title with Highlight */}
-                  <div>
+                  <div className="-mt-3">
                     <Title
                       highlightText="הספרון"
                       className="text-3xl lg:text-4xl text-center lg:text-right"
@@ -382,30 +394,38 @@ export default function Home() {
                     </Title>
                   </div>
 
+                  {/* Subtitle */}
+                  <div className="text-center lg:text-right -mt-1">
+                    <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
+                      ספרון אישי לתינוק – עם תמונות המשפחה שלכם
+                    </h3>
+                  </div>
+
                   {/* Description Text */}
                   <div className="space-y-3 text-center lg:text-right">
                     <p className="font-body text-medium-gray leading-relaxed">
-                      ספרון דו צדדי עם תמונות מועבדות ב AI
+                      ספרון דו־צדדי עם תמונות מעובדות ב־AI שנוצרות מהתמונות
+                      המשפחתיות שלכם.
                       <br />
-                      שנוצרו מהתמונות המיוחדות שלכם: צד אחד שחור לבן ומתאים
-                      לתינוקות בגילאי 0-3 חודשים וצד שני צבעוני.
+                      צד אחד בשחור־לבן לגירוי ראייה לתינוקות בני 0–3 חודשים, וצד
+                      שני צבעוני, להמשך ההתפתחות.
                       <br />
-                      הספרון מתאים במיוחד לזמן בטן, לשידת החתלה ולעגלה.
+                      מושלם לזמן בטן, לשידת ההחתלה או למתנה אישית במיוחד.
                     </p>
                   </div>
 
                   {/* Price */}
                   <div className="flex items-center justify-center lg:justify-start gap-2">
-                    <span className="text-2xl font-heading text-dark-gray">
-                      120 ₪
+                    <span className="text-xl font-heading text-dark-gray">
+                      מחיר השקה: 120 ₪
                     </span>
                   </div>
 
                   {/* CTA Button */}
                   <div className="flex justify-center lg:justify-start pt-2">
                     <a href="/upload">
-                      <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105">
-                        התחל ליצור את הספרון
+                      <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-5 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105">
+                        צרו עכשיו את הספרון האישי שלכם
                       </Button>
                     </a>
                   </div>
