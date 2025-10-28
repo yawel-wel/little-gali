@@ -457,10 +457,10 @@ export default function Home() {
             {/* Section Title */}
             <div className="text-center mb-16">
               <Title highlightText="עובד" size="lg" className="mb-4">
-                איך זה עובד?
+                איך זה עובד – בשלושה צעדים פשוטים
               </Title>
               <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                כל מה שצריך זה כמה תמונות. אנחנו נטפל בכל השאר
+                כל מה שצריך זה כמה תמונות אהובות – אנחנו נדאג לכל השאר
               </p>
             </div>
 
@@ -486,9 +486,9 @@ export default function Home() {
                 <div className="relative inline-block mb-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFEDD4" }}
+                    style={{ backgroundColor: "#FFD8D0" }}
                   >
-                    <span className="text-dark-gray font-heading text-sm font-bold">
+                    <span className="text-dark-gray font-heading text-base font-bold">
                       1
                     </span>
                   </div>
@@ -536,9 +536,9 @@ export default function Home() {
                 <div className="relative inline-block mb-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFEDD4" }}
+                    style={{ backgroundColor: "#FFD8D0" }}
                   >
-                    <span className="text-dark-gray font-heading text-sm font-bold">
+                    <span className="text-dark-gray font-heading text-base font-bold">
                       2
                     </span>
                   </div>
@@ -586,9 +586,9 @@ export default function Home() {
                 <div className="relative inline-block mb-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFEDD4" }}
+                    style={{ backgroundColor: "#FFD8D0" }}
                   >
-                    <span className="text-dark-gray font-heading text-sm font-bold">
+                    <span className="text-dark-gray font-heading text-base font-bold">
                       3
                     </span>
                   </div>
@@ -621,6 +621,165 @@ export default function Home() {
                   התחילו עכשיו
                 </Button>
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Dual Design Section */}
+        <section className="relative bg-white py-8 lg:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-8">
+              <Title
+                highlightText="שלכם"
+                size="sm"
+                className="max-w-2xl mx-auto"
+              >
+                התמונה שלכם – גם לפוקוס הראשון וגם לצבעים הראשונים
+              </Title>
+              <p className="text-base sm:text-lg font-body text-medium-gray leading-relaxed max-w-xl mx-auto mt-4">
+                אנחנו ממירים כל תמונה לשתי גרסאות – אחת בשחור־לבן שמיועדת לגירוי
+                הראייה הראשוני, ואחת צבעונית שמתאימה לשלב שבו התינוק כבר מזהה
+                צבעים.
+              </p>
+            </div>
+
+            {/* Mobile Carousel / Desktop Grid */}
+            <div className="max-w-4xl mx-auto relative mt-16 md:mt-24">
+              {/* Center Image - Overlapping both mobile and desktop */}
+              <div
+                className="absolute top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 md:top-0 md:-translate-y-3/4"
+                style={{ top: "38px" }}
+              >
+                <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                  <img
+                    src="/original-example.jpeg"
+                    alt="Original Example"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* Mobile Carousel */}
+              <div className="md:hidden">
+                <div className="relative overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out pt-12 cursor-grab active:cursor-grabbing"
+                    id="carousel-container"
+                    style={{ touchAction: "pan-x pan-y" }}
+                  >
+                    {/* Slide 1 - Colorful (Left) */}
+                    <div className="w-4/5 flex-shrink-0 pr-4">
+                      <div
+                        className="rounded-2xl p-6 text-center"
+                        style={{ backgroundColor: "#FFF7F2" }}
+                      >
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
+                          צבעוני
+                        </h3>
+                        <p className="text-xs font-body text-medium-gray mb-4">
+                          הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה
+                          מתפתחת והעולם סביבם מתחיל להתמלא בצבעים.
+                        </p>
+                        <div className="w-40 h-40 mx-auto">
+                          <img
+                            src="/colorful-example.png"
+                            alt="Colorful Example"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 2 - Black and White (Right) */}
+                    <div className="w-4/5 flex-shrink-0 pr-4">
+                      <div
+                        className="rounded-2xl p-6 text-center"
+                        style={{ backgroundColor: "#F7F8FA" }}
+                      >
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
+                          שחור לבן
+                        </h3>
+                        <p className="text-xs font-body text-medium-gray mb-4">
+                          הצד הזה מתאים במיוחד לתינוקות מהלידה ועד גיל 3 חודשים
+                          — בדיוק בשלב שבו הם מתחילים לזהות ניגודים חזקים.
+                        </p>
+                        <div className="w-40 h-40 mx-auto">
+                          <img
+                            src="/black-and-white-example.png"
+                            alt="Black and White Example"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="flex justify-center mt-6 space-x-2">
+                  <button
+                    className="cursor-pointer w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer"
+                    data-slide="0"
+                  ></button>
+                  <button
+                    className="cursor-pointer w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer"
+                    data-slide="1"
+                  ></button>
+                </div>
+              </div>
+
+              {/* Desktop Grid */}
+              <div className="hidden md:grid md:grid-cols-2 gap-0 relative">
+                {/* Left Side - Black and White */}
+                <div
+                  className="rounded-l-2xl p-8 text-center relative pt-16"
+                  style={{ backgroundColor: "#F7F8FA" }}
+                >
+                  <h3 className="text-xl font-heading text-dark-gray mb-2">
+                    שחור לבן
+                  </h3>
+                  <p className="text-sm font-body text-medium-gray mb-4">
+                    הצד הזה מתאים במיוחד לתינוקות מהלידה ועד גיל 3 חודשים —
+                    בדיוק בשלב שבו הם מתחילים לזהות ניגודים חזקים.
+                  </p>
+                  <div className="w-56 h-56 mx-auto">
+                    <img
+                      src="/black-and-white-example.png"
+                      alt="Black and White Example"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Side - Colorful */}
+                <div
+                  className="rounded-r-2xl p-8 text-center relative pt-16"
+                  style={{ backgroundColor: "#FFF7F2" }}
+                >
+                  <h3 className="text-xl font-heading text-dark-gray mb-2">
+                    צבעוני
+                  </h3>
+                  <p className="text-sm font-body text-medium-gray mb-4">
+                    הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה מתפתחת
+                    והעולם סביבם מתחיל להתמלא בצבעים.
+                  </p>
+                  <div className="w-56 h-56 mx-auto">
+                    <img
+                      src="/colorful-example.png"
+                      alt="Colorful Example"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Info Text */}
+            <div className="text-center mt-8">
+              <p className="text-sm font-body text-medium-gray">
+                כל ספרון כולל את שני הצדדים – שחור־לבן וצבעוני
+              </p>
             </div>
           </div>
         </section>
@@ -742,142 +901,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Dual Design Section */}
-        <section className="relative bg-white py-8 lg:py-12">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Title */}
-            <div className="text-center mb-8">
-              <Title
-                highlightText="שני"
-                size="sm"
-                className="max-w-2xl mx-auto"
-              >
-                תמונה אחת, שני עיצובים
-              </Title>
-              <p className="text-base sm:text-lg font-body text-medium-gray leading-relaxed max-w-xl mx-auto mt-4">
-                אנחנו נעבד את התמונה וניצור ממנה שתי גרסאות שונות
-              </p>
-            </div>
-
-            {/* Mobile Carousel / Desktop Grid */}
-            <div className="max-w-4xl mx-auto relative mt-16 md:mt-24">
-              {/* Center Image - Overlapping both mobile and desktop */}
-              <div
-                className="absolute top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 md:top-0 md:-translate-y-3/4"
-                style={{ top: "38px" }}
-              >
-                <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  <img
-                    src="/original-example.jpeg"
-                    alt="Original Example"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-
-              {/* Mobile Carousel */}
-              <div className="md:hidden">
-                <div className="relative overflow-hidden">
-                  <div
-                    className="flex transition-transform duration-300 ease-in-out pt-12 cursor-grab active:cursor-grabbing"
-                    id="carousel-container"
-                    style={{ touchAction: "pan-x pan-y" }}
-                  >
-                    {/* Slide 1 - Colorful (Left) */}
-                    <div className="w-4/5 flex-shrink-0 pr-4">
-                      <div className="bg-orange-100 rounded-2xl p-6 text-center">
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          צבעוני
-                        </h3>
-                        <p className="text-xs font-body text-medium-gray mb-4">
-                          מתאים מגיל 3 חודשים ומעלה
-                        </p>
-                        <div className="w-40 h-40 mx-auto">
-                          <img
-                            src="/colorful-example.png"
-                            alt="Colorful Example"
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Slide 2 - Black and White (Right) */}
-                    <div className="w-4/5 flex-shrink-0 pr-4">
-                      <div className="bg-gray-100 rounded-2xl p-6 text-center">
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          שחור לבן
-                        </h3>
-                        <p className="text-xs font-body text-medium-gray mb-4">
-                          מתאים במיוחד מגיל לידה ועד גיל 3 חודשים
-                        </p>
-                        <div className="w-40 h-40 mx-auto">
-                          <img
-                            src="/black-and-white-example.png"
-                            alt="Black and White Example"
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pagination Dots */}
-                <div className="flex justify-center mt-6 space-x-2">
-                  <button
-                    className="cursor-pointer w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer"
-                    data-slide="0"
-                  ></button>
-                  <button
-                    className="cursor-pointer w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer"
-                    data-slide="1"
-                  ></button>
-                </div>
-              </div>
-
-              {/* Desktop Grid */}
-              <div className="hidden md:grid md:grid-cols-2 gap-0 relative">
-                {/* Left Side - Black and White */}
-                <div className="bg-gray-100 rounded-l-2xl p-8 text-center relative pt-16">
-                  <h3 className="text-xl font-heading text-dark-gray mb-2">
-                    שחור לבן
-                  </h3>
-                  <p className="text-sm font-body text-medium-gray mb-4">
-                    מתאים במיוחד מגיל לידה ועד גיל 3 חודשים
-                  </p>
-                  <div className="w-56 h-56 mx-auto">
-                    <img
-                      src="/black-and-white-example.png"
-                      alt="Black and White Example"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                </div>
-
-                {/* Right Side - Colorful */}
-                <div className="bg-orange-100 rounded-r-2xl p-8 text-center relative pt-16">
-                  <h3 className="text-xl font-heading text-dark-gray mb-2">
-                    צבעוני
-                  </h3>
-                  <p className="text-sm font-body text-medium-gray mb-4">
-                    מתאים מגיל 3 חודשים ומעלה
-                  </p>
-                  <div className="w-56 h-56 mx-auto">
-                    <img
-                      src="/colorful-example.png"
-                      alt="Colorful Example"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Meet Us Section */}
-        <section id="about" className="relative bg-[#F3EEE8] pb-6">
+        <section id="about" className="relative bg-white pb-6">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
