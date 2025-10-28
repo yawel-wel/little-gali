@@ -153,11 +153,11 @@ export default function UploadPage() {
               {/* Selected Images Display */}
               {images.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
+                  <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible">
                     {images.slice(0, 5).map((url, index) => (
                       <div
                         key={index}
-                        className="relative w-full aspect-square max-w-[110px] sm:max-w-[120px] md:max-w-none md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto"
+                        className="relative w-full aspect-square max-w-[72px] sm:max-w-[80px] md:max-w-none md:w-[84px] md:h-[84px] lg:w-[96px] lg:h-[96px] flex-shrink-0 mx-auto"
                       >
                         <img
                           src={url}
