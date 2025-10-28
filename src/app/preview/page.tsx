@@ -130,11 +130,11 @@ export default function PreviewPage() {
                 <h2 className="text-2xl font-bold text-dark-gray text-center mb-8">
                   התמונות שלך
                 </h2>
-                <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible">
+                <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
                   {images.map((url, index) => (
                     <div
                       key={index}
-                      className="relative w-full aspect-square max-w-[72px] sm:max-w-[80px] md:max-w-none md:w-[84px] md:h-[84px] lg:w-[96px] lg:h-[96px] flex-shrink-0 mx-auto rounded-lg overflow-hidden border-2 border-primary-orange"
+                      className="relative w-full aspect-square max-w-[72px] sm:max-w-[80px] md:max-w-none md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto rounded-lg overflow-hidden border-2 border-primary-orange"
                     >
                       <img
                         src={url}
