@@ -220,13 +220,13 @@ export default function Home() {
               <div className="order-1 md:order-1 text-center md:text-right space-y-4">
                 {/* Badge */}
                 <div className="flex justify-center md:justify-start">
-                  <div
-                    className="inline-block px-6 py-2 rounded-full"
-                    style={{ backgroundColor: "#F8D9C4" }}
-                  >
-                    <p className="text-sm font-body-bold text-black uppercase tracking-widest">
-                      הדפסה אישית באיכות גבוהה
-                    </p>
+                <div
+                  className="inline-block px-6 py-2 rounded-full"
+                  style={{ backgroundColor: "#F8D9C4" }}
+                >
+                  <p className="text-sm font-body-bold text-black uppercase tracking-widest">
+                    הדפסה אישית באיכות גבוהה
+                  </p>
                   </div>
                 </div>
 
@@ -255,33 +255,37 @@ export default function Home() {
 
                 {/* CTA Button */}
                 <div className="pt-1 flex md:justify-start justify-center">
-                  <motion.div
-                    whileHover={{
-                      scale: 1.01,
-                      y: -1,
-                      transition: { duration: 0.2, ease: easeOwlet },
-                    }}
-                  >
-                    <a href="/upload">
-                      <Button
-                        size="lg"
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
-                      >
-                        צרו ספרון עכשיו
-                      </Button>
-                    </a>
-                  </motion.div>
+                <motion.div
+                  whileHover={{
+                    scale: 1.01,
+                    y: -1,
+                    transition: { duration: 0.2, ease: easeOwlet },
+                  }}
+                >
+                  <a href="/upload">
+                    <Button
+                      size="lg"
+                      className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
+                    >
+                      צרו ספרון עכשיו
+                    </Button>
+                  </a>
+                </motion.div>
                 </div>
               </div>
 
               {/* Image Column */}
               <div className="order-2 md:order-2 w-full h-full">
-                <div className="w-full h-full md:min-h-[360px] lg:min-h-[420px] flex items-center justify-center">
+                <div className="w-full h-full md:min-h-[360px] lg:min-h-[420px] flex items-center justify-center overflow-hidden rounded-xl">
                   <motion.img
                     src="/hero-image.jpg"
                     alt="Baby book example"
                     className="w-full h-auto md:h-full object-contain"
                     style={{ y: prefersReducedMotion ? 0 : heroY }}
+                    initial={prefersReducedMotion ? false : { scale: 1.08 }}
+                    animate={prefersReducedMotion ? undefined : { scale: 1 }}
+                    whileHover={{ scale: 1.06 }}
+                    transition={{ duration: 5, ease: easeOwlet }}
                   />
                 </div>
               </div>
@@ -709,10 +713,12 @@ export default function Home() {
                 style={{ top: "38px" }}
               >
                 <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  <img
+                <motion.img
                     src="/original-example.jpeg"
                     alt="Original Example"
                     className="w-full h-full object-cover"
+                  whileHover={{ scale: 1.06 }}
+                  transition={{ duration: 3.5, ease: easeOwlet }}
                   />
                 </div>
               </div>
@@ -748,11 +754,13 @@ export default function Home() {
                           הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה
                           מתפתחת והעולם סביבם מתחיל להתמלא בצבעים.
                         </p>
-                        <div className="w-40 h-40 mx-auto">
-                          <img
+                        <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
+                          <motion.img
                             src="/colorful-example.png"
                             alt="Colorful Example"
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full h-full object-cover"
+                            whileHover={{ scale: 1.06 }}
+                            transition={{ duration: 3.5, ease: easeOwlet }}
                           />
                         </div>
                       </motion.div>
@@ -781,11 +789,13 @@ export default function Home() {
                           הצד הזה מתאים במיוחד לתינוקות מהלידה ועד גיל 3 חודשים
                           — בדיוק בשלב שבו הם מתחילים לזהות ניגודים חזקים.
                         </p>
-                        <div className="w-40 h-40 mx-auto">
-                          <img
+                        <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
+                          <motion.img
                             src="/black-and-white-example.png"
                             alt="Black and White Example"
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full h-full object-cover"
+                            whileHover={{ scale: 1.06 }}
+                            transition={{ duration: 3.5, ease: easeOwlet }}
                           />
                         </div>
                       </motion.div>
@@ -1083,17 +1093,18 @@ export default function Home() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
-              <div className="relative">
+              <div className="relative rounded-3xl overflow-hidden">
                 <motion.img
-                  src="/about-us.png"
+                  src="/about-us.jpg"
                   alt="About Us"
-                  className="w-full h-auto rounded-3xl"
-                  whileHover={{
-                    scale: 1.02,
-                    y: -2,
-                    boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                    transition: { type: "spring", stiffness: 200, damping: 20 },
-                  }}
+                  className="w-full h-auto"
+                  initial={prefersReducedMotion ? false : { scale: 1 }}
+                  whileInView={
+                    prefersReducedMotion ? undefined : { scale: 1.06 }
+                  }
+                  whileHover={{ scale: 1.06 }}
+                  transition={{ duration: 2.5, ease: easeOwlet }}
+                  viewport={{ once: true, amount: 0.4 }}
                 />
               </div>
 
