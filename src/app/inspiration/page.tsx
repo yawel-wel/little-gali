@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { RotateCw } from "lucide-react";
 
+const easeOwlet = [0.16, 1, 0.3, 1];
+
 export default function InspirationPage() {
+  const prefersReducedMotion = useReducedMotion();
   const [cardStates, setCardStates] = useState({
     card1: false,
     card2: false,
@@ -40,7 +44,12 @@ export default function InspirationPage() {
 
       <main className="flex-1 pt-20">
         {/* Section Title */}
-        <section className="relative py-16 lg:py-24">
+        <motion.section
+          className="relative py-16 lg:py-24"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: easeOwlet }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <Title highlightText="השראה" size="xl" className="mb-4">
@@ -55,7 +64,14 @@ export default function InspirationPage() {
             {/* Cards Section */}
             <div className="max-w-4xl mx-auto space-y-8">
               {/* Card 1: ספרון משפחה גרעינית */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative">
+              <motion.div
+                className="bg-white rounded-2xl shadow-lg overflow-hidden relative"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                animate={
+                  prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                }
+                transition={{ duration: 1.1, ease: easeOwlet }}
+              >
                 {/* Badge */}
                 <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
                   <div
@@ -101,46 +117,104 @@ export default function InspirationPage() {
 
                   {/* Right Section - Illustrations Grid */}
                   <div className="w-full md:w-2/3 p-6 md:p-8">
-                    <div className="grid grid-cols-2 gap-4">
+                    <motion.div
+                      className="grid grid-cols-2 gap-4"
+                      initial={prefersReducedMotion ? false : "hidden"}
+                      animate={prefersReducedMotion ? undefined : "show"}
+                      variants={{
+                        hidden: {},
+                        show: {
+                          transition: { staggerChildren: 0.1 },
+                        },
+                      }}
+                    >
                       {/* Top Left */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={getImageSrc(1, cardStates.card1, "close-family")}
                           alt="Family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Top Right */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={getImageSrc(2, cardStates.card1, "close-family")}
                           alt="Family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Bottom Left */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={getImageSrc(3, cardStates.card1, "close-family")}
                           alt="Family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Bottom Right */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={getImageSrc(4, cardStates.card1, "close-family")}
                           alt="Family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
-                    </div>
+                      </motion.div>
+                    </motion.div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Card 2: הכירו את שאר המשפחה */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative">
+              <motion.div
+                className="bg-white rounded-2xl shadow-lg overflow-hidden relative"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                whileInView={
+                  prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                }
+                transition={{ duration: 1.1, ease: easeOwlet }}
+                viewport={{ once: true, amount: 0.25 }}
+              >
                 {/* Badge */}
                 <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
                   <div
@@ -186,9 +260,30 @@ export default function InspirationPage() {
 
                   {/* Right Section - Illustrations Grid */}
                   <div className="w-full md:w-2/3 p-6 md:p-8">
-                    <div className="grid grid-cols-2 gap-4">
+                    <motion.div
+                      className="grid grid-cols-2 gap-4"
+                      initial={prefersReducedMotion ? false : "hidden"}
+                      whileInView={prefersReducedMotion ? undefined : "show"}
+                      viewport={{ once: true, amount: 0.25 }}
+                      variants={{
+                        hidden: {},
+                        show: {
+                          transition: { staggerChildren: 0.1 },
+                        },
+                      }}
+                    >
                       {/* Top Left */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card2
@@ -198,9 +293,19 @@ export default function InspirationPage() {
                           alt="Extended family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Top Right */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card2
@@ -210,9 +315,19 @@ export default function InspirationPage() {
                           alt="Extended family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Bottom Left */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card2
@@ -222,9 +337,19 @@ export default function InspirationPage() {
                           alt="Extended family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Bottom Right */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card2
@@ -234,14 +359,22 @@ export default function InspirationPage() {
                           alt="Extended family illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
-                    </div>
+                      </motion.div>
+                    </motion.div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Card 3: ספר תינוקי */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative">
+              <motion.div
+                className="bg-white rounded-2xl shadow-lg overflow-hidden relative"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                whileInView={
+                  prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                }
+                transition={{ duration: 1.1, ease: easeOwlet }}
+                viewport={{ once: true, amount: 0.25 }}
+              >
                 {/* Badge */}
                 <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
                   <div
@@ -287,9 +420,30 @@ export default function InspirationPage() {
 
                   {/* Right Section - Illustrations Grid */}
                   <div className="w-full md:w-2/3 p-6 md:p-8">
-                    <div className="grid grid-cols-2 gap-4">
+                    <motion.div
+                      className="grid grid-cols-2 gap-4"
+                      initial={prefersReducedMotion ? false : "hidden"}
+                      whileInView={prefersReducedMotion ? undefined : "show"}
+                      viewport={{ once: true, amount: 0.25 }}
+                      variants={{
+                        hidden: {},
+                        show: {
+                          transition: { staggerChildren: 0.1 },
+                        },
+                      }}
+                    >
                       {/* Top Left */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card3
@@ -299,9 +453,19 @@ export default function InspirationPage() {
                           alt="Baby moments illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Top Right */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card3
@@ -311,9 +475,19 @@ export default function InspirationPage() {
                           alt="Baby moments illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Bottom Left */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card3
@@ -323,9 +497,19 @@ export default function InspirationPage() {
                           alt="Baby moments illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
+                      </motion.div>
                       {/* Bottom Right */}
-                      <div className="aspect-square rounded-lg flex items-center justify-center p-4">
+                      <motion.div
+                        className="aspect-square rounded-lg flex items-center justify-center p-4"
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: { duration: 0.7, ease: easeOwlet },
+                          },
+                        }}
+                      >
                         <img
                           src={
                             cardStates.card3
@@ -335,23 +519,31 @@ export default function InspirationPage() {
                           alt="Baby moments illustration"
                           className="w-full h-full object-cover rounded-lg"
                         />
-                      </div>
-                    </div>
+                      </motion.div>
+                    </motion.div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* CTA Button */}
             <div className="text-center mt-12">
-              <a href="/upload">
-                <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105">
-                  התחילו ליצור את הספרון שלכם
-                </Button>
-              </a>
+              <motion.div
+                whileHover={{
+                  scale: 1.01,
+                  y: -1,
+                  transition: { duration: 0.2, ease: easeOwlet },
+                }}
+              >
+                <a href="/upload">
+                  <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-base transition-all duration-200">
+                    התחילו ליצור את הספרון שלכם
+                  </Button>
+                </a>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       <Footer />

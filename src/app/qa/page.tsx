@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
@@ -10,16 +11,23 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+const easeOwlet = [0.16, 1, 0.3, 1];
+
 export default function QAPage() {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Header />
 
       <main className="flex-1">
         {/* Q&A Section */}
-        <section
+        <motion.section
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F9F7EE" }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.25 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
             {/* Section Title */}
@@ -33,140 +41,270 @@ export default function QAPage() {
             </div>
 
             {/* Accordion */}
-            <div className="max-w-4xl mx-auto">
+            <motion.div
+              className="max-w-4xl mx-auto"
+              initial={prefersReducedMotion ? false : "hidden"}
+              whileInView={prefersReducedMotion ? undefined : "show"}
+              viewport={{ once: true, amount: 0.25 }}
+              variants={{
+                hidden: {},
+                show: {
+                  transition: { staggerChildren: 0.1 },
+                },
+              }}
+            >
               <Accordion type="single" collapsible className="space-y-4">
-                <AccordionItem
-                  value="item-1"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    ממה הספרון עשוי?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    הספרון עשוי מנייר איכותי ועבה שנעבר למינציה.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-1"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      ממה הספרון עשוי?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      הספרון עשוי מנייר איכותי ועבה שנעבר למינציה.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-2"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    כמה תמונות צריך לבחור?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד
-                    השני בצבעוני.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-2"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      כמה תמונות צריך לבחור?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד
+                      השני בצבעוני.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-3"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    מי כדאי שיהיה בספרון?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    אנשים קרובים שתינוקכם יכיר ויתחבר אליהם – הורים, סבים, אחים,
-                    חבר קרוב ואפילו חיית המחמד המשפחתית.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-3"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      מי כדאי שיהיה בספרון?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      אנשים קרובים שתינוקכם יכיר ויתחבר אליהם – הורים, סבים,
+                      אחים, חבר קרוב ואפילו חיית המחמד המשפחתית.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-4"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    איזה תמונה מתאימה?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    תמונה ברורה של הפנים, בלי משקפי שמש ועדיף עם חיוך. לא קרובה
-                    מדי לפנים. הימנעו מתמונות מטושטשות או עם תאורה גרועה.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-4"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      איזה תמונה מתאימה?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      תמונה ברורה של הפנים, בלי משקפי שמש ועדיף עם חיוך. לא
+                      קרובה מדי לפנים. הימנעו מתמונות מטושטשות או עם תאורה
+                      גרועה.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-5"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    אפשר לשים כמה אנשים בתמונה אחת?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    כן, בהחלט! ניתן להעלות תמונה עם שני אנשים במידה והתמונה תהיה
-                    ברורה ומוארת היטב. עדיף להימנע מתמונות עם יותר משני אנשים
-                    מאחר ועיבוד התמונה עלול להיפגע וגם כי תמונה עם יותר מדיי
-                    פרטים אינה מותאמת לתינוקות.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-5"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      אפשר לשים כמה אנשים בתמונה אחת?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      כן, בהחלט! ניתן להעלות תמונה עם שני אנשים במידה והתמונה
+                      תהיה ברורה ומוארת היטב. עדיף להימנע מתמונות עם יותר משני
+                      אנשים מאחר ועיבוד התמונה עלול להיפגע וגם כי תמונה עם יותר
+                      מדיי פרטים אינה מותאמת לתינוקות.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-6"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    האם הרקע משנה?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    לא. הרקע מוסר אוטומטית ומוחלף בלבן.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-6"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      האם הרקע משנה?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      לא. הרקע מוסר אוטומטית ומוחלף בלבן.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-7"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    איך מנקים את הספרון?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם מים.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-7"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      איך מנקים את הספרון?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם
+                      מים.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-8"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    כמה זמן לוקח להכין את הספרון?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    תהליך ההכנה לוקח 7-10 ימי עבודה מרגע קבלת התמונות. אנו
-                    שולחים עדכון על התקדמות ומעדכנים אתכם כשהספרון מוכן לאיסוף
-                    או למשלוח.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-8"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      כמה זמן לוקח להכין את הספרון?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      תהליך ההכנה לוקח 7-10 ימי עבודה מרגע קבלת התמונות. אנו
+                      שולחים עדכון על התקדמות ומעדכנים אתכם כשהספרון מוכן לאיסוף
+                      או למשלוח.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
 
-                <AccordionItem
-                  value="item-9"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 1.1, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    מה אם אני לא מרוצה מהספרון?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם זה לא
-                    המצב שאנחנו מאפשרים להחזיר את הספרון ולקבל את התשלום בחזרה.
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem
+                    value="item-9"
+                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
+                      מה אם אני לא מרוצה מהספרון?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
+                      המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם זה לא
+                      המצב שאנחנו מאפשרים להחזיר את הספרון ולקבל את התשלום
+                      בחזרה.
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
               </Accordion>
-            </div>
+            </motion.div>
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
-              <a href="/contact" className="block">
-                <p className="font-body text-medium-gray mb-6 cursor-pointer hover:text-dark-gray transition-colors">
-                  לא מצאתם את התשובה שחיפשתם?
-                </p>
-                <Button className="cursor-pointer bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
-                  צרו איתנו קשר
-                </Button>
-              </a>
+              <motion.div
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                whileInView={
+                  prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                }
+                transition={{ duration: 1.1, ease: easeOwlet }}
+                viewport={{ once: true, amount: 0.25 }}
+              >
+                <a href="/contact" className="block">
+                  <p className="font-body text-medium-gray mb-6 cursor-pointer hover:text-dark-gray transition-colors">
+                    לא מצאתם את התשובה שחיפשתם?
+                  </p>
+                  <motion.div
+                    whileHover={{
+                      scale: 1.01,
+                      y: -1,
+                      transition: { duration: 0.2, ease: easeOwlet },
+                    }}
+                  >
+                    <Button className="cursor-pointer bg-soft-peach hover:bg-soft-peach/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200">
+                      צרו איתנו קשר
+                    </Button>
+                  </motion.div>
+                </a>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       {/* Footer */}

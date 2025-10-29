@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
+
+const easeOwlet = [0.16, 1, 0.3, 1];
 
 export function Header() {
+  const prefersReducedMotion = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -79,7 +82,12 @@ export function Header() {
   }));
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-soft-peach-light">
+    <motion.header
+      className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-soft-peach-light"
+      initial={prefersReducedMotion ? false : { y: -100 }}
+      animate={prefersReducedMotion ? undefined : { y: 0 }}
+      transition={{ duration: 1.1, ease: easeOwlet }}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4">
           {/* Left Side - CTA Button (Desktop) / Menu Button (Mobile) */}
@@ -174,6 +182,6 @@ export function Header() {
           </Sheet>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

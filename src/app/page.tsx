@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
@@ -21,6 +19,10 @@ import {
 } from "@/components/ui/accordion";
 
 export default function Home() {
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 300], [0, -8]);
+  const easeOwlet: any = [0.16, 1, 0.3, 1];
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
@@ -251,11 +253,14 @@ export default function Home() {
 
               {/* Hero Image with Arrow */}
               <div className="w-full max-w-6xl mx-auto relative">
-                <img
+                <motion.img
                   src="/musicians.png"
                   alt="Baby book example"
                   className="w-full h-auto object-contain"
-                  style={{ maxHeight: "220px" }}
+                  style={{
+                    maxHeight: "220px",
+                    y: prefersReducedMotion ? 0 : heroY,
+                  }}
                 />
 
                 {/* Decorative Arrow - Right side */}
@@ -352,21 +357,39 @@ export default function Home() {
                 </div>
 
                 {/* Centered Button */}
-                <a href="/upload">
-                  <Button
-                    size="lg"
-                    className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 transform hover:scale-105 shadow-lg"
-                  >
-                    צרו ספרון עכשיו
-                  </Button>
-                </a>
+                <motion.div
+                  whileHover={{
+                    scale: 1.01,
+                    y: -1,
+                    transition: { duration: 0.2, ease: easeOwlet },
+                  }}
+                >
+                  <a href="/upload">
+                    <Button
+                      size="lg"
+                      className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
+                    >
+                      צרו ספרון עכשיו
+                    </Button>
+                  </a>
+                </motion.div>
               </div>
             </div>
           </div>
         </section>
 
         {/* הספרון שלנו Section */}
-        <section className="relative bg-white py-12 lg:py-16">
+        <motion.section
+          className="relative bg-white py-12 lg:py-16"
+          initial={
+            prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
+          }
+          whileInView={
+            prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
+          }
+          transition={{ duration: 0.9, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -423,11 +446,19 @@ export default function Home() {
 
                   {/* CTA Button */}
                   <div className="flex justify-center lg:justify-start pt-2">
-                    <a href="/upload">
-                      <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-5 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105">
-                        צרו עכשיו את הספרון האישי שלכם
-                      </Button>
-                    </a>
+                    <motion.div
+                      whileHover={{
+                        scale: 1.01,
+                        y: -1,
+                        transition: { duration: 0.2, ease: easeOwlet },
+                      }}
+                    >
+                      <a href="/upload">
+                        <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-5 rounded-full font-body-bold text-base transition-all duration-200">
+                          צרו עכשיו את הספרון האישי שלכם
+                        </Button>
+                      </a>
+                    </motion.div>
                   </div>
                 </div>
 
@@ -435,10 +466,20 @@ export default function Home() {
                 <div className="order-1 lg:order-2">
                   <div className="w-full">
                     <div className="aspect-square rounded-lg overflow-hidden">
-                      <img
+                      <motion.img
                         src="/carousel-img-1.jpeg"
                         alt="Book showcase"
                         className="w-full h-full object-cover"
+                        initial={prefersReducedMotion ? false : { scale: 1.12 }}
+                        whileInView={
+                          prefersReducedMotion ? undefined : { scale: 1 }
+                        }
+                        transition={{ duration: 2.2, ease: easeOwlet }}
+                        viewport={{ once: true, amount: 0.25 }}
+                        whileHover={{
+                          scale: 1.04,
+                          transition: { duration: 0.5, ease: easeOwlet },
+                        }}
                       />
                     </div>
                     {/* Link to more examples */}
@@ -458,12 +499,20 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* How It Works Section */}
-        <section
+        <motion.section
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
+          initial={
+            prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
+          }
+          whileInView={
+            prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
+          }
+          transition={{ duration: 0.9, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -477,21 +526,52 @@ export default function Home() {
             </div>
 
             {/* Steps Grid */}
-            <div className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0">
+            <motion.div
+              className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0"
+              initial={prefersReducedMotion ? false : "hidden"}
+              whileInView={prefersReducedMotion ? undefined : "show"}
+              viewport={{ once: true, amount: 0.3 }}
+              variants={{
+                hidden: {},
+                show: {
+                  transition: { staggerChildren: 0.2 },
+                },
+              }}
+            >
               {/* Step 1 */}
-              <div className="text-center relative">
+              <motion.div
+                className="text-center relative"
+                variants={{
+                  hidden: { opacity: 0, y: 40 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.2, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Step Image */}
                 <div className="mb-4">
-                  <div
+                  <motion.div
                     className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
                     style={{ backgroundColor: "#F3EEE8" }}
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20,
+                      },
+                    }}
                   >
                     <img
                       src="/upload-images.jpg"
                       alt="Upload Images"
                       className="w-full h-full object-contain"
                     />
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Step Number */}
@@ -526,22 +606,42 @@ export default function Home() {
 
                 {/* Connecting line to next step */}
                 <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
-              </div>
+              </motion.div>
 
               {/* Step 2 */}
-              <div className="text-center relative">
+              <motion.div
+                className="text-center relative"
+                variants={{
+                  hidden: { opacity: 0, y: 40 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.2, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Step Image */}
                 <div className="mb-4">
-                  <div
+                  <motion.div
                     className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
                     style={{ backgroundColor: "#F3EEE8" }}
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20,
+                      },
+                    }}
                   >
                     <img
                       src="/transform-images.png"
                       alt="Transform Images"
                       className="w-full h-full object-contain"
                     />
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Step Number */}
@@ -576,22 +676,42 @@ export default function Home() {
 
                 {/* Connecting line to next step */}
                 <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
-              </div>
+              </motion.div>
 
               {/* Step 3 */}
-              <div className="text-center relative">
+              <motion.div
+                className="text-center relative"
+                variants={{
+                  hidden: { opacity: 0, y: 40 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.2, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Step Image */}
                 <div className="mb-4">
-                  <div
+                  <motion.div
                     className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
                     style={{ backgroundColor: "#F3EEE8" }}
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20,
+                      },
+                    }}
                   >
                     <img
                       src="/print-book.png"
                       alt="Print Book"
                       className="w-full h-full object-contain"
                     />
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Step Number */}
@@ -623,22 +743,36 @@ export default function Home() {
                     עד הבית – מוכן לשימוש ולמזכרת.
                   </p>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
-              <a href="/upload">
-                <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200 transform hover:scale-105">
-                  התחילו עכשיו
-                </Button>
-              </a>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                  y: -2,
+                  transition: { type: "spring", stiffness: 200, damping: 20 },
+                }}
+              >
+                <a href="/upload">
+                  <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200">
+                    התחילו עכשיו
+                  </Button>
+                </a>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Dual Design Section */}
-        <section className="relative bg-white py-8 lg:py-12">
+        <motion.section
+          className="relative bg-white py-8 lg:py-12"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.25 }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-8">
@@ -682,9 +816,19 @@ export default function Home() {
                   >
                     {/* Slide 1 - Colorful (Left) */}
                     <div className="w-4/5 flex-shrink-0 pr-4">
-                      <div
+                      <motion.div
                         className="rounded-2xl p-6 text-center"
                         style={{ backgroundColor: "#FFF7F2" }}
+                        whileHover={{
+                          scale: 1.02,
+                          y: -2,
+                          boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                          transition: {
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 20,
+                          },
+                        }}
                       >
                         <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
                           צבעוני
@@ -700,14 +844,24 @@ export default function Home() {
                             className="w-full h-full object-cover rounded-lg"
                           />
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
 
                     {/* Slide 2 - Black and White (Right) */}
                     <div className="w-4/5 flex-shrink-0 pr-4">
-                      <div
+                      <motion.div
                         className="rounded-2xl p-6 text-center"
                         style={{ backgroundColor: "#F7F8FA" }}
+                        whileHover={{
+                          scale: 1.02,
+                          y: -2,
+                          boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                          transition: {
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 20,
+                          },
+                        }}
                       >
                         <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
                           שחור לבן
@@ -723,7 +877,7 @@ export default function Home() {
                             className="w-full h-full object-cover rounded-lg"
                           />
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
@@ -744,9 +898,15 @@ export default function Home() {
               {/* Desktop Grid */}
               <div className="hidden md:grid md:grid-cols-2 gap-0 relative">
                 {/* Left Side - Black and White */}
-                <div
+                <motion.div
                   className="rounded-l-2xl p-8 text-center relative pt-16"
                   style={{ backgroundColor: "#F7F8FA" }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
+                  whileInView={
+                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                  }
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  viewport={{ once: true, amount: 0.3 }}
                 >
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
                     שחור לבן
@@ -755,19 +915,37 @@ export default function Home() {
                     הצד הזה מתאים במיוחד לתינוקות מהלידה ועד גיל 3 חודשים —
                     בדיוק בשלב שבו הם מתחילים לזהות ניגודים חזקים.
                   </p>
-                  <div className="w-56 h-56 mx-auto">
+                  <motion.div
+                    className="w-56 h-56 mx-auto"
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20,
+                      },
+                    }}
+                  >
                     <img
                       src="/black-and-white-example.png"
                       alt="Black and White Example"
                       className="w-full h-full object-cover rounded-lg"
                     />
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
 
                 {/* Right Side - Colorful */}
-                <div
+                <motion.div
                   className="rounded-r-2xl p-8 text-center relative pt-16"
                   style={{ backgroundColor: "#FFF7F2" }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
+                  whileInView={
+                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                  }
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  viewport={{ once: true, amount: 0.3 }}
                 >
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
                     צבעוני
@@ -776,14 +954,26 @@ export default function Home() {
                     הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה מתפתחת
                     והעולם סביבם מתחיל להתמלא בצבעים.
                   </p>
-                  <div className="w-56 h-56 mx-auto">
+                  <motion.div
+                    className="w-56 h-56 mx-auto"
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20,
+                      },
+                    }}
+                  >
                     <img
                       src="/colorful-example.png"
                       alt="Colorful Example"
                       className="w-full h-full object-cover rounded-lg"
                     />
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
             </div>
 
@@ -794,10 +984,16 @@ export default function Home() {
               </p>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Choose Your Path Section */}
-        <section className="relative bg-[#F3EEE8] py-16 lg:py-24">
+        <motion.section
+          className="relative bg-[#F3EEE8] py-16 lg:py-24"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.25 }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-12">
@@ -807,9 +1003,30 @@ export default function Home() {
             </div>
 
             {/* 4 Column Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto">
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto"
+              initial={prefersReducedMotion ? false : "hidden"}
+              whileInView={prefersReducedMotion ? undefined : "show"}
+              viewport={{ once: true, amount: 0.25 }}
+              variants={{
+                hidden: {},
+                show: {
+                  transition: { staggerChildren: 0.15 },
+                },
+              }}
+            >
               {/* Column 1 */}
-              <div className="text-center">
+              <motion.div
+                className="text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.1, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Image */}
                 <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
                   <img
@@ -829,10 +1046,20 @@ export default function Home() {
                   הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר
                   מימיו הראשונים
                 </p>
-              </div>
+              </motion.div>
 
               {/* Column 2 */}
-              <div className="text-center">
+              <motion.div
+                className="text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.1, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Image */}
                 <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
                   <img
@@ -851,10 +1078,20 @@ export default function Home() {
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק
                 </p>
-              </div>
+              </motion.div>
 
               {/* Column 3 */}
-              <div className="text-center">
+              <motion.div
+                className="text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.1, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Image */}
                 <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
                   <img
@@ -873,10 +1110,20 @@ export default function Home() {
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק
                 </p>
-              </div>
+              </motion.div>
 
               {/* Column 4 */}
-              <div className="text-center">
+              <motion.div
+                className="text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 16 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.1, ease: easeOwlet },
+                  },
+                }}
+              >
                 {/* Image */}
                 <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
                   <img
@@ -895,8 +1142,8 @@ export default function Home() {
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
                   במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה
                 </p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* CTA Section */}
             <div className="text-center mt-16">
@@ -911,18 +1158,31 @@ export default function Home() {
               </p>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Meet Us Section */}
-        <section id="about" className="relative bg-white pb-6">
+        <motion.section
+          id="about"
+          className="relative bg-white pb-6"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
               <div className="relative">
-                <img
+                <motion.img
                   src="/about-us.png"
                   alt="About Us"
                   className="w-full h-auto rounded-3xl"
+                  whileHover={{
+                    scale: 1.02,
+                    y: -2,
+                    boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                    transition: { type: "spring", stiffness: 200, damping: 20 },
+                  }}
                 />
               </div>
 
@@ -965,13 +1225,17 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Q&A Section */}
-        <section
+        <motion.section
           id="qa"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.3 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1042,14 +1306,22 @@ export default function Home() {
 
             {/* Button to navigate to Q&A page */}
             <div className="text-center mt-12">
-              <a href="/qa">
-                <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200 transform hover:scale-105">
-                  לכל השאלות והתשובות
-                </Button>
-              </a>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                  y: -2,
+                  transition: { type: "spring", stiffness: 200, damping: 20 },
+                }}
+              >
+                <a href="/qa">
+                  <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200">
+                    לכל השאלות והתשובות
+                  </Button>
+                </a>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       <Footer />

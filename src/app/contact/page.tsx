@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const easeOwlet = [0.16, 1, 0.3, 1];
+
 export default function ContactPage() {
+  const prefersReducedMotion = useReducedMotion();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -83,15 +87,27 @@ export default function ContactPage() {
       <Header />
 
       <main className="flex-1">
-        <section
+        <motion.section
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F9F7EE" }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.25 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
                 {/* Left Side - Title and Image Placeholder */}
-                <div className="order-1 lg:order-1">
+                <motion.div
+                  className="order-1 lg:order-1"
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                  whileInView={
+                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                  }
+                  transition={{ duration: 1.1, ease: easeOwlet, delay: 0.1 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                >
                   <div className="space-y-6">
                     {/* Title */}
                     <div>
@@ -109,10 +125,18 @@ export default function ContactPage() {
                       />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Right Side - Form */}
-                <div className="order-2 lg:order-2">
+                <motion.div
+                  className="order-2 lg:order-2"
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                  whileInView={
+                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                  }
+                  transition={{ duration: 1.1, ease: easeOwlet, delay: 0.2 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                >
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Name Field */}
                     <div>
@@ -191,20 +215,29 @@ export default function ContactPage() {
 
                     {/* Submit Button */}
                     <div>
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      <motion.div
+                        whileHover={{
+                          scale: 1.01,
+                          y: -1,
+                          transition: { duration: 0.2, ease: easeOwlet },
+                        }}
+                        whileTap={{ scale: 0.99 }}
                       >
-                        {isSubmitting ? "שולח..." : "שלח הודעה"}
-                      </Button>
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSubmitting ? "שולח..." : "שלח הודעה"}
+                        </Button>
+                      </motion.div>
                     </div>
                   </form>
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       <Footer />
