@@ -215,31 +215,34 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden pt-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center space-y-4 pt-16 md:pt-20 lg:pt-24">
-              {/* Welcome text */}
-              <div>
-                <div
-                  className="inline-block px-6 py-2 rounded-full"
-                  style={{ backgroundColor: "#F8D9C4" }}
-                >
-                  <p className="text-sm font-body-bold text-black uppercase tracking-widest">
-                    הדפסה אישית באיכות גבוהה
-                  </p>
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center pt-16 md:pt-20 lg:pt-24 max-w-6xl mx-auto">
+              {/* Text Column */}
+              <div className="order-1 md:order-1 text-center md:text-right space-y-4">
+                {/* Badge */}
+                <div className="flex justify-center md:justify-start">
+                  <div
+                    className="inline-block px-6 py-2 rounded-full"
+                    style={{ backgroundColor: "#F8D9C4" }}
+                  >
+                    <p className="text-sm font-body-bold text-black uppercase tracking-widest">
+                      הדפסה אישית באיכות גבוהה
+                    </p>
+                  </div>
                 </div>
 
-                {/* Main headline - made bigger and added more space */}
+                {/* Title */}
                 <Title
                   highlightText="אישי"
-                  size="2xl"
+                  size="xl"
                   roundedUnderline
-                  className="max-w-4xl mx-auto mt-4"
+                  className="max-w-3xl md:max-w-none mx-auto md:mx-0"
                 >
                   ספרון תינוקות מותאם באופן אישי
                 </Title>
 
                 {/* Description */}
                 <p
-                  className="text-base sm:text-lg md:text-xl font-normal text-medium-gray leading-relaxed max-w-xl mx-auto mt-6 text-center"
+                  className="text-base sm:text-lg md:text-xl font-normal text-medium-gray leading-relaxed max-w-xl mx-auto md:mx-0"
                   style={{
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                     letterSpacing: "0.5px",
@@ -247,132 +250,40 @@ export default function Home() {
                 >
                   ספרון נפתח ודו צדדי עם תמונות של הקרובים ביותר.
                   <br />
-                  מתאים במיוחד לזמן בטן וגילאי 0-3 חודשים.
+                  מתאים במיוחד לזמן בטן וגילאי 0-6 חודשים.
                 </p>
-              </div>
 
-              {/* Hero Image with Arrow */}
-              <div className="w-full max-w-6xl mx-auto relative">
-                <motion.img
-                  src="/musicians.png"
-                  alt="Baby book example"
-                  className="w-full h-auto object-contain"
-                  style={{
-                    maxHeight: "220px",
-                    y: prefersReducedMotion ? 0 : heroY,
-                  }}
-                />
-
-                {/* Decorative Arrow - Right side */}
-                <div className="absolute top-1/2 right-36 transform -translate-y-1/2 hidden lg:block">
-                  {/* Text above arrow */}
-                  <div
-                    className="absolute -top-6 left-26 transform -translate-x-1/2 text-dark-gray text-sm"
-                    style={{
-                      fontFamily: "'Playpen Sans Hebrew', cursive",
-                      fontWeight: "600",
-                      letterSpacing: "0.5px",
-                      transform: "translateX(-50%) rotate(5deg)",
-                      lineHeight: "1.2",
-                      whiteSpace: "nowrap",
+                {/* CTA Button */}
+                <div className="pt-1 flex md:justify-start justify-center">
+                  <motion.div
+                    whileHover={{
+                      scale: 1.01,
+                      y: -1,
+                      transition: { duration: 0.2, ease: easeOwlet },
                     }}
                   >
-                    <div>מותאם לראיית</div>
-                    <div>תינוקות</div>
-                  </div>
-
-                  {/* Arrow */}
-                  <svg
-                    width="100"
-                    height="80"
-                    viewBox="0 0 100 80"
-                    className="text-dark-gray"
-                    style={{ transform: "rotate(180deg)" }}
-                  >
-                    <path
-                      d="M10 40 Q50 20 90 50"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M75 35 L90 50 L75 65"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                    <a href="/upload">
+                      <Button
+                        size="lg"
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
+                      >
+                        צרו ספרון עכשיו
+                      </Button>
+                    </a>
+                  </motion.div>
                 </div>
               </div>
 
-              {/* CTA Button with Arrow */}
-              <div className="pt-1 relative flex items-center justify-center">
-                {/* Hand-drawn Arrow and Text - Left side */}
-                <div className="hidden lg:block absolute right-1/2 mr-20 top-1/2 transform -translate-y-1/2">
-                  {/* Arrow */}
-                  <svg
-                    width="80"
-                    height="40"
-                    viewBox="0 0 80 40"
-                    className="text-dark-gray"
-                    style={{ transform: "rotate(-26deg)" }}
-                  >
-                    <path
-                      d="M8 30 Q25 20 50 25"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M45 15 L50 25 L45 35"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-
-                  {/* Text */}
-                  <div
-                    className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-dark-gray text-sm"
-                    style={{
-                      transform: "translateX(-50%) rotate(-32deg)",
-                      fontFamily: "'Playpen Sans Hebrew', cursive",
-                      fontWeight: "600",
-                      letterSpacing: "0.5px",
-                      lineHeight: "1.2",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <div>זה לוקח</div>
-                    <div>דקה</div>
-                  </div>
+              {/* Image Column */}
+              <div className="order-2 md:order-2 w-full h-full">
+                <div className="w-full h-full md:min-h-[360px] lg:min-h-[420px] flex items-center justify-center">
+                  <motion.img
+                    src="/hero-image.jpg"
+                    alt="Baby book example"
+                    className="w-full h-auto md:h-full object-contain"
+                    style={{ y: prefersReducedMotion ? 0 : heroY }}
+                  />
                 </div>
-
-                {/* Centered Button */}
-                <motion.div
-                  whileHover={{
-                    scale: 1.01,
-                    y: -1,
-                    transition: { duration: 0.2, ease: easeOwlet },
-                  }}
-                >
-                  <a href="/upload">
-                    <Button
-                      size="lg"
-                      className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
-                    >
-                      צרו ספרון עכשיו
-                    </Button>
-                  </a>
-                </motion.div>
               </div>
             </div>
           </div>
@@ -467,7 +378,7 @@ export default function Home() {
                   <div className="w-full">
                     <div className="aspect-square rounded-lg overflow-hidden">
                       <motion.img
-                        src="/carousel-img-1.jpeg"
+                        src="/our-book.jpeg"
                         alt="Book showcase"
                         className="w-full h-full object-cover"
                         initial={prefersReducedMotion ? false : { scale: 1.12 }}
