@@ -157,7 +157,7 @@ export default function UploadPage() {
                     {images.slice(0, 5).map((url, index) => (
                       <div
                         key={index}
-                        className="relative w-full aspect-square max-w-[72px] sm:max-w-[80px] md:max-w-none md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto"
+                        className="relative w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto"
                       >
                         <img
                           src={url}
