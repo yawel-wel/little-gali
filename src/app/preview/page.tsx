@@ -178,7 +178,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       placeholder="הכנס את שמך המלא"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right text-sm sm:text-base"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange text-right text-sm sm:text-base"
                     />
                   </div>
 
@@ -198,7 +198,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       placeholder="name@example.com"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right text-sm sm:text-base"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange text-right text-sm sm:text-base"
                     />
                   </div>
 
@@ -218,7 +218,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       placeholder="050-1234567"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent text-right text-sm sm:text-base"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange text-right text-sm sm:text-base"
                     />
                     <p className="text-xs text-gray-500 mt-2">
                       כדי שנוכל לעדכן אותך כשהספרון מוכן
@@ -240,7 +240,7 @@ export default function PreviewPage() {
                       onChange={handleInputChange}
                       rows={3}
                       placeholder="שתף איתנו איך שמעת עלינו..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent resize-none text-right text-sm sm:text-base"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange resize-none text-right text-sm sm:text-base"
                     />
                   </div>
 
