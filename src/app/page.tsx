@@ -220,13 +220,13 @@ export default function Home() {
               <div className="order-1 md:order-1 text-center md:text-right space-y-4">
                 {/* Badge */}
                 <div className="flex justify-center md:justify-start">
-                <div
-                  className="inline-block px-6 py-2 rounded-full"
-                  style={{ backgroundColor: "#F8D9C4" }}
-                >
-                  <p className="text-sm font-body-bold text-black uppercase tracking-widest">
-                    הדפסה אישית באיכות גבוהה
-                  </p>
+                  <div
+                    className="inline-block px-6 py-2 rounded-full"
+                    style={{ backgroundColor: "#F8D9C4" }}
+                  >
+                    <p className="text-sm font-body-bold text-black uppercase tracking-widest">
+                      הדפסה אישית באיכות גבוהה
+                    </p>
                   </div>
                 </div>
 
@@ -255,22 +255,22 @@ export default function Home() {
 
                 {/* CTA Button */}
                 <div className="pt-1 flex md:justify-start justify-center">
-                <motion.div
-                  whileHover={{
-                    scale: 1.01,
-                    y: -1,
-                    transition: { duration: 0.2, ease: easeOwlet },
-                  }}
-                >
-                  <a href="/upload">
-                    <Button
-                      size="lg"
-                      className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
-                    >
-                      צרו ספרון עכשיו
-                    </Button>
-                  </a>
-                </motion.div>
+                  <motion.div
+                    whileHover={{
+                      scale: 1.01,
+                      y: -1,
+                      transition: { duration: 0.2, ease: easeOwlet },
+                    }}
+                  >
+                    <a href="/upload">
+                      <Button
+                        size="lg"
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
+                      >
+                        צרו ספרון עכשיו
+                      </Button>
+                    </a>
+                  </motion.div>
                 </div>
               </div>
 
@@ -713,12 +713,12 @@ export default function Home() {
                 style={{ top: "38px" }}
               >
                 <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                <motion.img
+                  <motion.img
                     src="/original-example.jpeg"
                     alt="Original Example"
                     className="w-full h-full object-cover"
-                  whileHover={{ scale: 1.06 }}
-                  transition={{ duration: 3.5, ease: easeOwlet }}
+                    whileHover={{ scale: 1.06 }}
+                    transition={{ duration: 3.5, ease: easeOwlet }}
                   />
                 </div>
               </div>
@@ -949,7 +949,7 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
                   <img
                     src="/couple.png"
                     alt="Couple"
@@ -982,7 +982,7 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
                   <img
                     src="/sister.png"
                     alt="Young Sister"
@@ -1014,7 +1014,7 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
                   <img
                     src="/parent-and-son.png"
                     alt="Parent and Son"
@@ -1046,7 +1046,7 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
                   <img
                     src="/dad-and-son.png"
                     alt="Dad and Son"
