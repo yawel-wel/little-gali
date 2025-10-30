@@ -127,7 +127,7 @@ export default function PreviewPage() {
 
               {/* Preview Images */}
               <div className="mt-12">
-                <h2 className="text-2xl font-bold text-dark-gray text-center mb-8">
+                <h2 className="text-2xl font-bold text-dark-gray text-center mb-6">
                   התמונות שלך
                 </h2>
                 <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">

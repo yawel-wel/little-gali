@@ -213,7 +213,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden pt-20">
+        <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden pt-[72px]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center pt-16 md:pt-20 lg:pt-24 max-w-6xl mx-auto">
               {/* Text Column */}
@@ -415,7 +415,7 @@ export default function Home() {
             prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
           }
           transition={{ duration: 0.9, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.1 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -433,7 +433,7 @@ export default function Home() {
               className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0"
               initial={prefersReducedMotion ? false : "hidden"}
               whileInView={prefersReducedMotion ? undefined : "show"}
-              viewport={{ once: true, amount: 0.3 }}
+              viewport={{ once: true, amount: 0.15 }}
               variants={{
                 hidden: {},
                 show: {
@@ -503,7 +503,7 @@ export default function Home() {
                   </h3>
                   <p className="font-body text-medium-gray leading-relaxed">
                     מעלים 5 תמונות אהובות של התינוק או המשפחה – זה לוקח פחות
-                    מדקה, ואפשר גם מהטלפון
+                    מדקה
                   </p>
                 </div>
 
@@ -719,42 +719,7 @@ export default function Home() {
                     id="carousel-container"
                     style={{ touchAction: "pan-x pan-y" }}
                   >
-                    {/* Slide 1 - Colorful (Left) */}
-                    <div className="w-4/5 flex-shrink-0 pr-4">
-                      <motion.div
-                        className="rounded-2xl p-6 text-center"
-                        style={{ backgroundColor: "#FFF7F2" }}
-                        whileHover={{
-                          scale: 1.02,
-                          y: -2,
-                          boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                          transition: {
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 20,
-                          },
-                        }}
-                      >
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          צבעוני
-                        </h3>
-                        <p className="text-xs font-body text-medium-gray mb-4">
-                          הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה
-                          מתפתחת והעולם סביבם מתחיל להתמלא בצבעים.
-                        </p>
-                        <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
-                          <motion.img
-                            src="/colorful-example.png"
-                            alt="Colorful Example"
-                            className="w-full h-full object-cover"
-                            whileHover={{ scale: 1.06 }}
-                            transition={{ duration: 3.5, ease: easeOwlet }}
-                          />
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Slide 2 - Black and White (Right) */}
+                    {/* Slide 1 - Black and White (Left) */}
                     <div className="w-4/5 flex-shrink-0 pr-4">
                       <motion.div
                         className="rounded-2xl p-6 text-center"
@@ -781,6 +746,41 @@ export default function Home() {
                           <motion.img
                             src="/black-and-white-example.png"
                             alt="Black and White Example"
+                            className="w-full h-full object-cover"
+                            whileHover={{ scale: 1.06 }}
+                            transition={{ duration: 3.5, ease: easeOwlet }}
+                          />
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    {/* Slide 2 - Colorful (Right) */}
+                    <div className="w-4/5 flex-shrink-0 pr-4">
+                      <motion.div
+                        className="rounded-2xl p-6 text-center"
+                        style={{ backgroundColor: "#FFF7F2" }}
+                        whileHover={{
+                          scale: 1.02,
+                          y: -2,
+                          boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                          transition: {
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 20,
+                          },
+                        }}
+                      >
+                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
+                          צבעוני
+                        </h3>
+                        <p className="text-xs font-body text-medium-gray mb-4">
+                          הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה
+                          מתפתחת והעולם סביבם מתחיל להתמלא בצבעים.
+                        </p>
+                        <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
+                          <motion.img
+                            src="/colorful-example.png"
+                            alt="Colorful Example"
                             className="w-full h-full object-cover"
                             whileHover={{ scale: 1.06 }}
                             transition={{ duration: 3.5, ease: easeOwlet }}
@@ -1059,19 +1059,6 @@ export default function Home() {
                 </p>
               </motion.div>
             </motion.div>
-
-            {/* CTA Section */}
-            <div className="text-center mt-16">
-              <p className="font-body text-medium-gray text-sm">
-                מעוניינים לדעת עוד על ראיית תינוקות?{" "}
-                <a
-                  href="#"
-                  className="text-[#F4A261] hover:text-[#F4A261]/80 underline cursor-pointer transition-colors duration-200"
-                >
-                  גלו כאן
-                </a>
-              </p>
-            </div>
           </div>
         </motion.section>
 

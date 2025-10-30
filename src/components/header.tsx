@@ -60,7 +60,6 @@ export function Header() {
     { name: "צור קשר", href: "/contact" },
     { name: "השראה", href: "/inspiration" },
     { name: "שאלות ותשובות", href: "/qa" },
-    { name: "הידעת", href: "#" },
     { name: "אודותינו", href: "/#about" },
     { name: "בית", href: "/" },
   ].map((item) => ({
@@ -72,7 +71,6 @@ export function Header() {
   const mobileNavigationItems = [
     { name: "בית", href: "/" },
     { name: "אודותינו", href: "/#about" },
-    { name: "הידעת", href: "#" },
     { name: "שאלות ותשובות", href: "/qa" },
     { name: "השראה", href: "/inspiration" },
     { name: "צור קשר", href: "/contact" },
@@ -175,6 +173,14 @@ export function Header() {
                         {item.name}
                       </a>
                     ))}
+                    {/* Mobile CTA Button */}
+                    <div className="mt-6 pr-0">
+                      <a href="/upload">
+                        <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
+                          צרו ספרון
+                        </Button>
+                      </a>
+                    </div>
                   </div>
                 </nav>
               </div>
