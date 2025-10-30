@@ -144,6 +144,19 @@ export default function PreviewPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Order Details */}
+                <div className="mt-6 text-center space-y-1">
+                  <p className="text-base md:text-lg text-dark-gray font-body">
+                    מחיר - 120 ₪
+                  </p>
+                  <p className="text-base md:text-lg text-dark-gray font-body">
+                    זמן אספקה - עד 14 ימי עסקים
+                  </p>
+                  <p className="text-sm md:text-base text-medium-gray font-body">
+                    הודעה תשלח כשהספרון מוכן בשביל תיאום לאיסוף
+                  </p>
+                </div>
               </div>
 
               {/* Contact Form */}
