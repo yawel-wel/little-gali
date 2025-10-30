@@ -309,7 +309,7 @@ export default function Home() {
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 {/* Left Column - Text Content */}
-                <div className="order-2 lg:order-1 space-y-6">
+                <div className="order-1 lg:order-1 space-y-6">
                   {/* New Badge */}
                   <div className="flex justify-center lg:justify-start">
                     <div
@@ -378,7 +378,7 @@ export default function Home() {
                 </div>
 
                 {/* Right Column - Single Image */}
-                <div className="order-1 lg:order-2">
+                <div className="order-2 lg:order-2">
                   <div className="w-full">
                     <div className="aspect-square rounded-lg overflow-hidden">
                       <motion.img
