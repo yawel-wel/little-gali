@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useUploadImages } from "@/lib/UploadImagesContext";
-import { blobToBase64 } from "@/lib/utils";
+import { blobToBase64, compressImage } from "@/lib/utils";
 
 export default function PreviewPage() {
   const router = useRouter();
@@ -41,20 +41,16 @@ export default function PreviewPage() {
       multipart.append("phoneNumber", formData.phoneNumber);
       multipart.append("hearAbout", formData.hearAbout);
 
-      // Append image blobs reconstructed from blob URLs
+      // Compress and append images to reduce payload size
       // Limit to first 5 images (server enforces as well)
       const limitedImages = images.slice(0, 5);
-      for (let i = 0; i < limitedImages.length; i++) {
-        const url = limitedImages[i];
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const filename = `image-${i + 1}.${(
-          blob.type.split("/")[1] || "jpg"
-        ).replace("jpeg", "jpg")}`;
-        multipart.append(
-          "images",
-          new File([blob], filename, { type: blob.type || "image/jpeg" })
-        );
+      const compressedImages = await Promise.all(
+        limitedImages.map((url) => compressImage(url, 1920, 1920, 0.85))
+      );
+
+      for (let i = 0; i < compressedImages.length; i++) {
+        const file = compressedImages[i];
+        multipart.append("images", file);
       }
 
       const response = await fetch("/api/order", {

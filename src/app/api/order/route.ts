@@ -88,6 +88,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate file sizes (max 2MB per file, 10MB total)
+    const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB
+    let totalSize = 0;
+
+    for (const file of imageFiles) {
+      const fileSize = file.size;
+      if (fileSize > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `תמונה גדולה מדי. גודל מקסימלי לכל תמונה: 2MB` },
+          { status: 413 }
+        );
+      }
+      totalSize += fileSize;
+    }
+
+    if (totalSize > MAX_TOTAL_SIZE) {
+      return NextResponse.json(
+        { error: `התמונות גדולות מדי. גודל מקסימלי כולל: 10MB` },
+        { status: 413 }
+      );
+    }
+
     // Prepare attachments from uploaded files
     const attachments = await Promise.all(
       imageFiles.slice(0, 5).map(async (file: File, index: number) => {
