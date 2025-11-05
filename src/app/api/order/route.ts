@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
+export const runtime = "nodejs";
+
 // Initialize Resend only when API key is available
 const getResend = () => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -59,17 +61,20 @@ function base64ToBuffer(base64String: string): {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { fullName, email, phoneNumber, hearAbout, images } = body;
+    const form = await request.formData();
+    const fullName = String(form.get("fullName") || "");
+    const email = String(form.get("email") || "");
+    const phoneNumber = String(form.get("phoneNumber") || "");
+    const hearAbout = String(form.get("hearAbout") || "");
+    const imageFiles = form.getAll("images") as unknown as File[];
 
     // Validate input
     if (
       !fullName ||
       !email ||
       !phoneNumber ||
-      !images ||
-      !Array.isArray(images) ||
-      images.length === 0
+      !imageFiles ||
+      imageFiles.length === 0
     ) {
       return NextResponse.json({ error: "שדות חובה חסרים" }, { status: 400 });
     }
@@ -83,18 +88,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prepare attachments from base64 images
-    const attachments = images
-      .slice(0, 5)
-      .map((base64Image: string, index: number) => {
-        const { data, filename } = base64ToBuffer(base64Image);
+    // Prepare attachments from uploaded files
+    const attachments = await Promise.all(
+      imageFiles.slice(0, 5).map(async (file: File, index: number) => {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const type = file.type || "image/jpeg";
+        const inferredExt = type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+        const originalName = (file as any).name as string | undefined;
+        const filename =
+          originalName && originalName.includes(".")
+            ? originalName
+            : `image-${index + 1}-${Date.now()}.${inferredExt}`;
         return {
-          filename: `image-${index + 1}-${Date.now()}.${
-            filename.split(".")[1]
-          }`,
-          content: data,
+          filename,
+          content: buffer,
         };
-      });
+      })
+    );
 
     // Send email using Resend
     const resend = getResend();
@@ -134,7 +145,7 @@ export async function POST(request: NextRequest) {
 
           <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #E5543D; margin-top: 0;">התמונות שנבחרו (${
-              images.length
+              imageFiles.length
             } מתוך 5):</h3>
             <p style="color: #666; margin-bottom: 15px;">התמונות מצורפות להודעה - ניתן להוריד אותן מהקובץ המצורף</p>
           </div>
@@ -150,7 +161,7 @@ export async function POST(request: NextRequest) {
 
 ${hearAbout ? `הערות:\n${hearAbout}\n` : ""}
 
-התמונות שנבחרו (${images.length} מתוך 5) - מצורפות להודעה
+התמונות שנבחרו (${imageFiles.length} מתוך 5) - מצורפות להודעה
       `,
       attachments,
     });

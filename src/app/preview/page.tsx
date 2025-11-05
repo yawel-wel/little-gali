@@ -34,22 +34,32 @@ export default function PreviewPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      // Convert current blob URLs to base64 for sending
-      const base64Images = await Promise.all(
-        images.map((url) => blobToBase64(url))
-      );
+      // Build multipart form data to avoid oversized JSON payloads
+      const multipart = new FormData();
+      multipart.append("fullName", formData.fullName);
+      multipart.append("email", formData.email);
+      multipart.append("phoneNumber", formData.phoneNumber);
+      multipart.append("hearAbout", formData.hearAbout);
+
+      // Append image blobs reconstructed from blob URLs
+      // Limit to first 5 images (server enforces as well)
+      const limitedImages = images.slice(0, 5);
+      for (let i = 0; i < limitedImages.length; i++) {
+        const url = limitedImages[i];
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const filename = `image-${i + 1}.${(
+          blob.type.split("/")[1] || "jpg"
+        ).replace("jpeg", "jpg")}`;
+        multipart.append(
+          "images",
+          new File([blob], filename, { type: blob.type || "image/jpeg" })
+        );
+      }
+
       const response = await fetch("/api/order", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          hearAbout: formData.hearAbout,
-          images: base64Images,
-        }),
+        body: multipart,
       });
 
       const data = await response.json();
