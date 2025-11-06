@@ -34,43 +34,77 @@ export default function PreviewPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      // Build multipart form data to avoid oversized JSON payloads
-      const multipart = new FormData();
-      multipart.append("fullName", formData.fullName);
-      multipart.append("email", formData.email);
-      multipart.append("phoneNumber", formData.phoneNumber);
-      multipart.append("hearAbout", formData.hearAbout);
+      // Validate form data
+      if (!formData.fullName || !formData.email || !formData.phoneNumber) {
+        setSubmitStatus({
+          type: "error",
+          message: "אנא מלא את כל השדות החובה",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Compress and append images to reduce payload size
-      // Limit to first 5 images (server enforces as well)
+      // Validate images
+      if (!images || images.length !== 5) {
+        setSubmitStatus({
+          type: "error",
+          message: "אנא בחר בדיוק 5 תמונות",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Compress images first, then upload to Cloudinary CDN
+      // Limit to first 5 images
       const limitedImages = images.slice(0, 5);
       const compressedImages = await Promise.all(
         limitedImages.map((url) => compressImage(url, 1920, 1920, 0.85))
       );
 
-      for (let i = 0; i < compressedImages.length; i++) {
-        const file = compressedImages[i];
-        multipart.append("images", file);
+      // Upload compressed images to Cloudinary
+      const uploadFormData = new FormData();
+      compressedImages.forEach((file) => {
+        uploadFormData.append("images", file);
+      });
+
+      const uploadResponse = await fetch("/api/upload-images", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        const uploadError = await uploadResponse.json();
+        throw new Error(uploadError.error || "Failed to upload images");
       }
 
-      const response = await fetch("/api/order", {
+      const uploadData = await uploadResponse.json();
+      const imageUrls = uploadData.imageUrls;
+
+      // Create Shopify checkout
+      const response = await fetch("/api/shopify/checkout", {
         method: "POST",
-        body: multipart,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageUrls: imageUrls,
+          quantity: 1,
+          // Optional: add bookId if you have one
+          // bookId: generateBookId(),
+        }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        setSubmitStatus({
-          type: "success",
-          message: data.message || "ההזמנה נשלחה בהצלחה!",
-        });
-        // Nothing to clear now; context will keep state until user navigates away
+      if (response.ok && data.checkoutUrl) {
+        // Redirect to Shopify checkout
+        window.location.href = data.checkoutUrl;
       } else {
         setSubmitStatus({
           type: "error",
-          message: data.error || "שגיאה בשליחת ההזמנה. אנא נסה שוב.",
+          message: data.error || "שגיאה ביצירת תהליך התשלום. אנא נסה שוב.",
         });
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Submit error:", error);
@@ -78,7 +112,6 @@ export default function PreviewPage() {
         type: "error",
         message: "שגיאה בשרת. אנא נסה שוב מאוחר יותר.",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
