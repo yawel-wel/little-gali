@@ -32,6 +32,10 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className="overflow-x-hidden">
       <head>
+        <meta
+          name="google-site-verification"
+          content="Fy9eAB6H8N1DkO006a1eYCRc99aOjEioAiBJDNLRZZ4"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
