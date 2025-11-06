@@ -3,27 +3,37 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { blobToBase64, compressImage } from "@/lib/utils";
 
 export default function PreviewPage() {
   const router = useRouter();
   const { images } = useUploadImages();
-  const [formData, setFormData] = useState({
-    phoneNumber: "",
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
 
+  // Redirect to upload page if images are missing (e.g., user navigated back from checkout)
+  useEffect(() => {
+    if (!images || images.length === 0) {
+      router.push("/upload");
+    }
+  }, [images, router]);
+
   const handleGoBack = () => {
     router.push("/upload");
   };
+
+  // Don't render content if images are missing (redirecting)
+  if (!images || images.length === 0) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,16 +41,6 @@ export default function PreviewPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      // Validate phone number only (other fields collected by Shopify)
-      if (!formData.phoneNumber) {
-        setSubmitStatus({
-          type: "error",
-          message: "אנא הזן מספר טלפון",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
       // Validate images
       if (!images || images.length !== 5) {
         setSubmitStatus({
@@ -86,7 +86,6 @@ export default function PreviewPage() {
         body: JSON.stringify({
           imageUrls: imageUrls,
           quantity: 1,
-          phoneNumber: formData.phoneNumber,
           // Optional: add bookId if you have one
           // bookId: generateBookId(),
         }),
@@ -114,16 +113,6 @@ export default function PreviewPage() {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   return (
     <div
       className="min-h-screen overflow-x-hidden"
@@ -141,7 +130,7 @@ export default function PreviewPage() {
               {/* Back Button */}
               <button
                 onClick={handleGoBack}
-                className="flex items-center gap-2 text-dark-gray hover:text-primary-orange transition-colors mb-6 cursor-pointer"
+                className="flex items-center gap-2 text-dark-gray hover:text-primary-orange transition-all mb-6 cursor-pointer"
               >
                 <ArrowRight className="w-5 h-5" />
                 <span className="font-body-bold">חזרה לעריכת תמונות</span>
@@ -196,39 +185,20 @@ export default function PreviewPage() {
                 </div>
               </div>
 
-              {/* Phone Number + Continue to Checkout */}
-              <div className="mt-12 bg-white rounded-2xl shadow-lg p-8">
+              {/* Continue to Checkout */}
+              <div className="mt-12">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Phone Number Field */}
-                  <div>
-                    <label
-                      htmlFor="phoneNumber"
-                      className="block font-body-bold text-dark-gray mb-2"
-                    >
-                      מספר טלפון *
-                    </label>
-                    <input
-                      type="tel"
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                      placeholder="050-1234567"
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange text-right text-sm sm:text-base"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      כדי שנוכל לעדכן אותך כשהספרון מוכן
-                    </p>
-                  </div>
-
                   {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-primary-orange hover:bg-primary-orange/90 disabled:bg-primary-orange/70 disabled:cursor-not-allowed text-white font-body-bold text-base sm:text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2"
+                    className="bg-primary-orange hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-body-bold text-lg py-3 sm:py-4 px-8 rounded-xl transition-opacity cursor-pointer flex items-center justify-center gap-2 mx-auto min-w-[180px]"
                   >
-                    {isSubmitting ? "מעבד..." : "המשך לתשלום 🎉"}
+                    {isSubmitting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "המשך לתשלום 🎉"
+                    )}
                   </button>
 
                   {/* Status Message */}

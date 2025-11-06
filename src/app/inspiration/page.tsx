@@ -100,7 +100,7 @@ export default function InspirationPage() {
                     <button
                       type="button"
                       onClick={() => toggleCard("card1")}
-                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-colors duration-200 cursor-pointer"
+                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer"
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card1
@@ -243,7 +243,7 @@ export default function InspirationPage() {
                     <button
                       type="button"
                       onClick={() => toggleCard("card2")}
-                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-colors duration-200 cursor-pointer"
+                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer"
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card2
@@ -403,7 +403,7 @@ export default function InspirationPage() {
                     <button
                       type="button"
                       onClick={() => toggleCard("card3")}
-                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-colors duration-200 cursor-pointer"
+                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer"
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card3

@@ -166,7 +166,7 @@ export default function UploadPage() {
                         />
                         <button
                           onClick={() => handleRemoveImage(index)}
-                          className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
+                          className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -179,14 +179,14 @@ export default function UploadPage() {
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       <button
                         onClick={handleNavigateToPreview}
-                        className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10"
+                        className="w-full bg-primary-orange hover:bg-primary-orange/90 hover:opacity-90 text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10"
                         style={{ touchAction: "manipulation" }}
                       >
                         המשך
                       </button>
                       <button
                         onClick={handleStartOver}
-                        className="w-full bg-white hover:bg-gray-50 text-dark-gray font-body-bold text-base py-3 sm:py-4 rounded-xl border border-gray-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full bg-white hover:bg-gray-50 text-dark-gray font-body-bold text-base py-3 sm:py-4 rounded-xl border border-gray-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
                         style={{ touchAction: "manipulation" }}
                       >
                         <svg

@@ -794,11 +794,11 @@ export default function Home() {
                 {/* Pagination Dots */}
                 <div className="flex justify-center mt-6 space-x-2">
                   <button
-                    className="cursor-pointer w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer"
+                    className="cursor-pointer w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200"
                     data-slide="0"
                   ></button>
                   <button
-                    className="cursor-pointer w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer"
+                    className="cursor-pointer w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200"
                     data-slide="1"
                   ></button>
                 </div>
