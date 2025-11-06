@@ -11,7 +11,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log("Request body received:", JSON.stringify(body, null, 2));
 
-    const { imageUrls, quantity = 1, bookId } = body;
+    const {
+      imageUrls,
+      quantity = 1,
+      bookId,
+      phoneNumber,
+    } = body as {
+      imageUrls: string[];
+      quantity?: number;
+      bookId?: string;
+      phoneNumber?: string;
+    };
 
     if (!imageUrls || imageUrls.length !== 5) {
       console.error("Invalid request:", {
@@ -120,6 +130,14 @@ export async function POST(request: NextRequest) {
                 {
                   key: "book_id",
                   value: bookId,
+                },
+              ]
+            : []),
+          ...(phoneNumber
+            ? [
+                {
+                  key: "customer_phone",
+                  value: phoneNumber,
                 },
               ]
             : []),

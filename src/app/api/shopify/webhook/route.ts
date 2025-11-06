@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         : webhookData.billing_address?.name || "לקוח";
     const customerEmail =
       webhookData.customer?.email || webhookData.contact_email;
-    const customerPhone =
+    let customerPhone =
       webhookData.customer?.phone || webhookData.billing_address?.phone;
 
     console.log("Customer:", customerName, customerEmail, customerPhone);
@@ -125,19 +125,23 @@ export async function POST(request: NextRequest) {
       for (const attr of webhookData.note_attributes) {
         if (attr.name === "book_id") {
           bookId = attr.value;
+        } else if (attr.name === "customer_phone" && !customerPhone) {
+          customerPhone = attr.value;
         } else if (attr.name && attr.name.startsWith("image_")) {
           imageUrls.push(attr.value);
         }
       }
     }
 
-    // Also check cart attributes if available
+    // Also check cart attributes (line item properties) if available
     if (webhookData.line_items && webhookData.line_items.length > 0) {
       const lineItem = webhookData.line_items[0];
       if (lineItem.properties && Array.isArray(lineItem.properties)) {
         for (const prop of lineItem.properties) {
           if (prop.name === "book_id") {
             bookId = prop.value;
+          } else if (prop.name === "customer_phone" && !customerPhone) {
+            customerPhone = prop.value;
           } else if (prop.name && prop.name.startsWith("image_")) {
             imageUrls.push(prop.value);
           }

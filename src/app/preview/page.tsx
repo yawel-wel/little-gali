@@ -13,10 +13,7 @@ export default function PreviewPage() {
   const router = useRouter();
   const { images } = useUploadImages();
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
     phoneNumber: "",
-    hearAbout: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -34,11 +31,11 @@ export default function PreviewPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      // Validate form data
-      if (!formData.fullName || !formData.email || !formData.phoneNumber) {
+      // Validate phone number only (other fields collected by Shopify)
+      if (!formData.phoneNumber) {
         setSubmitStatus({
           type: "error",
-          message: "אנא מלא את כל השדות החובה",
+          message: "אנא הזן מספר טלפון",
         });
         setIsSubmitting(false);
         return;
@@ -89,6 +86,7 @@ export default function PreviewPage() {
         body: JSON.stringify({
           imageUrls: imageUrls,
           quantity: 1,
+          phoneNumber: formData.phoneNumber,
           // Optional: add bookId if you have one
           // bookId: generateBookId(),
         }),
@@ -198,49 +196,9 @@ export default function PreviewPage() {
                 </div>
               </div>
 
-              {/* Contact Form */}
+              {/* Phone Number + Continue to Checkout */}
               <div className="mt-12 bg-white rounded-2xl shadow-lg p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Full Name Field */}
-                  <div>
-                    <label
-                      htmlFor="fullName"
-                      className="block font-body-bold text-dark-gray mb-2"
-                    >
-                      שם מלא *
-                    </label>
-                    <input
-                      type="text"
-                      id="fullName"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="הכנס את שמך המלא"
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange text-right text-sm sm:text-base"
-                    />
-                  </div>
-
-                  {/* Email Field */}
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block font-body-bold text-dark-gray mb-2"
-                    >
-                      אימייל *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="name@example.com"
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange text-right text-sm sm:text-base"
-                    />
-                  </div>
-
                   {/* Phone Number Field */}
                   <div>
                     <label
@@ -264,32 +222,13 @@ export default function PreviewPage() {
                     </p>
                   </div>
 
-                  {/* How did you hear about us - Textarea */}
-                  <div>
-                    <label
-                      htmlFor="hearAbout"
-                      className="block font-body-bold text-dark-gray mb-2"
-                    >
-                      איך שמעת עלינו
-                    </label>
-                    <textarea
-                      id="hearAbout"
-                      name="hearAbout"
-                      value={formData.hearAbout}
-                      onChange={handleInputChange}
-                      rows={3}
-                      placeholder="שתף איתנו איך שמעת עלינו..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange resize-none text-right text-sm sm:text-base"
-                    />
-                  </div>
-
                   {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-primary-orange hover:bg-primary-orange/90 disabled:bg-primary-orange/70 disabled:cursor-not-allowed text-white font-body-bold text-base sm:text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2"
                   >
-                    {isSubmitting ? "שולח..." : "יאללה תכינו לי את הספרון 🎉"}
+                    {isSubmitting ? "מעבד..." : "המשך לתשלום 🎉"}
                   </button>
 
                   {/* Status Message */}
