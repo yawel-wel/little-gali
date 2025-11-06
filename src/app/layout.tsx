@@ -17,7 +17,8 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata: Metadata = {
   title: "Little Gali",
-  description: "Welcome to Little Gali - your beautiful Next.js app",
+  description:
+    "מתנה אישית וקסומה להולדת התינוק – ספרון בעיצוב ייחודי עם תמונות של המשפחה, צד שחור-לבן וצד צבעוני. מזכרת מרגשת לשנים הראשונות של החיים.",
   icons: {
     icon: "/favicon.png",
   },
