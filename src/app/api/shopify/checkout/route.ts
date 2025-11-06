@@ -86,7 +86,8 @@ export async function POST(request: NextRequest) {
 
     // Validate that imageUrls are URLs (not base64)
     // With Cloudinary, we should receive URLs, not base64 data URLs
-    const invalidUrls = imageUrls.filter(
+    const urls = imageUrls as string[];
+    const invalidUrls = urls.filter(
       (url: string) => !url.startsWith("http://") && !url.startsWith("https://")
     );
 
@@ -124,23 +125,23 @@ export async function POST(request: NextRequest) {
             : []),
           {
             key: "image_1",
-            value: imageUrls[0],
+            value: urls[0],
           },
           {
             key: "image_2",
-            value: imageUrls[1],
+            value: urls[1],
           },
           {
             key: "image_3",
-            value: imageUrls[2],
+            value: urls[2],
           },
           {
             key: "image_4",
-            value: imageUrls[3],
+            value: urls[3],
           },
           {
             key: "image_5",
-            value: imageUrls[4],
+            value: urls[4],
           },
         ],
         note: `ספר מותאם אישית${bookId ? ` - ${bookId}` : ""}
