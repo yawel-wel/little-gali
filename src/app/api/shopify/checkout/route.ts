@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Validate that imageUrls are URLs (not base64)
     // With Cloudinary, we should receive URLs, not base64 data URLs
     const invalidUrls = imageUrls.filter(
-      (url) => !url.startsWith("http://") && !url.startsWith("https://")
+      (url: string) => !url.startsWith("http://") && !url.startsWith("https://")
     );
 
     if (invalidUrls.length > 0) {
