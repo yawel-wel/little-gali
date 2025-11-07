@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { UploadImagesProvider } from "@/lib/UploadImagesContext";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -55,6 +56,7 @@ export default function RootLayout({
         className={`${nunito.variable} ${nunitoSans.variable} antialiased overflow-x-hidden`}
       >
         <UploadImagesProvider>{children}</UploadImagesProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
