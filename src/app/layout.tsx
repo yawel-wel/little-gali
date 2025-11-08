@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { Nunito, Nunito_Sans } from "next/font/google";
+import { Assistant, Heebo } from "next/font/google";
 import "./globals.css";
 import { UploadImagesProvider } from "@/lib/UploadImagesContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const nunito = Nunito({
-  variable: "--font-nunito",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+const heebo = Heebo({
+  variable: "--font-heebo",
+  subsets: ["latin", "hebrew"],
+  weight: ["700"],
 });
 
-const nunitoSans = Nunito_Sans({
-  variable: "--font-nunito-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+const assistant = Assistant({
+  variable: "--font-assistant",
+  subsets: ["latin", "hebrew"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -37,23 +37,9 @@ export default function RootLayout({
           name="google-site-verification"
           content="Fy9eAB6H8N1DkO006a1eYCRc99aOjEioAiBJDNLRZZ4"
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin=""
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Hebrew:wght@100..800&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body
-        className={`${nunito.variable} ${nunitoSans.variable} antialiased overflow-x-hidden`}
+        className={`${heebo.variable} ${assistant.variable} antialiased overflow-x-hidden`}
       >
         <UploadImagesProvider>{children}</UploadImagesProvider>
         <SpeedInsights />

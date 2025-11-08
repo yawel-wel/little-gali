@@ -241,13 +241,7 @@ export default function Home() {
                 </Title>
 
                 {/* Description */}
-                <p
-                  className="text-base sm:text-lg md:text-xl font-normal text-medium-gray leading-relaxed max-w-xl mx-auto md:mx-0"
-                  style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-                    letterSpacing: "0.5px",
-                  }}
-                >
+                <p className="text-base sm:text-lg md:text-xl font-body text-medium-gray leading-relaxed max-w-xl mx-auto md:mx-0">
                   ספרון נפתח ודו צדדי עם תמונות של הקרובים ביותר.
                   <br />
                   מתאים במיוחד לזמן בטן וגילאי 0-6 חודשים.
@@ -265,7 +259,7 @@ export default function Home() {
                     <a href="/upload">
                       <Button
                         size="lg"
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-black text-base text-sm transition-all duration-200 shadow-lg"
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 shadow-lg"
                       >
                         צרו ספרון עכשיו
                       </Button>

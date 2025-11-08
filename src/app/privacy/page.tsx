@@ -18,7 +18,7 @@ export default function PrivacyPage() {
             <div className="max-w-4xl mx-auto">
               {/* Page Title */}
               <div className="text-center mb-12">
-                <h1 className="text-3xl lg:text-4xl font-black text-dark-gray leading-tight mb-4">
+                <h1 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight mb-4">
                   מדיניות פרטיות
                 </h1>
               </div>

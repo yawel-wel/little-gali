@@ -51,7 +51,7 @@ export function Title({
   if (highlightIndex === -1) {
     return (
       <h2
-        className={`font-black text-dark-gray leading-tight ${sizeClasses[size]} ${className}`}
+        className={`font-heading text-dark-gray leading-tight ${sizeClasses[size]} ${className}`}
       >
         {children}
       </h2>
@@ -77,7 +77,7 @@ export function Title({
 
   return (
     <h2
-      className={`font-black text-dark-gray leading-tight ${sizeClasses[size]} ${className}`}
+      className={`font-heading text-dark-gray leading-tight ${sizeClasses[size]} ${className}`}
     >
       {beforeText}
       <span className="relative inline-block">
