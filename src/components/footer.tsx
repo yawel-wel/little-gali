@@ -62,14 +62,6 @@ export function Footer() {
                   שאלות ותשובות
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  ראיית תינוקות
-                </a>
-              </li>
             </ul>
           </div>
 
