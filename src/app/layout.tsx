@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Assistant, Heebo } from "next/font/google";
 import "./globals.css";
@@ -43,6 +44,7 @@ export default function RootLayout({
       >
         <UploadImagesProvider>{children}</UploadImagesProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
