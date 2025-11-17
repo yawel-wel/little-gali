@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
-import { ArrowRight, Loader2, ShoppingCart } from "lucide-react";
+import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
 import { QuantityControls } from "@/components/quantity-controls";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -124,13 +124,25 @@ export default function CartPage() {
                 <div className="md:flex md:gap-6 md:items-start">
                   {/* Left Column: Cart Items */}
                   <div className="md:flex-1 space-y-4">
-                    {cart.items.map((item, index) => {
+                    {[...cart.items].reverse().map((item, reversedIndex) => {
+                      const displayIndex = reversedIndex + 1;
                       const itemTotal = item.quantity * 120;
                       return (
                         <div
                           key={item.id}
-                          className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 shadow-sm"
+                          className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 shadow-sm relative"
                         >
+                          {/* X Icon for Quick Removal */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveClick(item.lineId || item.id);
+                            }}
+                            className="absolute top-3 left-3 w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer"
+                            disabled={isLoading}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                           {/* Images Section - Centered */}
                           {item.imageUrls && item.imageUrls.length > 0 && (
                             <div className="mb-4">
@@ -156,7 +168,7 @@ export default function CartPage() {
                                             src={url}
                                             alt={`Image ${
                                               imgIndex + 1
-                                            } of book ${index + 1}`}
+                                            } of book ${displayIndex}`}
                                             className="w-full h-full object-cover"
                                           />
                                         </div>
@@ -176,9 +188,7 @@ export default function CartPage() {
                                       <div className="w-[75px] h-[75px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
                                         <img
                                           src={url}
-                                          alt={`Image ${imgIndex + 1} of book ${
-                                            index + 1
-                                          }`}
+                                          alt={`Image ${imgIndex + 1} of book ${displayIndex}`}
                                           className="w-full h-full object-cover"
                                         />
                                       </div>
@@ -192,7 +202,7 @@ export default function CartPage() {
                           <div className="mb-4">
                             {/* Title - Smaller size, regular weight */}
                             <h3 className="text-sm md:text-base font-body text-dark-gray mb-1">
-                              ספר {index + 1}
+                              ספר {displayIndex}
                             </h3>
                             {/* Price - Smaller size, bolder weight */}
                             <p className="text-sm md:text-base font-body-bold text-dark-gray">
@@ -302,6 +312,17 @@ export default function CartPage() {
                             )}
                           </Button>
                         </div>
+                        
+                        {/* Add Book Button */}
+                        <div className="mt-3">
+                          <Button
+                            onClick={() => router.push("/upload?new=1")}
+                            variant="outline"
+                            className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
+                          >
+                            הוסף ספרון
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -357,6 +378,15 @@ export default function CartPage() {
                         ) : (
                           "המשך לתשלום"
                         )}
+                      </Button>
+                      
+                      {/* Add Book Button */}
+                      <Button
+                        onClick={() => router.push("/upload?new=1")}
+                        variant="outline"
+                        className="w-full max-w-sm border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
+                      >
+                        הוסף ספרון
                       </Button>
                     </div>
                   </div>

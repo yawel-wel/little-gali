@@ -711,13 +711,6 @@ function UploadPageContent() {
                             <Loader2 className="w-5 h-5 animate-spin" />
                             {isEditing ? "מעדכן..." : "מוסיף לעגלה..."}
                           </>
-                        ) : uploadingImages.size > 0 ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            מעלה תמונות...
-                          </>
-                        ) : isEditing ? (
-                          "עדכן ספרון"
                         ) : (
                           "הוסף לעגלה"
                         )}

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/CartContext";
-import { ShoppingCart, Loader2 } from "lucide-react";
+import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { QuantityControls } from "@/components/quantity-controls";
 
@@ -113,12 +113,13 @@ export function CartDrawer() {
               </div>
             ) : cart && cart.items.length > 0 ? (
               <div className="space-y-3 px-4">
-                {cart.items.map((item, index) => {
+                {[...cart.items].reverse().map((item, reversedIndex) => {
+                  const displayIndex = reversedIndex + 1;
                   const itemTotal = item.quantity * 120;
                   return (
                     <div
                       key={item.id}
-                      className="border border-gray-200 rounded-lg p-3 bg-white"
+                      className="border border-gray-200 rounded-lg p-3 bg-white relative"
                       onClick={(e) => {
                         // Prevent clicks on the container from interfering
                         const target = e.target as HTMLElement;
@@ -131,6 +132,17 @@ export function CartDrawer() {
                         }
                       }}
                     >
+                      {/* X Icon for Quick Removal */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveClick(item.lineId || item.id);
+                        }}
+                        className="absolute top-2 left-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer"
+                        disabled={isActionLoading}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                       {/* Images Section */}
                       {item.imageUrls && item.imageUrls.length > 0 && (
                         <div className="mb-3">
@@ -150,9 +162,7 @@ export function CartDrawer() {
                                 <div className="w-[60px] h-[60px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
                                   <img
                                     src={url}
-                                    alt={`Image ${imgIndex + 1} of book ${
-                                      index + 1
-                                    }`}
+                                    alt={`Image ${imgIndex + 1} of book ${displayIndex}`}
                                     className="w-full h-full object-cover"
                                   />
                                 </div>
@@ -166,7 +176,7 @@ export function CartDrawer() {
                       <div className="mb-3">
                         {/* Title - Smaller size */}
                         <h3 className="text-sm font-body text-dark-gray mb-1">
-                          ספר {index + 1}
+                          ספר {displayIndex}
                         </h3>
                         {/* Price - Bolder weight */}
                         <p className="text-sm font-body-bold text-dark-gray">
