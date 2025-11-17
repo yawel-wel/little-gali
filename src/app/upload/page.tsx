@@ -5,13 +5,13 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { Upload, Info, X, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
 
-export default function UploadPage() {
+function UploadPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNewFlow = searchParams.get("new") === "1";
@@ -665,5 +665,22 @@ export default function UploadPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen overflow-x-hidden flex items-center justify-center"
+          style={{ backgroundColor: "#F3EEE8" }}
+        >
+          <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
+        </div>
+      }
+    >
+      <UploadPageContent />
+    </Suspense>
   );
 }
