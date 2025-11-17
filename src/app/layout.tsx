@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Assistant, Heebo } from "next/font/google";
 import "./globals.css";
 import { UploadImagesProvider } from "@/lib/UploadImagesContext";
+import { CartProvider } from "@/lib/CartContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const heebo = Heebo({
@@ -42,7 +43,9 @@ export default function RootLayout({
       <body
         className={`${heebo.variable} ${assistant.variable} antialiased overflow-x-hidden`}
       >
-        <UploadImagesProvider>{children}</UploadImagesProvider>
+        <CartProvider>
+          <UploadImagesProvider>{children}</UploadImagesProvider>
+        </CartProvider>
         <SpeedInsights />
         <Analytics />
       </body>

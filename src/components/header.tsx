@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { CartDrawer } from "@/components/cart-drawer";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
@@ -87,9 +88,9 @@ export function Header() {
       transition={{ duration: 1.1, ease: easeOwlet }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4">
-          {/* Left Side - CTA Button (Desktop) / Menu Button (Mobile) */}
-          <div className="py-2">
+        <div className="flex items-center justify-between py-4 relative">
+          {/* Left Side - Mobile Menu Button / Desktop CTA Button & Cart */}
+          <div className="flex items-center gap-4 py-2">
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -105,8 +106,9 @@ export function Header() {
                 </SheetTrigger>
               </Sheet>
             </div>
-            {/* Desktop CTA Button */}
-            <div className="hidden md:block">
+            {/* Desktop CTA Button & Cart */}
+            <div className="hidden md:flex items-center gap-4">
+              <CartDrawer />
               <a href="/upload">
                 <button className="cursor-pointer border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
                   צרו ספרון
@@ -115,38 +117,60 @@ export function Header() {
             </div>
           </div>
 
-          {/* Center - Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 py-2 flex-1 justify-center">
-            {desktopNavigationItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                className={`relative text-sm font-body-bold transition-colors duration-200 ${
-                  item.active
-                    ? "text-primary-orange"
-                    : "text-dark-gray hover:text-primary-orange"
-                }`}
-              >
-                {item.name}
-                {item.active && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-primary-orange"></div>
-                )}
+          {/* Center - Mobile Logo (Centered) / Desktop Navigation */}
+          <div className="flex-1 flex justify-center md:justify-start py-2">
+            {/* Mobile Logo - Centered */}
+            <div className="md:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <a href="/" className="block">
+                <img
+                  src="/logo.png"
+                  alt="Little Gali"
+                  width={200}
+                  height={60}
+                  className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                />
               </a>
-            ))}
-          </nav>
+            </div>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8 mr-4">
+              {desktopNavigationItems.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className={`relative text-sm font-body-bold transition-colors duration-200 cursor-pointer ${
+                    item.active
+                      ? "text-primary-orange hover:opacity-80"
+                      : "text-dark-gray hover:text-primary-orange"
+                  }`}
+                >
+                  {item.name}
+                  {item.active && (
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-primary-orange"></div>
+                  )}
+                </a>
+              ))}
+            </nav>
+          </div>
 
-          {/* Right Side - Logo */}
-          <div className="flex-shrink-0 py-2">
-            <a href="/" className="block">
-              <img
-                src="/logo.png"
-                alt="Little Gali"
-                width={200}
-                height={60}
-                className="h-10 w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
-              />
-            </a>
+          {/* Right Side - Mobile Cart / Desktop Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            {/* Mobile Cart Icon */}
+            <div className="md:hidden">
+              <CartDrawer />
+            </div>
+            {/* Desktop Logo */}
+            <div className="hidden md:block">
+              <a href="/" className="block">
+                <img
+                  src="/logo.png"
+                  alt="Little Gali"
+                  width={200}
+                  height={60}
+                  className="h-10 w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                />
+              </a>
+            </div>
           </div>
 
           {/* Mobile Menu Content */}

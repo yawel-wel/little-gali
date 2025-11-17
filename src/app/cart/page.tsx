@@ -1,0 +1,418 @@
+"use client";
+
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Title } from "@/components/title";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useCart } from "@/lib/CartContext";
+import { ArrowRight, Loader2, ShoppingCart } from "lucide-react";
+import { QuantityControls } from "@/components/quantity-controls";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+
+export default function CartPage() {
+  const { cart, isLoading, removeFromCart, updateQuantity, fetchCart } =
+    useCart();
+  const router = useRouter();
+  const [isOptimisticAdding, setIsOptimisticAdding] = useState(false);
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+
+  // Fetch cart on mount if we have a cart ID
+  useEffect(() => {
+    // Detect optimistic adding to avoid empty flash
+    try {
+      if (typeof window !== "undefined") {
+        const flag = sessionStorage.getItem("adding_to_cart");
+        if (flag === "1") {
+          setIsOptimisticAdding(true);
+        }
+      }
+    } catch {}
+    const savedCartId = localStorage.getItem("shopify_cart_id");
+    if (savedCartId && !cart) {
+      fetchCart(savedCartId);
+    }
+  }, [cart, fetchCart]);
+
+  useEffect(() => {
+    // Clear optimistic state once cart is loaded
+    if (cart && cart.items.length > 0) {
+      setIsOptimisticAdding(false);
+    }
+  }, [cart]);
+
+  const handleRemoveClick = (lineId: string) => {
+    setItemToRemove(lineId);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!itemToRemove) return;
+
+    setIsRemoving(itemToRemove);
+    setShowConfirmDialog(false);
+    try {
+      await removeFromCart([itemToRemove]);
+    } catch (error) {
+      console.error("Error removing item:", error);
+    } finally {
+      setIsRemoving(null);
+      setItemToRemove(null);
+    }
+  };
+
+  const handleCancelRemove = () => {
+    setShowConfirmDialog(false);
+    setItemToRemove(null);
+  };
+
+  // Edit functionality removed: books can only be created via normal flow and not edited from cart
+
+  const handleCheckout = () => {
+    if (cart?.checkoutUrl) {
+      setIsCheckingOut(true);
+      window.location.href = cart.checkoutUrl;
+    }
+  };
+
+  return (
+    <div
+      className="min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: "#F3EEE8" }}
+    >
+      <Header />
+
+      <main className="flex-1">
+        <section
+          className="relative py-10 lg:py-16 pt-20 md:pt-16"
+          style={{ backgroundColor: "#F3EEE8" }}
+        >
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
+            <div className="max-w-4xl mx-auto space-y-8">
+              {/* Title */}
+              <div className="text-center space-y-4">
+                <Title
+                  highlightText="עגלה"
+                  size="xl"
+                  roundedUnderline
+                  className="font-bold"
+                >
+                  עגלת הקניות
+                </Title>
+              </div>
+
+              {/* Cart Content */}
+              {isOptimisticAdding || (isLoading && !cart) ? (
+                <div
+                  className="min-h-[200px] flex items-center justify-center"
+                  style={{ backgroundColor: "#F3EEE8" }}
+                >
+                  <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
+                </div>
+              ) : cart && cart.items.length > 0 ? (
+                <div className="md:flex md:gap-6 md:items-start">
+                  {/* Left Column: Cart Items */}
+                  <div className="md:flex-1 space-y-4">
+                    {cart.items.map((item, index) => {
+                      const itemTotal = item.quantity * 120;
+                      return (
+                        <div
+                          key={item.id}
+                          className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 shadow-sm"
+                        >
+                          {/* Images Section - Centered */}
+                          {item.imageUrls && item.imageUrls.length > 0 && (
+                            <div className="mb-4">
+                              {/* Mobile: Scrollable row */}
+                              <div className="md:hidden">
+                                <div
+                                  className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar justify-center"
+                                  style={{
+                                    scrollSnapType: "x mandatory",
+                                    WebkitOverflowScrolling: "touch",
+                                  }}
+                                >
+                                  {item.imageUrls
+                                    .slice(0, 5)
+                                    .map((url, imgIndex) => (
+                                      <div
+                                        key={imgIndex}
+                                        className="flex-shrink-0"
+                                        style={{ scrollSnapAlign: "start" }}
+                                      >
+                                        <div className="w-[65px] h-[65px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
+                                          <img
+                                            src={url}
+                                            alt={`Image ${
+                                              imgIndex + 1
+                                            } of book ${index + 1}`}
+                                            className="w-full h-full object-cover"
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                              {/* Desktop: All 5 images visible - centered */}
+                              <div className="hidden md:flex gap-2 justify-center">
+                                {item.imageUrls
+                                  .slice(0, 5)
+                                  .map((url, imgIndex) => (
+                                    <div
+                                      key={imgIndex}
+                                      className="flex-shrink-0"
+                                    >
+                                      <div className="w-[75px] h-[75px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
+                                        <img
+                                          src={url}
+                                          alt={`Image ${imgIndex + 1} of book ${
+                                            index + 1
+                                          }`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Title and Price - Separate row below images */}
+                          <div className="mb-4">
+                            {/* Title - Smaller size, regular weight */}
+                            <h3 className="text-sm md:text-base font-body text-dark-gray mb-1">
+                              ספר {index + 1}
+                            </h3>
+                            {/* Price - Smaller size, bolder weight */}
+                            <p className="text-sm md:text-base font-body-bold text-dark-gray">
+                              120 ₪
+                            </p>
+                          </div>
+
+                          {/* Item Details with inline values */}
+                          <div className="text-sm text-medium-gray font-body space-y-1 mb-3">
+                            <div>
+                              <span>כמות: </span>
+                              <span className="font-body text-dark-gray">
+                                {item.quantity}
+                              </span>
+                            </div>
+                            <div>
+                              <span>סה״כ לפריט: </span>
+                              <span className="font-body text-dark-gray">
+                                {itemTotal} ₪
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Combined Quantity Controls */}
+                          <div>
+                            <QuantityControls
+                              quantity={item.quantity}
+                              onIncrease={() => {
+                                updateQuantity(
+                                  item.lineId || item.id,
+                                  item.quantity + 1
+                                );
+                              }}
+                              onDecrease={() => {
+                                const newQuantity = Math.max(
+                                  1,
+                                  item.quantity - 1
+                                );
+                                updateQuantity(
+                                  item.lineId || item.id,
+                                  newQuantity
+                                );
+                              }}
+                              onDelete={() =>
+                                handleRemoveClick(item.lineId || item.id)
+                              }
+                              isLoading={isLoading}
+                              isDeleting={isRemoving === item.id}
+                              size="md"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right Column: Order Summary (Desktop) - Sticky */}
+                  <div className="hidden md:block md:w-80 md:flex-shrink-0">
+                    <div className="sticky top-4">
+                      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <h2 className="text-xl font-body-bold text-dark-gray mb-4">
+                          סיכום הזמנה
+                        </h2>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-medium-gray font-body">
+                              כמות פריטים:
+                            </span>
+                            <span className="font-body-bold text-dark-gray">
+                              {cart.totalQuantity}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-medium-gray font-body">
+                              סה"כ:
+                            </span>
+                            <span className="text-xl font-body-bold text-black">
+                              {cart.totalAmount
+                                ? `${parseFloat(cart.totalAmount).toFixed(2)} ₪`
+                                : `${cart.items.length * 120} ₪`}
+                            </span>
+                          </div>
+                          <div className="pt-4 border-t border-gray-200">
+                            <p className="text-sm text-medium-gray font-body mb-4">
+                              זמן אספקה - עד 14 ימי עסקים
+                            </p>
+                            <p className="text-sm text-medium-gray font-body">
+                              הודעה תשלח כשהספרון מוכן בשביל תיאום לאיסוף
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Checkout Button */}
+                        <div className="mt-6">
+                          <Button
+                            onClick={handleCheckout}
+                            disabled={isCheckingOut || isLoading}
+                            className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
+                          >
+                            {isCheckingOut ? (
+                              <>
+                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                מעבר לתשלום...
+                              </>
+                            ) : (
+                              "המשך לתשלום"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile: Order Summary Below Items */}
+                  <div className="md:hidden space-y-6 mt-6">
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                      <h2 className="text-xl font-body-bold text-dark-gray mb-4">
+                        סיכום הזמנה
+                      </h2>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-medium-gray font-body">
+                            כמות פריטים:
+                          </span>
+                          <span className="font-body-bold text-dark-gray">
+                            {cart.totalQuantity}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-medium-gray font-body">
+                            סה"כ:
+                          </span>
+                          <span className="text-xl font-body-bold text-black">
+                            {cart.totalAmount
+                              ? `${parseFloat(cart.totalAmount).toFixed(2)} ₪`
+                              : `${cart.items.length * 120} ₪`}
+                          </span>
+                        </div>
+                        <div className="pt-4 border-t border-gray-200">
+                          <p className="text-sm text-medium-gray font-body mb-4">
+                            זמן אספקה - עד 14 ימי עסקים
+                          </p>
+                          <p className="text-sm text-medium-gray font-body">
+                            הודעה תשלח כשהספרון מוכן בשביל תיאום לאיסוף
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Checkout Button */}
+                    <div className="flex flex-col items-center gap-3">
+                      <Button
+                        onClick={handleCheckout}
+                        disabled={isCheckingOut || isLoading}
+                        className="w-full max-w-sm bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
+                      >
+                        {isCheckingOut ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                            מעבר לתשלום...
+                          </>
+                        ) : (
+                          "המשך לתשלום"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
+                  <h2 className="text-2xl font-body-bold text-dark-gray mb-4">
+                    העגלה שלך ריקה
+                  </h2>
+                  <p className="text-medium-gray font-body mb-8">
+                    התחל ליצור ספרון מותאם אישית
+                  </p>
+                  <Button
+                    onClick={() => router.push("/upload")}
+                    className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 px-8 cursor-pointer"
+                  >
+                    צרו ספרון
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader className="!text-center">
+            <DialogTitle className="font-body-bold text-dark-gray mt-4">
+              הסרת פריט מהעגלה
+            </DialogTitle>
+            <DialogDescription className="font-body text-medium-gray">
+              האם אתה בטוח שברצונך להסיר את הספר מהעגלה?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row-reverse gap-2 sm:gap-0 mt-4">
+            <Button
+              onClick={handleConfirmRemove}
+              className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold cursor-pointer"
+            >
+              הסר
+            </Button>
+            <Button
+              onClick={handleCancelRemove}
+              variant="outline"
+              className="border-gray-300 text-dark-gray hover:bg-gray-50 font-body-bold cursor-pointer"
+            >
+              ביטול
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

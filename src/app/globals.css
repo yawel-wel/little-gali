@@ -133,6 +133,9 @@
   .text-primary-orange {
     color: #e5543d;
   }
+  .hover\:text-primary-orange:hover {
+    color: #e5543d;
+  }
   .bg-primary-orange {
     background-color: #e5543d;
   }
@@ -241,5 +244,14 @@
   }
   .bg-darker-blue {
     background-color: #1e293b;
+  }
+
+  /* Hide scrollbars for cart image scrolling */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

@@ -1,0 +1,361 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+export interface CartItem {
+  id: string;
+  quantity: number;
+  imageUrls: string[];
+  title?: string;
+  lineId?: string;
+}
+
+export interface Cart {
+  id: string;
+  checkoutUrl: string;
+  totalQuantity: number;
+  totalAmount?: string;
+  currencyCode?: string;
+  items: CartItem[];
+}
+
+interface CartContextType {
+  cart: Cart | null;
+  isLoading: boolean;
+  addToCart: (
+    imageUrls: string[],
+    quantity?: number,
+    bookId?: string,
+    phoneNumber?: string
+  ) => Promise<void>;
+  removeFromCart: (lineIds: string[]) => Promise<void>;
+  updateQuantity: (lineId: string, quantity: number) => Promise<void>;
+  fetchCart: (cartId: string) => Promise<void>;
+  clearCart: () => void;
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = useState<Cart | null>(null);
+  // Start in loading state to avoid initial empty-state flicker until we check localStorage
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Warmup the runtime early to reduce first-action latency
+  useEffect(() => {
+    fetch("/api/warmup").catch(() => {});
+  }, []);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    const savedCartId = localStorage.getItem("shopify_cart_id");
+    if (savedCartId) {
+      fetchCart(savedCartId);
+    } else {
+      // No existing cart; we're done initializing
+      setIsLoading(false);
+    }
+  }, []);
+
+  const fetchCart = async (cartId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/shopify/cart/get", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cartId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.cart) {
+          // Helper to fetch line images with small retries to avoid race with server-side storage
+          const fetchLineImagesWithRetry = async (
+            cId: string,
+            lId: string,
+            attempts = 3,
+            delayMs = 200
+          ): Promise<string[]> => {
+            for (let i = 0; i < attempts; i++) {
+              try {
+                const res = await fetch(
+                  `/api/cart-images?cartId=${cId}&lineId=${lId}`
+                );
+                if (res.ok) {
+                  const json = await res.json();
+                  if (
+                    Array.isArray(json.imageUrls) &&
+                    json.imageUrls.length === 5
+                  ) {
+                    return json.imageUrls;
+                  }
+                }
+              } catch {
+                // ignore and retry
+              }
+              await new Promise((r) => setTimeout(r, delayMs));
+            }
+            return [];
+          };
+
+          // Fetch images from our separate storage for each line item only
+          const cartItems: CartItem[] = await Promise.all(
+            data.cart.lines.map(async (line: any) => {
+              const imageUrls = await fetchLineImagesWithRetry(cartId, line.id);
+              return {
+                id: line.id,
+                lineId: line.id,
+                quantity: line.quantity,
+                title: line.title,
+                imageUrls,
+              };
+            })
+          );
+
+          setCart({
+            id: data.cart.id,
+            checkoutUrl: data.cart.checkoutUrl,
+            totalQuantity: data.cart.totalQuantity,
+            totalAmount: data.cart.totalAmount,
+            currencyCode: data.cart.currencyCode,
+            items: cartItems,
+          });
+          localStorage.setItem("shopify_cart_id", data.cart.id);
+          // Clear optimistic adding flag if set
+          try {
+            if (typeof window !== "undefined") {
+              sessionStorage.removeItem("adding_to_cart");
+            }
+          } catch {}
+        }
+      } else {
+        // Cart not found or expired, clear it
+        localStorage.removeItem("shopify_cart_id");
+        setCart(null);
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addToCart = async (
+    imageUrls: string[],
+    quantity: number = 1,
+    bookId?: string,
+    phoneNumber?: string
+  ) => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (cart?.id) {
+        // Add to existing cart
+        response = await fetch("/api/shopify/cart/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cartId: cart.id,
+            imageUrls,
+            quantity,
+            bookId,
+            phoneNumber,
+          }),
+        });
+      } else {
+        // Create new cart
+        response = await fetch("/api/shopify/cart/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageUrls,
+            quantity,
+            bookId,
+            phoneNumber,
+          }),
+        });
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.cart) {
+          // If cart includes items with images, use it directly (faster)
+          if (data.cart.items && Array.isArray(data.cart.items)) {
+            // Preserve existing items' images when adding to existing cart
+            let mergedItems = data.cart.items;
+            if (cart?.items && cart.items.length > 0) {
+              mergedItems = data.cart.items.map((newItem: any) => {
+                // Find matching existing item by lineId
+                const existingItem = cart.items.find(
+                  (existing) =>
+                    existing.lineId === newItem.lineId ||
+                    existing.id === newItem.lineId
+                );
+                // If new item doesn't have images but existing one does, preserve them
+                if (
+                  (!newItem.imageUrls || newItem.imageUrls.length === 0) &&
+                  existingItem &&
+                  existingItem.imageUrls &&
+                  existingItem.imageUrls.length > 0
+                ) {
+                  return {
+                    ...newItem,
+                    imageUrls: existingItem.imageUrls,
+                  };
+                }
+                return newItem;
+              });
+            }
+
+            setCart({
+              id: data.cart.id,
+              checkoutUrl: data.cart.checkoutUrl,
+              totalQuantity: data.cart.totalQuantity,
+              totalAmount: data.cart.totalAmount,
+              currencyCode: data.cart.currencyCode,
+              items: mergedItems,
+            });
+            localStorage.setItem("shopify_cart_id", data.cart.id);
+            // Clear optimistic adding flag if set
+            try {
+              if (typeof window !== "undefined") {
+                sessionStorage.removeItem("adding_to_cart");
+              }
+            } catch {}
+            // For existing lines without images, fetch them in background (non-blocking)
+            const linesNeedingImages = mergedItems.filter(
+              (item: any) => !item.imageUrls || item.imageUrls.length === 0
+            );
+            if (linesNeedingImages.length > 0 && data.cart.id) {
+              // Fetch images for lines that don't have them yet (non-blocking)
+              fetchCart(data.cart.id).catch(() => {
+                // Silently fail - images will load on next page refresh
+              });
+            }
+          } else {
+            // Fallback: fetch full cart details (for backward compatibility)
+            await fetchCart(data.cart.id);
+          }
+        }
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to add to cart");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateQuantity = async (lineId: string, quantity: number) => {
+    if (!cart?.id) return;
+
+    if (quantity <= 0) {
+      // If quantity is 0 or less, remove the item
+      await removeFromCart([lineId]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/shopify/cart/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cartId: cart.id,
+          lineId,
+          quantity,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.cart) {
+          // Fetch updated cart
+          await fetchCart(data.cart.id);
+        }
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update quantity");
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeFromCart = async (lineIds: string[]) => {
+    if (!cart?.id) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/shopify/cart/remove", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cartId: cart.id,
+          lineIds,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.cart) {
+          // Fetch updated cart
+          await fetchCart(data.cart.id);
+        }
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to remove from cart");
+      }
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearCart = () => {
+    setCart(null);
+    localStorage.removeItem("shopify_cart_id");
+  };
+
+  return (
+    <CartContext.Provider
+      value={{
+        cart,
+        isLoading,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        fetchCart,
+        clearCart,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export function useCart() {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+}
