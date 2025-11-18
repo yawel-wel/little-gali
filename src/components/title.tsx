@@ -19,6 +19,10 @@ interface TitleProps {
    * Whether to use rounded underline style
    */
   roundedUnderline?: boolean;
+  /**
+   * Text color class (e.g., "text-white", "text-dark-gray")
+   */
+  color?: string;
 }
 
 const sizeClasses = {
@@ -43,6 +47,7 @@ export function Title({
   size = "md",
   className = "",
   roundedUnderline = false,
+  color = "text-dark-gray",
 }: TitleProps) {
   // Find the position of the highlight text in the title
   const highlightIndex = children.indexOf(highlightText);
@@ -51,7 +56,7 @@ export function Title({
   if (highlightIndex === -1) {
     return (
       <h2
-        className={`font-heading text-dark-gray leading-tight ${sizeClasses[size]} ${className}`}
+        className={`font-heading ${color} leading-tight ${sizeClasses[size]} ${className}`}
       >
         {children}
       </h2>
@@ -77,7 +82,7 @@ export function Title({
 
   return (
     <h2
-      className={`font-heading text-dark-gray leading-tight ${sizeClasses[size]} ${className}`}
+      className={`font-heading ${color} leading-tight ${sizeClasses[size]} ${className}`}
     >
       {beforeText}
       <span className="relative inline-block">

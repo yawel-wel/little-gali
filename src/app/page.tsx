@@ -213,80 +213,57 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-[#F3EEE8] py-8 lg:py-12 overflow-hidden pt-[72px]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center pt-16 md:pt-20 lg:pt-24 max-w-6xl mx-auto">
-              {/* Text Column */}
-              <div className="order-1 md:order-1 text-center md:text-right space-y-4">
-                {/* Badge */}
-                <div className="flex justify-center md:justify-start">
-                  <div
-                    className="inline-block px-6 py-2 rounded-full"
-                    style={{ backgroundColor: "#F8D9C4" }}
-                  >
-                    <p className="text-sm font-body-bold text-black uppercase tracking-widest">
-                      הדפסה אישית באיכות גבוהה
-                    </p>
-                  </div>
-                </div>
-
-                {/* Title */}
+        <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[72px] pb-24 sm:pb-0">
+          {/* Background Image - positioned top-right */}
+          <div className="absolute inset-0">
+            <motion.img
+              src="/hero-image.jpeg"
+              alt="Baby book example"
+              className="w-full h-full object-cover object-top sm:object-[center_50%]"
+              style={{ y: prefersReducedMotion ? 0 : heroY }}
+              initial={prefersReducedMotion ? false : { scale: 1.2 }}
+              animate={prefersReducedMotion ? undefined : { scale: 1.05 }}
+              transition={{ duration: 5, ease: easeOwlet }}
+            />
+            {/* Lighter gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
+          </div>
+          {/* Content Overlay - center-aligned */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex items-start sm:items-center justify-center pt-10 sm:pt-0">
+            <div className="text-center space-y-5 md:space-y-6 max-w-2xl">
+              {/* Title - centered with better contrast */}
+              <div className="relative px-4">
                 <Title
                   highlightText="אישי"
-                  size="xl"
-                  roundedUnderline
-                  className="max-w-3xl md:max-w-none mx-auto md:mx-0"
+                  color="text-white"
+                  className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
                 >
                   ספרון תינוקות מותאם באופן אישי
                 </Title>
-
-                {/* Description */}
-                <p className="text-base sm:text-lg md:text-xl font-body text-medium-gray leading-relaxed max-w-xl mx-auto md:mx-0">
-                  ספרון נפתח ודו צדדי עם תמונות של הקרובים ביותר.
-                  <br />
-                  מתאים במיוחד לזמן בטן וגילאי 0-6 חודשים.
-                </p>
-
-                {/* CTA Button */}
-                <div className="pt-1 flex md:justify-start justify-center">
-                  <motion.div
-                    whileHover={{
-                      scale: 1.01,
-                      y: -1,
-                      transition: { duration: 0.2, ease: easeOwlet },
-                    }}
-                  >
-                    <a href="/upload">
-                      <Button
-                        size="lg"
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 shadow-lg"
-                      >
-                        צרו ספרון עכשיו
-                      </Button>
-                    </a>
-                  </motion.div>
-                </div>
               </div>
-
-              {/* Image Column */}
-              <div className="order-2 md:order-2 w-full h-full">
-                <div className="w-full h-full md:min-h-[360px] lg:min-h-[420px] flex items-center justify-center overflow-hidden rounded-xl">
-                  <motion.img
-                    src="/hero-image.jpg"
-                    alt="Baby book example"
-                    className="w-full h-auto md:h-full object-contain"
-                    style={{ y: prefersReducedMotion ? 0 : heroY }}
-                    initial={prefersReducedMotion ? false : { scale: 1.08 }}
-                    animate={prefersReducedMotion ? undefined : { scale: 1 }}
-                    whileHover={{ scale: 1.06 }}
-                    transition={{ duration: 5, ease: easeOwlet }}
-                  />
-                </div>
+              {/* CTA Button */}
+              <div className="pt-6">
+                <motion.div
+                  className="fixed bottom-4 left-1/2 w-[calc(100%-32px)] max-w-md -translate-x-1/2 z-40 sm:relative sm:bottom-auto sm:left-auto sm:w-auto sm:max-w-none sm:translate-x-0"
+                  whileHover={{
+                    scale: 1.05,
+                    y: -2,
+                    transition: { duration: 0.2, ease: easeOwlet },
+                  }}
+                >
+                  <a href="/upload">
+                    <Button
+                      size="lg"
+                      className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-10 py-4 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl w-full sm:w-auto"
+                    >
+                      צרו ספרון עכשיו
+                    </Button>
+                  </a>
+                </motion.div>
               </div>
             </div>
           </div>
         </section>
-
         {/* הספרון שלנו Section */}
         <motion.section
           className="relative bg-white py-12 lg:py-16"
