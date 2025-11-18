@@ -376,7 +376,7 @@ export default function Home() {
                   <div className="w-full">
                     <div className="aspect-square rounded-lg overflow-hidden">
                       <motion.img
-                        src="/our-book.jpeg"
+                        src="/our-book.jpg"
                         alt="Book showcase"
                         className="w-full h-full object-cover"
                         initial={prefersReducedMotion ? false : { scale: 1.12 }}
