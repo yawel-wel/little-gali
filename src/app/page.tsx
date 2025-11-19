@@ -313,10 +313,37 @@ export default function Home() {
                   </div>
 
                   {/* Price */}
-                  <div className="flex items-center justify-center lg:justify-start gap-2">
-                    <span className="text-xl font-heading text-dark-gray">
-                      מחיר: {BOOK_PRICE} ₪
-                    </span>
+                  {/* Price - Underlined Elegant */}
+                  <div className="flex flex-col items-center lg:items-start gap-1">
+                    <div className="relative">
+                      <span className="text-sm font-body text-medium-gray mt-1 block">
+                        מחיר לספר
+                      </span>
+                      <div className="flex items-baseline pb-1">
+                        <span className="text-4xl font-heading font-light text-dark-gray">
+                          {BOOK_PRICE}
+                        </span>
+                        <span className="text-2xl font-bodye">₪</span>
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-24 h-0.5 bg-gradient-to-l from-primary-orange to-transparent"></div>
+                    </div>
+                    <div className="flex items-center gap-2 font-body text-medium-gray">
+                      <svg
+                        className="w-4 h-4 text-green-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span>ספר שני ב-₪99 בלבד</span>
+                    </div>
+                    <p className="text-sm font-body text-medium-gray mt-1">
+                      * ההנחה מתעדכנת אוטומטית בעמוד התשלום
+                    </p>
                   </div>
 
                   {/* CTA Button */}

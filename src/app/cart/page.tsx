@@ -327,6 +327,12 @@ export default function CartPage() {
                           >
                             הוסף ספרון
                           </Button>
+                          <p className="text-sm font-body text-medium-gray text-center mt-2">
+                            ספרון שני ב-99 ₪ 🎉
+                          </p>
+                          <p className="text-xs font-body text-medium-gray text-center mt-1">
+                            * ההנחה מתעדכנת אוטומטית בעמוד התשלום
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -388,13 +394,21 @@ export default function CartPage() {
                       </Button>
 
                       {/* Add Book Button */}
-                      <Button
-                        onClick={() => router.push("/upload?new=1")}
-                        variant="outline"
-                        className="w-full max-w-sm border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
-                      >
-                        הוסף ספרון
-                      </Button>
+                      <div className="w-full max-w-sm">
+                        <Button
+                          onClick={() => router.push("/upload?new=1")}
+                          variant="outline"
+                          className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
+                        >
+                          הוסף ספרון
+                        </Button>
+                        <p className="text-sm font-body text-medium-gray text-center mt-2">
+                          ספרון שני ב-99 ₪ 🎉
+                        </p>
+                        <p className="text-xs font-body text-medium-gray text-center mt-1">
+                          * ההנחה מתעדכנת אוטומטית בעמוד התשלום
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
