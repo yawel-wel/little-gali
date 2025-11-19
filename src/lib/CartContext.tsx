@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useLanguage } from "./LanguageContext";
 
 export interface CartItem {
   id: string;
@@ -37,9 +38,24 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { locale } = useLanguage();
   const [cart, setCart] = useState<Cart | null>(null);
   // Start in loading state to avoid initial empty-state flicker until we check localStorage
   const [isLoading, setIsLoading] = useState(true);
+
+  // Helper function to ensure checkoutUrl always has the current locale
+  const ensureLocaleInCheckoutUrl = useCallback((checkoutUrl: string): string => {
+    try {
+      const url = new URL(checkoutUrl);
+      // Always update the locale parameter to match current locale
+      url.searchParams.set("locale", locale);
+      return url.toString();
+    } catch (e) {
+      // If URL parsing fails, return original URL
+      console.error("Error parsing checkout URL:", e);
+      return checkoutUrl;
+    }
+  }, [locale]);
 
   // Warmup the runtime early to reduce first-action latency
   useEffect(() => {
@@ -57,6 +73,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Update checkoutUrl whenever locale changes (but not when cart changes to avoid loops)
+  useEffect(() => {
+    if (cart?.checkoutUrl) {
+      const updatedUrl = ensureLocaleInCheckoutUrl(cart.checkoutUrl);
+      // Only update if the URL actually changed
+      if (updatedUrl !== cart.checkoutUrl) {
+        setCart({
+          ...cart,
+          checkoutUrl: updatedUrl,
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale, ensureLocaleInCheckoutUrl]);
+
   const fetchCart = async (cartId: string) => {
     setIsLoading(true);
     try {
@@ -65,7 +96,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ cartId }),
+        body: JSON.stringify({ cartId, locale }),
       });
 
       if (response.ok) {
@@ -116,7 +147,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           setCart({
             id: data.cart.id,
-            checkoutUrl: data.cart.checkoutUrl,
+            checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
             totalQuantity: data.cart.totalQuantity,
             totalAmount: data.cart.totalAmount,
             currencyCode: data.cart.currencyCode,
@@ -164,6 +195,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             quantity,
             bookId,
             phoneNumber,
+            locale,
           }),
         });
       } else {
@@ -178,6 +210,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             quantity,
             bookId,
             phoneNumber,
+            locale,
           }),
         });
       }
@@ -215,7 +248,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
             setCart({
               id: data.cart.id,
-              checkoutUrl: data.cart.checkoutUrl,
+              checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
               totalQuantity: data.cart.totalQuantity,
               totalAmount: data.cart.totalAmount,
               currencyCode: data.cart.currencyCode,
@@ -275,6 +308,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           cartId: cart.id,
           lineId,
           quantity,
+          locale,
         }),
       });
 
@@ -309,6 +343,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({
           cartId: cart.id,
           lineIds,
+          locale,
         }),
       });
 

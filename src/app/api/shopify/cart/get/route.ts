@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cartId } = body as { cartId: string };
+    const { cartId, locale } = body as { cartId: string; locale?: string };
 
     if (!cartId) {
       return NextResponse.json(
@@ -157,10 +157,18 @@ export async function POST(request: NextRequest) {
         };
       }) || [];
 
+    // Append locale to checkout URL if provided
+    let checkoutUrl = cart.checkoutUrl;
+    if (locale && (locale === "he" || locale === "en")) {
+      const url = new URL(checkoutUrl);
+      url.searchParams.set("locale", locale);
+      checkoutUrl = url.toString();
+    }
+
     return NextResponse.json({
       cart: {
         id: cart.id,
-        checkoutUrl: cart.checkoutUrl,
+        checkoutUrl: checkoutUrl,
         totalQuantity: cart.totalQuantity,
         totalAmount: cart.cost?.totalAmount?.amount,
         currencyCode: cart.cost?.totalAmount?.currencyCode,

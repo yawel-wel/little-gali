@@ -20,7 +20,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 
 export function CartDrawer() {
   const { cart, isLoading, removeFromCart, updateQuantity } = useCart();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -68,7 +68,19 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     if (cart?.checkoutUrl) {
-      window.location.href = cart.checkoutUrl;
+      // The checkoutUrl in cart state should already have the locale
+      // But ensure it's there as a safety measure
+      let checkoutUrl = cart.checkoutUrl;
+      try {
+        const url = new URL(checkoutUrl);
+        // Always ensure locale is set to current locale
+        url.searchParams.set("locale", locale);
+        checkoutUrl = url.toString();
+      } catch (e) {
+        // If URL parsing fails, use original URL
+        console.error("Error parsing checkout URL:", e);
+      }
+      window.location.href = checkoutUrl;
     }
   };
 

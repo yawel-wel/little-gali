@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Check } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function UploadModal({
   showUploadButton = true,
   onUploadClick,
 }: UploadModalProps) {
+  const { t, locale } = useLanguage();
   if (!isOpen) return null;
 
   return (
@@ -29,7 +31,9 @@ export function UploadModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all cursor-pointer"
+          className={`absolute top-4 ${
+            locale === "en" ? "right-4" : "left-4"
+          } w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all cursor-pointer`}
         >
           <X className="w-5 h-5 text-gray-600" />
         </button>
@@ -38,55 +42,99 @@ export function UploadModal({
         <div className="px-8 py-6">
           {/* Title */}
           <h2 className="text-xl font-semibold text-dark-gray mb-6 text-center">
-            איך לבחור תמונה לספרון?
+            {t("uploadModal.title")}
           </h2>
 
           {/* Two Column Layout */}
           <div className="grid grid-cols-2 gap-x-12 items-start mt-4 mb-6">
             {/* Left Column - What to Choose */}
             <div className="pt-1">
-              <h3 className="text-md font-semibold text-dark-gray mb-2">
-                כדאי לבחור
+              <h3
+                className={`text-md font-semibold text-dark-gray mb-2 ${
+                  locale === "en" ? "text-left" : "text-right"
+                }`}
+              >
+                {t("uploadModal.choose")}
               </h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+              <ul className="space-y-2 w-full">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     ✅
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-6">
-                    פנים ברורות
+                  <p
+                    className={`text-dark-gray font-body text-base leading-6 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.clearFaces")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     ✅
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-6">
-                    רואים את העיניים
+                  <p
+                    className={`text-dark-gray font-body text-base leading-6 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.visibleEyes")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     ✅
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-6">
-                    תאורה טובה
+                  <p
+                    className={`text-dark-gray font-body text-base leading-6 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.goodLighting")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     ✅
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-6">
-                    אדם אחד או שניים בתמונה
+                  <p
+                    className={`text-dark-gray font-body text-base leading-6 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.oneOrTwo")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     ✅
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-6">
-                    חיוך טבעי
+                  <p
+                    className={`text-dark-gray font-body text-base leading-6 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.naturalSmile")}
                   </p>
                 </li>
               </ul>
@@ -94,48 +142,92 @@ export function UploadModal({
 
             {/* Right Column - What to Avoid */}
             <div>
-              <h3 className="text-md font-semibold text-dark-gray mb-2">
-                כדאי להימנע
+              <h3
+                className={`text-md font-semibold text-dark-gray mb-2 ${
+                  locale === "en" ? "text-left" : "text-right"
+                }`}
+              >
+                {t("uploadModal.avoid")}
               </h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+              <ul className="space-y-2 w-full">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     🚫
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-5">
-                    פילטר שחור-לבן
+                  <p
+                    className={`text-dark-gray font-body text-base leading-5 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.noBWFilter")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     🚫
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-5">
-                    קרוב מדי לפנים
+                  <p
+                    className={`text-dark-gray font-body text-base leading-5 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.notTooClose")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     🚫
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-5">
-                    מטושטשת או רחוקה
+                  <p
+                    className={`text-dark-gray font-body text-base leading-5 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.notBlurry")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     🚫
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-5">
-                    תמונה קבוצתית
+                  <p
+                    className={`text-dark-gray font-body text-base leading-5 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.noGroup")}
                   </p>
                 </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-[14px] md:text-[18px] leading-none">
+                <li
+                  className={`flex items-center gap-2 ${
+                    locale === "en" ? "flex-row justify-start" : "flex-row"
+                  }`}
+                >
+                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
                     🚫
                   </span>
-                  <p className="text-dark-gray font-body text-base leading-5">
-                    משקפי שמש או כובע
+                  <p
+                    className={`text-dark-gray font-body text-base leading-5 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("uploadModal.noSunglasses")}
                   </p>
                 </li>
               </ul>
@@ -143,11 +235,16 @@ export function UploadModal({
           </div>
 
           {/* Important Note */}
-          <div className="mt-5 mb-5 flex justify-start">
-            <div className="bg-[#FFF8E6] text-gray-700 text-sm rounded-lg px-3 py-2 pl-4 inline-flex items-start gap-2">
+          <div className="mt-5 mb-5 flex justify-center">
+            <div
+              className={`bg-[#FFF8E6] text-gray-700 text-sm rounded-lg px-3 py-2 ${
+                locale === "en" ? "pl-4" : "pr-4"
+              } inline-flex items-start gap-2`}
+            >
               <span className="text-yellow-500 text-lg leading-none">💡</span>
               <span>
-                <strong>חשוב:</strong> הפנים בתמונה צריכות להיראות בבירור
+                <strong>{t("uploadModal.important")}</strong>{" "}
+                {t("uploadModal.importantNote")}
               </span>
             </div>
           </div>
@@ -159,7 +256,7 @@ export function UploadModal({
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img
                   src="/too-close-example.jpg"
-                  alt="Too close example"
+                  alt={t("uploadModal.tooCloseExample")}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -173,7 +270,7 @@ export function UploadModal({
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img
                   src="/group-example.jpeg"
-                  alt="Group example"
+                  alt={t("uploadModal.groupExample")}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -187,7 +284,7 @@ export function UploadModal({
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img
                   src="/good-example-1.jpg"
-                  alt="Good example 1"
+                  alt={t("uploadModal.goodExample1")}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -201,7 +298,7 @@ export function UploadModal({
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img
                   src="/good-example-2.jpg"
-                  alt="Good example 2"
+                  alt={t("uploadModal.goodExample2")}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -221,7 +318,7 @@ export function UploadModal({
                 }}
                 className="cursor-pointer w-full max-w-[280px] bg-[#E15B3A] hover:bg-[#D44E2E] hover:opacity-90 text-white font-medium text-base h-11 px-6 rounded-xl shadow-md flex items-center justify-center gap-2 transition-opacity"
               >
-                בחירה מהמכשיר
+                {t("uploadModal.chooseFromDevice")}
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -241,8 +338,8 @@ export function UploadModal({
 
           {/* Privacy Statement */}
           <div className="text-center mt-2 mb-2">
-            <p className="font-body text-sm text-gray-500">
-              התמונות ישמשו רק ליצירת הספרון האישי שלכם
+            <p className="font-body text-sm text-gray-500 text-center">
+              {t("uploadModal.privacy")}
             </p>
           </div>
         </div>

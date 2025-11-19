@@ -16,11 +16,13 @@ export async function POST(request: NextRequest) {
       quantity = 1,
       bookId,
       phoneNumber,
+      locale,
     } = body as {
       imageUrls: string[];
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
+      locale?: string;
     };
 
     if (!imageUrls || imageUrls.length !== 5) {
@@ -266,8 +268,16 @@ export async function POST(request: NextRequest) {
     console.log("Cart created successfully:", cart.id);
     console.log("Checkout URL:", cart.checkoutUrl);
 
+    // Append locale to checkout URL if provided
+    let checkoutUrl = cart.checkoutUrl;
+    if (locale && (locale === "he" || locale === "en")) {
+      const url = new URL(checkoutUrl);
+      url.searchParams.set("locale", locale);
+      checkoutUrl = url.toString();
+    }
+
     return NextResponse.json({
-      checkoutUrl: cart.checkoutUrl,
+      checkoutUrl: checkoutUrl,
       checkoutId: cart.id,
     });
   } catch (error: any) {

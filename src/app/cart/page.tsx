@@ -85,7 +85,19 @@ export default function CartPage() {
   const handleCheckout = () => {
     if (cart?.checkoutUrl) {
       setIsCheckingOut(true);
-      window.location.href = cart.checkoutUrl;
+      // The checkoutUrl in cart state should already have the locale
+      // But ensure it's there as a safety measure
+      let checkoutUrl = cart.checkoutUrl;
+      try {
+        const url = new URL(checkoutUrl);
+        // Always ensure locale is set to current locale
+        url.searchParams.set("locale", locale);
+        checkoutUrl = url.toString();
+      } catch (e) {
+        // If URL parsing fails, use original URL
+        console.error("Error parsing checkout URL:", e);
+      }
+      window.location.href = checkoutUrl;
     }
   };
 
@@ -495,14 +507,14 @@ export default function CartPage() {
                   <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
                   <h2
                     className={`text-2xl font-body-bold text-dark-gray mb-4 ${
-                      locale === "en" ? "text-left" : "text-right"
+                      locale === "en" ? "text-center" : "text-right"
                     }`}
                   >
                     {t("cart.empty")}
                   </h2>
                   <p
                     className={`text-medium-gray font-body mb-8 ${
-                      locale === "en" ? "text-left" : "text-right"
+                      locale === "en" ? "text-center" : "text-right"
                     }`}
                   >
                     {t("cart.startCreating")}

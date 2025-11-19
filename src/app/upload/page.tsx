@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 function UploadPageContent() {
   const router = useRouter();
@@ -17,6 +18,7 @@ function UploadPageContent() {
   const isNewFlow = searchParams.get("new") === "1";
   const { images, setImages, clearImages } = useUploadImages();
   const { addToCart, removeFromCart, cart } = useCart();
+  const { t, locale } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
@@ -352,7 +354,7 @@ function UploadPageContent() {
       if (!images || images.length !== 5) {
         setSubmitStatus({
           type: "error",
-          message: "אנא בחר בדיוק 5 תמונות",
+          message: t("upload.selectExactly5"),
         });
         setIsSubmitting(false);
         return;
@@ -362,7 +364,7 @@ function UploadPageContent() {
       if (uploadingImages.size > 0) {
         setSubmitStatus({
           type: "error",
-          message: "אנא המתן עד שהתמונות יסיימו להעלות",
+          message: t("upload.waitForUpload"),
         });
         setIsSubmitting(false);
         return;
@@ -574,7 +576,7 @@ function UploadPageContent() {
       console.error("Submit error:", error);
       setSubmitStatus({
         type: "error",
-        message: "שגיאה בשרת. אנא נסה שוב מאוחר יותר.",
+        message: t("upload.serverError"),
       });
       setIsSubmitting(false);
       setIsNavigating(false);
@@ -598,33 +600,45 @@ function UploadPageContent() {
               {/* Main Title */}
               <div className="text-center md:mt-4">
                 <Title
-                  highlightText="אישי"
+                  highlightText={t("upload.titleHighlight")}
                   size="xl"
                   roundedUnderline
                   className="text-2xl md:text-4xl font-bold"
                 >
-                  בואו ניצור לתינוק שלכם ספרון אישי
+                  {t("upload.title")}
                 </Title>
               </div>
 
               {/* First Paragraph */}
               <div className="text-center mb-8">
-                <p className="text-lg font-body text-dark-gray leading-relaxed">
-                  בחרו 5 תמונות שיופיעו בספרון.
-                  <br />
-                  אין צורך בתמונה מושלמת, אנחנו נדאג שהפנים, ההבעה והחום האנושי
-                  שבתמונה יבואו לידי ביטוי.
+                <p
+                  className={`text-lg font-body text-dark-gray leading-relaxed ${
+                    locale === "en" ? "text-center" : "text-right"
+                  }`}
+                >
+                  {t("upload.description")
+                    .split("\n")
+                    .map((line, i, arr) => (
+                      <span key={i}>
+                        {line}
+                        {i < arr.length - 1 && <br />}
+                      </span>
+                    ))}
                 </p>
               </div>
 
               {/* Image Selection Progress Indicator */}
               <div className="text-center">
                 <div className="inline-block px-4 py-2 rounded-full bg-white border border-gray-200">
-                  <span className="text-dark-gray font-body-bold text-md">
+                  <span
+                    className={`text-dark-gray font-body-bold text-md ${
+                      locale === "en" ? "text-center" : "text-right"
+                    }`}
+                  >
                     <span className="text-primary-orange">
                       {selectedImagesCount}
                     </span>{" "}
-                    מתוך 5 תמונות
+                    {t("upload.imagesCount")}
                   </span>
                 </div>
               </div>
@@ -654,7 +668,11 @@ function UploadPageContent() {
                         >
                           <img
                             src={url}
-                            alt={`Selected ${index + 1}`}
+                            alt={
+                              locale === "en"
+                                ? `Selected photo ${index + 1}`
+                                : `תמונה נבחרת ${index + 1}`
+                            }
                             className={`w-full h-full object-cover border-2 rounded-lg transition-opacity ${
                               isUploading
                                 ? "opacity-60 border-primary-orange/50"
@@ -709,10 +727,12 @@ function UploadPageContent() {
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-5 h-5 animate-spin" />
-                            {isEditing ? "מעדכן..." : "מוסיף לעגלה..."}
+                            {isEditing
+                              ? t("upload.updating")
+                              : t("upload.addingToCart")}
                           </>
                         ) : (
-                          "הוסף לעגלה"
+                          t("upload.addToCart")
                         )}
                       </button>
                       <button
@@ -733,7 +753,7 @@ function UploadPageContent() {
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                           />
                         </svg>
-                        התחל מחדש
+                        {t("upload.startOver")}
                       </button>
                       {/* Status Message */}
                       {submitStatus.type && (
@@ -772,7 +792,7 @@ function UploadPageContent() {
                     >
                       <Info className="w-5 h-5" />
                       <span className="font-body-bold text-base">
-                        איזו תמונה כדאי להעלות?
+                        {t("upload.photoTip")}
                       </span>
                     </div>
                   </div>
