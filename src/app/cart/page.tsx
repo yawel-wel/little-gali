@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
+import { BOOK_PRICE } from "@/lib/constants";
 import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
 import { QuantityControls } from "@/components/quantity-controls";
 import { useRouter } from "next/navigation";
@@ -126,7 +127,7 @@ export default function CartPage() {
                   <div className="md:flex-1 space-y-4">
                     {[...cart.items].reverse().map((item, reversedIndex) => {
                       const displayIndex = reversedIndex + 1;
-                      const itemTotal = item.quantity * 120;
+                      const itemTotal = item.quantity * BOOK_PRICE;
                       return (
                         <div
                           key={item.id}
@@ -188,7 +189,9 @@ export default function CartPage() {
                                       <div className="w-[75px] h-[75px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
                                         <img
                                           src={url}
-                                          alt={`Image ${imgIndex + 1} of book ${displayIndex}`}
+                                          alt={`Image ${
+                                            imgIndex + 1
+                                          } of book ${displayIndex}`}
                                           className="w-full h-full object-cover"
                                         />
                                       </div>
@@ -206,7 +209,7 @@ export default function CartPage() {
                             </h3>
                             {/* Price - Smaller size, bolder weight */}
                             <p className="text-sm md:text-base font-body-bold text-dark-gray">
-                              120 ₪
+                              {BOOK_PRICE} ₪
                             </p>
                           </div>
 
@@ -280,9 +283,11 @@ export default function CartPage() {
                               סה"כ:
                             </span>
                             <span className="text-xl font-body-bold text-black">
-                              {cart.totalAmount
-                                ? `${parseFloat(cart.totalAmount).toFixed(2)} ₪`
-                                : `${cart.items.length * 120} ₪`}
+                              {cart.items.reduce(
+                                (sum, item) => sum + item.quantity * BOOK_PRICE,
+                                0
+                              )}{" "}
+                              ₪
                             </span>
                           </div>
                           <div className="pt-4 border-t border-gray-200">
@@ -312,7 +317,7 @@ export default function CartPage() {
                             )}
                           </Button>
                         </div>
-                        
+
                         {/* Add Book Button */}
                         <div className="mt-3">
                           <Button
@@ -347,9 +352,11 @@ export default function CartPage() {
                             סה"כ:
                           </span>
                           <span className="text-xl font-body-bold text-black">
-                            {cart.totalAmount
-                              ? `${parseFloat(cart.totalAmount).toFixed(2)} ₪`
-                              : `${cart.items.length * 120} ₪`}
+                            {cart.items.reduce(
+                              (sum, item) => sum + item.quantity * BOOK_PRICE,
+                              0
+                            )}{" "}
+                            ₪
                           </span>
                         </div>
                         <div className="pt-4 border-t border-gray-200">
@@ -379,7 +386,7 @@ export default function CartPage() {
                           "המשך לתשלום"
                         )}
                       </Button>
-                      
+
                       {/* Add Book Button */}
                       <Button
                         onClick={() => router.push("/upload?new=1")}

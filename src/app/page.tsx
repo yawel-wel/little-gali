@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { BOOK_PRICE } from "@/lib/constants";
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
@@ -281,18 +282,6 @@ export default function Home() {
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 {/* Left Column - Text Content */}
                 <div className="order-1 lg:order-1 space-y-6">
-                  {/* New Badge */}
-                  <div className="flex justify-center lg:justify-start">
-                    <div
-                      className="inline-flex items-center justify-center px-4 py-1 rounded-full"
-                      style={{ backgroundColor: "#F8D9C4" }}
-                    >
-                      <span className="text-sm font-body-bold text-black">
-                        חדש
-                      </span>
-                    </div>
-                  </div>
-
                   {/* Title with Highlight */}
                   <div className="-mt-3">
                     <Title
@@ -326,7 +315,7 @@ export default function Home() {
                   {/* Price */}
                   <div className="flex items-center justify-center lg:justify-start gap-2">
                     <span className="text-xl font-heading text-dark-gray">
-                      מחיר השקה: 120 ₪
+                      מחיר: {BOOK_PRICE} ₪
                     </span>
                   </div>
 

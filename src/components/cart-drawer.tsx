@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/CartContext";
+import { BOOK_PRICE } from "@/lib/constants";
 import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { QuantityControls } from "@/components/quantity-controls";
@@ -115,7 +116,7 @@ export function CartDrawer() {
               <div className="space-y-3 px-4">
                 {[...cart.items].reverse().map((item, reversedIndex) => {
                   const displayIndex = reversedIndex + 1;
-                  const itemTotal = item.quantity * 120;
+                  const itemTotal = item.quantity * BOOK_PRICE;
                   return (
                     <div
                       key={item.id}
@@ -180,7 +181,7 @@ export function CartDrawer() {
                         </h3>
                         {/* Price - Bolder weight */}
                         <p className="text-sm font-body-bold text-dark-gray">
-                          120 ₪
+                          {BOOK_PRICE} ₪
                         </p>
                       </div>
 
@@ -251,9 +252,7 @@ export function CartDrawer() {
                   סה"כ:
                 </span>
                 <span className="text-xl font-body-bold text-black">
-                  {cart.totalAmount
-                    ? `${parseFloat(cart.totalAmount).toFixed(2)} ₪`
-                    : `${cart.items.length * 120} ₪`}
+                  {cart.items.reduce((sum, item) => sum + item.quantity * BOOK_PRICE, 0)} ₪
                 </span>
               </div>
               <Button
