@@ -1,6 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export function Footer() {
+  const { t, locale } = useLanguage();
   return (
     <footer className="bg-white">
       {/* Upper Section - White Background with Columns */}
@@ -11,10 +15,12 @@ export function Footer() {
             <div className="mb-4">
               <img src="/logo.png" alt="Little Gali" className="h-8 w-auto" />
             </div>
-            <p className="font-body text-medium-gray text-sm leading-relaxed mb-6">
-              Little Gali הופך תמונות רגילות ליצירות שחור-לבן עדינות שמתאימות
-              במיוחד לראיית תינוקות. נולד מאמא שאהבה לראות את התינוקת שלה נמשכת
-              לפנים מוכרות.
+            <p
+              className={`font-body text-medium-gray text-sm leading-relaxed mb-6 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("footer.description")}
             </p>
             {/* Social Media Icons - temporarily disabled */}
             {/**
@@ -26,32 +32,28 @@ export function Footer() {
 
           {/* Column 2: Platform */}
           <div className="order-2 lg:order-2">
-            <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-              פלטפורמה
+            <h3
+              className={`font-heading text-dark-gray text-lg font-bold mb-4 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("footer.platform")}
             </h3>
-            <ul className="space-y-3">
+            <ul className={`space-y-3 ${locale === "en" ? "text-left" : "text-right"}`}>
               <li>
                 <a
-                  href="#"
+                  href="/#how-it-works"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  איך זה עובד
+                  {t("footer.howItWorks")}
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/inspiration"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  מדריך בחירת תמונה
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  גלריית השראה
+                  {t("footer.inspiration")}
                 </a>
               </li>
               <li>
@@ -59,7 +61,7 @@ export function Footer() {
                   href="/qa"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  שאלות ותשובות
+                  {t("nav.qa")}
                 </a>
               </li>
             </ul>
@@ -67,16 +69,20 @@ export function Footer() {
 
           {/* Column 3: Policies */}
           <div className="order-3 lg:order-3">
-            <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-              תקנונים
+            <h3
+              className={`font-heading text-dark-gray text-lg font-bold mb-4 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("footer.policies")}
             </h3>
-            <ul className="space-y-3">
+            <ul className={`space-y-3 ${locale === "en" ? "text-left" : "text-right"}`}>
               <li>
                 <a
                   href="/terms"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  תנאי שירות
+                  {t("footer.terms")}
                 </a>
               </li>
               <li>
@@ -84,7 +90,7 @@ export function Footer() {
                   href="/privacy"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  פרטיות
+                  {t("footer.privacy")}
                 </a>
               </li>
               <li>
@@ -92,7 +98,7 @@ export function Footer() {
                   href="/shipping"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  משלוחים
+                  {t("footer.shipping")}
                 </a>
               </li>
               <li>
@@ -100,7 +106,7 @@ export function Footer() {
                   href="/returns"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  החזרות
+                  {t("footer.returns")}
                 </a>
               </li>
             </ul>
@@ -108,16 +114,20 @@ export function Footer() {
 
           {/* Column 4: About */}
           <div className="order-4 lg:order-4">
-            <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-              אודות
+            <h3
+              className={`font-heading text-dark-gray text-lg font-bold mb-4 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("footer.about")}
             </h3>
-            <ul className="space-y-3">
+            <ul className={`space-y-3 ${locale === "en" ? "text-left" : "text-right"}`}>
               <li>
                 <a
-                  href="#"
+                  href="/#about"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  מי אנחנו
+                  {t("footer.whoWeAre")}
                 </a>
               </li>
               <li>
@@ -125,7 +135,7 @@ export function Footer() {
                   href="/contact"
                   className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
                 >
-                  צרו קשר
+                  {t("footer.contact")}
                 </a>
               </li>
             </ul>
@@ -133,12 +143,16 @@ export function Footer() {
 
           {/* Column 5: Contact US (Left side) */}
           <div className="order-5 lg:order-5">
-            <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-              צרו קשר
+            <h3
+              className={`font-heading text-dark-gray text-lg font-bold mb-4 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("footer.contact")}
             </h3>
             <a href="/contact">
               <Button className="cursor-pointer bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
-                צרו איתנו קשר
+                {t("footer.contactUs")}
               </Button>
             </a>
           </div>
@@ -149,7 +163,7 @@ export function Footer() {
       <div className="bg-gray-800 py-4">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center font-body text-white/80 text-sm">
-            © Copyright Little Gali. כל הזכויות שמורות.
+            {t("footer.copyright")}
           </p>
         </div>
       </div>

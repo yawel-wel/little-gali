@@ -16,9 +16,11 @@ import { BOOK_PRICE } from "@/lib/constants";
 import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { QuantityControls } from "@/components/quantity-controls";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export function CartDrawer() {
   const { cart, isLoading, removeFromCart, updateQuantity } = useCart();
+  const { t } = useLanguage();
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -179,7 +181,7 @@ export function CartDrawer() {
                       <div className="mb-3">
                         {/* Title - Smaller size */}
                         <h3 className="text-sm font-body text-dark-gray mb-1">
-                          ספר {displayIndex}
+                          {t("cart.book")} {displayIndex}
                         </h3>
                         {/* Price - Bolder weight */}
                         <p className="text-sm font-body-bold text-dark-gray">
@@ -190,13 +192,13 @@ export function CartDrawer() {
                       {/* Item Details with inline values */}
                       <div className="text-xs text-medium-gray font-body space-y-0.5 mb-2">
                         <div>
-                          <span>כמות: </span>
+                          <span>{t("cart.quantity")} </span>
                           <span className="font-body text-dark-gray">
                             {item.quantity}
                           </span>
                         </div>
                         <div>
-                          <span>סה״כ לפריט: </span>
+                          <span>{t("cart.itemTotal")} </span>
                           <span className="font-body text-dark-gray">
                             {itemTotal} ₪
                           </span>
@@ -235,12 +237,12 @@ export function CartDrawer() {
             ) : (
               <div className="text-center py-12 px-4">
                 <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-medium-gray font-body">העגלה שלך ריקה</p>
+                <p className="text-medium-gray font-body">{t("cart.empty")}</p>
                 <Button
                   onClick={() => router.push("/upload")}
                   className="mt-4 bg-primary-orange hover:bg-primary-orange/90 text-white cursor-pointer"
                 >
-                  צרו ספרון
+                  {t("nav.createBook")}
                 </Button>
               </div>
             )}
@@ -251,7 +253,7 @@ export function CartDrawer() {
             <div className="border-t border-gray-200 px-4 py-4">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-body-bold text-dark-gray">
-                  סה"כ:
+                  {t("cart.total")}
                 </span>
                 <span className="text-xl font-body-bold text-black">
                   {cart.items.reduce(
@@ -273,10 +275,10 @@ export function CartDrawer() {
                 {isLoading || isActionLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    טוען...
+                    {t("cart.loading")}
                   </>
                 ) : (
-                  "המשך לתשלום"
+                  t("cart.checkout")
                 )}
               </Button>
               <Button
@@ -284,7 +286,7 @@ export function CartDrawer() {
                 variant="outline"
                 className="w-full mt-2 border-primary-orange text-primary-orange hover:bg-primary-orange/10 cursor-pointer"
               >
-                צפה בעגלה המלאה
+                {t("cart.viewFull")}
               </Button>
             </div>
           )}
@@ -296,10 +298,10 @@ export function CartDrawer() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader className="!text-center">
             <DialogTitle className="font-body-bold text-dark-gray mt-4">
-              הסרת פריט מהעגלה
+              {t("cart.removeItem")}
             </DialogTitle>
             <DialogDescription className="font-body text-medium-gray">
-              האם אתה בטוח שברצונך להסיר את הספר מהעגלה?
+              {t("cart.removeConfirm")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-row-reverse gap-2 sm:gap-0 mt-4">
@@ -307,14 +309,14 @@ export function CartDrawer() {
               onClick={handleConfirmRemove}
               className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold cursor-pointer"
             >
-              הסר
+              {t("cart.remove")}
             </Button>
             <Button
               onClick={handleCancelRemove}
               variant="outline"
               className="border-gray-300 text-dark-gray hover:bg-gray-50 font-body-bold cursor-pointer"
             >
-              ביטול
+              {t("cart.cancel")}
             </Button>
           </DialogFooter>
         </DialogContent>

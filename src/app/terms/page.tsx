@@ -1,7 +1,12 @@
-import { Header } from "@/components/header";
-import { Button } from "@/components/ui/button";
+"use client";
 
-export default function TermsPage() {
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { useLanguage } from "@/lib/LanguageContext";
+import { useState, useEffect } from "react";
+
+function TermsPageContent() {
+  const { t, locale } = useLanguage();
   return (
     <div
       className="min-h-screen overflow-x-hidden"
@@ -18,175 +23,171 @@ export default function TermsPage() {
             <div className="max-w-4xl mx-auto">
               {/* Page Title */}
               <div className="text-center mb-12">
-                <h1 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight mb-4">
-                  תנאי השירות
+                <h1 className={`text-3xl lg:text-4xl font-heading text-dark-gray leading-tight mb-4 ${
+                  locale === "en" ? "text-left" : "text-right"
+                }`}>
+                  {t("terms.title")}
                 </h1>
               </div>
 
               {/* Intro */}
-              <div className="font-body text-medium-gray leading-relaxed mb-8">
+              <div className={`font-body text-medium-gray leading-relaxed mb-8 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}>
                 <p className="mb-4">
-                  ברוכים הבאים לאתר Little Gali. השימוש באתר והשירותים הניתנים
-                  בו כפופים לתנאים המפורטים להלן. בעת גלישה באתר וביצוע הזמנה,
-                  אתם מאשרים כי קראתם והסכמתם לתנאים אלה במלואם.
+                  {t("terms.intro")}
                 </p>
               </div>
 
               {/* Content */}
-              <div className="space-y-8 font-body text-medium-gray leading-relaxed">
+              <div className={`space-y-8 font-body text-medium-gray leading-relaxed ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}>
                 {/* שימוש באתר */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    שימוש באתר
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.useOfSite.title")}
                   </h2>
                   <p className="mb-4">
-                    האתר מאפשר הזמנת ספרונים אישיים לתינוקות המבוססים על תמונות
-                    שהמשתמש מעלה. השימוש באתר מותר למטרות אישיות ופרטיות בלבד.
+                    {t("terms.useOfSite.p1")}
                   </p>
                   <p>
-                    חל איסור להשתמש באתר למטרות מסחריות שאינן באישורנו, להעלות
-                    תוכן פוגעני, לא חוקי, או תמונות שאינן בבעלות המשתמש.
+                    {t("terms.useOfSite.p2")}
                   </p>
                 </div>
 
                 {/* אחריות המשתמש */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    אחריות המשתמש
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.userResponsibility.title")}
                   </h2>
                   <p className="mb-4">
-                    המשתמש מצהיר כי יש לו זכויות מלאות על התמונות שהוא מעלה, וכי
-                    השימוש בהן לצורך הפקת הספרון אינו מפר זכויות יוצרים, פרטיות
-                    או כל דין אחר.
+                    {t("terms.userResponsibility.p1")}
                   </p>
                   <p>
-                    המשתמש מאשר כי לא יעלה תמונות של קטינים או צדדים שלישיים ללא
-                    הסכמתם, וכי כל האחריות המשפטית בגין התוכן שהועלה חלה עליו
-                    בלבד.
+                    {t("terms.userResponsibility.p2")}
                   </p>
                 </div>
 
                 {/* הזמנות ותשלום */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    הזמנות ותשלום
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.ordersAndPayment.title")}
                   </h2>
                   <p className="mb-4">
-                    המחירים באתר מוצגים במטבע המצוין בעמוד ההזמנה וכוללים מע״מ
-                    בהתאם לחוק. התשלום מתבצע באמצעות מערכת סליקה מאובטחת,
-                    וההזמנה תיחשב סופית לאחר אישור התשלום.
+                    {t("terms.ordersAndPayment.p1")}
                   </p>
                   <p>
-                    החברה שומרת לעצמה את הזכות לבטל הזמנה במקרה של טעות במחיר,
-                    תקלה טכנית, חוסר זמינות או שימוש שאינו תקין באתר.
+                    {t("terms.ordersAndPayment.p2")}
                   </p>
                 </div>
 
                 {/* הפקת המוצר */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    הפקת המוצר
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.productProduction.title")}
                   </h2>
                   <p className="mb-4">
-                    כל ספרון מופק בהתאמה אישית על בסיס התמונות שהועלו.
+                    {t("terms.productProduction.p1")}
                   </p>
                   <p>
-                    מאחר שמדובר במוצר ייחודי ומותאם אישית, לא ניתן לשנות, לבטל
-                    או לבקש החזר לאחר ביצוע ההזמנה, למעט בהתאם למדיניות ההחזרים
-                    של האתר.
+                    {t("terms.productProduction.p2")}
                   </p>
                 </div>
 
                 {/* אחריות ושירות */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    אחריות ושירות
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.warrantyAndService.title")}
                   </h2>
                   <p className="mb-4">
-                    אנו מקפידות על איכות גבוהה של הדפסה וייצור, אך ייתכנו הבדלים
-                    קלים בגוון, חיתוך או ניגודיות בין התצוגה במסך לבין ההדפסה
-                    בפועל. הבדלים אלה נחשבים תקינים ואינם מהווים עילה לביטול
-                    עסקה.
+                    {t("terms.warrantyAndService.p1")}
                   </p>
                   <p>
-                    במקרה של מוצר פגום או נזק במשלוח, נטפל בכך בהתאם למדיניות
-                    ההחזרים שלנו.
+                    {t("terms.warrantyAndService.p2")}
                   </p>
                 </div>
 
                 {/* שימוש בטוח במוצרים לתינוקות */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    שימוש בטוח במוצרים לתינוקות
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.safeUse.title")}
                   </h2>
                   <p className="mb-4">
-                    מוצרי Little Gali נועדו לשימוש הורי ולהשגחת מבוגר בלבד.
+                    {t("terms.safeUse.p1")}
                   </p>
                   <p className="mb-4">
-                    הספרונים עשויים מנייר עבה (300 גרם) עם למינציה לשמירה על
-                    עמידות, אך אינם מיועדים לנשיכה, לעיסה או מגע ממושך עם רוק או
-                    נוזלים אחרים. אין להשאיר את המוצר ללא השגחה בקרבת תינוק או
-                    פעוט.
+                    {t("terms.safeUse.p2")}
                   </p>
                   <p>
-                    החברה אינה אחראית לכל נזק, ישיר או עקיף, שייגרם עקב שימוש
-                    שאינו בהתאם להנחיות אלו. השימוש במוצר מהווה אישור לכך
-                    שהלקוח/ה קרא/ה את ההנחיות ומקבל/ת אחריות מלאה לשימוש בטוח
-                    ומושכל.
+                    {t("terms.safeUse.p3")}
                   </p>
                 </div>
 
                 {/* קניין רוחני */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    קניין רוחני
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.intellectualProperty.title")}
                   </h2>
                   <p>
-                    כל זכויות היוצרים, העיצוב, התמונות, התוכן והקוד באתר שייכים
-                    ל־Little Gali, ואין להעתיק, להפיץ, לשכפל או להשתמש בהם ללא
-                    אישור מראש ובכתב.
+                    {t("terms.intellectualProperty.p1")}
                   </p>
                 </div>
 
                 {/* הגבלת אחריות */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    הגבלת אחריות
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.liabilityLimitation.title")}
                   </h2>
                   <p>
-                    השימוש באתר ובמוצרים נעשה באחריות המשתמש בלבד. Little Gali
-                    אינה אחראית לנזקים עקיפים, אובדן מידע, הפסדים או כל נזק
-                    תוצאתי אחר שנגרם עקב שימוש באתר, בשירות או במוצרים.
+                    {t("terms.liabilityLimitation.p1")}
                   </p>
                 </div>
 
                 {/* שינוי תנאים */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    שינוי תנאים
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.termsChanges.title")}
                   </h2>
                   <p>
-                    אנו שומרות לעצמנו את הזכות לעדכן או לשנות את תנאי השירות מעת
-                    לעת. הגרסה העדכנית תפורסם באתר, והמשך השימוש מהווה הסכמה
-                    לתנאים המעודכנים.
+                    {t("terms.termsChanges.p1")}
                   </p>
                 </div>
 
                 {/* יצירת קשר */}
                 <div>
-                  <h2 className="text-2xl font-heading text-dark-gray mb-4 font-bold">
-                    יצירת קשר
+                  <h2 className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    {t("terms.contact.title")}
                   </h2>
                   <p>
-                    לשאלות או הבהרות בנושא תנאי השירות ניתן לפנות אלינו באמצעות
-                    עמוד{" "}
+                    {t("terms.contact.p1")}{" "}
                     <a
                       href="/contact"
                       className="text-primary-orange hover:text-primary-orange/80 underline"
                     >
-                      צור קשר
+                      {t("terms.contact.link")}
                     </a>{" "}
-                    או במייל:
+                    {t("terms.contact.p2")}
                   </p>
                   <p className="mt-2">
                     📧{" "}
@@ -204,190 +205,30 @@ export default function TermsPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white">
-        {/* Upper Section - White Background with Columns */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
-            {/* Column 1: Logo/Brand (Right side) */}
-            <div className="col-span-2 lg:col-span-1 order-1 lg:order-1">
-              <div className="mb-4">
-                <img src="/logo.png" alt="Little Gali" className="h-8 w-auto" />
-              </div>
-              <p className="font-body text-medium-gray text-sm leading-relaxed mb-6">
-                Little Gali הופך תמונות רגילות ליצירות שחור-לבן עדינות שמתאימות
-                במיוחד לראיית תינוקות. נולד מאמא שאהבה לראות את התינוקת שלה
-                נמשכת לפנים מוכרות.
-              </p>
-              {/* Social Media Icons */}
-              <div className="flex gap-3">
-                <a
-                  href="#"
-                  className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                  aria-label="Facebook"
-                >
-                  <svg
-                    className="w-5 h-5 text-black"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                </a>
-                <a
-                  href="#"
-                  className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                  aria-label="Instagram"
-                >
-                  <svg
-                    className="w-5 h-5 text-black"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-
-            {/* Column 2: Platform */}
-            <div className="order-2 lg:order-2">
-              <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-                פלטפורמה
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <a
-                    href="#"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    איך זה עובד
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    מדריך בחירת תמונה
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    גלריית השראה
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/qa"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    שאלות ותשובות
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    ראיית תינוקות
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Policies */}
-            <div className="order-3 lg:order-3">
-              <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-                תקנונים
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <a
-                    href="/terms"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    תנאי שירות
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/privacy"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    פרטיות
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/shipping"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    משלוחים
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/returns"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    החזרות
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 4: About */}
-            <div className="order-4 lg:order-4">
-              <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-                אודות
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <a
-                    href="#"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    מי אנחנו
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/contact"
-                    className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                  >
-                    צרו קשר
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 5: Contact US (Left side) */}
-            <div className="order-5 lg:order-5">
-              <h3 className="font-heading text-dark-gray text-lg font-bold mb-4">
-                צרו קשר
-              </h3>
-              <a href="/contact">
-                <Button className="cursor-pointer bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200">
-                  צרו איתנו קשר
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Section - Dark Gray Bar */}
-        <div className="bg-gray-800 py-4">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-center font-body text-white/80 text-sm">
-              © Copyright Little Gali. כל הזכויות שמורות.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
+}
+
+export default function TermsPage() {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div
+        className="min-h-screen overflow-x-hidden"
+        style={{ backgroundColor: "#F9F7EE" }}
+      >
+        <Header />
+        <div className="min-h-screen"></div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return <TermsPageContent />;
 }

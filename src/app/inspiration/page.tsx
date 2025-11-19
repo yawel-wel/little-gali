@@ -7,11 +7,13 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { RotateCw } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
 export default function InspirationPage() {
   const prefersReducedMotion = useReducedMotion();
+  const { t, locale } = useLanguage();
   const [cardStates, setCardStates] = useState({
     card1: false,
     card2: false,
@@ -52,12 +54,13 @@ export default function InspirationPage() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <Title highlightText="השראה" size="xl" className="mb-4">
-                השראה לספרונים
+              <Title highlightText={t("inspiration.titleHighlight")} size="xl" className="mb-4">
+                {t("inspiration.title")}
               </Title>
-              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                צפו בדוגמאות לסוגי ספרונים כדי לעזור לכם לבחור תמונות וליצור
-                ספרון משלכם
+              <p className={`text-lg font-body text-medium-gray max-w-2xl mx-auto ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}>
+                {t("inspiration.subtitle")}
               </p>
             </div>
 
@@ -81,31 +84,38 @@ export default function InspirationPage() {
                     }}
                   >
                     <p className="text-sm font-body-bold text-black">
-                      {cardStates.card1 ? "צבעוני" : "שחור לבן"}
+                      {cardStates.card1 ? t("inspiration.colorful") : t("inspiration.blackWhite")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row pt-16 md:pt-10">
                   {/* Left Section - Text */}
-                  <div className="w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center text-right">
-                    <h3 className="text-2xl font-heading font-bold text-dark-gray mb-4">
-                      ספרון משפחה גרעינית
+                  <div className={`w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    <h3 className={`text-2xl font-heading font-bold text-dark-gray mb-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}>
+                      {t("inspiration.card1.title")}
                     </h3>
-                    <p className="text-base font-body text-medium-gray leading-relaxed">
-                      הפנים הקרובות ביותר לתינוק – אמא, אבא, ואולי גם אח, אחות
-                      או הכלב המשפחתי. הספרון שמעניק לו תחושת רוגע וחיבור למשפחה
+                    <p className={`text-base font-body text-medium-gray leading-relaxed ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}>
+                      {t("inspiration.card1.description")}
                     </p>
                     {/* Switch Button */}
                     <button
                       type="button"
                       onClick={() => toggleCard("card1")}
-                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer"
+                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer ${
+                        locale === "en" ? "justify-start" : "justify-end"
+                      }`}
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card1
-                          ? "החלף לצד שחור לבן"
-                          : "החלף לצד צבעוני"}
+                          ? t("inspiration.switchToBlackWhite")
+                          : t("inspiration.switchToColorful")}
                       </span>
                       <RotateCw
                         className={`w-4 h-4 transition-transform duration-500 ${
@@ -224,31 +234,38 @@ export default function InspirationPage() {
                     }}
                   >
                     <p className="text-sm font-body-bold text-black">
-                      {cardStates.card2 ? "צבעוני" : "שחור לבן"}
+                      {cardStates.card2 ? t("inspiration.colorful") : t("inspiration.blackWhite")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row pt-16 md:pt-10">
                   {/* Left Section - Text */}
-                  <div className="w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center text-right">
-                    <h3 className="text-2xl font-heading font-bold text-dark-gray mb-4">
-                      הכירו את שאר המשפחה
+                  <div className={`w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    <h3 className={`text-2xl font-heading font-bold text-dark-gray mb-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}>
+                      {t("inspiration.card2.title")}
                     </h3>
-                    <p className="text-base font-body text-medium-gray leading-relaxed">
-                      סבים, סבתות, דודים, בני דודים – כל מי שאוהב ומכיר את
-                      התינוק. דרך מתוקה לעודד היכרות וחיבור גם מרחוק
+                    <p className={`text-base font-body text-medium-gray leading-relaxed ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}>
+                      {t("inspiration.card2.description")}
                     </p>
                     {/* Switch Button */}
                     <button
                       type="button"
                       onClick={() => toggleCard("card2")}
-                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer"
+                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer ${
+                        locale === "en" ? "justify-start" : "justify-end"
+                      }`}
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card2
-                          ? "החלף לצד שחור לבן"
-                          : "החלף לצד צבעוני"}
+                          ? t("inspiration.switchToBlackWhite")
+                          : t("inspiration.switchToColorful")}
                       </span>
                       <RotateCw
                         className={`w-4 h-4 transition-transform duration-500 ${
@@ -384,31 +401,38 @@ export default function InspirationPage() {
                     }}
                   >
                     <p className="text-sm font-body-bold text-black">
-                      {cardStates.card3 ? "צבעוני" : "שחור לבן"}
+                      {cardStates.card3 ? t("inspiration.colorful") : t("inspiration.blackWhite")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row pt-16 md:pt-10">
                   {/* Left Section - Text */}
-                  <div className="w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center text-right">
-                    <h3 className="text-2xl font-heading font-bold text-dark-gray mb-4">
-                      ספר תינוקי
+                  <div className={`w-full md:w-1/3 p-6 md:p-8 flex flex-col justify-center ${
+                    locale === "en" ? "text-left" : "text-right"
+                  }`}>
+                    <h3 className={`text-2xl font-heading font-bold text-dark-gray mb-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}>
+                      {t("inspiration.card3.title")}
                     </h3>
-                    <p className="text-base font-body text-medium-gray leading-relaxed">
-                      רגעים שונים של התינוק עצמו – חיוך, פליאה, מבט סקרן. ספרון
-                      אישי ופשוט שמרתק כל תינוק
+                    <p className={`text-base font-body text-medium-gray leading-relaxed ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}>
+                      {t("inspiration.card3.description")}
                     </p>
                     {/* Switch Button */}
                     <button
                       type="button"
                       onClick={() => toggleCard("card3")}
-                      className="flex items-center justify-start gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer"
+                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer ${
+                        locale === "en" ? "justify-start" : "justify-end"
+                      }`}
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card3
-                          ? "החלף לצד שחור לבן"
-                          : "החלף לצד צבעוני"}
+                          ? t("inspiration.switchToBlackWhite")
+                          : t("inspiration.switchToColorful")}
                       </span>
                       <RotateCw
                         className={`w-4 h-4 transition-transform duration-500 ${
@@ -537,7 +561,7 @@ export default function InspirationPage() {
               >
                 <a href="/upload">
                   <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-base transition-all duration-200">
-                    התחילו ליצור את הספרון שלכם
+                    {t("inspiration.cta")}
                   </Button>
                 </a>
               </motion.div>

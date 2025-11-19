@@ -7,11 +7,13 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
 export default function ContactPage() {
   const prefersReducedMotion = useReducedMotion();
+  const { t, locale } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,7 +44,7 @@ export default function ContactPage() {
       if (response.ok) {
         setSubmitStatus({
           type: "success",
-          message: data.message || "ההודעה נשלחה בהצלחה!",
+          message: data.message || t("contact.success"),
         });
         // Reset form
         setFormData({
@@ -53,13 +55,13 @@ export default function ContactPage() {
       } else {
         setSubmitStatus({
           type: "error",
-          message: data.error || "שגיאה בשליחת ההודעה. אנא נסה שוב.",
+          message: data.error || t("contact.error"),
         });
       }
     } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: "שגיאה בשרת. אנא נסה שוב מאוחר יותר.",
+        message: t("contact.serverError"),
       });
     } finally {
       setIsSubmitting(false);
@@ -110,9 +112,17 @@ export default function ContactPage() {
                 >
                   <div className="space-y-6">
                     {/* Title */}
-                    <div>
-                      <Title highlightText="קשר" size="lg">
-                        צרו איתנו קשר
+                    <div className="w-full">
+                      <Title
+                        highlightText={t("contact.titleHighlight")}
+                        size="lg"
+                        className={`w-full m-0 ${
+                          locale === "en"
+                            ? "text-center lg:text-left"
+                            : "text-center lg:text-right"
+                        }`}
+                      >
+                        {t("contact.title")}
                       </Title>
                     </div>
 
@@ -142,9 +152,12 @@ export default function ContactPage() {
                     <div>
                       <label
                         htmlFor="name"
-                        className="block text-sm font-body-bold text-dark-gray mb-2"
+                        className={`block text-sm font-body-bold text-dark-gray mb-2 ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
                       >
-                        שם <span className="text-primary-orange">*</span>
+                        {t("contact.name")}{" "}
+                        <span className="text-primary-orange">*</span>
                       </label>
                       <Input
                         type="text"
@@ -153,8 +166,10 @@ export default function ContactPage() {
                         required
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white"
-                        placeholder="הכנס את שמך"
+                        className={`w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
+                        placeholder={t("contact.namePlaceholder")}
                       />
                     </div>
 
@@ -162,9 +177,12 @@ export default function ContactPage() {
                     <div>
                       <label
                         htmlFor="email"
-                        className="block text-sm font-body-bold text-dark-gray mb-2"
+                        className={`block text-sm font-body-bold text-dark-gray mb-2 ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
                       >
-                        אימייל <span className="text-primary-orange">*</span>
+                        {t("contact.email")}{" "}
+                        <span className="text-primary-orange">*</span>
                       </label>
                       <Input
                         type="email"
@@ -173,8 +191,10 @@ export default function ContactPage() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white"
-                        placeholder="הכנס את כתובת האימייל שלך"
+                        className={`w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
+                        placeholder={t("contact.emailPlaceholder")}
                       />
                     </div>
 
@@ -182,9 +202,12 @@ export default function ContactPage() {
                     <div>
                       <label
                         htmlFor="message"
-                        className="block text-sm font-body-bold text-dark-gray mb-2"
+                        className={`block text-sm font-body-bold text-dark-gray mb-2 ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
                       >
-                        הודעה <span className="text-primary-orange">*</span>
+                        {t("contact.message")}{" "}
+                        <span className="text-primary-orange">*</span>
                       </label>
                       <textarea
                         id="message"
@@ -193,8 +216,10 @@ export default function ContactPage() {
                         value={formData.message}
                         onChange={handleChange}
                         rows={8}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white resize-none font-body text-dark-gray"
-                        placeholder="השאר את הודעתך כאן..."
+                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white resize-none font-body text-dark-gray ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
+                        placeholder={t("contact.messagePlaceholder")}
                       />
                     </div>
 
@@ -228,7 +253,9 @@ export default function ContactPage() {
                           disabled={isSubmitting}
                           className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {isSubmitting ? "שולח..." : "שלח הודעה"}
+                          {isSubmitting
+                            ? t("contact.submitting")
+                            : t("contact.submit")}
                         </Button>
                       </motion.div>
                     </div>

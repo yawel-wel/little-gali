@@ -18,11 +18,13 @@ import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
 import { QuantityControls } from "@/components/quantity-controls";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, updateQuantity, fetchCart } =
     useCart();
   const router = useRouter();
+  const { t, locale } = useLanguage();
   const [isOptimisticAdding, setIsOptimisticAdding] = useState(false);
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -104,12 +106,12 @@ export default function CartPage() {
               {/* Title */}
               <div className="text-center space-y-4">
                 <Title
-                  highlightText="עגלה"
+                  highlightText={t("cart.titleHighlight")}
                   size="xl"
                   roundedUnderline
                   className="font-bold"
                 >
-                  עגלת הקניות
+                  {t("cart.title")}
                 </Title>
               </div>
 
@@ -204,25 +206,37 @@ export default function CartPage() {
                           {/* Title and Price - Separate row below images */}
                           <div className="mb-4">
                             {/* Title - Smaller size, regular weight */}
-                            <h3 className="text-sm md:text-base font-body text-dark-gray mb-1">
-                              ספר {displayIndex}
+                            <h3
+                              className={`text-sm md:text-base font-body text-dark-gray mb-1 ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.book")} {displayIndex}
                             </h3>
                             {/* Price - Smaller size, bolder weight */}
-                            <p className="text-sm md:text-base font-body-bold text-dark-gray">
+                            <p
+                              className={`text-sm md:text-base font-body-bold text-dark-gray ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
                               {BOOK_PRICE} ₪
                             </p>
                           </div>
 
                           {/* Item Details with inline values */}
-                          <div className="text-sm text-medium-gray font-body space-y-1 mb-3">
+                          <div
+                            className={`text-sm text-medium-gray font-body space-y-1 mb-3 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
                             <div>
-                              <span>כמות: </span>
+                              <span>{t("cart.quantity")} </span>
                               <span className="font-body text-dark-gray">
                                 {item.quantity}
                               </span>
                             </div>
                             <div>
-                              <span>סה״כ לפריט: </span>
+                              <span>{t("cart.itemTotal")} </span>
                               <span className="font-body text-dark-gray">
                                 {itemTotal} ₪
                               </span>
@@ -266,21 +280,33 @@ export default function CartPage() {
                   <div className="hidden md:block md:w-80 md:flex-shrink-0">
                     <div className="sticky top-4">
                       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                        <h2 className="text-xl font-body-bold text-dark-gray mb-4">
-                          סיכום הזמנה
+                        <h2
+                          className={`text-xl font-body-bold text-dark-gray mb-4 ${
+                            locale === "en" ? "text-left" : "text-right"
+                          }`}
+                        >
+                          {t("cart.orderSummary")}
                         </h2>
                         <div className="space-y-3">
-                          <div className="flex justify-between items-center">
+                          <div
+                            className={`flex justify-between items-center ${
+                              locale === "en" ? "flex-row" : "flex-row-reverse"
+                            }`}
+                          >
                             <span className="text-medium-gray font-body">
-                              כמות פריטים:
+                              {t("cart.itemsCount")}
                             </span>
                             <span className="font-body-bold text-dark-gray">
                               {cart.totalQuantity}
                             </span>
                           </div>
-                          <div className="flex justify-between items-center">
+                          <div
+                            className={`flex justify-between items-center ${
+                              locale === "en" ? "flex-row" : "flex-row-reverse"
+                            }`}
+                          >
                             <span className="text-medium-gray font-body">
-                              סה"כ:
+                              {t("cart.total")}
                             </span>
                             <span className="text-xl font-body-bold text-black">
                               {cart.items.reduce(
@@ -291,11 +317,19 @@ export default function CartPage() {
                             </span>
                           </div>
                           <div className="pt-4 border-t border-gray-200">
-                            <p className="text-sm text-medium-gray font-body mb-4">
-                              זמן אספקה - עד 14 ימי עסקים
+                            <p
+                              className={`text-sm text-medium-gray font-body mb-4 ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.deliveryTime")}
                             </p>
-                            <p className="text-sm text-medium-gray font-body">
-                              הודעה תשלח כשהספרון מוכן בשביל תיאום לאיסוף
+                            <p
+                              className={`text-sm text-medium-gray font-body ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.readyMessage")}
                             </p>
                           </div>
                         </div>
@@ -309,11 +343,15 @@ export default function CartPage() {
                           >
                             {isCheckingOut ? (
                               <>
-                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                                מעבר לתשלום...
+                                <Loader2
+                                  className={`w-5 h-5 animate-spin ${
+                                    locale === "en" ? "mr-2" : "ml-2"
+                                  }`}
+                                />
+                                {t("cart.checkoutProgress")}
                               </>
                             ) : (
-                              "המשך לתשלום"
+                              t("cart.checkout")
                             )}
                           </Button>
                         </div>
@@ -325,13 +363,21 @@ export default function CartPage() {
                             variant="outline"
                             className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
                           >
-                            הוסף ספרון
+                            {t("cart.addBook")}
                           </Button>
-                          <p className="text-sm font-body text-medium-gray text-center mt-2">
-                            ספרון שני ב-99 ₪ 🎉
+                          <p
+                            className={`text-sm font-body text-medium-gray text-center mt-2 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.secondBook")}
                           </p>
-                          <p className="text-xs font-body text-medium-gray text-center mt-1">
-                            * ההנחה מתעדכנת אוטומטית בעמוד התשלום
+                          <p
+                            className={`text-xs font-body text-medium-gray text-center mt-1 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.discountNote")}
                           </p>
                         </div>
                       </div>
@@ -341,21 +387,33 @@ export default function CartPage() {
                   {/* Mobile: Order Summary Below Items */}
                   <div className="md:hidden space-y-6 mt-6">
                     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                      <h2 className="text-xl font-body-bold text-dark-gray mb-4">
-                        סיכום הזמנה
+                      <h2
+                        className={`text-xl font-body-bold text-dark-gray mb-4 ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
+                      >
+                        {t("cart.orderSummary")}
                       </h2>
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center">
+                        <div
+                          className={`flex justify-between items-center ${
+                            locale === "en" ? "flex-row" : "flex-row-reverse"
+                          }`}
+                        >
                           <span className="text-medium-gray font-body">
-                            כמות פריטים:
+                            {t("cart.itemsCount")}
                           </span>
                           <span className="font-body-bold text-dark-gray">
                             {cart.totalQuantity}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
+                        <div
+                          className={`flex justify-between items-center ${
+                            locale === "en" ? "flex-row" : "flex-row-reverse"
+                          }`}
+                        >
                           <span className="text-medium-gray font-body">
-                            סה"כ:
+                            {t("cart.total")}
                           </span>
                           <span className="text-xl font-body-bold text-black">
                             {cart.items.reduce(
@@ -366,11 +424,19 @@ export default function CartPage() {
                           </span>
                         </div>
                         <div className="pt-4 border-t border-gray-200">
-                          <p className="text-sm text-medium-gray font-body mb-4">
-                            זמן אספקה - עד 14 ימי עסקים
+                          <p
+                            className={`text-sm text-medium-gray font-body mb-4 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.deliveryTime")}
                           </p>
-                          <p className="text-sm text-medium-gray font-body">
-                            הודעה תשלח כשהספרון מוכן בשביל תיאום לאיסוף
+                          <p
+                            className={`text-sm text-medium-gray font-body ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.readyMessage")}
                           </p>
                         </div>
                       </div>
@@ -385,11 +451,15 @@ export default function CartPage() {
                       >
                         {isCheckingOut ? (
                           <>
-                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            מעבר לתשלום...
+                            <Loader2
+                              className={`w-5 h-5 animate-spin ${
+                                locale === "en" ? "mr-2" : "ml-2"
+                              }`}
+                            />
+                            {t("cart.checkoutProgress")}
                           </>
                         ) : (
-                          "המשך לתשלום"
+                          t("cart.checkout")
                         )}
                       </Button>
 
@@ -400,13 +470,21 @@ export default function CartPage() {
                           variant="outline"
                           className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
                         >
-                          הוסף ספרון
+                          {t("cart.addBook")}
                         </Button>
-                        <p className="text-sm font-body text-medium-gray text-center mt-2">
-                          ספרון שני ב-99 ₪ 🎉
+                        <p
+                          className={`text-sm font-body text-medium-gray text-center mt-2 ${
+                            locale === "en" ? "text-left" : "text-right"
+                          }`}
+                        >
+                          {t("cart.secondBook")}
                         </p>
-                        <p className="text-xs font-body text-medium-gray text-center mt-1">
-                          * ההנחה מתעדכנת אוטומטית בעמוד התשלום
+                        <p
+                          className={`text-xs font-body text-medium-gray text-center mt-1 ${
+                            locale === "en" ? "text-left" : "text-right"
+                          }`}
+                        >
+                          {t("cart.discountNote")}
                         </p>
                       </div>
                     </div>
@@ -415,17 +493,25 @@ export default function CartPage() {
               ) : (
                 <div className="text-center py-16">
                   <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-                  <h2 className="text-2xl font-body-bold text-dark-gray mb-4">
-                    העגלה שלך ריקה
+                  <h2
+                    className={`text-2xl font-body-bold text-dark-gray mb-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("cart.empty")}
                   </h2>
-                  <p className="text-medium-gray font-body mb-8">
-                    התחל ליצור ספרון מותאם אישית
+                  <p
+                    className={`text-medium-gray font-body mb-8 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("cart.startCreating")}
                   </p>
                   <Button
                     onClick={() => router.push("/upload")}
                     className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 px-8 cursor-pointer"
                   >
-                    צרו ספרון
+                    {t("cart.createBook")}
                   </Button>
                 </div>
               )}
@@ -439,27 +525,41 @@ export default function CartPage() {
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader className="!text-center">
-            <DialogTitle className="font-body-bold text-dark-gray mt-4">
-              הסרת פריט מהעגלה
+          <DialogHeader
+            className={locale === "en" ? "!text-left" : "!text-center"}
+          >
+            <DialogTitle
+              className={`font-body-bold text-dark-gray mt-4 ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("cart.removeItem")}
             </DialogTitle>
-            <DialogDescription className="font-body text-medium-gray">
-              האם אתה בטוח שברצונך להסיר את הספר מהעגלה?
+            <DialogDescription
+              className={`font-body text-medium-gray ${
+                locale === "en" ? "text-left" : "text-right"
+              }`}
+            >
+              {t("cart.removeConfirm")}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-row-reverse gap-2 sm:gap-0 mt-4">
+          <DialogFooter
+            className={`${
+              locale === "en" ? "flex-row" : "flex-row-reverse"
+            } gap-2 sm:gap-0 mt-4`}
+          >
             <Button
               onClick={handleConfirmRemove}
               className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold cursor-pointer"
             >
-              הסר
+              {t("cart.remove")}
             </Button>
             <Button
               onClick={handleCancelRemove}
               variant="outline"
               className="border-gray-300 text-dark-gray hover:bg-gray-50 font-body-bold cursor-pointer"
             >
-              ביטול
+              {t("cart.cancel")}
             </Button>
           </DialogFooter>
         </DialogContent>

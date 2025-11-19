@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { CartDrawer } from "@/components/cart-drawer";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
@@ -15,6 +17,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { t, locale } = useLanguage();
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -58,13 +61,14 @@ export function Header() {
 
   // Navigation items for hamburger menu (mobile and desktop)
   const mobileNavigationItems = [
-    { name: "בית", href: "/" },
-    { name: "אודותינו", href: "/#about" },
-    { name: "שאלות ותשובות", href: "/qa" },
-    { name: "השראה", href: "/inspiration" },
-    { name: "צור קשר", href: "/contact" },
+    { nameKey: "nav.home", href: "/" },
+    { nameKey: "nav.about", href: "/#about" },
+    { nameKey: "nav.qa", href: "/qa" },
+    { nameKey: "nav.inspiration", href: "/inspiration" },
+    { nameKey: "nav.contact", href: "/contact" },
   ].map((item) => ({
     ...item,
+    name: t(item.nameKey),
     active: pathname === item.href,
   }));
 
@@ -78,33 +82,8 @@ export function Header() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4 relative">
-          {/* Left Side - Mobile Cart / Desktop Cart */}
+          {/* Left Side - Hamburger Menu (Both languages) */}
           <div className="flex-shrink-0 flex items-center gap-4">
-            {/* Mobile Cart Icon */}
-            <div className="md:hidden">
-              <CartDrawer />
-            </div>
-            {/* Desktop Cart */}
-            <div className="hidden md:flex items-center gap-4">
-              <CartDrawer />
-            </div>
-          </div>
-
-          {/* Center - Logo (Perfectly Centered using absolute positioning) */}
-          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <a href="/" className="block">
-              <img
-                src="/logo.png"
-                alt="Little Gali"
-                width={200}
-                height={60}
-                className="h-10 w-auto md:h-10 md:w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
-              />
-            </a>
-          </div>
-
-          {/* Right Side - Mobile Menu Button / Desktop Hamburger Menu */}
-          <div className="flex items-center gap-4 py-2">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               {/* Mobile Menu Button */}
               <div className="md:hidden">
@@ -132,13 +111,19 @@ export function Header() {
                   </Button>
                 </SheetTrigger>
               </div>
-
-              {/* Menu Content - Shared for Mobile and Desktop */}
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+              {/* Menu Content */}
+              <SheetContent
+                side={locale === "he" ? "right" : "left"}
+                className="w-[300px] sm:w-[400px]"
+              >
                 <div className="flex flex-col h-full">
                   {/* Navigation */}
                   <nav className="flex-1 pt-14 pb-6">
-                    <div className="space-y-3 pr-6">
+                    <div
+                      className={`space-y-3 ${
+                        locale === "he" ? "pr-6" : "pl-6"
+                      }`}
+                    >
                       {mobileNavigationItems.map((item) => (
                         <a
                           key={item.name}
@@ -156,11 +141,18 @@ export function Header() {
                           {item.name}
                         </a>
                       ))}
+                      {/* Language Switcher - Mobile */}
+                      <div className="mt-6 pr-0">
+                        <LanguageSwitcher
+                          variant="mobile"
+                          onLanguageChange={() => setIsOpen(false)}
+                        />
+                      </div>
                       {/* CTA Button */}
                       <div className="mt-6 pr-0">
                         <a href="/upload">
                           <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
-                            צרו ספרון
+                            {t("nav.createBook")}
                           </Button>
                         </a>
                       </div>
@@ -169,6 +161,32 @@ export function Header() {
                 </div>
               </SheetContent>
             </Sheet>
+          </div>
+
+          {/* Center - Logo (Perfectly Centered using absolute positioning) */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <a href="/" className="block">
+              <img
+                src="/logo.png"
+                alt="Little Gali"
+                width={200}
+                height={60}
+                className="h-10 w-auto md:h-10 md:w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              />
+            </a>
+          </div>
+
+          {/* Right Side - Cart / Language Switcher (Both languages) */}
+          <div className="flex items-center gap-4 py-2">
+            {/* Mobile Cart Icon */}
+            <div className="md:hidden">
+              <CartDrawer />
+            </div>
+            {/* Desktop Cart + Language Switcher */}
+            <div className="hidden md:flex items-center gap-4">
+              <LanguageSwitcher variant="desktop" />
+              <CartDrawer />
+            </div>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { Assistant, Heebo } from "next/font/google";
 import "./globals.css";
 import { UploadImagesProvider } from "@/lib/UploadImagesContext";
 import { CartProvider } from "@/lib/CartContext";
+import { LanguageProvider } from "@/lib/LanguageContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const heebo = Heebo({
@@ -33,19 +34,51 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" className="overflow-x-hidden">
+    <html lang="he" dir="rtl" className="overflow-x-hidden" suppressHydrationWarning>
       <head>
         <meta
           name="google-site-verification"
           content="Fy9eAB6H8N1DkO006a1eYCRc99aOjEioAiBJDNLRZZ4"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedLocale = localStorage.getItem('locale');
+                  if (savedLocale === 'en' || savedLocale === 'he') {
+                    document.documentElement.lang = savedLocale;
+                    document.documentElement.dir = savedLocale === 'he' ? 'rtl' : 'ltr';
+                    document.documentElement.setAttribute('data-locale', savedLocale);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            html:not([data-locale]) body {
+              opacity: 0;
+              visibility: hidden;
+            }
+            html[data-locale] body {
+              opacity: 1;
+              visibility: visible;
+              transition: opacity 0.1s;
+            }
+          `
+        }} />
       </head>
       <body
         className={`${heebo.variable} ${assistant.variable} antialiased overflow-x-hidden`}
+        suppressHydrationWarning
       >
-        <CartProvider>
-          <UploadImagesProvider>{children}</UploadImagesProvider>
-        </CartProvider>
+        <LanguageProvider>
+          <CartProvider>
+            <UploadImagesProvider>{children}</UploadImagesProvider>
+          </CartProvider>
+        </LanguageProvider>
         <SpeedInsights />
         <Analytics />
       </body>

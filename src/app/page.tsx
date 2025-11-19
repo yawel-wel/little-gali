@@ -18,12 +18,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 300], [0, -8]);
   const easeOwlet: any = [0.16, 1, 0.3, 1];
+  const { t, locale } = useLanguage();
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
@@ -235,11 +237,11 @@ export default function Home() {
               {/* Title - centered with better contrast */}
               <div className="relative px-4">
                 <Title
-                  highlightText="אישי"
+                  highlightText={t("home.hero.titleHighlight")}
                   color="text-white"
                   className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
                 >
-                  ספרון תינוקות מותאם באופן אישי
+                  {t("home.hero.title")}
                 </Title>
               </div>
               {/* CTA Button */}
@@ -257,7 +259,7 @@ export default function Home() {
                       size="lg"
                       className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-10 py-4 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl w-full sm:w-auto"
                     >
-                      צרו ספרון עכשיו
+                      {t("home.hero.cta")}
                     </Button>
                   </a>
                 </motion.div>
@@ -285,30 +287,40 @@ export default function Home() {
                   {/* Title with Highlight */}
                   <div className="-mt-3">
                     <Title
-                      highlightText="הספרון"
-                      className="text-3xl lg:text-4xl text-center lg:text-right"
+                      highlightText={t("home.book.titleHighlight")}
+                      className={`text-3xl lg:text-4xl ${
+                        locale === "en"
+                          ? "text-center lg:text-left"
+                          : "text-center lg:text-right"
+                      }`}
                     >
-                      הספרון שלנו
+                      {t("home.book.title")}
                     </Title>
                   </div>
 
                   {/* Subtitle */}
-                  <div className="text-center lg:text-right -mt-1">
+                  <div
+                    className={`-mt-1 ${
+                      locale === "en"
+                        ? "text-center lg:text-left"
+                        : "text-center lg:text-right"
+                    }`}
+                  >
                     <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
-                      ספרון אישי לתינוק – עם תמונות המשפחה שלכם
+                      {t("home.book.subtitle")}
                     </h3>
                   </div>
 
                   {/* Description Text */}
-                  <div className="space-y-3 text-center lg:text-right">
-                    <p className="font-body text-medium-gray leading-relaxed">
-                      ספרון דו־צדדי עם תמונות מעובדות ב־AI שנוצרות מהתמונות
-                      המשפחתיות שלכם.
-                      <br />
-                      צד אחד בשחור־לבן לגירוי ראייה לתינוקות בני 0–3 חודשים, וצד
-                      שני צבעוני, להמשך ההתפתחות.
-                      <br />
-                      מושלם לזמן בטן, לשידת ההחתלה או למתנה אישית במיוחד.
+                  <div
+                    className={`space-y-3 ${
+                      locale === "en"
+                        ? "text-center lg:text-left"
+                        : "text-center lg:text-right"
+                    }`}
+                  >
+                    <p className="font-body text-medium-gray leading-relaxed whitespace-pre-line">
+                      {t("home.book.description")}
                     </p>
                   </div>
 
@@ -317,7 +329,7 @@ export default function Home() {
                   <div className="flex flex-col items-center lg:items-start gap-1">
                     <div className="relative">
                       <span className="text-sm font-body text-medium-gray mt-1 block">
-                        מחיר לספר
+                        {t("home.book.price")}
                       </span>
                       <div className="flex items-baseline pb-1">
                         <span className="text-4xl font-heading font-light text-dark-gray">
@@ -325,7 +337,13 @@ export default function Home() {
                         </span>
                         <span className="text-2xl font-bodye">₪</span>
                       </div>
-                      <div className="absolute bottom-0 right-0 w-24 h-0.5 bg-gradient-to-l from-primary-orange to-transparent"></div>
+                      <div
+                        className={`absolute bottom-0 w-24 h-0.5 ${
+                          locale === "en"
+                            ? "left-0 bg-gradient-to-r from-primary-orange to-transparent"
+                            : "right-0 bg-gradient-to-l from-primary-orange to-transparent"
+                        }`}
+                      ></div>
                     </div>
                     <div className="flex items-center gap-2 font-body text-medium-gray">
                       <svg
@@ -339,10 +357,10 @@ export default function Home() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span>ספר שני ב-₪99 בלבד</span>
+                      <span>{t("home.book.secondBook")}</span>
                     </div>
                     <p className="text-sm font-body text-medium-gray mt-1">
-                      * ההנחה מתעדכנת אוטומטית בעמוד התשלום
+                      {t("home.book.discountNote")}
                     </p>
                   </div>
 
@@ -357,7 +375,7 @@ export default function Home() {
                     >
                       <a href="/upload">
                         <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-5 rounded-full font-body-bold text-base transition-all duration-200">
-                          צרו עכשיו את הספרון האישי שלכם
+                          {t("home.book.cta")}
                         </Button>
                       </a>
                     </motion.div>
@@ -393,6 +411,7 @@ export default function Home() {
 
         {/* How It Works Section */}
         <motion.section
+          id="how-it-works"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
           initial={
@@ -407,11 +426,15 @@ export default function Home() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-16">
-              <Title highlightText="עובד" size="lg" className="mb-4">
-                איך זה עובד – בשלושה צעדים פשוטים
+              <Title
+                highlightText={t("home.howItWorks.titleHighlight")}
+                size="lg"
+                className="mb-4"
+              >
+                {t("home.howItWorks.title")}
               </Title>
               <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                כל מה שצריך זה כמה תמונות אהובות – אנחנו נדאג לכל השאר
+                {t("home.howItWorks.subtitle")}
               </p>
             </div>
 
@@ -481,16 +504,15 @@ export default function Home() {
                   {/* Step Text */}
                   <div className="mb-1">
                     <p className="text-primary-orange text-sm font-body-bold">
-                      אתם עושים
+                      {t("home.howItWorks.step1.label")}
                     </p>
                   </div>
 
                   <h3 className="text-xl font-heading text-dark-gray">
-                    מעלים תמונות
+                    {t("home.howItWorks.step1.title")}
                   </h3>
                   <p className="font-body text-medium-gray leading-relaxed">
-                    מעלים 5 תמונות אהובות של התינוק או המשפחה – זה לוקח פחות
-                    מדקה
+                    {t("home.howItWorks.step1.description")}
                   </p>
                 </div>
 
@@ -551,16 +573,15 @@ export default function Home() {
                   {/* Step Text */}
                   <div className="mb-1">
                     <p className="text-primary-orange text-sm font-body-bold">
-                      אנחנו עושים
+                      {t("home.howItWorks.step2.label")}
                     </p>
                   </div>
 
                   <h3 className="text-xl font-heading text-dark-gray">
-                    מעבדים את התמונות
+                    {t("home.howItWorks.step2.title")}
                   </h3>
                   <p className="font-body text-medium-gray leading-relaxed">
-                    בעזרת בינה מלאכותית (AI) אנחנו ממירים את התמונות לגרסאות
-                    ברורות וידידותיות לתינוק – בשחור-לבן ובצבע.
+                    {t("home.howItWorks.step2.description")}
                   </p>
                 </div>
 
@@ -621,16 +642,15 @@ export default function Home() {
                   {/* Step Text */}
                   <div className="mb-1">
                     <p className="text-primary-orange text-sm font-body-bold">
-                      אנחנו עושים
+                      {t("home.howItWorks.step3.label")}
                     </p>
                   </div>
 
                   <h3 className="text-xl font-heading text-dark-gray">
-                    מדפיסים את הספרון
+                    {t("home.howItWorks.step3.title")}
                   </h3>
                   <p className="font-body text-medium-gray leading-relaxed">
-                    אנחנו מדפיסים את הספרון האישי שלכם באיכות גבוהה ושולחים אותו
-                    עד הבית – מוכן לשימוש ולמזכרת.
+                    {t("home.howItWorks.step3.description")}
                   </p>
                 </div>
               </motion.div>
@@ -647,7 +667,7 @@ export default function Home() {
               >
                 <a href="/upload">
                   <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200">
-                    התחילו עכשיו
+                    {t("home.howItWorks.cta")}
                   </Button>
                 </a>
               </motion.div>
@@ -667,16 +687,14 @@ export default function Home() {
             {/* Section Title */}
             <div className="text-center mb-8">
               <Title
-                highlightText="שלכם"
+                highlightText={t("home.dualDesign.titleHighlight")}
                 size="sm"
                 className="max-w-2xl mx-auto"
               >
-                התמונה שלכם – גם לפוקוס הראשון וגם לצבעים הראשונים
+                {t("home.dualDesign.title")}
               </Title>
               <p className="text-base sm:text-lg font-body text-medium-gray leading-relaxed max-w-xl mx-auto mt-4">
-                אנחנו ממירים כל תמונה לשתי גרסאות – אחת בשחור־לבן שמיועדת לגירוי
-                הראייה הראשוני, ואחת צבעונית שמתאימה לשלב שבו התינוק כבר מזהה
-                צבעים.
+                {t("home.dualDesign.description")}
               </p>
             </div>
 
@@ -723,11 +741,10 @@ export default function Home() {
                         }}
                       >
                         <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          שחור לבן
+                          {t("home.dualDesign.bw.title")}
                         </h3>
                         <p className="text-xs font-body text-medium-gray mb-4">
-                          הצד הזה מתאים במיוחד לתינוקות מהלידה ועד גיל 3 חודשים
-                          — בדיוק בשלב שבו הם מתחילים לזהות ניגודים חזקים.
+                          {t("home.dualDesign.bw.description")}
                         </p>
                         <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
                           <motion.img
@@ -758,11 +775,10 @@ export default function Home() {
                         }}
                       >
                         <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          צבעוני
+                          {t("home.dualDesign.color.title")}
                         </h3>
                         <p className="text-xs font-body text-medium-gray mb-4">
-                          הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה
-                          מתפתחת והעולם סביבם מתחיל להתמלא בצבעים.
+                          {t("home.dualDesign.color.description")}
                         </p>
                         <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
                           <motion.img
@@ -805,11 +821,10 @@ export default function Home() {
                   viewport={{ once: true, amount: 0.3 }}
                 >
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
-                    שחור לבן
+                    {t("home.dualDesign.bw.title")}
                   </h3>
                   <p className="text-sm font-body text-medium-gray mb-4">
-                    הצד הזה מתאים במיוחד לתינוקות מהלידה ועד גיל 3 חודשים —
-                    בדיוק בשלב שבו הם מתחילים לזהות ניגודים חזקים.
+                    {t("home.dualDesign.bw.description")}
                   </p>
                   <motion.div
                     className="w-56 h-56 mx-auto"
@@ -844,11 +859,10 @@ export default function Home() {
                   viewport={{ once: true, amount: 0.3 }}
                 >
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
-                    צבעוני
+                    {t("home.dualDesign.color.title")}
                   </h3>
                   <p className="text-sm font-body text-medium-gray mb-4">
-                    הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה מתפתחת
-                    והעולם סביבם מתחיל להתמלא בצבעים.
+                    {t("home.dualDesign.color.description")}
                   </p>
                   <motion.div
                     className="w-56 h-56 mx-auto"
@@ -876,12 +890,12 @@ export default function Home() {
             {/* Link to more examples */}
             <div className="text-center mt-8">
               <p className="text-sm font-body text-medium-gray">
-                רוצים לראות עוד דוגמאות?{" "}
+                {t("home.dualDesign.moreExamples")}{" "}
                 <a
                   href="/inspiration"
                   className="text-primary-orange hover:text-primary-orange/80 underline cursor-pointer transition-colors duration-200"
                 >
-                  גלו כאן
+                  {t("home.dualDesign.moreExamplesLink")}
                 </a>
               </p>
             </div>
@@ -899,8 +913,11 @@ export default function Home() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-12">
-              <Title highlightText="למיוחד" className="max-w-3xl mx-auto">
-                מה הופך את הספרון שלנו למיוחד
+              <Title
+                highlightText={t("home.special.titleHighlight")}
+                className="max-w-3xl mx-auto"
+              >
+                {t("home.special.title")}
               </Title>
             </div>
 
@@ -940,13 +957,12 @@ export default function Home() {
 
                 {/* Title */}
                 <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  להסתכל על הקרובים ביותר{" "}
+                  {t("home.special.item1.title")}
                 </h3>
 
                 {/* Subtitle */}
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר
-                  מימיו הראשונים
+                  {t("home.special.item1.description")}
                 </p>
               </motion.div>
 
@@ -973,12 +989,12 @@ export default function Home() {
 
                 {/* Title */}
                 <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  להכיר את המשפחה
+                  {t("home.special.item2.title")}
                 </h3>
 
                 {/* Subtitle */}
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק
+                  {t("home.special.item2.description")}
                 </p>
               </motion.div>
 
@@ -1005,12 +1021,12 @@ export default function Home() {
 
                 {/* Title */}
                 <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  מזכרת מתוקה
+                  {t("home.special.item3.title")}
                 </h3>
 
                 {/* Subtitle */}
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק
+                  {t("home.special.item3.description")}
                 </p>
               </motion.div>
 
@@ -1037,12 +1053,12 @@ export default function Home() {
 
                 {/* Title */}
                 <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  לא עוד מוצר גנרי
+                  {t("home.special.item4.title")}
                 </h3>
 
                 {/* Subtitle */}
                 <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה
+                  {t("home.special.item4.description")}
                 </p>
               </motion.div>
             </motion.div>
@@ -1082,33 +1098,27 @@ export default function Home() {
                 <div className="space-y-4">
                   {/* Brand name */}
                   <div className="text-primary-orange font-body-bold text-sm uppercase tracking-wide mb-0">
-                    ליטל גלי
+                    {t("home.about.brand")}
                   </div>
 
                   {/* Main heading */}
-                  <Title highlightText="אנחנו" size="lg">
-                    מי אנחנו
+                  <Title
+                    highlightText={t("home.about.titleHighlight")}
+                    size="lg"
+                  >
+                    {t("home.about.title")}
                   </Title>
 
                   {/* Body text */}
                   <div className="space-y-3 pt-2">
                     <p className="font-body text-medium-gray leading-relaxed">
-                      התחלתי לעבוד על הפרויקט אחרי שגלי נולדה. מצאתי את עצמי
-                      נשאבת לזה – חושבת על זה, מתכננת, מעצבת את האתר, ובכל פעם
-                      שמישהי העלתה תמונות לספרון – זה היה הדבר הראשון שרציתי
-                      לראות.
+                      {t("home.about.paragraph1")}
                     </p>
                     <p className="font-body text-medium-gray leading-relaxed">
-                      נהניתי מהתהליך עצמו, מליצור משהו חדש, ובעיקר מלראות את
-                      התגובות של האמהות כשהספרונים הגיעו אליהן. הרגשתי שאני עושה
-                      משהו מיוחד, שיש לו מקום, ושגם אני הייתי רוצה אותו בשביל
-                      גלי שלי (ואל דאגה – הכנתי לה כבר כמה וכמה ספרונים משלה).
+                      {t("home.about.paragraph2")}
                     </p>
                     <p className="font-body text-medium-gray leading-relaxed">
-                      אני מקווה שכמוני יהיו עוד אמהות שימצאו בספרון הזה ערך,
-                      שירצו אחד כזה לתינוק שלהן. ובסוף – זה גם בשבילנו. לראות את
-                      התינוק שלנו מסתכל על התמונות של המשפחה בסקרנות ולהתרגש בכל
-                      פעם מחדש.
+                      {t("home.about.paragraph3")}
                     </p>
                   </div>
                 </div>
@@ -1130,11 +1140,15 @@ export default function Home() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-16">
-              <Title highlightText="אותנו" size="lg" className="mb-4">
-                שאלו אותנו
+              <Title
+                highlightText={t("home.qa.titleHighlight")}
+                size="lg"
+                className="mb-4"
+              >
+                {t("home.qa.title")}
               </Title>
               <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו
+                {t("home.qa.subtitle")}
               </p>
             </div>
 
@@ -1145,11 +1159,19 @@ export default function Home() {
                   value="item-1"
                   className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    ממה הספרון עשוי?
+                  <AccordionTrigger
+                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.question1")}
                   </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    הספרון עשוי מנייר איכותי ועבה שנעבר למינציה.
+                  <AccordionContent
+                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.answer1")}
                   </AccordionContent>
                 </AccordionItem>
 
@@ -1157,12 +1179,19 @@ export default function Home() {
                   value="item-2"
                   className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    כמה תמונות צריך לבחור?
+                  <AccordionTrigger
+                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.question2")}
                   </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד
-                    השני בצבעוני.
+                  <AccordionContent
+                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.answer2")}
                   </AccordionContent>
                 </AccordionItem>
 
@@ -1170,12 +1199,19 @@ export default function Home() {
                   value="item-3"
                   className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    מי כדאי שיהיה בספרון?
+                  <AccordionTrigger
+                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.question3")}
                   </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    אנשים קרובים שתינוקכם יכיר ויתחבר אליהם – הורים, סבים, אחים,
-                    חבר קרוב ואפילו חיית המחמד המשפחתית.
+                  <AccordionContent
+                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.answer3")}
                   </AccordionContent>
                 </AccordionItem>
 
@@ -1183,12 +1219,19 @@ export default function Home() {
                   value="item-9"
                   className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
                 >
-                  <AccordionTrigger className="text-right font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer">
-                    מה אם אני לא מרוצה מהספרון?
+                  <AccordionTrigger
+                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.question9")}
                   </AccordionTrigger>
-                  <AccordionContent className="text-right font-body text-medium-gray leading-relaxed pt-4">
-                    המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם זה לא
-                    המצב שאנחנו מאפשרים להחזיר את הספרון ולקבל את התשלום בחזרה.
+                  <AccordionContent
+                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("qa.answer9")}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -1205,7 +1248,7 @@ export default function Home() {
               >
                 <a href="/qa">
                   <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200">
-                    לכל השאלות והתשובות
+                    {t("home.qa.cta")}
                   </Button>
                 </a>
               </motion.div>
