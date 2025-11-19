@@ -56,19 +56,7 @@ export function Header() {
     }
   };
 
-  // Desktop navigation (left to right: Home, About, etc.)
-  const desktopNavigationItems = [
-    { name: "צור קשר", href: "/contact" },
-    { name: "השראה", href: "/inspiration" },
-    { name: "שאלות ותשובות", href: "/qa" },
-    { name: "אודותינו", href: "/#about" },
-    { name: "בית", href: "/" },
-  ].map((item) => ({
-    ...item,
-    active: pathname === item.href,
-  }));
-
-  // Mobile navigation (top to bottom: Home, About, etc.)
+  // Navigation items for hamburger menu (mobile and desktop)
   const mobileNavigationItems = [
     { name: "בית", href: "/" },
     { name: "אודותינו", href: "/#about" },
@@ -82,134 +70,106 @@ export function Header() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-soft-peach-light"
+      className="fixed top-0 left-0 right-0 z-50"
+      style={{ backgroundColor: "#F9F7EE" }}
       initial={prefersReducedMotion ? false : { y: -100 }}
       animate={prefersReducedMotion ? undefined : { y: 0 }}
       transition={{ duration: 1.1, ease: easeOwlet }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4 relative">
-          {/* Left Side - Mobile Menu Button / Desktop CTA Button & Cart */}
-          <div className="flex items-center gap-4 py-2">
-            {/* Mobile Menu Button */}
+          {/* Left Side - Mobile Cart / Desktop Cart */}
+          <div className="flex-shrink-0 flex items-center gap-4">
+            {/* Mobile Cart Icon */}
             <div className="md:hidden">
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <CartDrawer />
+            </div>
+            {/* Desktop Cart */}
+            <div className="hidden md:flex items-center gap-4">
+              <CartDrawer />
+            </div>
+          </div>
+
+          {/* Center - Logo (Perfectly Centered using absolute positioning) */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <a href="/" className="block">
+              <img
+                src="/logo.png"
+                alt="Little Gali"
+                width={200}
+                height={60}
+                className="h-10 w-auto md:h-10 md:w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              />
+            </a>
+          </div>
+
+          {/* Right Side - Mobile Menu Button / Desktop Hamburger Menu */}
+          <div className="flex items-center gap-4 py-2">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-dark-gray hover:text-primary-orange"
+                    className="text-dark-gray hover:bg-[#D7D8DA] hover:text-dark-gray cursor-pointer rounded-full transition-all duration-200"
                   >
                     <Menu className="h-6 w-6" />
                     <span className="sr-only">Open menu</span>
                   </Button>
                 </SheetTrigger>
-              </Sheet>
-            </div>
-            {/* Desktop CTA Button & Cart */}
-            <div className="hidden md:flex items-center gap-4">
-              <CartDrawer />
-              <a href="/upload">
-                <button className="cursor-pointer border border-primary-orange text-primary-orange hover:bg-[#e5543d] hover:text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
-                  צרו ספרון
-                </button>
-              </a>
-            </div>
-          </div>
-
-          {/* Center - Mobile Logo (Centered) / Desktop Navigation */}
-          <div className="flex-1 flex justify-center md:justify-start py-2">
-            {/* Mobile Logo - Centered */}
-            <div className="md:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <a href="/" className="block">
-                <img
-                  src="/logo.png"
-                  alt="Little Gali"
-                  width={200}
-                  height={60}
-                  className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                />
-              </a>
-            </div>
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8 mr-4">
-              {desktopNavigationItems.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={`relative text-sm font-body-bold transition-colors duration-200 cursor-pointer ${
-                    item.active
-                      ? "text-primary-orange hover:opacity-80"
-                      : "text-dark-gray hover:text-primary-orange"
-                  }`}
-                >
-                  {item.name}
-                  {item.active && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-primary-orange"></div>
-                  )}
-                </a>
-              ))}
-            </nav>
-          </div>
-
-          {/* Right Side - Mobile Cart / Desktop Logo */}
-          <div className="flex-shrink-0 flex items-center">
-            {/* Mobile Cart Icon */}
-            <div className="md:hidden">
-              <CartDrawer />
-            </div>
-            {/* Desktop Logo */}
-            <div className="hidden md:block">
-              <a href="/" className="block">
-                <img
-                  src="/logo.png"
-                  alt="Little Gali"
-                  width={200}
-                  height={60}
-                  className="h-10 w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                />
-              </a>
-            </div>
-          </div>
-
-          {/* Mobile Menu Content */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col h-full">
-                {/* Mobile Navigation */}
-                <nav className="flex-1 pt-14 pb-6">
-                  <div className="space-y-3 pr-6">
-                    {mobileNavigationItems.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.href}
-                        onClick={(e) => {
-                          setIsOpen(false);
-                          handleNavClick(e, item.href);
-                        }}
-                        className={`block text-lg font-body-bold transition-colors duration-200 ${
-                          item.active
-                            ? "text-primary-orange"
-                            : "text-dark-gray hover:text-primary-orange"
-                        }`}
-                      >
-                        {item.name}
-                      </a>
-                    ))}
-                    {/* Mobile CTA Button */}
-                    <div className="mt-6 pr-0">
-                      <a href="/upload">
-                        <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
-                          צרו ספרון
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                </nav>
               </div>
-            </SheetContent>
-          </Sheet>
+              {/* Desktop Hamburger Menu */}
+              <div className="hidden md:block">
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-dark-gray hover:bg-[#D7D8DA] hover:text-dark-gray cursor-pointer rounded-full transition-all duration-200"
+                  >
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </SheetTrigger>
+              </div>
+
+              {/* Menu Content - Shared for Mobile and Desktop */}
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <div className="flex flex-col h-full">
+                  {/* Navigation */}
+                  <nav className="flex-1 pt-14 pb-6">
+                    <div className="space-y-3 pr-6">
+                      {mobileNavigationItems.map((item) => (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          onClick={(e) => {
+                            setIsOpen(false);
+                            handleNavClick(e, item.href);
+                          }}
+                          className={`block text-lg font-body-bold transition-colors duration-200 ${
+                            item.active
+                              ? "text-primary-orange"
+                              : "text-dark-gray hover:text-primary-orange"
+                          }`}
+                        >
+                          {item.name}
+                        </a>
+                      ))}
+                      {/* CTA Button */}
+                      <div className="mt-6 pr-0">
+                        <a href="/upload">
+                          <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
+                            צרו ספרון
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </motion.header>

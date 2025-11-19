@@ -91,7 +91,7 @@ export function CartDrawer() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative text-dark-gray hover:text-primary-orange cursor-pointer"
+          className="relative text-dark-gray cursor-pointer hover:bg-transparent"
         >
           <ShoppingCart className="h-6 w-6" />
           {cartItemCount > 0 && (
@@ -163,7 +163,9 @@ export function CartDrawer() {
                                 <div className="w-[60px] h-[60px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
                                   <img
                                     src={url}
-                                    alt={`Image ${imgIndex + 1} of book ${displayIndex}`}
+                                    alt={`Image ${
+                                      imgIndex + 1
+                                    } of book ${displayIndex}`}
                                     className="w-full h-full object-cover"
                                   />
                                 </div>
@@ -252,7 +254,11 @@ export function CartDrawer() {
                   סה"כ:
                 </span>
                 <span className="text-xl font-body-bold text-black">
-                  {cart.items.reduce((sum, item) => sum + item.quantity * BOOK_PRICE, 0)} ₪
+                  {cart.items.reduce(
+                    (sum, item) => sum + item.quantity * BOOK_PRICE,
+                    0
+                  )}{" "}
+                  ₪
                 </span>
               </div>
               <Button

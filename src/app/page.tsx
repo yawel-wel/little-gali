@@ -220,10 +220,10 @@ export default function Home() {
             <motion.img
               src="/hero-image.jpeg"
               alt="Baby book example"
-              className="w-full h-full object-cover object-top sm:object-[center_50%]"
+              className="w-full h-full object-cover sm:object-[center_40%]"
               style={{ y: prefersReducedMotion ? 0 : heroY }}
               initial={prefersReducedMotion ? false : { scale: 1.2 }}
-              animate={prefersReducedMotion ? undefined : { scale: 1.05 }}
+              animate={prefersReducedMotion ? undefined : { scale: 1.0 }}
               transition={{ duration: 5, ease: easeOwlet }}
             />
             {/* Lighter gradient overlay */}
