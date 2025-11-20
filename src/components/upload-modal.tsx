@@ -313,8 +313,13 @@ export function UploadModal({
             <div className="mt-4 flex justify-center">
               <button
                 onClick={() => {
+                  // Trigger file input first
                   onUploadClick?.();
-                  onClose();
+                  // Delay closing the modal slightly to allow file dialog to open
+                  // This prevents the modal close from interfering with the file dialog
+                  setTimeout(() => {
+                    onClose();
+                  }, 100);
                 }}
                 className="cursor-pointer w-full max-w-[280px] bg-[#E15B3A] hover:bg-[#D44E2E] hover:opacity-90 text-white font-medium text-base h-11 px-6 rounded-xl shadow-md flex items-center justify-center gap-2 transition-opacity"
               >

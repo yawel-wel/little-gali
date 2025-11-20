@@ -170,6 +170,21 @@ function UploadPageContent() {
     }
   }, [images, isEditing]);
 
+  // Preload modal images when component mounts to improve modal open performance
+  useEffect(() => {
+    const modalImages = [
+      "/too-close-example.jpg",
+      "/group-example.jpeg",
+      "/good-example-1.jpg",
+      "/good-example-2.jpg",
+    ];
+
+    modalImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
   const handleUploadClick = () => {
     // Don't show modal if in edit mode
     if (isEditing) {
@@ -272,39 +287,74 @@ function UploadPageContent() {
       setImages(limitedImages);
       setSelectedImagesCount(limitedImages.length);
 
-      // Upload new images immediately (only blob URLs that are newly added)
-      // Find which images are new blob URLs and need uploading
-      limitedImages.forEach(async (url, index) => {
-        // Only upload if it's a blob URL (newly added) and not already a Cloudinary URL
-        if (url.startsWith("blob:")) {
-          // Mark as uploading
-          setUploadingImages((prev) => new Set(prev).add(index));
+      // Find which images need uploading (only blob URLs that are newly added)
+      const imagesToUpload = limitedImages
+        .map((url, index) => ({ url, index }))
+        .filter(({ url }) => url.startsWith("blob:"));
 
-          try {
-            const cloudinaryUrl = await uploadSingleImage(url, index);
+      // Mark all uploading images upfront for better UX
+      if (imagesToUpload.length > 0) {
+        setUploadingImages((prev) => {
+          const newSet = new Set(prev);
+          imagesToUpload.forEach(({ index }) => newSet.add(index));
+          return newSet;
+        });
+      }
 
-            // Update the images array with Cloudinary URL
-            setImages((prevImages) => {
-              const updated = [...prevImages];
-              // Make sure the index is still valid and the URL at that index is still the same blob URL
-              if (index < updated.length && updated[index] === url) {
-                updated[index] = cloudinaryUrl;
-              }
-              return updated;
-            });
-          } catch (error) {
-            console.error(`Failed to upload image at index ${index}:`, error);
-            // Keep the blob URL on error - user can still proceed
-          } finally {
-            // Remove from uploading set
-            setUploadingImages((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(index);
-              return newSet;
-            });
-          }
+      // Upload all images in parallel using Promise.all
+      // This ensures all uploads proceed concurrently instead of sequentially
+      const uploadPromises = imagesToUpload.map(async ({ url, index }) => {
+        try {
+          const cloudinaryUrl = await uploadSingleImage(url, index);
+
+          // Update the images array with Cloudinary URL
+          setImages((prevImages) => {
+            const updated = [...prevImages];
+            // Make sure the index is still valid and the URL at that index is still the same blob URL
+            if (index < updated.length && updated[index] === url) {
+              updated[index] = cloudinaryUrl;
+            }
+            return updated;
+          });
+
+          return { index, url, success: true, cloudinaryUrl };
+        } catch (error) {
+          console.error(`Failed to upload image at index ${index}:`, error);
+          // Keep the blob URL on error - user can still proceed
+          return { index, url, success: false, error };
+        } finally {
+          // Remove from uploading set when done (success or failure)
+          setUploadingImages((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(index);
+            return newSet;
+          });
         }
       });
+
+      // Execute all uploads in parallel using Promise.allSettled
+      // This ensures all uploads proceed concurrently and we continue even if some fail
+      if (uploadPromises.length > 0) {
+        Promise.allSettled(uploadPromises).then((results) => {
+          // Log results for debugging
+          const successful = results.filter(
+            (r) => r.status === "fulfilled" && r.value.success
+          );
+          const failed = results.filter(
+            (r) =>
+              r.status === "rejected" ||
+              (r.status === "fulfilled" && !r.value.success)
+          );
+          if (failed.length > 0) {
+            console.warn(
+              `${failed.length} image(s) failed to upload, but user can still proceed`
+            );
+          }
+          if (successful.length > 0) {
+            console.log(`${successful.length} image(s) uploaded successfully`);
+          }
+        });
+      }
     }
   };
 
@@ -611,11 +661,7 @@ function UploadPageContent() {
 
               {/* First Paragraph */}
               <div className="text-center mb-8">
-                <p
-                  className={`text-lg font-body text-dark-gray leading-relaxed ${
-                    locale === "en" ? "text-center" : "text-right"
-                  }`}
-                >
+                <p className="text-lg font-body text-dark-gray leading-relaxed text-center">
                   {t("upload.description")
                     .split("\n")
                     .map((line, i, arr) => (
