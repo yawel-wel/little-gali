@@ -84,14 +84,14 @@ export default function ContactPage() {
   return (
     <div
       className="min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: "#F9F7EE" }}
+      style={{ backgroundColor: "#F3EEE8" }}
     >
       <Header />
 
       <main className="flex-1">
         <motion.section
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
-          style={{ backgroundColor: "#F9F7EE" }}
+          style={{ backgroundColor: "#F3EEE8" }}
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: easeOwlet }}
@@ -116,11 +116,7 @@ export default function ContactPage() {
                       <Title
                         highlightText={t("contact.titleHighlight")}
                         size="lg"
-                        className={`w-full m-0 ${
-                          locale === "en"
-                            ? "text-center lg:text-left"
-                            : "text-center lg:text-right"
-                        }`}
+                        className="w-full m-0 text-center"
                       >
                         {t("contact.title")}
                       </Title>

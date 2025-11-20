@@ -40,7 +40,7 @@ export default function InspirationPage() {
   return (
     <div
       className="min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: "#F9F7EE" }}
+      style={{ backgroundColor: "#F3EEE8" }}
     >
       <Header />
 

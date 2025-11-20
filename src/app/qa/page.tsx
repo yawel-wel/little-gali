@@ -19,14 +19,14 @@ export default function QAPage() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F3EEE8" }}>
       <Header />
 
       <main className="flex-1">
         {/* Q&A Section */}
         <motion.section
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
-          style={{ backgroundColor: "#F9F7EE" }}
+          style={{ backgroundColor: "#F3EEE8" }}
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: easeOwlet }}

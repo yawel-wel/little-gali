@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -22,22 +22,11 @@ export function CartDrawer() {
   const { cart, isLoading, removeFromCart, updateQuantity } = useCart();
   const { t, locale } = useLanguage();
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const checkDesktop = () => {
-      setIsDesktop(window.innerWidth >= 768); // md breakpoint
-    };
-
-    checkDesktop();
-    window.addEventListener("resize", checkDesktop);
-    return () => window.removeEventListener("resize", checkDesktop);
-  }, []);
 
   const handleRemoveClick = (lineId: string) => {
     setItemToRemove(lineId);
@@ -117,7 +106,7 @@ export function CartDrawer() {
         </Button>
       </SheetTrigger>
       <SheetContent
-        side={isDesktop ? "right" : "left"}
+        side={locale === "he" ? "left" : "right"}
         className="w-[300px] sm:w-[400px]"
       >
         <div className="flex flex-col h-full">
