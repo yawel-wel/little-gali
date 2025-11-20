@@ -26,6 +26,32 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
+  openGraph: {
+    title: "Little Gali – ספרון אישי לתינוק שלך",
+    description:
+      "ספרון שחור־לבן וצבעוני בהתאמה אישית – חיזוק קשר, סקרנות והתפתחות מהחודשים הראשונים 💫",
+    url: "https://www.littlegali.com",
+    siteName: "Little Gali",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dysgpkvl4/image/upload/v1763613635/little-gali/gzqsbjh01tqeeqo7tkwp.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Little Gali Baby Book",
+      },
+    ],
+    locale: "he_IL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Little Gali – ספרון אישי לתינוק שלך",
+    description:
+      "ספרון שחור־לבן וצבעוני בהתאמה אישית – חיזוק קשר, סקרנות והתפתחות מהחודשים הראשונים 💫",
+    images: [
+      "https://res.cloudinary.com/dysgpkvl4/image/upload/v1763613635/little-gali/gzqsbjh01tqeeqo7tkwp.jpg",
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -34,7 +60,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" className="overflow-x-hidden" suppressHydrationWarning>
+    <html
+      lang="he"
+      dir="rtl"
+      className="overflow-x-hidden"
+      suppressHydrationWarning
+    >
       <head>
         <meta
           name="google-site-verification"
@@ -56,8 +87,9 @@ export default function RootLayout({
             `,
           }}
         />
-        <style dangerouslySetInnerHTML={{
-          __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
             html:not([data-locale]) body {
               opacity: 0;
               visibility: hidden;
@@ -67,8 +99,9 @@ export default function RootLayout({
               visibility: visible;
               transition: opacity 0.1s;
             }
-          `
-        }} />
+          `,
+          }}
+        />
       </head>
       <body
         className={`${heebo.variable} ${assistant.variable} antialiased overflow-x-hidden`}
