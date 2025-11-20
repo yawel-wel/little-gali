@@ -47,7 +47,9 @@ function ReturnsPageContent() {
                   >
                     {t("returns.customized.title")}
                   </h2>
-                  <p>{t("returns.customized.p1")}</p>
+                  <div className="whitespace-pre-line">
+                    <p>{t("returns.customized.p1")}</p>
+                  </div>
                 </div>
 
                 {/* פגמים או נזק במשלוח */}
@@ -59,24 +61,25 @@ function ReturnsPageContent() {
                   >
                     {t("returns.damage.title")}
                   </h2>
-                  <p className="mb-4">
-                    {t("returns.damage.p1")}{" "}
-                    <a
-                      href="/contact"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
-                    >
-                      {t("returns.damage.link")}
-                    </a>{" "}
-                    {t("returns.damage.p2")}{" "}
-                    <a
-                      href="mailto:yaelromashkano@gmail.com"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
-                    >
-                      yaelromashkano@gmail.com
-                    </a>
-                    {t("returns.damage.p3")}
-                  </p>
-                  <p>{t("returns.damage.p4")}</p>
+                  <div className="whitespace-pre-line">
+                    <p className="mb-4">
+                      {t("returns.damage.p1")}{" "}
+                      <a
+                        href="/contact"
+                        className="text-primary-orange hover:text-primary-orange/80 underline"
+                      >
+                        {t("returns.damage.link")}
+                      </a>{" "}
+                      {t("returns.damage.p2")}{" "}
+                      <a
+                        href="mailto:yaelromashkano@gmail.com"
+                        className="text-primary-orange hover:text-primary-orange/80 underline"
+                      >
+                        yaelromashkano@gmail.com
+                      </a>
+                      {t("returns.damage.p3")}
+                    </p>
+                  </div>
                 </div>
 
                 {/* לא מרוצים מהמוצר? */}
@@ -88,8 +91,10 @@ function ReturnsPageContent() {
                   >
                     {t("returns.unsatisfied.title")}
                   </h2>
-                  <p className="mb-4">{t("returns.unsatisfied.p1")}</p>
-                  <p>{t("returns.unsatisfied.p2")}</p>
+                  <div className="whitespace-pre-line">
+                    <p className="mb-4">{t("returns.unsatisfied.p1")}</p>
+                    <p>{t("returns.unsatisfied.p2")}</p>
+                  </div>
                 </div>
 
                 {/* שונות טבעית ודגשים טכניים */}
@@ -101,8 +106,21 @@ function ReturnsPageContent() {
                   >
                     {t("returns.variations.title")}
                   </h2>
-                  <p className="mb-4">{t("returns.variations.p1")}</p>
-                  <p>{t("returns.variations.p2")}</p>
+                  <div className="whitespace-pre-line">
+                    <p>{t("returns.variations.p1")}</p>
+                  </div>
+                </div>
+
+                {/* Image Rights */}
+                <div>
+                  <h2
+                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
+                      locale === "en" ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {t("returns.imageRights.title")}
+                  </h2>
+                  <p>{t("returns.imageRights.p1")}</p>
                 </div>
               </div>
             </div>
