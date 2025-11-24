@@ -9,6 +9,7 @@ export interface CartItem {
   imageUrls: string[];
   title?: string;
   lineId?: string;
+  style?: "cartoon" | "pencil";
 }
 
 export interface Cart {
@@ -27,7 +28,8 @@ interface CartContextType {
     imageUrls: string[],
     quantity?: number,
     bookId?: string,
-    phoneNumber?: string
+    phoneNumber?: string,
+    style?: "cartoon" | "pencil"
   ) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
@@ -102,13 +104,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         if (data.cart) {
-          // Helper to fetch line images with small retries to avoid race with server-side storage
-          const fetchLineImagesWithRetry = async (
+          // Helper to fetch line images and style with small retries to avoid race with server-side storage
+          const fetchLineDataWithRetry = async (
             cId: string,
             lId: string,
             attempts = 3,
             delayMs = 200
-          ): Promise<string[]> => {
+          ): Promise<{ imageUrls: string[]; style?: "cartoon" | "pencil" }> => {
             for (let i = 0; i < attempts; i++) {
               try {
                 const res = await fetch(
@@ -120,7 +122,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     Array.isArray(json.imageUrls) &&
                     json.imageUrls.length === 5
                   ) {
-                    return json.imageUrls;
+                    return {
+                      imageUrls: json.imageUrls,
+                      style: json.style,
+                    };
                   }
                 }
               } catch {
@@ -128,19 +133,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               }
               await new Promise((r) => setTimeout(r, delayMs));
             }
-            return [];
+            return { imageUrls: [] };
           };
 
-          // Fetch images from our separate storage for each line item only
+          // Fetch images and style from our separate storage for each line item
+          // Also check Shopify attributes for style (fallback)
           const cartItems: CartItem[] = await Promise.all(
             data.cart.lines.map(async (line: any) => {
-              const imageUrls = await fetchLineImagesWithRetry(cartId, line.id);
+              const lineData = await fetchLineDataWithRetry(cartId, line.id);
+              
+              // Check Shopify attributes for style (fallback if not in our storage)
+              // Check both "style" (visible) and "_style" (hidden) attributes
+              let style = lineData.style;
+              if (!style && line.attributes) {
+                const styleAttr = line.attributes.find(
+                  (attr: any) => attr.key === "style" || attr.key === "_style"
+                );
+                if (styleAttr && (styleAttr.value === "cartoon" || styleAttr.value === "pencil")) {
+                  style = styleAttr.value;
+                }
+              }
+              
               return {
                 id: line.id,
                 lineId: line.id,
                 quantity: line.quantity,
                 title: line.title,
-                imageUrls,
+                imageUrls: lineData.imageUrls,
+                style,
               };
             })
           );
@@ -177,13 +197,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     imageUrls: string[],
     quantity: number = 1,
     bookId?: string,
-    phoneNumber?: string
+    phoneNumber?: string,
+    style?: "cartoon" | "pencil"
   ) => {
     setIsLoading(true);
     try {
       let response;
       if (cart?.id) {
         // Add to existing cart
+        console.log("📤 CartContext: Sending to API - style:", style);
         response = await fetch("/api/shopify/cart/add", {
           method: "POST",
           headers: {
@@ -195,6 +217,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             quantity,
             bookId,
             phoneNumber,
+            style: style || "cartoon",
             locale,
           }),
         });
@@ -210,6 +233,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             quantity,
             bookId,
             phoneNumber,
+            style: style || "cartoon",
             locale,
           }),
         });
@@ -218,63 +242,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         if (data.cart) {
-          // If cart includes items with images, use it directly (faster)
-          if (data.cart.items && Array.isArray(data.cart.items)) {
-            // Preserve existing items' images when adding to existing cart
-            let mergedItems = data.cart.items;
-            if (cart?.items && cart.items.length > 0) {
-              mergedItems = data.cart.items.map((newItem: any) => {
-                // Find matching existing item by lineId
-                const existingItem = cart.items.find(
-                  (existing) =>
-                    existing.lineId === newItem.lineId ||
-                    existing.id === newItem.lineId
-                );
-                // If new item doesn't have images but existing one does, preserve them
-                if (
-                  (!newItem.imageUrls || newItem.imageUrls.length === 0) &&
-                  existingItem &&
-                  existingItem.imageUrls &&
-                  existingItem.imageUrls.length > 0
-                ) {
-                  return {
-                    ...newItem,
-                    imageUrls: existingItem.imageUrls,
-                  };
-                }
-                return newItem;
-              });
-            }
-
-            setCart({
-              id: data.cart.id,
-              checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
-              totalQuantity: data.cart.totalQuantity,
-              totalAmount: data.cart.totalAmount,
-              currencyCode: data.cart.currencyCode,
-              items: mergedItems,
-            });
-            localStorage.setItem("shopify_cart_id", data.cart.id);
-            // Clear optimistic adding flag if set
-            try {
-              if (typeof window !== "undefined") {
-                sessionStorage.removeItem("adding_to_cart");
-              }
-            } catch {}
-            // For existing lines without images, fetch them in background (non-blocking)
-            const linesNeedingImages = mergedItems.filter(
-              (item: any) => !item.imageUrls || item.imageUrls.length === 0
-            );
-            if (linesNeedingImages.length > 0 && data.cart.id) {
-              // Fetch images for lines that don't have them yet (non-blocking)
-              fetchCart(data.cart.id).catch(() => {
-                // Silently fail - images will load on next page refresh
-              });
-            }
-          } else {
-            // Fallback: fetch full cart details (for backward compatibility)
-            await fetchCart(data.cart.id);
-          }
+          // Always fetch the complete cart to ensure we have style and images from cart-images API
+          // This is more reliable than trying to merge partial data
+          await fetchCart(data.cart.id);
         }
       } else {
         const error = await response.json();

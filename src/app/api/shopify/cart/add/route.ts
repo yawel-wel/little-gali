@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
       quantity = 1,
       bookId,
       phoneNumber,
+      style,
       locale,
     } = body as {
       cartId: string;
@@ -18,8 +19,11 @@ export async function POST(request: NextRequest) {
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
+      style?: "cartoon" | "pencil";
       locale?: string;
     };
+
+    console.log("🛒 API /cart/add received style:", style, "type:", typeof style);
 
     if (!cartId || !imageUrls || imageUrls.length !== 5) {
       return NextResponse.json(
@@ -123,6 +127,29 @@ export async function POST(request: NextRequest) {
             { key: "_image_3", value: urls[2] },
             { key: "_image_4", value: urls[3] },
             { key: "_image_5", value: urls[4] },
+            // Always include style attribute (default to "cartoon" if not provided)
+            // Ensure style is valid before saving
+            ...(style && (style === "cartoon" || style === "pencil")
+              ? [
+                  {
+                    key: "_style",
+                    value: style,
+                  },
+                  {
+                    key: "style",
+                    value: style,
+                  },
+                ]
+              : [
+                  {
+                    key: "_style",
+                    value: "cartoon",
+                  },
+                  {
+                    key: "style",
+                    value: "cartoon",
+                  },
+                ]),
             ...(bookId
               ? [
                   {
@@ -211,11 +238,14 @@ export async function POST(request: NextRequest) {
       try {
         // Images are now stored as line item attributes (_image_1..._image_5) which are hidden from checkout
         // Also store in our server-side storage for UI
+        const styleToStore = style && (style === "cartoon" || style === "pencil") ? style : "cartoon";
         console.log(
-          "Storing cart images for lineId:",
+          "💾 Storing cart images for lineId:",
           lineId,
-          "imageUrls:",
-          urls
+          "style:",
+          styleToStore,
+          "original style param:",
+          style
         );
         const storeResponse = await fetch(
           `${
@@ -230,6 +260,7 @@ export async function POST(request: NextRequest) {
               cartId: cart.id,
               lineId: lineId,
               imageUrls: urls,
+              style: styleToStore,
             }),
           }
         );
@@ -259,6 +290,18 @@ export async function POST(request: NextRequest) {
           node.attributes.some(
             (a: any) => a.key === "_uid" && a.value === lineUid
           );
+        
+        // Extract style from attributes (check both "style" and "_style")
+        let itemStyle: "cartoon" | "pencil" | undefined = undefined;
+        if (Array.isArray(node.attributes)) {
+          const styleAttr = node.attributes.find(
+            (a: any) => a.key === "style" || a.key === "_style"
+          );
+          if (styleAttr && (styleAttr.value === "cartoon" || styleAttr.value === "pencil")) {
+            itemStyle = styleAttr.value;
+          }
+        }
+        
         return {
           id: node.id,
           lineId: node.id,
@@ -268,6 +311,7 @@ export async function POST(request: NextRequest) {
             node.merchandise?.title ||
             "ספר מותאם אישית",
           imageUrls: isNewLine ? urls : [], // Include images for the newly added line
+          style: itemStyle || (isNewLine ? (styleToStore || "cartoon") : undefined), // Include style for new line
         };
       }) || [];
 

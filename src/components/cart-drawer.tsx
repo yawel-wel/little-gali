@@ -199,6 +199,16 @@ export function CartDrawer() {
                           </span>
                         </div>
                         <div>
+                          <span>סגנון צבעוני: </span>
+                          <span className="font-body text-dark-gray">
+                            {item.style === "cartoon"
+                              ? t("cart.style.cartoon")
+                              : item.style === "pencil"
+                              ? t("cart.style.pencil")
+                              : t("cart.style.cartoon")}
+                          </span>
+                        </div>
+                        <div>
                           <span>{t("cart.itemTotal")} </span>
                           <span className="font-body text-dark-gray">
                             {itemTotal} ₪

@@ -248,6 +248,16 @@ export default function CartPage() {
                               </span>
                             </div>
                             <div>
+                              <span>סגנון צבעוני: </span>
+                              <span className="font-body text-dark-gray">
+                                {item.style === "cartoon"
+                                  ? t("cart.style.cartoon")
+                                  : item.style === "pencil"
+                                  ? t("cart.style.pencil")
+                                  : t("cart.style.cartoon")}
+                              </span>
+                            </div>
+                            <div>
                               <span>{t("cart.itemTotal")} </span>
                               <span className="font-body text-dark-gray">
                                 {itemTotal} ₪
@@ -371,7 +381,7 @@ export default function CartPage() {
                         {/* Add Book Button */}
                         <div className="mt-3">
                           <Button
-                            onClick={() => router.push("/upload?new=1")}
+                            onClick={() => router.push("/upload")}
                             variant="outline"
                             className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
                           >
@@ -478,7 +488,7 @@ export default function CartPage() {
                       {/* Add Book Button */}
                       <div className="w-full max-w-sm">
                         <Button
-                          onClick={() => router.push("/upload?new=1")}
+                          onClick={() => router.push("/upload")}
                           variant="outline"
                           className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
                         >
@@ -505,18 +515,10 @@ export default function CartPage() {
               ) : (
                 <div className="text-center py-16">
                   <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-                  <h2
-                    className={`text-2xl font-body-bold text-dark-gray mb-4 ${
-                      locale === "en" ? "text-center" : "text-right"
-                    }`}
-                  >
+                  <h2 className="text-2xl font-body-bold text-dark-gray mb-4 text-center">
                     {t("cart.empty")}
                   </h2>
-                  <p
-                    className={`text-medium-gray font-body mb-8 ${
-                      locale === "en" ? "text-center" : "text-right"
-                    }`}
-                  >
+                  <p className="text-medium-gray font-body mb-8 text-center">
                     {t("cart.startCreating")}
                   </p>
                   <Button
