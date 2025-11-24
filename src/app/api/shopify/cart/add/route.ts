@@ -234,11 +234,14 @@ export async function POST(request: NextRequest) {
           n.attributes.some((a: any) => a.key === "_uid" && a.value === lineUid)
       );
     const lineId = addedLine?.id;
+    
+    // Validate and normalize style (use this throughout the function)
+    const styleToStore = style && (style === "cartoon" || style === "pencil") ? style : "cartoon";
+    
     if (lineId) {
       try {
         // Images are now stored as line item attributes (_image_1..._image_5) which are hidden from checkout
         // Also store in our server-side storage for UI
-        const styleToStore = style && (style === "cartoon" || style === "pencil") ? style : "cartoon";
         console.log(
           "💾 Storing cart images for lineId:",
           lineId,
