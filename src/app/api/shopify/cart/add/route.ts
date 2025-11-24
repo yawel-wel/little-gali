@@ -23,7 +23,12 @@ export async function POST(request: NextRequest) {
       locale?: string;
     };
 
-    console.log("🛒 API /cart/add received style:", style, "type:", typeof style);
+    console.log(
+      "🛒 API /cart/add received style:",
+      style,
+      "type:",
+      typeof style
+    );
 
     if (!cartId || !imageUrls || imageUrls.length !== 5) {
       return NextResponse.json(
@@ -234,10 +239,11 @@ export async function POST(request: NextRequest) {
           n.attributes.some((a: any) => a.key === "_uid" && a.value === lineUid)
       );
     const lineId = addedLine?.id;
-    
+
     // Validate and normalize style (use this throughout the function)
-    const styleToStore = style && (style === "cartoon" || style === "pencil") ? style : "cartoon";
-    
+    const styleToStore =
+      style && (style === "cartoon" || style === "pencil") ? style : "cartoon";
+
     if (lineId) {
       try {
         // Images are now stored as line item attributes (_image_1..._image_5) which are hidden from checkout
@@ -293,18 +299,21 @@ export async function POST(request: NextRequest) {
           node.attributes.some(
             (a: any) => a.key === "_uid" && a.value === lineUid
           );
-        
+
         // Extract style from attributes (check both "style" and "_style")
         let itemStyle: "cartoon" | "pencil" | undefined = undefined;
         if (Array.isArray(node.attributes)) {
           const styleAttr = node.attributes.find(
             (a: any) => a.key === "style" || a.key === "_style"
           );
-          if (styleAttr && (styleAttr.value === "cartoon" || styleAttr.value === "pencil")) {
+          if (
+            styleAttr &&
+            (styleAttr.value === "cartoon" || styleAttr.value === "pencil")
+          ) {
             itemStyle = styleAttr.value;
           }
         }
-        
+
         return {
           id: node.id,
           lineId: node.id,
@@ -314,7 +323,8 @@ export async function POST(request: NextRequest) {
             node.merchandise?.title ||
             "ספר מותאם אישית",
           imageUrls: isNewLine ? urls : [], // Include images for the newly added line
-          style: itemStyle || (isNewLine ? (styleToStore || "cartoon") : undefined), // Include style for new line
+          style:
+            itemStyle || (isNewLine ? styleToStore || "cartoon" : undefined), // Include style for new line
         };
       }) || [];
 
