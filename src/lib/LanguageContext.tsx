@@ -429,6 +429,14 @@ const hebrewTranslations = {
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
 
+  // Style Selector
+  "styleSelector.title": "בחרו את הסגנון שלכם:",
+  "styleSelector.subtitle": "הסגנון ישפיע על הצד הצבעוני של התמונה",
+  "styleSelector.cartoon": "קריקטורה",
+  "styleSelector.pencil": "עיפרון",
+  "styleSelector.cartoonAlt": "קריקטורה - סגנון קריקטורה",
+  "styleSelector.pencilAlt": "עיפרון - סגנון עיפרון",
+
   // Upload Modal
   "uploadModal.title": "איך לבחור תמונה לספרון?",
   "uploadModal.choose": "כדאי לבחור",
@@ -804,6 +812,15 @@ const englishTranslations = {
   "upload.addToCart": "Add to Cart",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
+
+  // Style Selector
+  "styleSelector.title": "Choose Your Style:",
+  "styleSelector.subtitle":
+    "The style will affect the colorful side of the image",
+  "styleSelector.cartoon": "Cartoon",
+  "styleSelector.pencil": "Pencil",
+  "styleSelector.cartoonAlt": "Cartoon - Cartoon style",
+  "styleSelector.pencilAlt": "Pencil - Pencil style",
 
   // Upload Modal
   "uploadModal.title": "How to Choose a Photo for the Book?",

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/lib/LanguageContext";
+
 export type StyleType = "cartoon" | "pencil";
 
 interface StyleSelectorProps {
@@ -11,17 +13,19 @@ export function StyleSelector({
   selectedStyle,
   onStyleChange,
 }: StyleSelectorProps) {
+  const { t, locale } = useLanguage();
+
   return (
     <div className="flex flex-col items-center gap-5 w-full">
       {/* Heading and Subtitle Group */}
       <div className="flex flex-col items-center gap-2">
         <h3 className="text-lg font-body-bold text-dark-gray text-center">
-          בחרו את הסגנון שלכם:
+          {t("styleSelector.title")}
         </h3>
 
         {/* Subtitle */}
         <p className="text-md font-body text-medium-gray text-center">
-          הסגנון ישפיע על הצד הצבעוני של התמונה
+          {t("styleSelector.subtitle")}
         </p>
       </div>
 
@@ -57,7 +61,7 @@ export function StyleSelector({
           <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
             <img
               src="/style-example-cartoon.png"
-              alt="קריקטורה - סגנון קריקטורה"
+              alt={t("styleSelector.cartoonAlt")}
               className="w-full h-full object-cover"
               style={{ border: "none", outline: "none" }}
               onError={(e) => {
@@ -68,7 +72,7 @@ export function StyleSelector({
           </div>
           {/* Label */}
           <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
-            קריקטורה
+            {t("styleSelector.cartoon")}
           </span>
         </button>
 
@@ -102,7 +106,7 @@ export function StyleSelector({
           <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
             <img
               src="/style-example-pencil.png"
-              alt="עיפרון - סגנון עיפרון"
+              alt={t("styleSelector.pencilAlt")}
               className="w-full h-full object-cover"
               style={{ border: "none", outline: "none" }}
               onError={(e) => {
@@ -118,7 +122,7 @@ export function StyleSelector({
           </div>
           {/* Label */}
           <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
-            עיפרון
+            {t("styleSelector.pencil")}
           </span>
         </button>
       </div>
