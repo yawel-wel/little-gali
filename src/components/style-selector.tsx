@@ -26,14 +26,14 @@ export function StyleSelector({
       </div>
 
       {/* Style Options */}
-      <div className="flex flex-row gap-4 sm:gap-6 justify-center w-full max-w-2xl px-24 sm:px-4">
+      <div className="flex flex-row gap-4 sm:gap-6 justify-center w-full max-w-full sm:max-w-2xl px-8 sm:px-0">
         {/* Cartoon Option */}
         <button
           onClick={() => {
             console.log("🎨 Style changed to: cartoon");
             onStyleChange("cartoon");
           }}
-          className={`flex flex-col items-center gap-4 p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[240px] bg-white ${
+          className={`flex flex-col items-center gap-4 p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[240px] bg-white ml-4 sm:ml-0 ${
             selectedStyle === "cartoon"
               ? "border-[4px] border-primary-orange"
               : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
@@ -60,6 +60,10 @@ export function StyleSelector({
               alt="קריקטורה - סגנון קריקטורה"
               className="w-full h-full object-cover"
               style={{ border: "none", outline: "none" }}
+              onError={(e) => {
+                console.error("Failed to load cartoon style image");
+                e.currentTarget.style.display = "none";
+              }}
             />
           </div>
           {/* Label */}
@@ -74,7 +78,7 @@ export function StyleSelector({
             console.log("🎨 Style changed to: pencil");
             onStyleChange("pencil");
           }}
-          className={`flex flex-col items-center gap-4 p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[240px] bg-white ${
+          className={`flex flex-col items-center gap-4 p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[240px] bg-white ml-4 mr-4 sm:ml-0 sm:mr-0 ${
             selectedStyle === "pencil"
               ? "border-[4px] border-primary-orange"
               : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
@@ -101,6 +105,15 @@ export function StyleSelector({
               alt="עיפרון - סגנון עיפרון"
               className="w-full h-full object-cover"
               style={{ border: "none", outline: "none" }}
+              onError={(e) => {
+                console.error("Failed to load pencil style image");
+                // Try fallback image
+                if (e.currentTarget.src !== "/style-example-pencil2.png") {
+                  e.currentTarget.src = "/style-example-pencil2.png";
+                } else {
+                  e.currentTarget.style.display = "none";
+                }
+              }}
             />
           </div>
           {/* Label */}

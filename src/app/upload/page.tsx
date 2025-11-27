@@ -518,7 +518,7 @@ function UploadPageContent() {
 
               {/* Style Selector - Show when all 5 images are uploaded */}
               {selectedImagesCount === 5 && (
-                <div className="flex justify-center mt-6 mb-6">
+                <div className="flex justify-center mt-6 mb-6 -mx-4 sm:mx-0 px-4 sm:px-0">
                   <StyleSelector
                     selectedStyle={selectedStyle}
                     onStyleChange={setSelectedStyle}
