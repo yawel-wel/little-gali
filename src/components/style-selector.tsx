@@ -26,7 +26,7 @@ export function StyleSelector({
       </div>
 
       {/* Style Options */}
-      <div className="flex flex-row gap-4 sm:gap-6 justify-center w-full max-w-2xl px-4">
+      <div className="flex flex-row gap-4 sm:gap-6 justify-center w-full max-w-2xl px-24 sm:px-4">
         {/* Cartoon Option */}
         <button
           onClick={() => {
