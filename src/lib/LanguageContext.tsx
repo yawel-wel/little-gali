@@ -436,6 +436,17 @@ const hebrewTranslations = {
   "styleSelector.pencil": "עיפרון",
   "styleSelector.cartoonAlt": "קריקטורה - סגנון קריקטורה",
   "styleSelector.pencilAlt": "עיפרון - סגנון עיפרון",
+  "styleSelector.modal.title": "מה ההבדל?",
+  "styleSelector.modal.subtitle": "בחרו את הסגנון המועדף עליכם לצד הצבעוני:",
+  "styleSelector.modal.cartoon.bold": "סגנון איורי",
+  "styleSelector.modal.cartoon.vibrant": "משחקי וחמוד",
+  "styleSelector.modal.cartoon.modern": "צבעים עזים",
+  "styleSelector.modal.cartoon.stylized": "פחות מדויק לפרטים",
+  "styleSelector.modal.pencil.soft": "סגנון עפרונות צבעוניים",
+  "styleSelector.modal.pencil.delicate": "רך ואומנותי",
+  "styleSelector.modal.pencil.handDrawn": "פסטלים עדינים",
+  "styleSelector.modal.pencil.realistic": "מדויק לפרטים",
+  "styleSelector.modal.gotIt": "הבנתי!",
 
   // Upload Modal
   "uploadModal.title": "איך לבחור תמונה לספרון?",
@@ -821,6 +832,18 @@ const englishTranslations = {
   "styleSelector.pencil": "Pencil",
   "styleSelector.cartoonAlt": "Cartoon - Cartoon style",
   "styleSelector.pencilAlt": "Pencil - Pencil style",
+  "styleSelector.modal.title": "What's the difference?",
+  "styleSelector.modal.subtitle":
+    "Choose your preferred style for the colorful side:",
+  "styleSelector.modal.cartoon.bold": "Bold & playful",
+  "styleSelector.modal.cartoon.vibrant": "Vibrant colors",
+  "styleSelector.modal.cartoon.modern": "Modern illustration style",
+  "styleSelector.modal.cartoon.stylized": "Stylized features",
+  "styleSelector.modal.pencil.soft": "Soft & artistic",
+  "styleSelector.modal.pencil.delicate": "Delicate pastels",
+  "styleSelector.modal.pencil.handDrawn": "Hand-drawn aesthetic",
+  "styleSelector.modal.pencil.realistic": "Realistic details",
+  "styleSelector.modal.gotIt": "Got it!",
 
   // Upload Modal
   "uploadModal.title": "How to Choose a Photo for the Book?",
