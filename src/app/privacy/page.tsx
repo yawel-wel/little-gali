@@ -70,7 +70,9 @@ function PrivacyPageContent() {
                     {t("privacy.imageUse.title")}
                   </h2>
                   <p className="mb-4">{t("privacy.imageUse.p1")}</p>
-                  <p>{t("privacy.imageUse.p2")}</p>
+                  <p className="mb-4">{t("privacy.imageUse.p2")}</p>
+                  <p className="mb-4">{t("privacy.imageUse.p3")}</p>
+                  <p>{t("privacy.imageUse.p4")}</p>
                 </div>
 
                 {/* אבטחת מידע */}

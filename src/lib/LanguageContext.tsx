@@ -207,9 +207,13 @@ const hebrewTranslations = {
     "המידע נשמר בצורה מאובטחת ואינו נמסר לצדדים שלישיים, למעט במקרים הנדרשים לצורך ביצוע התשלום או משלוח המוצר, ובהתאם להסכמי סודיות ושמירת פרטיות.",
   "privacy.imageUse.title": "שימוש בתמונות",
   "privacy.imageUse.p1":
-    "התמונות שתעלו לאתר משמשות אך ורק לצורך יצירת הספרון האישי שלכם. הן נשמרות במסד נתונים מאובטח לצורך הפקת המוצר, מתן שירות לקוחות או שחזור במקרה של תקלה. לא ייעשה בהן שימוש נוסף, פרסום או העברה לצדדים שלישיים.",
+    "התמונות שתעלו לאתר ישמשו אך ורק לצורך יצירת הספרון האישי שלכם.",
   "privacy.imageUse.p2":
-    "ניתן לבקש את מחיקת התמונות לאחר השלמת ההפקה באמצעות פנייה אלינו, בכפוף לשיקולים טכניים של גיבוי ותמיכה.",
+    "התמונות נשמרות באופן מאובטח בענן לצורך הפקת המוצר, הצגת תצוגה מקדימה, מתן שירות לקוחות או שחזור במקרה של תקלה, גם אם לא הושלמה רכישה בפועל.",
+  "privacy.imageUse.p3":
+    "לא ייעשה בתמונות כל שימוש נוסף, פרסום או העברה לצדדים שלישיים.",
+  "privacy.imageUse.p4":
+    "ניתן לפנות אלינו בכל עת בבקשה למחיקת התמונות לאחר סיום ההפקה או במקרה של אי־רכישה, ואנו נטפל בכך בהתאם לשיקולים טכניים של גיבוי ותמיכה.",
   "privacy.dataSecurity.title": "אבטחת מידע",
   "privacy.dataSecurity.p1":
     "האתר משתמש באמצעי אבטחה מתקדמים, לרבות הצפנת נתונים ואחסון בשרתים מאובטחים, לצורך הגנה על פרטיותכם. יחד עם זאת, יש לזכור כי אף מערכת אינטרנטית אינה חסינה לחלוטין, ואיננו יכולים להבטיח הגנה מוחלטת מפני חדירה או שימוש לא מורשה.",
@@ -574,9 +578,13 @@ const englishTranslations = {
     "The information is stored securely and is not shared with third parties, except in cases required for payment processing or product shipping, and in accordance with confidentiality and privacy agreements.",
   "privacy.imageUse.title": "Image Use",
   "privacy.imageUse.p1":
-    "Images you upload to the website are used solely for creating your personal book. They are stored in a secure database for product production, customer service, or recovery in case of failure. They will not be used for any other purpose, published, or transferred to third parties.",
+    "Images you upload to the website will be used solely for creating your personal book.",
   "privacy.imageUse.p2":
-    "You may request deletion of images after production completion by contacting us, subject to technical considerations of backup and support.",
+    "Images are stored securely in the cloud for product production, preview display, customer service, or recovery in case of failure, even if a purchase was not completed.",
+  "privacy.imageUse.p3":
+    "No additional use, publication, or transfer to third parties will be made with the images.",
+  "privacy.imageUse.p4":
+    "You may contact us at any time to request deletion of images after production completion or in case of non-purchase, and we will handle it according to technical considerations of backup and support.",
   "privacy.dataSecurity.title": "Data Security",
   "privacy.dataSecurity.p1":
     "The website uses advanced security measures, including data encryption and storage on secure servers, to protect your privacy. However, please remember that no internet system is completely immune, and we cannot guarantee absolute protection against intrusion or unauthorized use.",

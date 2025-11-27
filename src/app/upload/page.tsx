@@ -149,8 +149,8 @@ function UploadPageContent() {
         throw new Error("Invalid response from upload API");
       }
 
-      // Revoke the blob URL to free memory
-      URL.revokeObjectURL(blobUrl);
+      // Don't revoke blob URL here - revoke it after state update to prevent black image
+      // URL.revokeObjectURL(blobUrl);
 
       return uploadData.imageUrls[0];
     } catch (error) {
@@ -212,6 +212,13 @@ function UploadPageContent() {
             // Make sure the index is still valid and the URL at that index is still the same blob URL
             if (index < updated.length && updated[index] === url) {
               updated[index] = cloudinaryUrl;
+              // Revoke blob URL AFTER state update to prevent black image flash
+              // Use requestAnimationFrame to ensure DOM has updated before revoking
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  URL.revokeObjectURL(url);
+                });
+              });
             }
             return updated;
           });

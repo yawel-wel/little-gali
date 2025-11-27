@@ -26,14 +26,14 @@ export function StyleSelector({
       </div>
 
       {/* Style Options */}
-      <div className="flex flex-row gap-4 sm:gap-6 justify-center w-full max-w-full sm:max-w-2xl px-8 sm:px-0">
+      <div className="flex flex-row gap-1 sm:gap-4 justify-center w-full max-w-full sm:max-w-2xl px-4 sm:px-0">
         {/* Cartoon Option */}
         <button
           onClick={() => {
             console.log("🎨 Style changed to: cartoon");
             onStyleChange("cartoon");
           }}
-          className={`flex flex-col items-center gap-4 p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[240px] bg-white ml-4 sm:ml-0 ${
+          className={`flex flex-col items-center gap-3 sm:gap-4 p-3 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ml-2 sm:ml-0 ${
             selectedStyle === "cartoon"
               ? "border-[4px] border-primary-orange"
               : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
@@ -54,7 +54,7 @@ export function StyleSelector({
           }}
         >
           {/* Cartoon Example Image */}
-          <div className="w-[160px] h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
+          <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
             <img
               src="/style-example-cartoon.png"
               alt="קריקטורה - סגנון קריקטורה"
@@ -67,7 +67,7 @@ export function StyleSelector({
             />
           </div>
           {/* Label */}
-          <span className="font-body-bold text-base md:text-lg text-dark-gray">
+          <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
             קריקטורה
           </span>
         </button>
@@ -78,7 +78,7 @@ export function StyleSelector({
             console.log("🎨 Style changed to: pencil");
             onStyleChange("pencil");
           }}
-          className={`flex flex-col items-center gap-4 p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[240px] bg-white ml-4 mr-4 sm:ml-0 sm:mr-0 ${
+          className={`flex flex-col items-center gap-3 sm:gap-4 p-3 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ml-2 mr-2 sm:ml-0 sm:mr-0 ${
             selectedStyle === "pencil"
               ? "border-[4px] border-primary-orange"
               : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
@@ -99,7 +99,7 @@ export function StyleSelector({
           }}
         >
           {/* Pencil Example Image */}
-          <div className="w-[160px] h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
+          <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
             <img
               src="/style-example-pencil.png"
               alt="עיפרון - סגנון עיפרון"
@@ -117,7 +117,7 @@ export function StyleSelector({
             />
           </div>
           {/* Label */}
-          <span className="font-body-bold text-base md:text-lg text-dark-gray">
+          <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
             עיפרון
           </span>
         </button>
