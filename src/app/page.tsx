@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   motion,
+  AnimatePresence,
   useReducedMotion,
   useScroll,
   useTransform,
@@ -11,6 +12,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
@@ -19,6 +21,339 @@ import {
 } from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
+
+function ComingSoonSection({
+  prefersReducedMotion,
+  easeOwlet,
+}: {
+  prefersReducedMotion: boolean | null;
+  easeOwlet: any;
+}) {
+  const { locale, t } = useLanguage();
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setSubmitStatus({
+        type: "error",
+        message: t("home.comingSoon.error"),
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/email-signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          type: "success",
+          message: data.message || t("home.comingSoon.success"),
+        });
+        setEmail("");
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: data.error || t("home.comingSoon.errorGeneric"),
+        });
+      }
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: t("home.comingSoon.errorGeneric"),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.section
+      className="relative py-16 lg:py-24"
+      style={{ backgroundColor: "#F3EEE8" }}
+      initial={
+        prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
+      }
+      whileInView={
+        prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
+      }
+      transition={{ duration: 0.9, ease: easeOwlet }}
+      viewport={{ once: true, amount: 0.2 }}
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          className="max-w-3xl mx-auto text-center"
+          initial={prefersReducedMotion ? false : "hidden"}
+          whileInView={prefersReducedMotion ? undefined : "show"}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            show: {
+              transition: { staggerChildren: 0.15 },
+            },
+          }}
+        >
+          {/* Main Heading - Largest, Most Prominent */}
+          <motion.div
+            className="mb-8"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.8, ease: easeOwlet },
+              },
+            }}
+          >
+            <Title
+              highlightText={t("home.comingSoon.titleHighlight")}
+              size="xl"
+              className="text-center"
+            >
+              {t("home.comingSoon.title")}
+            </Title>
+          </motion.div>
+
+          {/* Image */}
+          <div className="flex justify-center my-8">
+            <motion.div
+              className="w-full max-w-md rounded-lg overflow-hidden shadow-lg"
+              initial={
+                prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }
+              }
+              whileInView={
+                prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }
+              }
+              transition={{ duration: 0.8, ease: easeOwlet, delay: 0.2 }}
+              viewport={{ once: true, amount: 0.3 }}
+              whileHover={{
+                scale: 1.02,
+                transition: { duration: 0.3, ease: easeOwlet },
+              }}
+            >
+              <img
+                src="/coming-soon.jpg"
+                alt="Coming Soon"
+                className="w-full h-auto object-cover"
+              />
+            </motion.div>
+          </div>
+
+          {/* Product Name - Secondary, Medium-Large */}
+          <motion.div
+            className="mb-4 mt-5"
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              show: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.7, ease: easeOwlet },
+              },
+            }}
+          >
+            <h3 className="text-xl md:text-2xl font-heading font-bold text-dark-gray">
+              {t("home.comingSoon.productName")}
+            </h3>
+          </motion.div>
+
+          {/* Description/CTA Text - Tertiary, Regular Body */}
+          <motion.div
+            className="mb-8"
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              show: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.7, ease: easeOwlet },
+              },
+            }}
+          >
+            <p className="text-base font-body text-medium-gray">
+              {t("home.comingSoon.subtitle")}
+            </p>
+          </motion.div>
+
+          {/* Email Form or Success Message */}
+          <AnimatePresence mode="wait">
+            {submitStatus.type === "success" ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4, ease: easeOwlet }}
+                className="max-w-[500px] mx-auto"
+              >
+                {/* Success Card Container */}
+                <div
+                  className="rounded-2xl border-2 border-dashed border-primary-orange bg-[#FAFAF9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-8 md:p-10"
+                  style={{ borderColor: "#E16854" }}
+                >
+                  <div className="flex flex-col items-center text-center">
+                    {/* Checkmark Icon */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: 0.4,
+                        ease: easeOwlet,
+                        delay: 0.1,
+                      }}
+                      className="w-12 h-12 rounded-full bg-primary-orange flex items-center justify-center shadow-lg mb-3"
+                    >
+                      <svg
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </motion.div>
+
+                    {/* Thank You Title */}
+                    <motion.h3
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        ease: easeOwlet,
+                        delay: 0.2,
+                      }}
+                      className="text-xl md:text-2xl font-heading font-bold text-dark-gray mb-2"
+                    >
+                      {t("home.comingSoon.successTitle")}
+                    </motion.h3>
+
+                    {/* Success Message */}
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        ease: easeOwlet,
+                        delay: 0.3,
+                      }}
+                      className="text-base font-body text-medium-gray"
+                    >
+                      {t("home.comingSoon.successMessage")}
+                    </motion.p>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={handleSubmit}
+                className="max-w-lg mx-auto"
+                initial="hidden"
+                animate="show"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.8, ease: easeOwlet },
+                  },
+                }}
+              >
+                {/* Desktop: Horizontal Layout */}
+                <div
+                  className={`hidden md:flex md:items-center md:justify-center md:gap-4 ${
+                    locale === "en" ? "flex-row" : "flex-row"
+                  }`}
+                >
+                  <div className="flex-1 max-w-[350px]">
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t("home.comingSoon.emailPlaceholder")}
+                      required
+                      disabled={isSubmitting}
+                      className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-3.5 text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
+                      dir={locale === "en" ? "ltr" : "rtl"}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 whitespace-nowrap"
+                  >
+                    {isSubmitting
+                      ? t("home.comingSoon.submitting")
+                      : t("home.comingSoon.button")}
+                  </Button>
+                </div>
+
+                {/* Mobile: Vertical Layout */}
+                <div className="md:hidden space-y-3">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t("home.comingSoon.emailPlaceholder")}
+                    required
+                    disabled={isSubmitting}
+                    className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-3.5 text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
+                    dir={locale === "en" ? "ltr" : "rtl"}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full cursor-pointer bg-primary-orange hover:bg-primary-orange/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-full font-body-bold text-base transition-all duration-200"
+                  >
+                    {isSubmitting
+                      ? t("home.comingSoon.submitting")
+                      : t("home.comingSoon.button")}
+                  </Button>
+                </div>
+
+                {/* Error Message */}
+                {submitStatus.type === "error" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4"
+                  >
+                    <p className="text-base font-body text-red-600">
+                      {submitStatus.message}
+                    </p>
+                  </motion.div>
+                )}
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </motion.section>
+  );
+}
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
@@ -408,6 +743,12 @@ export default function Home() {
             </div>
           </div>
         </motion.section>
+
+        {/* Coming Soon Section */}
+        <ComingSoonSection
+          prefersReducedMotion={prefersReducedMotion}
+          easeOwlet={easeOwlet}
+        />
 
         {/* How It Works Section */}
         <motion.section
