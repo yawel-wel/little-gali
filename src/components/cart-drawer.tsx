@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/CartContext";
-import { BOOK_PRICE } from "@/lib/constants";
+import { BOOK_PRICE, USE_TEMPORARY_CHECKOUT } from "@/lib/constants";
 import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { QuantityControls } from "@/components/quantity-controls";
@@ -142,7 +142,9 @@ export function CartDrawer() {
                           e.stopPropagation();
                           handleRemoveClick(item.lineId || item.id);
                         }}
-                        className="absolute top-2 left-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer"
+                        className={`absolute top-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer ${
+                          locale === "en" ? "right-2" : "left-2"
+                        }`}
                         disabled={isActionLoading}
                       >
                         <X className="w-4 h-4" />
@@ -199,7 +201,7 @@ export function CartDrawer() {
                           </span>
                         </div>
                         <div>
-                          <span>סגנון צבעוני: </span>
+                          <span>{t("cart.colorStyle")} </span>
                           <span className="font-body text-dark-gray">
                             {item.style === "cartoon"
                               ? t("cart.style.cartoon")
@@ -274,28 +276,33 @@ export function CartDrawer() {
                   ₪
                 </span>
               </div>
-              <Button
-                onClick={handleCheckout}
-                className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 cursor-pointer"
-                disabled={isLoading || isActionLoading}
-                style={{
-                  cursor:
-                    isLoading || isActionLoading ? "not-allowed" : "pointer",
-                }}
-              >
-                {isLoading || isActionLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    {t("cart.loading")}
-                  </>
-                ) : (
-                  t("cart.checkout")
-                )}
-              </Button>
+              {/* TEMPORARY CHECKOUT FLOW: Hide checkout button when temporary checkout is active */}
+              {!USE_TEMPORARY_CHECKOUT && (
+                <Button
+                  onClick={handleCheckout}
+                  className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 cursor-pointer"
+                  disabled={isLoading || isActionLoading}
+                  style={{
+                    cursor:
+                      isLoading || isActionLoading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isLoading || isActionLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      {t("cart.loading")}
+                    </>
+                  ) : (
+                    t("cart.checkout")
+                  )}
+                </Button>
+              )}
               <Button
                 onClick={() => router.push("/cart")}
                 variant="outline"
-                className="w-full mt-2 border-primary-orange text-primary-orange hover:bg-primary-orange/10 cursor-pointer"
+                className={`w-full ${
+                  USE_TEMPORARY_CHECKOUT ? "" : "mt-2"
+                } border-primary-orange text-primary-orange hover:bg-primary-orange/10 cursor-pointer`}
               >
                 {t("cart.viewFull")}
               </Button>

@@ -13,12 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
-import { BOOK_PRICE } from "@/lib/constants";
-import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
+import { BOOK_PRICE, USE_TEMPORARY_CHECKOUT } from "@/lib/constants";
+import { ArrowRight, Loader2, ShoppingCart, X, Check } from "lucide-react";
 import { QuantityControls } from "@/components/quantity-controls";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
+import { Input } from "@/components/ui/input";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, updateQuantity, fetchCart } =
@@ -30,6 +31,13 @@ export default function CartPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+
+  // TEMPORARY CHECKOUT FLOW STATE
+  // When removing this feature, delete all state variables prefixed with "tempCheckout"
+  const [tempCheckoutName, setTempCheckoutName] = useState("");
+  const [tempCheckoutPhone, setTempCheckoutPhone] = useState("");
+  const [tempCheckoutSubmitting, setTempCheckoutSubmitting] = useState(false);
+  const [tempCheckoutSuccess, setTempCheckoutSuccess] = useState(false);
 
   // Fetch cart on mount if we have a cart ID
   useEffect(() => {
@@ -83,21 +91,71 @@ export default function CartPage() {
   // Edit functionality removed: books can only be created via normal flow and not edited from cart
 
   const handleCheckout = () => {
-    if (cart?.checkoutUrl) {
-      setIsCheckingOut(true);
-      // The checkoutUrl in cart state should already have the locale
-      // But ensure it's there as a safety measure
-      let checkoutUrl = cart.checkoutUrl;
-      try {
-        const url = new URL(checkoutUrl);
-        // Always ensure locale is set to current locale
-        url.searchParams.set("locale", locale);
-        checkoutUrl = url.toString();
-      } catch (e) {
-        // If URL parsing fails, use original URL
-        console.error("Error parsing checkout URL:", e);
+    if (USE_TEMPORARY_CHECKOUT) {
+      // TEMPORARY CHECKOUT FLOW
+      // When removing this feature, delete this entire if block
+      handleTemporaryCheckout();
+    } else {
+      // Standard Shopify checkout
+      if (cart?.checkoutUrl) {
+        setIsCheckingOut(true);
+        // The checkoutUrl in cart state should already have the locale
+        // But ensure it's there as a safety measure
+        let checkoutUrl = cart.checkoutUrl;
+        try {
+          const url = new URL(checkoutUrl);
+          // Always ensure locale is set to current locale
+          url.searchParams.set("locale", locale);
+          checkoutUrl = url.toString();
+        } catch (e) {
+          // If URL parsing fails, use original URL
+          console.error("Error parsing checkout URL:", e);
+        }
+        window.location.href = checkoutUrl;
       }
-      window.location.href = checkoutUrl;
+    }
+  };
+
+  // TEMPORARY CHECKOUT FLOW HANDLER
+  // When removing this feature, delete this entire function
+  const handleTemporaryCheckout = async () => {
+    if (!tempCheckoutName.trim() || !tempCheckoutPhone.trim() || !cart) {
+      return;
+    }
+
+    setTempCheckoutSubmitting(true);
+    try {
+      const response = await fetch("/api/temporary-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: tempCheckoutName.trim(),
+          phoneNumber: tempCheckoutPhone.trim(),
+          books: cart.items.map((item) => ({
+            quantity: item.quantity,
+            style: item.style || "cartoon",
+            imageUrls: item.imageUrls || [],
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "שגיאה בשליחת ההזמנה");
+      }
+
+      setTempCheckoutSuccess(true);
+      // Reset form after success
+      setTempCheckoutName("");
+      setTempCheckoutPhone("");
+    } catch (error) {
+      console.error("Error submitting temporary checkout:", error);
+      alert("שגיאה בשליחת ההזמנה. אנא נסה שוב מאוחר יותר.");
+    } finally {
+      setTempCheckoutSubmitting(false);
     }
   };
 
@@ -159,7 +217,9 @@ export default function CartPage() {
                               e.stopPropagation();
                               handleRemoveClick(item.lineId || item.id);
                             }}
-                            className="absolute top-3 left-3 w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer"
+                            className={`absolute top-3 w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer ${
+                              locale === "en" ? "right-3" : "left-3"
+                            }`}
                             disabled={isLoading || isRemoving !== null}
                           >
                             <X className="w-4 h-4" />
@@ -254,7 +314,7 @@ export default function CartPage() {
                               </span>
                             </div>
                             <div>
-                              <span>סגנון צבעוני: </span>
+                              <span>{t("cart.colorStyle")} </span>
                               <span className="font-body text-dark-gray">
                                 {item.style === "cartoon"
                                   ? t("cart.style.cartoon")
@@ -295,7 +355,9 @@ export default function CartPage() {
                                 handleRemoveClick(item.lineId || item.id)
                               }
                               isLoading={isLoading || isRemoving !== null}
-                              isDeleting={isRemoving === (item.lineId || item.id)}
+                              isDeleting={
+                                isRemoving === (item.lineId || item.id)
+                              }
                               disabled={isRemoving !== null}
                               size="md"
                             />
@@ -322,28 +384,60 @@ export default function CartPage() {
                               locale === "en" ? "flex-row" : "flex-row-reverse"
                             }`}
                           >
-                            <span className="text-medium-gray font-body">
-                              {t("cart.itemsCount")}
-                            </span>
-                            <span className="font-body-bold text-dark-gray">
-                              {cart.totalQuantity}
-                            </span>
+                            {locale === "he" ? (
+                              <>
+                                <span className="font-body-bold text-dark-gray">
+                                  {cart.totalQuantity}
+                                </span>
+                                <span className="text-medium-gray font-body">
+                                  {t("cart.itemsCount")}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-medium-gray font-body">
+                                  {t("cart.itemsCount")}
+                                </span>
+                                <span className="font-body-bold text-dark-gray">
+                                  {cart.totalQuantity}
+                                </span>
+                              </>
+                            )}
                           </div>
                           <div
                             className={`flex justify-between items-center ${
                               locale === "en" ? "flex-row" : "flex-row-reverse"
                             }`}
                           >
-                            <span className="text-medium-gray font-body">
-                              {t("cart.total")}
-                            </span>
-                            <span className="text-xl font-body-bold text-black">
-                              {cart.items.reduce(
-                                (sum, item) => sum + item.quantity * BOOK_PRICE,
-                                0
-                              )}{" "}
-                              ₪
-                            </span>
+                            {locale === "he" ? (
+                              <>
+                                <span className="text-xl font-body-bold text-black">
+                                  {cart.items.reduce(
+                                    (sum, item) =>
+                                      sum + item.quantity * BOOK_PRICE,
+                                    0
+                                  )}{" "}
+                                  ₪
+                                </span>
+                                <span className="text-medium-gray font-body">
+                                  {t("cart.total")}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-medium-gray font-body">
+                                  {t("cart.total")}
+                                </span>
+                                <span className="text-xl font-body-bold text-black">
+                                  {cart.items.reduce(
+                                    (sum, item) =>
+                                      sum + item.quantity * BOOK_PRICE,
+                                    0
+                                  )}{" "}
+                                  ₪
+                                </span>
+                              </>
+                            )}
                           </div>
                           <div className="pt-4 border-t border-gray-200">
                             <p
@@ -353,36 +447,146 @@ export default function CartPage() {
                             >
                               {t("cart.deliveryTime")}
                             </p>
-                            <p
-                              className={`text-sm text-medium-gray font-body ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              {t("cart.readyMessage")}
-                            </p>
+                            {/* TEMPORARY CHECKOUT FLOW: Hide readyMessage here since it's shown below phone input */}
+                            {!USE_TEMPORARY_CHECKOUT && (
+                              <p
+                                className={`text-sm text-medium-gray font-body ${
+                                  locale === "en" ? "text-left" : "text-right"
+                                }`}
+                              >
+                                {t("cart.readyMessage")}
+                              </p>
+                            )}
                           </div>
                         </div>
 
                         {/* Checkout Button */}
                         <div className="mt-6">
-                          <Button
-                            onClick={handleCheckout}
-                            disabled={isCheckingOut || isLoading}
-                            className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
-                          >
-                            {isCheckingOut ? (
-                              <>
-                                <Loader2
-                                  className={`w-5 h-5 animate-spin ${
-                                    locale === "en" ? "mr-2" : "ml-2"
+                          {/* TEMPORARY CHECKOUT FLOW: Show name/phone inputs and different button */}
+                          {USE_TEMPORARY_CHECKOUT ? (
+                            <>
+                              {/* Success Message */}
+                              {tempCheckoutSuccess && (
+                                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                  <div className="flex items-center justify-center gap-2 text-green-700 mb-2">
+                                    <Check className="w-5 h-5" />
+                                    <p className="font-body-bold text-base">
+                                      {t("cart.tempCheckout.successTitle")}
+                                    </p>
+                                  </div>
+                                  <p className="text-sm font-body text-green-600 text-center">
+                                    {t("cart.tempCheckout.successMessage")}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Info Text */}
+                              <p
+                                className={`text-sm font-body text-medium-gray mb-4 ${
+                                  locale === "en" ? "text-left" : "text-right"
+                                }`}
+                              >
+                                {t("cart.tempCheckout.paymentLinkInfo")}
+                              </p>
+
+                              {/* Name Input */}
+                              <div className="mb-3">
+                                <Input
+                                  type="text"
+                                  placeholder={t(
+                                    "cart.tempCheckout.namePlaceholder"
+                                  )}
+                                  value={tempCheckoutName}
+                                  onChange={(e) => {
+                                    setTempCheckoutName(e.target.value);
+                                    setTempCheckoutSuccess(false);
+                                  }}
+                                  className={`w-full ${
+                                    locale === "en" ? "text-left" : "text-right"
                                   }`}
+                                  dir={locale === "he" ? "rtl" : "ltr"}
                                 />
-                                {t("cart.checkoutProgress")}
-                              </>
-                            ) : (
-                              t("cart.checkout")
-                            )}
-                          </Button>
+                              </div>
+
+                              {/* Phone Input */}
+                              <div className="mb-3">
+                                <Input
+                                  type="tel"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  placeholder={t(
+                                    "cart.tempCheckout.phonePlaceholder"
+                                  )}
+                                  value={tempCheckoutPhone}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(
+                                      /\D/g,
+                                      ""
+                                    );
+                                    setTempCheckoutPhone(value);
+                                    setTempCheckoutSuccess(false);
+                                  }}
+                                  className={`w-full ${
+                                    locale === "en" ? "text-left" : "text-right"
+                                  }`}
+                                  dir={locale === "he" ? "rtl" : "ltr"}
+                                />
+                              </div>
+
+                              {/* Ready Message - moved from order summary */}
+                              <p
+                                className={`text-sm text-medium-gray font-body mb-4 ${
+                                  locale === "en" ? "text-left" : "text-right"
+                                }`}
+                              >
+                                {t("cart.readyMessage")}
+                              </p>
+
+                              {/* Submit Button */}
+                              <Button
+                                onClick={handleTemporaryCheckout}
+                                disabled={
+                                  !tempCheckoutName.trim() ||
+                                  !tempCheckoutPhone.trim() ||
+                                  tempCheckoutSubmitting ||
+                                  isLoading
+                                }
+                                className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {tempCheckoutSubmitting ? (
+                                  <>
+                                    <Loader2
+                                      className={`w-5 h-5 animate-spin ${
+                                        locale === "en" ? "mr-2" : "ml-2"
+                                      }`}
+                                    />
+                                    {locale === "he" ? "שולח..." : "Sending..."}
+                                  </>
+                                ) : (
+                                  t("cart.tempCheckout.submitButton")
+                                )}
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              onClick={handleCheckout}
+                              disabled={isCheckingOut || isLoading}
+                              className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
+                            >
+                              {isCheckingOut ? (
+                                <>
+                                  <Loader2
+                                    className={`w-5 h-5 animate-spin ${
+                                      locale === "en" ? "mr-2" : "ml-2"
+                                    }`}
+                                  />
+                                  {t("cart.checkoutProgress")}
+                                </>
+                              ) : (
+                                t("cart.checkout")
+                              )}
+                            </Button>
+                          )}
                         </div>
 
                         {/* Add Book Button */}
@@ -401,13 +605,16 @@ export default function CartPage() {
                           >
                             {t("cart.secondBook")}
                           </p>
-                          <p
-                            className={`text-xs font-body text-medium-gray text-center mt-1 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.discountNote")}
-                          </p>
+                          {/* TEMPORARY CHECKOUT FLOW: Hide discount note when temporary checkout is active */}
+                          {!USE_TEMPORARY_CHECKOUT && (
+                            <p
+                              className={`text-xs font-body text-medium-gray text-center mt-1 ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.discountNote")}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -426,31 +633,63 @@ export default function CartPage() {
                       <div className="space-y-3">
                         <div
                           className={`flex justify-between items-center ${
-                            locale === "en" ? "flex-row" : "flex-row-reverse"
+                            locale === "en" ? "flex-row" : "flex-row"
                           }`}
                         >
-                          <span className="text-medium-gray font-body">
-                            {t("cart.itemsCount")}
-                          </span>
-                          <span className="font-body-bold text-dark-gray">
-                            {cart.totalQuantity}
-                          </span>
+                          {locale === "he" ? (
+                            <>
+                              <span className="font-body-bold text-dark-gray">
+                                {cart.totalQuantity}
+                              </span>
+                              <span className="text-medium-gray font-body">
+                                {t("cart.itemsCount")}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-medium-gray font-body">
+                                {t("cart.itemsCount")}
+                              </span>
+                              <span className="font-body-bold text-dark-gray">
+                                {cart.totalQuantity}
+                              </span>
+                            </>
+                          )}
                         </div>
                         <div
                           className={`flex justify-between items-center ${
-                            locale === "en" ? "flex-row" : "flex-row-reverse"
+                            locale === "en" ? "flex-row" : "flex-row"
                           }`}
                         >
-                          <span className="text-medium-gray font-body">
-                            {t("cart.total")}
-                          </span>
-                          <span className="text-xl font-body-bold text-black">
-                            {cart.items.reduce(
-                              (sum, item) => sum + item.quantity * BOOK_PRICE,
-                              0
-                            )}{" "}
-                            ₪
-                          </span>
+                          {locale === "he" ? (
+                            <>
+                              <span className="text-xl font-body-bold text-black">
+                                {cart.items.reduce(
+                                  (sum, item) =>
+                                    sum + item.quantity * BOOK_PRICE,
+                                  0
+                                )}{" "}
+                                ₪
+                              </span>
+                              <span className="text-medium-gray font-body">
+                                {t("cart.total")}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-medium-gray font-body">
+                                {t("cart.total")}
+                              </span>
+                              <span className="text-xl font-body-bold text-black">
+                                {cart.items.reduce(
+                                  (sum, item) =>
+                                    sum + item.quantity * BOOK_PRICE,
+                                  0
+                                )}{" "}
+                                ₪
+                              </span>
+                            </>
+                          )}
                         </div>
                         <div className="pt-4 border-t border-gray-200">
                           <p
@@ -460,37 +699,144 @@ export default function CartPage() {
                           >
                             {t("cart.deliveryTime")}
                           </p>
-                          <p
-                            className={`text-sm text-medium-gray font-body ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.readyMessage")}
-                          </p>
+                          {/* TEMPORARY CHECKOUT FLOW: Hide readyMessage here since it's shown below phone input */}
+                          {!USE_TEMPORARY_CHECKOUT && (
+                            <p
+                              className={`text-sm text-medium-gray font-body ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.readyMessage")}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Checkout Button */}
                     <div className="flex flex-col items-center gap-3">
-                      <Button
-                        onClick={handleCheckout}
-                        disabled={isCheckingOut || isLoading}
-                        className="w-full max-w-sm bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
-                      >
-                        {isCheckingOut ? (
-                          <>
-                            <Loader2
-                              className={`w-5 h-5 animate-spin ${
-                                locale === "en" ? "mr-2" : "ml-2"
+                      {/* TEMPORARY CHECKOUT FLOW: Show name/phone inputs and different button */}
+                      {USE_TEMPORARY_CHECKOUT ? (
+                        <>
+                          {/* Success Message */}
+                          {tempCheckoutSuccess && (
+                            <div className="w-full max-w-sm mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center justify-center gap-2 text-green-700 mb-2">
+                                <Check className="w-5 h-5" />
+                                <p className="font-body-bold text-base">
+                                  {t("cart.tempCheckout.successTitle")}
+                                </p>
+                              </div>
+                              <p className="text-sm font-body text-green-600 text-center">
+                                {t("cart.tempCheckout.successMessage")}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Info Text */}
+                          <p
+                            className={`w-full max-w-sm text-sm font-body text-medium-gray mb-4 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.tempCheckout.paymentLinkInfo")}
+                          </p>
+
+                          {/* Name Input */}
+                          <div className="w-full max-w-sm mb-3">
+                            <Input
+                              type="text"
+                              placeholder={t(
+                                "cart.tempCheckout.namePlaceholder"
+                              )}
+                              value={tempCheckoutName}
+                              onChange={(e) => {
+                                setTempCheckoutName(e.target.value);
+                                setTempCheckoutSuccess(false);
+                              }}
+                              className={`w-full ${
+                                locale === "en" ? "text-left" : "text-right"
                               }`}
+                              dir={locale === "he" ? "rtl" : "ltr"}
                             />
-                            {t("cart.checkoutProgress")}
-                          </>
-                        ) : (
-                          t("cart.checkout")
-                        )}
-                      </Button>
+                          </div>
+
+                          {/* Phone Input */}
+                          <div className="w-full max-w-sm mb-3">
+                            <Input
+                              type="tel"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              placeholder={t(
+                                "cart.tempCheckout.phonePlaceholder"
+                              )}
+                              value={tempCheckoutPhone}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, "");
+                                setTempCheckoutPhone(value);
+                                setTempCheckoutSuccess(false);
+                              }}
+                              className={`w-full ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                              dir={locale === "he" ? "rtl" : "ltr"}
+                            />
+                          </div>
+
+                          {/* Ready Message - moved from order summary */}
+                          <p
+                            className={`w-full max-w-sm text-sm text-medium-gray font-body mb-4 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.readyMessage")}
+                          </p>
+
+                          {/* Submit Button */}
+                          <Button
+                            onClick={handleTemporaryCheckout}
+                            disabled={
+                              !tempCheckoutName.trim() ||
+                              !tempCheckoutPhone.trim() ||
+                              tempCheckoutSubmitting ||
+                              isLoading
+                            }
+                            className="w-full max-w-sm bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {tempCheckoutSubmitting ? (
+                              <>
+                                <Loader2
+                                  className={`w-5 h-5 animate-spin ${
+                                    locale === "en" ? "mr-2" : "ml-2"
+                                  }`}
+                                />
+                                {locale === "he" ? "שולח..." : "Sending..."}
+                              </>
+                            ) : (
+                              t("cart.tempCheckout.submitButton")
+                            )}
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          onClick={handleCheckout}
+                          disabled={isCheckingOut || isLoading}
+                          className="w-full max-w-sm bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
+                        >
+                          {isCheckingOut ? (
+                            <>
+                              <Loader2
+                                className={`w-5 h-5 animate-spin ${
+                                  locale === "en" ? "mr-2" : "ml-2"
+                                }`}
+                              />
+                              {t("cart.checkoutProgress")}
+                            </>
+                          ) : (
+                            t("cart.checkout")
+                          )}
+                        </Button>
+                      )}
 
                       {/* Add Book Button */}
                       <div className="w-full max-w-sm">
@@ -508,13 +854,16 @@ export default function CartPage() {
                         >
                           {t("cart.secondBook")}
                         </p>
-                        <p
-                          className={`text-xs font-body text-medium-gray text-center mt-1 ${
-                            locale === "en" ? "text-left" : "text-right"
-                          }`}
-                        >
-                          {t("cart.discountNote")}
-                        </p>
+                        {/* TEMPORARY CHECKOUT FLOW: Hide discount note when temporary checkout is active */}
+                        {!USE_TEMPORARY_CHECKOUT && (
+                          <p
+                            className={`text-xs font-body text-medium-gray text-center mt-1 ${
+                              locale === "en" ? "text-left" : "text-right"
+                            }`}
+                          >
+                            {t("cart.discountNote")}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
