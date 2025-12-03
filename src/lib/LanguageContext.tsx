@@ -286,8 +286,8 @@ const hebrewTranslations = {
   "lang.english": "English",
 
   // Home Page
-  "home.hero.title": "ספרון תינוקות מותאם באופן אישי",
-  "home.hero.titleHighlight": "אישי",
+  "home.hero.title": "ספרון לתינוק|מהתמונות שלכם",
+  "home.hero.titleHighlight": "שלכם",
   "home.hero.cta": "צרו ספרון עכשיו",
   "home.book.title": "הספרון שלנו",
   "home.book.titleHighlight": "הספרון",

@@ -361,6 +361,17 @@ export default function Home() {
   const heroY = useTransform(scrollY, [0, 300], [0, -8]);
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
@@ -560,44 +571,111 @@ export default function Home() {
               className="w-full h-full object-cover sm:object-[center_40%]"
               style={{ y: prefersReducedMotion ? 0 : heroY }}
               initial={prefersReducedMotion ? false : { scale: 1.2 }}
-              animate={prefersReducedMotion ? undefined : { scale: 1.0 }}
+              animate={
+                prefersReducedMotion
+                  ? undefined
+                  : { scale: isMobile ? 1.5 : 1.0 }
+              }
               transition={{ duration: 5, ease: easeOwlet }}
             />
             {/* Lighter gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
           </div>
           {/* Content Overlay - center-aligned */}
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex items-start sm:items-center justify-center pt-10 sm:pt-0">
-            <div className="text-center space-y-5 md:space-y-6 max-w-2xl">
-              {/* Title - centered with better contrast */}
-              <div className="relative px-4">
-                <Title
-                  highlightText={t("home.hero.titleHighlight")}
-                  color="text-white"
-                  className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                >
-                  {t("home.hero.title")}
-                </Title>
-              </div>
-              {/* CTA Button */}
-              <div className="pt-6">
-                <motion.div
-                  className="fixed bottom-4 left-1/2 w-[calc(100%-32px)] max-w-md -translate-x-1/2 z-40 sm:relative sm:bottom-auto sm:left-auto sm:w-auto sm:max-w-none sm:translate-x-0"
-                  whileHover={{
-                    scale: 1.05,
-                    y: -2,
-                    transition: { duration: 0.2, ease: easeOwlet },
-                  }}
-                >
-                  <a href="/upload">
-                    <Button
-                      size="lg"
-                      className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-10 py-4 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl w-full sm:w-auto"
-                    >
-                      {t("home.hero.cta")}
-                    </Button>
-                  </a>
-                </motion.div>
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center space-y-5 md:space-y-6 max-w-2xl mx-auto">
+                {/* Title - centered with better contrast */}
+                <div className="relative px-4">
+                  {(() => {
+                    const titleText = t("home.hero.title");
+                    const highlightText = t("home.hero.titleHighlight");
+                    const titleParts = titleText.split("|");
+
+                    if (titleParts.length === 2) {
+                      // Hebrew: split into two lines
+                      const [line1, line2] = titleParts;
+                      const highlightIndex = line2.indexOf(highlightText);
+
+                      if (highlightIndex !== -1) {
+                        const beforeHighlight = line2.substring(
+                          0,
+                          highlightIndex
+                        );
+                        const afterHighlight = line2.substring(
+                          highlightIndex + highlightText.length
+                        );
+
+                        return (
+                          <h2 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
+                            {line1}
+                            <br />
+                            {beforeHighlight}
+                            <span className="relative inline-block">
+                              <span className="relative z-10">
+                                {highlightText}
+                              </span>
+                              <span
+                                className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                                style={{
+                                  height: "8px",
+                                  borderRadius: "6px 6px 0 0",
+                                  transform: "rotate(-2deg) translateY(0px)",
+                                  background:
+                                    "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
+                                  boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
+                                  width: "110%",
+                                  left: "-5%",
+                                }}
+                              ></span>
+                            </span>
+                            {afterHighlight}
+                          </h2>
+                        );
+                      } else {
+                        // Fallback if highlight not found in second line
+                        return (
+                          <h2 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
+                            {line1}
+                            <br />
+                            {line2}
+                          </h2>
+                        );
+                      }
+                    } else {
+                      // English or other: use Title component as before
+                      return (
+                        <Title
+                          highlightText={highlightText}
+                          color="text-white"
+                          className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                        >
+                          {titleText}
+                        </Title>
+                      );
+                    }
+                  })()}
+                </div>
+                {/* CTA Button */}
+                <div className="pt-6">
+                  <motion.div
+                    className="fixed bottom-4 left-1/2 w-[calc(100%-32px)] max-w-md -translate-x-1/2 z-40 sm:relative sm:bottom-auto sm:left-auto sm:w-auto sm:max-w-none sm:translate-x-0"
+                    whileHover={{
+                      scale: 1.05,
+                      y: -2,
+                      transition: { duration: 0.2, ease: easeOwlet },
+                    }}
+                  >
+                    <a href="/upload">
+                      <Button
+                        size="lg"
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-10 py-4 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl w-full sm:w-auto"
+                      >
+                        {t("home.hero.cta")}
+                      </Button>
+                    </a>
+                  </motion.div>
+                </div>
               </div>
             </div>
           </div>
@@ -743,12 +821,6 @@ export default function Home() {
             </div>
           </div>
         </motion.section>
-
-        {/* Coming Soon Section */}
-        <ComingSoonSection
-          prefersReducedMotion={prefersReducedMotion}
-          easeOwlet={easeOwlet}
-        />
 
         {/* How It Works Section */}
         <motion.section
@@ -1467,6 +1539,12 @@ export default function Home() {
             </div>
           </div>
         </motion.section>
+
+        {/* Coming Soon Section */}
+        <ComingSoonSection
+          prefersReducedMotion={prefersReducedMotion}
+          easeOwlet={easeOwlet}
+        />
 
         {/* Q&A Section */}
         <motion.section
