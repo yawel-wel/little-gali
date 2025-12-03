@@ -12,14 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/CartContext";
-import { BOOK_PRICE, USE_TEMPORARY_CHECKOUT } from "@/lib/constants";
+import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE, USE_TEMPORARY_CHECKOUT } from "@/lib/constants";
 import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { QuantityControls } from "@/components/quantity-controls";
 import { useLanguage } from "@/lib/LanguageContext";
 
 export function CartDrawer() {
-  const { cart, isLoading, removeFromCart, updateQuantity } = useCart();
+  const { cart, isLoading, removeFromCart } = useCart();
   const { t, locale } = useLanguage();
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -77,16 +76,6 @@ export function CartDrawer() {
 
   const showDrawerSpinner = isLoading && !isActionLoading;
 
-  const handleQuantityChange = async (lineId: string, newQuantity: number) => {
-    setIsActionLoading(true);
-    try {
-      await updateQuantity(lineId, newQuantity);
-    } catch (error) {
-      console.error("Error updating quantity:", error);
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -119,7 +108,6 @@ export function CartDrawer() {
               <div className="space-y-3 px-4">
                 {[...cart.items].reverse().map((item, reversedIndex) => {
                   const displayIndex = reversedIndex + 1;
-                  const itemTotal = item.quantity * BOOK_PRICE;
                   return (
                     <div
                       key={item.id}
@@ -180,27 +168,14 @@ export function CartDrawer() {
                         </div>
                       )}
 
-                      {/* Title and Price - Below Images */}
+                      {/* Title, Style, and Price */}
                       <div className="mb-3">
                         {/* Title - Smaller size */}
                         <h3 className="text-sm font-body text-dark-gray mb-1">
                           {t("cart.book")} {displayIndex}
                         </h3>
-                        {/* Price - Bolder weight */}
-                        <p className="text-sm font-body-bold text-dark-gray">
-                          {BOOK_PRICE} ₪
-                        </p>
-                      </div>
-
-                      {/* Item Details with inline values */}
-                      <div className="text-xs text-medium-gray font-body space-y-0.5 mb-2">
-                        <div>
-                          <span>{t("cart.quantity")} </span>
-                          <span className="font-body text-dark-gray">
-                            {item.quantity}
-                          </span>
-                        </div>
-                        <div>
+                        {/* Color Style - Above price */}
+                        <div className="text-xs text-medium-gray font-body mb-1">
                           <span>{t("cart.colorStyle")} </span>
                           <span className="font-body text-dark-gray">
                             {item.style === "cartoon"
@@ -210,38 +185,19 @@ export function CartDrawer() {
                               : t("cart.style.cartoon")}
                           </span>
                         </div>
-                        <div>
-                          <span>{t("cart.itemTotal")} </span>
-                          <span className="font-body text-dark-gray">
-                            {itemTotal} ₪
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Combined Quantity Controls */}
-                      <div>
-                        <QuantityControls
-                          quantity={item.quantity}
-                          onIncrease={() =>
-                            handleQuantityChange(
-                              item.lineId || item.id,
-                              item.quantity + 1
-                            )
-                          }
-                          onDecrease={() =>
-                            handleQuantityChange(
-                              item.lineId || item.id,
-                              Math.max(1, item.quantity - 1)
-                            )
-                          }
-                          onDelete={() =>
-                            handleRemoveClick(item.lineId || item.id)
-                          }
-                          isLoading={isActionLoading}
-                          isDeleting={isRemoving === item.id && isActionLoading}
-                          disabled={isActionLoading}
-                          size="sm"
-                        />
+                        {/* Price - Bolder weight */}
+                        <p className="text-sm font-body-bold text-dark-gray">
+                          {displayIndex > 1 ? (
+                            <>
+                              <span className="line-through text-medium-gray mr-2">
+                                {BOOK_PRICE}
+                              </span>
+                              <span>{DISCOUNTED_BOOK_PRICE} ₪</span>
+                            </>
+                          ) : (
+                            <>{BOOK_PRICE} ₪</>
+                          )}
+                        </p>
                       </div>
                     </div>
                   );
@@ -269,8 +225,9 @@ export function CartDrawer() {
                   {t("cart.total")}
                 </span>
                 <span className="text-xl font-body-bold text-black">
-                  {cart.items.reduce(
-                    (sum, item) => sum + item.quantity * BOOK_PRICE,
+                  {[...cart.items].reverse().reduce(
+                    (sum, item, index) =>
+                      sum + (index === 0 ? BOOK_PRICE : DISCOUNTED_BOOK_PRICE) * item.quantity,
                     0
                   )}{" "}
                   ₪

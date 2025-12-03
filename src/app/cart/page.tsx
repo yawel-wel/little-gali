@@ -13,17 +13,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
-import { BOOK_PRICE, USE_TEMPORARY_CHECKOUT } from "@/lib/constants";
+import {
+  BOOK_PRICE,
+  DISCOUNTED_BOOK_PRICE,
+  USE_TEMPORARY_CHECKOUT,
+} from "@/lib/constants";
 import { ArrowRight, Loader2, ShoppingCart, X, Check } from "lucide-react";
-import { QuantityControls } from "@/components/quantity-controls";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Input } from "@/components/ui/input";
 
 export default function CartPage() {
-  const { cart, isLoading, removeFromCart, updateQuantity, fetchCart } =
-    useCart();
+  const { cart, isLoading, removeFromCart, fetchCart } = useCart();
   const router = useRouter();
   const { t, locale } = useLanguage();
   const [isOptimisticAdding, setIsOptimisticAdding] = useState(false);
@@ -199,7 +201,6 @@ export default function CartPage() {
                   <div className="md:flex-1 space-y-4">
                     {[...cart.items].reverse().map((item, reversedIndex) => {
                       const displayIndex = reversedIndex + 1;
-                      const itemTotal = item.quantity * BOOK_PRICE;
                       return (
                         <div
                           key={item.id}
@@ -281,7 +282,7 @@ export default function CartPage() {
                             </div>
                           )}
 
-                          {/* Title and Price - Separate row below images */}
+                          {/* Title, Style, and Price */}
                           <div className="mb-4">
                             {/* Title - Smaller size, regular weight */}
                             <h3
@@ -291,29 +292,12 @@ export default function CartPage() {
                             >
                               {t("cart.book")} {displayIndex}
                             </h3>
-                            {/* Price - Smaller size, bolder weight */}
-                            <p
-                              className={`text-sm md:text-base font-body-bold text-dark-gray ${
+                            {/* Color Style - Above price */}
+                            <div
+                              className={`text-sm text-medium-gray font-body mb-1 ${
                                 locale === "en" ? "text-left" : "text-right"
                               }`}
                             >
-                              {BOOK_PRICE} ₪
-                            </p>
-                          </div>
-
-                          {/* Item Details with inline values */}
-                          <div
-                            className={`text-sm text-medium-gray font-body space-y-1 mb-3 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            <div>
-                              <span>{t("cart.quantity")} </span>
-                              <span className="font-body text-dark-gray">
-                                {item.quantity}
-                              </span>
-                            </div>
-                            <div>
                               <span>{t("cart.colorStyle")} </span>
                               <span className="font-body text-dark-gray">
                                 {item.style === "cartoon"
@@ -323,44 +307,23 @@ export default function CartPage() {
                                   : t("cart.style.cartoon")}
                               </span>
                             </div>
-                            <div>
-                              <span>{t("cart.itemTotal")} </span>
-                              <span className="font-body text-dark-gray">
-                                {itemTotal} ₪
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Combined Quantity Controls */}
-                          <div>
-                            <QuantityControls
-                              quantity={item.quantity}
-                              onIncrease={() => {
-                                updateQuantity(
-                                  item.lineId || item.id,
-                                  item.quantity + 1
-                                );
-                              }}
-                              onDecrease={() => {
-                                const newQuantity = Math.max(
-                                  1,
-                                  item.quantity - 1
-                                );
-                                updateQuantity(
-                                  item.lineId || item.id,
-                                  newQuantity
-                                );
-                              }}
-                              onDelete={() =>
-                                handleRemoveClick(item.lineId || item.id)
-                              }
-                              isLoading={isLoading || isRemoving !== null}
-                              isDeleting={
-                                isRemoving === (item.lineId || item.id)
-                              }
-                              disabled={isRemoving !== null}
-                              size="md"
-                            />
+                            {/* Price - Smaller size, bolder weight */}
+                            <p
+                              className={`text-sm md:text-base font-body-bold text-dark-gray ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {displayIndex > 1 ? (
+                                <>
+                                  <span className="line-through text-medium-gray mr-2">
+                                    {BOOK_PRICE}
+                                  </span>
+                                  <span>{DISCOUNTED_BOOK_PRICE} ₪</span>
+                                </>
+                              ) : (
+                                <>{BOOK_PRICE} ₪</>
+                              )}
+                            </p>
                           </div>
                         </div>
                       );
@@ -413,8 +376,12 @@ export default function CartPage() {
                               <>
                                 <span className="text-xl font-body-bold text-black">
                                   {cart.items.reduce(
-                                    (sum, item) =>
-                                      sum + item.quantity * BOOK_PRICE,
+                                    (sum, item, index) =>
+                                      sum +
+                                      (index === 0
+                                        ? BOOK_PRICE
+                                        : DISCOUNTED_BOOK_PRICE) *
+                                        item.quantity,
                                     0
                                   )}{" "}
                                   ₪
@@ -430,8 +397,12 @@ export default function CartPage() {
                                 </span>
                                 <span className="text-xl font-body-bold text-black">
                                   {cart.items.reduce(
-                                    (sum, item) =>
-                                      sum + item.quantity * BOOK_PRICE,
+                                    (sum, item, index) =>
+                                      sum +
+                                      (index === 0
+                                        ? BOOK_PRICE
+                                        : DISCOUNTED_BOOK_PRICE) *
+                                        item.quantity,
                                     0
                                   )}{" "}
                                   ₪
@@ -665,8 +636,12 @@ export default function CartPage() {
                             <>
                               <span className="text-xl font-body-bold text-black">
                                 {cart.items.reduce(
-                                  (sum, item) =>
-                                    sum + item.quantity * BOOK_PRICE,
+                                  (sum, item, index) =>
+                                    sum +
+                                    (index === 0
+                                      ? BOOK_PRICE
+                                      : DISCOUNTED_BOOK_PRICE) *
+                                      item.quantity,
                                   0
                                 )}{" "}
                                 ₪
@@ -682,8 +657,12 @@ export default function CartPage() {
                               </span>
                               <span className="text-xl font-body-bold text-black">
                                 {cart.items.reduce(
-                                  (sum, item) =>
-                                    sum + item.quantity * BOOK_PRICE,
+                                  (sum, item, index) =>
+                                    sum +
+                                    (index === 0
+                                      ? BOOK_PRICE
+                                      : DISCOUNTED_BOOK_PRICE) *
+                                      item.quantity,
                                   0
                                 )}{" "}
                                 ₪

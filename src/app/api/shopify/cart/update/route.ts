@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (result.data.cartLinesUpdate.userErrors.length > 0) {
+    if (result.data.cartLinesUpdate.userErrors && result.data.cartLinesUpdate.userErrors.length > 0) {
       const errors = result.data.cartLinesUpdate.userErrors;
       return NextResponse.json(
         {

@@ -3,6 +3,7 @@
  */
 
 export const BOOK_PRICE = 145;
+export const DISCOUNTED_BOOK_PRICE = 99;
 
 // TEMPORARY CHECKOUT FLOW
 // Set to true to enable temporary checkout flow (manual order via email)
