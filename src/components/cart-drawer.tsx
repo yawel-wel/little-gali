@@ -24,7 +24,6 @@ export function CartDrawer() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [isActionLoading, setIsActionLoading] = useState(false);
   const router = useRouter();
 
   const handleRemoveClick = (lineId: string) => {
@@ -37,13 +36,11 @@ export function CartDrawer() {
 
     setIsRemoving(itemToRemove);
     setShowConfirmDialog(false);
-    setIsActionLoading(true);
     try {
       await removeFromCart([itemToRemove]);
     } catch (error) {
       console.error("Error removing item:", error);
     } finally {
-      setIsActionLoading(false);
       setIsRemoving(null);
       setItemToRemove(null);
     }
@@ -74,7 +71,7 @@ export function CartDrawer() {
 
   const cartItemCount = cart?.totalQuantity || 0;
 
-  const showDrawerSpinner = isLoading && !isActionLoading;
+  const showDrawerSpinner = isLoading && !isRemoving;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -123,6 +120,12 @@ export function CartDrawer() {
                         }
                       }}
                     >
+                      {/* Loader Overlay - Show only on the item being removed */}
+                      {isRemoving === (item.lineId || item.id) && (
+                        <div className="absolute inset-0 bg-white/80 rounded-lg flex items-center justify-center z-50">
+                          <Loader2 className="w-6 h-6 animate-spin text-primary-orange" />
+                        </div>
+                      )}
                       {/* X Icon for Quick Removal */}
                       <button
                         onClick={(e) => {
@@ -132,7 +135,9 @@ export function CartDrawer() {
                         className={`absolute top-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer ${
                           locale === "en" ? "right-2" : "left-2"
                         }`}
-                        disabled={isActionLoading}
+                        disabled={
+                          isLoading || isRemoving === (item.lineId || item.id)
+                        }
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -239,13 +244,15 @@ export function CartDrawer() {
               <Button
                 onClick={handleCheckout}
                 className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 cursor-pointer"
-                disabled={isLoading || isActionLoading}
+                disabled={isLoading || isRemoving !== null}
                 style={{
                   cursor:
-                    isLoading || isActionLoading ? "not-allowed" : "pointer",
+                    isLoading || isRemoving !== null
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
-                {isLoading || isActionLoading ? (
+                {isLoading || isRemoving !== null ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     {t("cart.loading")}

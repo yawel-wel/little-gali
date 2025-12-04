@@ -154,6 +154,7 @@ export async function POST(request: NextRequest) {
           quantity: node.quantity,
           title: node.merchandise?.product?.title || node.merchandise?.title,
           imageUrls: imageUrls, // Empty for new carts, populated for old carts (backward compatibility)
+          attributes: node.attributes, // Include attributes for fallback in CartContext
         };
       }) || [];
 

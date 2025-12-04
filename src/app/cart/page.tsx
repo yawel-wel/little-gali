@@ -144,8 +144,8 @@ export default function CartPage() {
                           key={item.id}
                           className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 shadow-sm relative"
                         >
-                          {/* Loader Overlay - Show on all cards when removing */}
-                          {isRemoving && (
+                          {/* Loader Overlay - Show only on the item being removed */}
+                          {isRemoving === (item.lineId || item.id) && (
                             <div className="absolute inset-0 bg-white/80 rounded-lg flex items-center justify-center z-50">
                               <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
                             </div>
@@ -159,7 +159,10 @@ export default function CartPage() {
                             className={`absolute top-3 w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer ${
                               locale === "en" ? "right-3" : "left-3"
                             }`}
-                            disabled={isLoading || isRemoving !== null}
+                            disabled={
+                              isLoading ||
+                              isRemoving === (item.lineId || item.id)
+                            }
                           >
                             <X className="w-4 h-4" />
                           </button>

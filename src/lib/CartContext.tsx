@@ -137,10 +137,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           };
 
           // Fetch images and style from our separate storage for each line item
+          // Fallback to Shopify attributes if in-memory store is empty (production issue)
           // Also check Shopify attributes for style (fallback)
           const cartItems: CartItem[] = await Promise.all(
             data.cart.lines.map(async (line: any) => {
               const lineData = await fetchLineDataWithRetry(cartId, line.id);
+              
+              // Fallback to Shopify attributes if cart-images API returned empty (production issue)
+              // This happens because in-memory storage doesn't work across serverless instances
+              let imageUrls = lineData.imageUrls;
+              if (imageUrls.length === 0) {
+                // First try the imageUrls already extracted by the get route (from Shopify attributes)
+                if (line.imageUrls && Array.isArray(line.imageUrls) && line.imageUrls.length > 0) {
+                  imageUrls = line.imageUrls;
+                } else if (line.attributes) {
+                  // Extract images from Shopify line item attributes (backward compatibility)
+                  const shopifyImageUrls: string[] = [];
+                  for (let i = 1; i <= 5; i++) {
+                    const imageAttr = line.attributes.find(
+                      (attr: any) =>
+                        attr.key === `_image_${i}` || attr.key === `image_${i}`
+                    );
+                    if (imageAttr?.value) {
+                      shopifyImageUrls.push(imageAttr.value);
+                    }
+                  }
+                  if (shopifyImageUrls.length > 0) {
+                    imageUrls = shopifyImageUrls;
+                  }
+                }
+              }
               
               // Check Shopify attributes for style (fallback if not in our storage)
               // Check both "style" (visible) and "_style" (hidden) attributes
@@ -159,7 +185,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 lineId: line.id,
                 quantity: line.quantity,
                 title: line.title,
-                imageUrls: lineData.imageUrls,
+                imageUrls: imageUrls,
                 style,
               };
             })
