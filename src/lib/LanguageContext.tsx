@@ -123,12 +123,6 @@ const hebrewTranslations = {
   "cart.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
   "cart.startCreating": "התחל ליצור ספרון מותאם אישית",
   "cart.createBook": "צרו ספרון",
-  "cart.tempCheckout.paymentLinkInfo": "לינק לתשלום ישלח לאחר שההזמנה תתקבל",
-  "cart.tempCheckout.namePlaceholder": "שם מלא",
-  "cart.tempCheckout.phonePlaceholder": "מספר טלפון",
-  "cart.tempCheckout.submitButton": "שלח הזמנה",
-  "cart.tempCheckout.successTitle": "ההזמנה נשלחה בהצלחה!",
-  "cart.tempCheckout.successMessage": "ניצור עמך קשר בקרוב",
 
   // Inspiration Page
   "inspiration.title": "השראה לספרונים",
@@ -531,13 +525,6 @@ const englishTranslations = {
   "cart.discountNote": "* Discount is automatically applied at checkout",
   "cart.startCreating": "Start creating a personalized book",
   "cart.createBook": "Create Book",
-  "cart.tempCheckout.paymentLinkInfo":
-    "Payment link will be sent after the order is received",
-  "cart.tempCheckout.namePlaceholder": "Full Name",
-  "cart.tempCheckout.phonePlaceholder": "Phone Number",
-  "cart.tempCheckout.submitButton": "Send Order",
-  "cart.tempCheckout.successTitle": "Order sent successfully!",
-  "cart.tempCheckout.successMessage": "We will contact you soon",
 
   // Inspiration Page
   "inspiration.title": "Book Inspiration",
