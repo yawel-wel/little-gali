@@ -192,7 +192,7 @@ function ComingSoonSection({
               },
             }}
           >
-            <p className="text-base font-body text-medium-gray">
+            <p className="text-base font-body text-medium-gray whitespace-pre-line">
               {t("home.comingSoon.subtitle")}
             </p>
           </motion.div>
@@ -926,7 +926,7 @@ export default function Home() {
                     }}
                   >
                     <Image
-                      src="/upload-images.jpg"
+                      src="/upload-images.jpeg"
                       alt="Upload Images"
                       width={224}
                       height={224}
@@ -1070,7 +1070,7 @@ export default function Home() {
                     }}
                   >
                     <Image
-                      src="/print-book.png"
+                      src="/print-book.jpeg"
                       alt="Print Book"
                       width={224}
                       height={224}
