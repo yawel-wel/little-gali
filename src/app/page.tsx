@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   motion,
   AnimatePresence,
@@ -150,10 +151,14 @@ function ComingSoonSection({
                 transition: { duration: 0.3, ease: easeOwlet },
               }}
             >
-              <img
+              <Image
                 src="/coming-soon.jpg"
                 alt="Coming Soon"
+                width={600}
+                height={400}
                 className="w-full h-auto object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 600px"
               />
             </motion.div>
           </div>
@@ -368,23 +373,37 @@ export default function Home() {
       setIsMobile(window.innerWidth < 640); // sm breakpoint
     };
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    // Debounce resize listener for better performance
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 150);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
-      setTimeout(() => {
-        const element = document.querySelector(hash);
-        if (element) {
-          const yOffset = -80; // Offset for header
-          const y =
-            element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
-      }, 100);
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const element = document.querySelector(hash);
+          if (element) {
+            const yOffset = -80; // Offset for header
+            const y =
+              element.getBoundingClientRect().top +
+              window.pageYOffset +
+              yOffset;
+            window.scrollTo({ top: y, behavior: "smooth" });
+          }
+        }, 100);
+      });
     }
   }, []);
 
@@ -538,8 +557,10 @@ export default function Home() {
       }
     }
 
-    // Initialize carousel after component mounts
-    initCarousel();
+    // Initialize carousel after component mounts with requestAnimationFrame
+    requestAnimationFrame(() => {
+      initCarousel();
+    });
 
     // Cleanup function
     return () => {
@@ -565,10 +586,7 @@ export default function Home() {
         <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[72px] pb-24 sm:pb-0">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
-            <motion.img
-              src="/hero-image.jpeg"
-              alt="Baby book example"
-              className="w-full h-full object-cover sm:object-[center_40%]"
+            <motion.div
               style={{ y: prefersReducedMotion ? 0 : heroY }}
               initial={prefersReducedMotion ? false : { scale: 1.2 }}
               animate={
@@ -577,7 +595,17 @@ export default function Home() {
                   : { scale: isMobile ? 1.5 : 1.0 }
               }
               transition={{ duration: 5, ease: easeOwlet }}
-            />
+              className="w-full h-full"
+            >
+              <Image
+                src="/hero-image.jpeg"
+                alt="Baby book example"
+                fill
+                priority
+                className="object-cover sm:object-[center_40%]"
+                sizes="100vw"
+              />
+            </motion.div>
             {/* Lighter gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
           </div>
@@ -686,11 +714,10 @@ export default function Home() {
           initial={
             prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
           }
-          whileInView={
+          animate={
             prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
           }
           transition={{ duration: 0.9, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
@@ -799,21 +826,27 @@ export default function Home() {
                 <div className="order-2 lg:order-2">
                   <div className="w-full">
                     <div className="aspect-square rounded-lg overflow-hidden">
-                      <motion.img
-                        src="/our-book.jpg"
-                        alt="Book showcase"
-                        className="w-full h-full object-cover"
+                      <motion.div
                         initial={prefersReducedMotion ? false : { scale: 1.12 }}
-                        whileInView={
+                        animate={
                           prefersReducedMotion ? undefined : { scale: 1 }
                         }
                         transition={{ duration: 2.2, ease: easeOwlet }}
-                        viewport={{ once: true, amount: 0.25 }}
                         whileHover={{
                           scale: 1.04,
                           transition: { duration: 0.5, ease: easeOwlet },
                         }}
-                      />
+                        className="w-full h-full relative"
+                      >
+                        <Image
+                          src="/our-book.jpg"
+                          alt="Book showcase"
+                          fill
+                          className="object-cover"
+                          priority
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </motion.div>
                     </div>
                   </div>
                 </div>
@@ -892,10 +925,13 @@ export default function Home() {
                       },
                     }}
                   >
-                    <img
+                    <Image
                       src="/upload-images.jpg"
                       alt="Upload Images"
+                      width={224}
+                      height={224}
                       className="w-full h-full object-contain"
+                      loading="lazy"
                     />
                   </motion.div>
                 </div>
@@ -961,10 +997,13 @@ export default function Home() {
                       },
                     }}
                   >
-                    <img
+                    <Image
                       src="/transform-images.png"
                       alt="Transform Images"
+                      width={224}
+                      height={224}
                       className="w-full h-full object-contain"
+                      loading="lazy"
                     />
                   </motion.div>
                 </div>
@@ -1030,10 +1069,13 @@ export default function Home() {
                       },
                     }}
                   >
-                    <img
+                    <Image
                       src="/print-book.png"
                       alt="Print Book"
+                      width={224}
+                      height={224}
                       className="w-full h-full object-contain"
+                      loading="lazy"
                     />
                   </motion.div>
                 </div>
@@ -1119,13 +1161,20 @@ export default function Home() {
                 style={{ top: "38px" }}
               >
                 <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  <motion.img
-                    src="/original-example.jpeg"
-                    alt="Original Example"
-                    className="w-full h-full object-cover"
+                  <motion.div
                     whileHover={{ scale: 1.06 }}
                     transition={{ duration: 3.5, ease: easeOwlet }}
-                  />
+                    className="w-full h-full relative"
+                  >
+                    <Image
+                      src="/original-example.jpeg"
+                      alt="Original Example"
+                      fill
+                      className="object-cover"
+                      loading="lazy"
+                      sizes="128px"
+                    />
+                  </motion.div>
                 </div>
               </div>
 
@@ -1160,13 +1209,20 @@ export default function Home() {
                           {t("home.dualDesign.bw.description")}
                         </p>
                         <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
-                          <motion.img
-                            src="/black-and-white-example.png"
-                            alt="Black and White Example"
-                            className="w-full h-full object-cover"
+                          <motion.div
                             whileHover={{ scale: 1.06 }}
                             transition={{ duration: 3.5, ease: easeOwlet }}
-                          />
+                            className="w-full h-full relative"
+                          >
+                            <Image
+                              src="/black-and-white-example.png"
+                              alt="Black and White Example"
+                              fill
+                              className="object-cover"
+                              loading="lazy"
+                              sizes="160px"
+                            />
+                          </motion.div>
                         </div>
                       </motion.div>
                     </div>
@@ -1194,13 +1250,20 @@ export default function Home() {
                           {t("home.dualDesign.color.description")}
                         </p>
                         <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
-                          <motion.img
-                            src="/colorful-example.png"
-                            alt="Colorful Example"
-                            className="w-full h-full object-cover"
+                          <motion.div
                             whileHover={{ scale: 1.06 }}
                             transition={{ duration: 3.5, ease: easeOwlet }}
-                          />
+                            className="w-full h-full relative"
+                          >
+                            <Image
+                              src="/colorful-example.png"
+                              alt="Colorful Example"
+                              fill
+                              className="object-cover"
+                              loading="lazy"
+                              sizes="160px"
+                            />
+                          </motion.div>
                         </div>
                       </motion.div>
                     </div>
@@ -1252,10 +1315,13 @@ export default function Home() {
                       },
                     }}
                   >
-                    <img
+                    <Image
                       src="/black-and-white-example.png"
                       alt="Black and White Example"
+                      width={224}
+                      height={224}
                       className="w-full h-full object-cover rounded-lg"
+                      loading="lazy"
                     />
                   </motion.div>
                 </motion.div>
@@ -1290,10 +1356,13 @@ export default function Home() {
                       },
                     }}
                   >
-                    <img
+                    <Image
                       src="/colorful-example.png"
                       alt="Colorful Example"
+                      width={224}
+                      height={224}
                       className="w-full h-full object-cover rounded-lg"
+                      loading="lazy"
                     />
                   </motion.div>
                 </motion.div>
@@ -1360,11 +1429,14 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
+                  <Image
                     src="/couple.png"
                     alt="Couple"
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 144px, 256px"
                   />
                 </div>
 
@@ -1392,11 +1464,14 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
+                  <Image
                     src="/sister.png"
                     alt="Young Sister"
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 144px, 256px"
                   />
                 </div>
 
@@ -1424,11 +1499,14 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
+                  <Image
                     src="/parent-and-son.png"
                     alt="Parent and Son"
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 144px, 256px"
                   />
                 </div>
 
@@ -1456,11 +1534,14 @@ export default function Home() {
                 }}
               >
                 {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6">
-                  <img
+                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
+                  <Image
                     src="/dad-and-son.png"
                     alt="Dad and Son"
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 144px, 256px"
                   />
                 </div>
 
@@ -1491,10 +1572,7 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
               <div className="relative rounded-3xl overflow-hidden">
-                <motion.img
-                  src="/about-us.jpg"
-                  alt="About Us"
-                  className="w-full h-auto"
+                <motion.div
                   initial={prefersReducedMotion ? false : { scale: 1 }}
                   whileInView={
                     prefersReducedMotion ? undefined : { scale: 1.06 }
@@ -1502,7 +1580,17 @@ export default function Home() {
                   whileHover={{ scale: 1.06 }}
                   transition={{ duration: 2.5, ease: easeOwlet }}
                   viewport={{ once: true, amount: 0.4 }}
-                />
+                  className="w-full aspect-[4/3] relative"
+                >
+                  <Image
+                    src="/about-us.jpg"
+                    alt="About Us"
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                </motion.div>
               </div>
 
               {/* Right Column - Text Content */}
