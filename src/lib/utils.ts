@@ -24,11 +24,12 @@ export async function blobToBase64(blobUrl: string): Promise<string> {
 }
 
 // Compress and resize image to reduce file size
+// Optimized for faster uploads: slightly reduced quality and dimensions
 export async function compressImage(
   blobUrl: string,
-  maxWidth: number = 1920,
-  maxHeight: number = 1920,
-  quality: number = 0.85
+  maxWidth: number = 1600,
+  maxHeight: number = 1600,
+  quality: number = 0.75
 ): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();

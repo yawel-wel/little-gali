@@ -123,8 +123,8 @@ function UploadPageContent() {
     index: number
   ): Promise<string> => {
     try {
-      // Compress the image
-      const compressedFile = await compressImage(blobUrl, 1920, 1920, 0.85);
+      // Compress the image (using optimized defaults from utils)
+      const compressedFile = await compressImage(blobUrl);
 
       // Upload to Cloudinary
       const uploadFormData = new FormData();
@@ -315,14 +315,25 @@ function UploadPageContent() {
         return;
       }
 
-      // Check if any images are still uploading
+      // If images are still uploading, wait for them to complete
+      // This allows the user to click "Add to Cart" immediately while uploads finish
       if (uploadingImages.size > 0) {
-        setSubmitStatus({
-          type: "error",
-          message: t("upload.waitForUpload"),
-        });
-        setIsSubmitting(false);
-        return;
+        // Wait for all uploads to complete (with timeout)
+        const maxWaitTime = 60000; // 60 seconds max wait
+        const startTime = Date.now();
+        
+        while (uploadingImages.size > 0 && Date.now() - startTime < maxWaitTime) {
+          await new Promise((resolve) => setTimeout(resolve, 100)); // Check every 100ms
+        }
+        
+        if (uploadingImages.size > 0) {
+          setSubmitStatus({
+            type: "error",
+            message: t("upload.waitForUpload"),
+          });
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       // Limit to first 5 images and create a snapshot to avoid stale references
@@ -343,7 +354,7 @@ function UploadPageContent() {
         // This should rarely happen, but handle it as a fallback
         console.log("Uploading remaining blob URLs:", blobUrls);
         const compressedImages = await Promise.all(
-          blobUrls.map((url) => compressImage(url, 1920, 1920, 0.85))
+          blobUrls.map((url) => compressImage(url))
         );
 
         // Upload compressed images to Cloudinary
@@ -610,14 +621,21 @@ function UploadPageContent() {
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       <button
                         onClick={handleAddToCart}
-                        disabled={isSubmitting || uploadingImages.size > 0}
+                        disabled={isSubmitting}
                         className="w-full bg-primary-orange hover:bg-primary-orange/90 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10 flex items-center justify-center gap-2"
                         style={{ touchAction: "manipulation" }}
                       >
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-5 h-5 animate-spin" />
-                            {t("upload.addingToCart")}
+                            {uploadingImages.size > 0
+                              ? t("upload.uploadingAndAdding")
+                              : t("upload.addingToCart")}
+                          </>
+                        ) : uploadingImages.size > 0 ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            {t("upload.uploading")}
                           </>
                         ) : (
                           t("upload.addToCart")
