@@ -6,7 +6,7 @@ import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { StyleSelector, StyleType } from "@/components/style-selector";
 import { Upload, Info, X, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
@@ -36,6 +36,8 @@ function UploadPageContent() {
   const [selectedStyle, setSelectedStyle] = useState<StyleType>("cartoon");
   const selectedStyleRef = useRef<StyleType>("cartoon");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Store Cloudinary URLs separately - don't update display, only use for cart
+  const cloudinaryUrls = useRef<Map<number, string>>(new Map()); // Maps index -> Cloudinary URL
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -63,6 +65,7 @@ function UploadPageContent() {
     setHasSeenModal(false);
     setSubmitStatus({ type: null, message: "" });
     setIsSubmitting(false);
+    cloudinaryUrls.current.clear(); // Clear Cloudinary URLs map
 
     // Clear file input
     if (fileInputRef.current) {
@@ -84,9 +87,18 @@ function UploadPageContent() {
       "/good-example-2.jpg",
     ];
 
-    modalImages.forEach((src) => {
-      const img = new Image();
-      img.src = src;
+    // Preload all images and wait for them to fully load
+    Promise.all(
+      modalImages.map((src) => {
+        return new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Resolve even on error to not block
+          img.src = src;
+        });
+      })
+    ).then(() => {
+      console.log("Modal images preloaded");
     });
   }, []);
 
@@ -113,9 +125,12 @@ function UploadPageContent() {
     setShowModal(false);
   };
 
-  const handleModalUploadClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleModalUploadClick = useCallback(() => {
+    // Use setTimeout to ensure this runs after any state updates from modal close
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 0);
+  }, []);
 
   // Upload a single image to Cloudinary
   const uploadSingleImage = async (
@@ -183,92 +198,13 @@ function UploadPageContent() {
       }
 
       // Update images with blob URLs for immediate preview
+      // Don't upload yet - wait until user clicks "Add to Cart"
       setImages(limitedImages);
       setSelectedImagesCount(limitedImages.length);
-
-      // Find which images need uploading (only blob URLs that are newly added)
-      const imagesToUpload = limitedImages
-        .map((url, index) => ({ url, index }))
-        .filter(({ url }) => url.startsWith("blob:"));
-
-      // Mark all uploading images upfront for better UX
-      if (imagesToUpload.length > 0) {
-        setUploadingImages((prev) => {
-          const newSet = new Set(prev);
-          imagesToUpload.forEach(({ index }) => newSet.add(index));
-          return newSet;
-        });
-      }
-
-      // Upload all images in parallel using Promise.all
-      // This ensures all uploads proceed concurrently instead of sequentially
-      const uploadPromises = imagesToUpload.map(async ({ url, index }) => {
-        try {
-          const cloudinaryUrl = await uploadSingleImage(url, index);
-
-          // Update the images array with Cloudinary URL
-          setImages((prevImages) => {
-            const updated = [...prevImages];
-            // Make sure the index is still valid and the URL at that index is still the same blob URL
-            if (index < updated.length && updated[index] === url) {
-              updated[index] = cloudinaryUrl;
-              // Revoke blob URL AFTER state update to prevent black image flash
-              // Use requestAnimationFrame to ensure DOM has updated before revoking
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  URL.revokeObjectURL(url);
-                });
-              });
-            }
-            return updated;
-          });
-
-          return { index, url, success: true, cloudinaryUrl };
-        } catch (error) {
-          console.error(`Failed to upload image at index ${index}:`, error);
-          // Keep the blob URL on error - user can still proceed
-          return { index, url, success: false, error };
-        } finally {
-          // Remove from uploading set when done (success or failure)
-          setUploadingImages((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(index);
-            return newSet;
-          });
-        }
-      });
-
-      // Execute all uploads in parallel using Promise.allSettled
-      // This ensures all uploads proceed concurrently and we continue even if some fail
-      if (uploadPromises.length > 0) {
-        Promise.allSettled(uploadPromises).then((results) => {
-          // Log results for debugging
-          const successful = results.filter(
-            (r) => r.status === "fulfilled" && r.value.success
-          );
-          const failed = results.filter(
-            (r) =>
-              r.status === "rejected" ||
-              (r.status === "fulfilled" && !r.value.success)
-          );
-          if (failed.length > 0) {
-            console.warn(
-              `${failed.length} image(s) failed to upload, but user can still proceed`
-            );
-          }
-          if (successful.length > 0) {
-            console.log(`${successful.length} image(s) uploaded successfully`);
-          }
-        });
-      }
     }
   };
 
   const handleRemoveImage = (index: number) => {
-    // Don't allow removal while uploading
-    if (uploadingImages.has(index)) {
-      return;
-    }
     // Revoke the URL to prevent memory leaks (only for blob URLs)
     if (images[index] && images[index].startsWith("blob:")) {
       URL.revokeObjectURL(images[index]);
@@ -276,12 +212,18 @@ function UploadPageContent() {
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
     setSelectedImagesCount(newImages.length);
-    // Remove from uploading set if it was there
-    setUploadingImages((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(index);
-      return newSet;
+    // Remove Cloudinary URL from map and shift remaining indices
+    cloudinaryUrls.current.delete(index);
+    // Shift all Cloudinary URLs after this index down by 1
+    const newCloudinaryUrls = new Map<number, string>();
+    cloudinaryUrls.current.forEach((url, i) => {
+      if (i < index) {
+        newCloudinaryUrls.set(i, url);
+      } else if (i > index) {
+        newCloudinaryUrls.set(i - 1, url);
+      }
     });
+    cloudinaryUrls.current = newCloudinaryUrls;
   };
 
   const handleStartOver = () => {
@@ -295,6 +237,7 @@ function UploadPageContent() {
     setSelectedImagesCount(0);
     setUploadingImages(new Set()); // Clear uploading state
     setSelectedStyle("cartoon"); // Reset to default style
+    cloudinaryUrls.current.clear(); // Clear Cloudinary URLs map
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -315,123 +258,59 @@ function UploadPageContent() {
         return;
       }
 
-      // If images are still uploading, wait for them to complete
-      // This allows the user to click "Add to Cart" immediately while uploads finish
-      if (uploadingImages.size > 0) {
-        // Wait for all uploads to complete (with timeout)
-        const maxWaitTime = 60000; // 60 seconds max wait
-        const startTime = Date.now();
-        
-        while (uploadingImages.size > 0 && Date.now() - startTime < maxWaitTime) {
-          await new Promise((resolve) => setTimeout(resolve, 100)); // Check every 100ms
-        }
-        
-        if (uploadingImages.size > 0) {
-          setSubmitStatus({
-            type: "error",
-            message: t("upload.waitForUpload"),
-          });
-          setIsSubmitting(false);
-          return;
-        }
-      }
+      // Mark all images as uploading for UI feedback
+      setUploadingImages(new Set([0, 1, 2, 3, 4]));
 
-      // Limit to first 5 images and create a snapshot to avoid stale references
-      const limitedImages = [...images.slice(0, 5)];
-
-      // Check for any remaining blob URLs that haven't been uploaded yet
-      const blobUrls = limitedImages.filter(
-        (url) => !url.startsWith("http://") && !url.startsWith("https://")
+      // Upload all 5 images simultaneously to Cloudinary
+      // Compress all images in parallel
+      const compressedImages = await Promise.all(
+        images.map((url) => compressImage(url))
       );
 
-      let imageUrls: string[];
+      // Upload all compressed images to Cloudinary simultaneously
+      const uploadFormData = new FormData();
+      compressedImages.forEach((file) => {
+        uploadFormData.append("images", file);
+      });
 
-      if (blobUrls.length === 0) {
-        // All images are already Cloudinary URLs, use them directly
-        imageUrls = [...limitedImages];
-      } else {
-        // Some images are still blob URLs - upload them now
-        // This should rarely happen, but handle it as a fallback
-        console.log("Uploading remaining blob URLs:", blobUrls);
-        const compressedImages = await Promise.all(
-          blobUrls.map((url) => compressImage(url))
-        );
+      const uploadResponse = await fetch("/api/upload-images", {
+        method: "POST",
+        body: uploadFormData,
+      });
 
-        // Upload compressed images to Cloudinary
-        const uploadFormData = new FormData();
-        compressedImages.forEach((file) => {
-          uploadFormData.append("images", file);
-        });
-
-        const uploadResponse = await fetch("/api/upload-images", {
-          method: "POST",
-          body: uploadFormData,
-        });
-
-        if (!uploadResponse.ok) {
-          const uploadError = await uploadResponse.json();
-          throw new Error(uploadError.error || "Failed to upload images");
-        }
-
-        const uploadData = await uploadResponse.json();
-        const newCloudinaryUrls = uploadData.imageUrls;
-        console.log("Received Cloudinary URLs:", newCloudinaryUrls);
-
-        // Combine existing Cloudinary URLs with newly uploaded ones
-        // Reconstruct the array maintaining the exact order
-        let cloudinaryIndex = 0;
-        imageUrls = limitedImages.map((url) => {
-          if (url.startsWith("http://") || url.startsWith("https://")) {
-            // Keep existing Cloudinary URL
-            return url;
-          } else {
-            // Replace blob URL with corresponding Cloudinary URL
-            if (cloudinaryIndex >= newCloudinaryUrls.length) {
-              throw new Error("Failed to map uploaded image URL");
-            }
-            const cloudinaryUrl = newCloudinaryUrls[cloudinaryIndex];
-            cloudinaryIndex++;
-            // Revoke blob URL
-            URL.revokeObjectURL(url);
-            return cloudinaryUrl;
-          }
-        });
+      if (!uploadResponse.ok) {
+        const uploadError = await uploadResponse.json();
+        setUploadingImages(new Set());
+        throw new Error(uploadError.error || "Failed to upload images");
       }
 
-      // Validate that we have exactly 5 Cloudinary URLs
-      if (imageUrls.length !== 5) {
-        console.error("Invalid imageUrls length:", imageUrls.length);
-        throw new Error("Failed to prepare images for cart");
+      const uploadData = await uploadResponse.json();
+      const imageUrls = uploadData.imageUrls;
+
+      if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length !== 5) {
+        setUploadingImages(new Set());
+        throw new Error("Invalid response from upload API");
       }
+
+      // Store Cloudinary URLs in the map for potential future use
+      imageUrls.forEach((url, index) => {
+        cloudinaryUrls.current.set(index, url);
+      });
+
+      // Clear uploading state
+      setUploadingImages(new Set());
 
       // Validate all URLs are Cloudinary URLs
       const invalidUrls = imageUrls.filter(
-        (url) => !url.startsWith("http://") && !url.startsWith("https://")
+        (url) =>
+          !url || (!url.startsWith("http://") && !url.startsWith("https://"))
       );
       if (invalidUrls.length > 0) {
-        console.error("Invalid URLs in final imageUrls:", invalidUrls);
+        console.error("Invalid URLs in imageUrls:", invalidUrls);
         throw new Error("Some images were not uploaded correctly");
       }
 
-      console.log("Final imageUrls to add to cart:", imageUrls);
-
-      // Verify imageUrls before adding to cart
-      console.log("About to add to cart with imageUrls:", imageUrls);
-      if (!imageUrls || imageUrls.length !== 5) {
-        throw new Error("Invalid imageUrls array before adding to cart");
-      }
-      const allValidUrls = imageUrls.every(
-        (url) =>
-          url && (url.startsWith("http://") || url.startsWith("https://"))
-      );
-      if (!allValidUrls) {
-        console.error("Invalid URLs in imageUrls:", imageUrls);
-        throw new Error("Some image URLs are invalid before adding to cart");
-      }
-
-      // Add to cart - create a copy to ensure we're using the correct array
-      const imageUrlsToAdd = [...imageUrls];
-      console.log("Adding to cart with imageUrlsToAdd:", imageUrlsToAdd);
+      console.log("Uploaded images, adding to cart:", imageUrls);
       // Mark optimistic adding to avoid empty-state flash
       try {
         if (typeof window !== "undefined") {
@@ -451,7 +330,7 @@ function UploadPageContent() {
         styleToAdd
       );
       const addPromise = addToCart(
-        imageUrlsToAdd,
+        imageUrls,
         1,
         undefined,
         undefined,
@@ -470,6 +349,7 @@ function UploadPageContent() {
       // The images will be cleared when the component unmounts or on next visit
     } catch (error) {
       console.error("Submit error:", error);
+      setUploadingImages(new Set()); // Clear uploading state on error
       setSubmitStatus({
         type: "error",
         message: t("upload.serverError"),
@@ -559,9 +439,6 @@ function UploadPageContent() {
                 <div className="space-y-4">
                   <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
                     {images.slice(0, 5).map((url, index) => {
-                      const isUploading = uploadingImages.has(index);
-                      const isCloudinaryUrl =
-                        url.startsWith("http://") || url.startsWith("https://");
                       return (
                         <div
                           key={index}
@@ -574,40 +451,14 @@ function UploadPageContent() {
                                 ? `Selected photo ${index + 1}`
                                 : `תמונה נבחרת ${index + 1}`
                             }
-                            className={`w-full h-full object-cover border-2 rounded-lg transition-opacity ${
-                              isUploading
-                                ? "opacity-60 border-primary-orange/50"
-                                : "border-primary-orange"
-                            }`}
+                            className="w-full h-full object-cover border-2 border-primary-orange rounded-lg"
+                            loading="eager"
+                            decoding="async"
                           />
-                          {/* Uploading indicator */}
-                          {isUploading && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg">
-                              <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin text-primary-orange" />
-                            </div>
-                          )}
-                          {/* Uploaded checkmark */}
-                          {!isUploading && isCloudinaryUrl && (
-                            <div className="absolute top-1 right-1 bg-green-500 rounded-full p-1 shadow-lg">
-                              <svg
-                                className="w-2 h-2 md:w-3 md:h-3 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            </div>
-                          )}
                           <button
                             onClick={() => handleRemoveImage(index)}
                             className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
-                            disabled={isUploading}
+                            disabled={isSubmitting}
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -622,21 +473,11 @@ function UploadPageContent() {
                       <button
                         onClick={handleAddToCart}
                         disabled={isSubmitting}
-                        className="w-full bg-primary-orange hover:bg-primary-orange/90 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10 flex items-center justify-center gap-2"
+                        className="w-full bg-primary-orange hover:bg-primary-orange/90 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10 flex items-center justify-center"
                         style={{ touchAction: "manipulation" }}
                       >
                         {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            {uploadingImages.size > 0
-                              ? t("upload.uploadingAndAdding")
-                              : t("upload.addingToCart")}
-                          </>
-                        ) : uploadingImages.size > 0 ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            {t("upload.uploading")}
-                          </>
+                          <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                           t("upload.addToCart")
                         )}

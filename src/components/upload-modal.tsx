@@ -2,6 +2,7 @@
 
 import { X, Check } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useEffect } from "react";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -17,6 +18,23 @@ export function UploadModal({
   onUploadClick,
 }: UploadModalProps) {
   const { t, locale } = useLanguage();
+
+  // Preload images when modal component mounts (even before it's opened)
+  useEffect(() => {
+    const modalImages = [
+      "/too-close-example.jpg",
+      "/group-example.jpeg",
+      "/good-example-1.jpg",
+      "/good-example-2.jpg",
+    ];
+
+    // Preload all images immediately
+    modalImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
   if (!isOpen) return null;
 
   return (
@@ -258,6 +276,7 @@ export function UploadModal({
                   src="/too-close-example.jpg"
                   alt={t("uploadModal.tooCloseExample")}
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
@@ -272,6 +291,7 @@ export function UploadModal({
                   src="/group-example.jpeg"
                   alt={t("uploadModal.groupExample")}
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
@@ -286,6 +306,7 @@ export function UploadModal({
                   src="/good-example-1.jpg"
                   alt={t("uploadModal.goodExample1")}
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
@@ -300,6 +321,7 @@ export function UploadModal({
                   src="/good-example-2.jpg"
                   alt={t("uploadModal.goodExample2")}
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
@@ -312,14 +334,17 @@ export function UploadModal({
           {showUploadButton && (
             <div className="mt-4 flex justify-center">
               <button
-                onClick={() => {
-                  // Trigger file input first
-                  onUploadClick?.();
-                  // Delay closing the modal slightly to allow file dialog to open
-                  // This prevents the modal close from interfering with the file dialog
-                  setTimeout(() => {
-                    onClose();
-                  }, 100);
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  // Close modal first to avoid state update conflicts
+                  onClose();
+                  // Use requestAnimationFrame to ensure modal closes before opening file dialog
+                  requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                      onUploadClick?.();
+                    });
+                  });
                 }}
                 className="cursor-pointer w-full max-w-[280px] bg-[#E15B3A] hover:bg-[#D44E2E] hover:opacity-90 text-white font-medium text-base h-11 px-6 rounded-xl shadow-md flex items-center justify-center gap-2 transition-opacity"
               >

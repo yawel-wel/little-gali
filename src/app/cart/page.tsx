@@ -193,6 +193,8 @@ export default function CartPage() {
                                               imgIndex + 1
                                             } of book ${displayIndex}`}
                                             className="w-full h-full object-cover"
+                                            loading="eager"
+                                            decoding="async"
                                           />
                                         </div>
                                       </div>
@@ -215,6 +217,8 @@ export default function CartPage() {
                                             imgIndex + 1
                                           } of book ${displayIndex}`}
                                           className="w-full h-full object-cover"
+                                          loading="eager"
+                                          decoding="async"
                                         />
                                       </div>
                                     </div>
