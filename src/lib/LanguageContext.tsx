@@ -359,7 +359,7 @@ const hebrewTranslations = {
   "home.comingSoon.titleHighlight": "מיוחד",
   "home.comingSoon.productName": "ספרוני בד מיוחדים",
   "home.comingSoon.subtitle":
-    "בקרוב!\nnספרונים מבד שמכילים את התמונות שלכם.\nהשאירו מייל ואנחנו נדאג לעדכן אתכם ראשונים כשהם יגיעו.",
+    "בקרוב!\nספרונים מבד שמכילים את התמונות שלכם.\nהשאירו מייל ואנחנו נדאג לעדכן אתכם ראשונים כשהם יגיעו.",
   "home.comingSoon.emailPlaceholder": "כתובת המייל שלכם",
   "home.comingSoon.button": "עדכנו אותי",
   "home.comingSoon.submitting": "שולח...",
