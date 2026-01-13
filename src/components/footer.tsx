@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -13,7 +14,7 @@ export function Footer() {
           {/* Column 1: Logo/Brand (Right side) */}
           <div className="col-span-2 lg:col-span-1 order-1 lg:order-1">
             <div className="mb-4">
-              <img src="/logo.png" alt="Little Gali" className="h-8 w-auto" />
+              <Image src="/logo.png" alt="Little Gali" width={1440} height={432} className="h-8 w-auto" />
             </div>
             <p
               className={`font-body text-medium-gray text-sm leading-relaxed mb-6 ${

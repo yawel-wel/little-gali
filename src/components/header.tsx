@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
@@ -166,11 +167,12 @@ export function Header() {
           {/* Center - Logo (Perfectly Centered using absolute positioning) */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <a href="/" className="block">
-              <img
+              <Image
                 src="/logo.png"
                 alt="Little Gali"
-                width={200}
-                height={60}
+                width={1440}
+                height={432}
+                priority
                 className="h-10 w-auto md:h-10 md:w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
               />
             </a>
