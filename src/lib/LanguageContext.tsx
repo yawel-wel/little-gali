@@ -346,7 +346,7 @@ const hebrewTranslations = {
   "home.about.title": "מי אנחנו",
   "home.about.titleHighlight": "אנחנו",
   "home.about.paragraph1":
-    "התחלתי לעבוד על הפרויקט אחרי שגלי נולדה. מצאתי את עצמי נשאבת לזה – חושבת על זה, מתכננת, מעצבת את האתר, ובכל פעם שמישהי העלתה תמונות לספרון – זה היה הדבר הראשון שרציתי לראות.",
+    "את Little Gali פתחתי בערך חודשיים אחרי שגלי שלי נולדה. מצאתי את עצמי נשאבת לזה – חושבת על זה, מתכננת, מעצבת את האתר, ובכל פעם שמישהי העלתה תמונות לספרון – זה היה הדבר הראשון שרציתי לעשות.",
   "home.about.paragraph2":
     "נהניתי מהתהליך עצמו, מליצור משהו חדש, ובעיקר מלראות את התגובות של האמהות כשהספרונים הגיעו אליהן. הרגשתי שאני עושה משהו מיוחד, שיש לו מקום, ושגם אני הייתי רוצה אותו בשביל גלי שלי (ואל דאגה – הכנתי לה כבר כמה וכמה ספרונים משלה).",
   "home.about.paragraph3":
@@ -753,7 +753,7 @@ const englishTranslations = {
   "home.about.title": "Who We Are",
   "home.about.titleHighlight": "We",
   "home.about.paragraph1":
-    "I started working on this project after Gali was born. I found myself drawn to it – thinking about it, planning, designing the website, and every time someone uploaded photos for a book – it was the first thing I wanted to see.",
+    "I opened Little Gali about two months after my Gali was born. I found myself drawn to it – thinking about it, planning, designing the website, and every time someone uploaded photos for a book – it was the first thing I wanted to do.",
   "home.about.paragraph2":
     "I enjoyed the process itself, creating something new, and especially seeing the mothers' reactions when the books arrived. I felt I was doing something special, that had a place, and that I would want one for my Gali too (and don't worry – I've already made her several of her own books).",
   "home.about.paragraph3":
