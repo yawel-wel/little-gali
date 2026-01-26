@@ -180,7 +180,7 @@ export function Header() {
                 width={1440}
                 height={432}
                 priority
-                className="h-10 w-auto md:h-10 md:w-auto lg:h-12 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                className="h-8 w-auto md:h-8 md:w-auto lg:h-10 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
               />
             </a>
           </div>

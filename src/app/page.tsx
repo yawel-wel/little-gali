@@ -595,7 +595,7 @@ export default function Home() {
                   : { scale: isMobile ? 1.5 : 1.0 }
               }
               transition={{ duration: 5, ease: easeOwlet }}
-              className="w-full h-full"
+              className="w-full h-full relative"
             >
               <Image
                 src="/hero-image.jpeg"
@@ -605,9 +605,9 @@ export default function Home() {
                 className="object-cover sm:object-[center_40%]"
                 sizes="100vw"
               />
+              {/* Lighter gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
             </motion.div>
-            {/* Lighter gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
           </div>
           {/* Content Overlay - center-aligned */}
           <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -697,7 +697,7 @@ export default function Home() {
                     <a href="/upload">
                       <Button
                         size="lg"
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-10 py-4 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl w-full sm:w-auto"
+                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 md:!bg-transparent md:hover:!bg-white/5 md:backdrop-blur-md border-0 md:border md:border-white text-white px-10 py-4 rounded md:rounded-md font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl md:shadow-none w-full sm:w-auto"
                       >
                         {t("home.hero.cta")}
                       </Button>
