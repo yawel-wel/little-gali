@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { CartDrawer } from "@/components/cart-drawer";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { TopBanner } from "@/components/top-banner";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
@@ -74,15 +75,21 @@ export function Header() {
   }));
 
   return (
-    <motion.header
-      className="fixed top-0 left-0 right-0 z-50"
-      style={{ backgroundColor: "#F9F7EE" }}
-      initial={prefersReducedMotion ? false : { y: -100 }}
-      animate={prefersReducedMotion ? undefined : { y: 0 }}
-      transition={{ duration: 1.1, ease: easeOwlet }}
-    >
+    <>
+      <TopBanner />
+      <motion.header
+        className="fixed left-0 right-0 z-50 transition-[top] duration-300 ease-in-out"
+        style={{ 
+          backgroundColor: "#F9F7EE",
+          top: "var(--banner-height, 40px)",
+          marginTop: 0
+        }}
+        initial={prefersReducedMotion ? false : { y: -100 }}
+        animate={prefersReducedMotion ? undefined : { y: 0 }}
+        transition={{ duration: 1.1, ease: easeOwlet }}
+      >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4 relative">
+        <div className="flex items-center justify-between py-3 md:py-2 relative">
           {/* Left Side - Hamburger Menu (Both languages) */}
           <div className="flex-shrink-0 flex items-center gap-4">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -193,5 +200,6 @@ export function Header() {
         </div>
       </div>
     </motion.header>
+    </>
   );
 }

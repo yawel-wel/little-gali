@@ -583,7 +583,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[72px] pb-24 sm:pb-0">
+        <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[120px] pb-24 sm:pb-0">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
             <motion.div

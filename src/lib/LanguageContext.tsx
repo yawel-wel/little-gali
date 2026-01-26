@@ -94,6 +94,9 @@ const hebrewTranslations = {
   "nav.contact": "צור קשר",
   "nav.createBook": "צרו ספרון",
 
+  // Top Banner
+  "banner.shipping": "משלוחים לכל הארץ",
+
   // Cart
   "cart.title": "עגלת הקניות",
   "cart.titleHighlight": "עגלה",
@@ -496,6 +499,9 @@ const englishTranslations = {
   "nav.inspiration": "Inspiration",
   "nav.contact": "Contact",
   "nav.createBook": "Create Book",
+
+  // Top Banner
+  "banner.shipping": "Shipping Nationwide",
 
   // Cart
   "cart.title": "Shopping Cart",
