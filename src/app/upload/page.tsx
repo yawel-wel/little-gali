@@ -61,6 +61,20 @@ function SortableImageItem({
     animateLayoutChanges: () => false, // Disable layout animation on drop
   });
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.matchMedia("(min-width: 768px)").matches);
+    };
+    
+    checkDesktop();
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    mediaQuery.addEventListener("change", checkDesktop);
+    
+    return () => mediaQuery.removeEventListener("change", checkDesktop);
+  }, []);
+
   const dragTransform = CSS.Transform.toString(transform);
   const isDraggingTransform = dragTransform && dragTransform !== "none" && dragTransform !== "translate3d(0, 0, 0)";
   
@@ -70,18 +84,21 @@ function SortableImageItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // 3D accordion book effect using rotateY
+  // 3D accordion book effect using rotateY - only on desktop
   // Alternate fold direction per index
   const isEven = index % 2 === 0;
   const foldAngle = isEven ? "-25deg" : "25deg";
   const origin = isEven ? "center left" : "center right";
 
   // Combine accordion rotation with drag transform
-  // When dragging, only show drag transform; otherwise show accordion effect
+  // When dragging, only show drag transform; otherwise show accordion effect on desktop only
+  // On mobile, show normal images without rotation
   const accordionTransform = `perspective(800px) rotateY(${foldAngle})`;
   const combinedTransform = isDraggingTransform
     ? dragTransform
-    : accordionTransform;
+    : isDesktop
+    ? accordionTransform
+    : undefined;
 
   return (
     <div
@@ -89,7 +106,7 @@ function SortableImageItem({
       style={{
         ...style,
         transform: combinedTransform,
-        transformOrigin: origin,
+        transformOrigin: isDesktop ? origin : undefined,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
         cursor: isDragging ? "grabbing" : "grab",
         touchAction: "none", // Prevent default touch behaviors on mobile

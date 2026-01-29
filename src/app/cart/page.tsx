@@ -651,15 +651,15 @@ export default function CartPage() {
             className={locale === "en" ? "!text-left" : "!text-center"}
           >
             <DialogTitle
-              className={`font-body-bold text-dark-gray mt-4 ${
-                locale === "en" ? "text-left" : "text-right"
+              className={`font-body-bold text-dark-gray ${
+                locale === "en" ? "text-left" : "text-right mr-10"
               }`}
             >
               {t("cart.removeItem")}
             </DialogTitle>
             <DialogDescription
               className={`font-body text-medium-gray ${
-                locale === "en" ? "text-left" : "text-right"
+                locale === "en" ? "text-left" : "text-right mr-10"
               }`}
             >
               {t("cart.removeConfirm")}
@@ -668,7 +668,7 @@ export default function CartPage() {
           <DialogFooter
             className={`${
               locale === "en" ? "flex-row" : "flex-row-reverse"
-            } gap-2 sm:gap-0 mt-4`}
+            } gap-2 mt-4`}
           >
             <Button
               variant="contained"
