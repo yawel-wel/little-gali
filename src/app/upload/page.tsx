@@ -13,6 +13,128 @@ import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface SortableImageItemProps {
+  id: string;
+  url: string;
+  index: number;
+  locale: string;
+  onRemove: (index: number) => void;
+  isSubmitting: boolean;
+}
+
+function SortableImageItem({
+  id,
+  url,
+  index,
+  locale,
+  onRemove,
+  isSubmitting,
+}: SortableImageItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id,
+    animateLayoutChanges: () => false, // Disable layout animation on drop
+  });
+
+  const dragTransform = CSS.Transform.toString(transform);
+  const isDraggingTransform = dragTransform && dragTransform !== "none" && dragTransform !== "translate3d(0, 0, 0)";
+  
+  const style = {
+    transform: dragTransform,
+    transition: "none", // Always disable transitions to prevent flicker on all items
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  // 3D accordion book effect using rotateY
+  // Alternate fold direction per index
+  const isEven = index % 2 === 0;
+  const foldAngle = isEven ? "-25deg" : "25deg";
+  const origin = isEven ? "center left" : "center right";
+
+  // Combine accordion rotation with drag transform
+  // When dragging, only show drag transform; otherwise show accordion effect
+  const accordionTransform = `perspective(800px) rotateY(${foldAngle})`;
+  const combinedTransform = isDraggingTransform
+    ? dragTransform
+    : accordionTransform;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        ...style,
+        transform: combinedTransform,
+        transformOrigin: origin,
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+        cursor: isDragging ? "grabbing" : "grab",
+        touchAction: "none", // Prevent default touch behaviors on mobile
+        WebkitTouchCallout: "none", // Prevent iOS callout menu
+        WebkitUserSelect: "none", // Prevent text selection
+        userSelect: "none",
+        willChange: isDragging ? "transform" : "auto", // Optimize for dragging
+      }}
+      className="relative w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0"
+      {...attributes}
+      {...listeners}
+    >
+      <img
+        src={url}
+        alt={
+          locale === "en"
+            ? `Selected photo ${index + 1}`
+            : `תמונה נבחרת ${index + 1}`
+        }
+        className="w-full h-full object-cover border-2 border-primary-orange rounded-lg pointer-events-none"
+        loading="eager"
+        decoding="async"
+        draggable={false}
+      />
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onRemove(index);
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+        }}
+        className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
+        disabled={isSubmitting}
+        style={{ pointerEvents: 'auto' }}
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </div>
+  );
+}
 
 function UploadPageContent() {
   const router = useRouter();
@@ -244,6 +366,61 @@ function UploadPageContent() {
     }
   };
 
+  // Drag and drop sensors
+  // Use PointerSensor for mouse (with distance) and TouchSensor for touch (with delay)
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px of movement before drag starts (for mouse)
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 50, // 50ms delay on touch before drag starts (very short for responsiveness)
+        tolerance: 15, // Allow 15px of movement during delay
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end to reorder images
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = images.findIndex((_, i) => i.toString() === active.id);
+      const newIndex = images.findIndex((_, i) => i.toString() === over.id);
+
+      // Reorder images array
+      const newImages = arrayMove(images, oldIndex, newIndex);
+      setImages(newImages);
+
+      // Reorder Cloudinary URLs map
+      const newCloudinaryUrls = new Map<number, string>();
+      const oldCloudinaryUrls = new Map(cloudinaryUrls.current);
+      
+      // Create a temporary array to track the reordering
+      const tempUrls: (string | undefined)[] = Array(images.length);
+      oldCloudinaryUrls.forEach((url, i) => {
+        tempUrls[i] = url;
+      });
+
+      // Reorder the temp array
+      const reorderedTemp = arrayMove(tempUrls, oldIndex, newIndex);
+      
+      // Rebuild the map with new indices
+      reorderedTemp.forEach((url, i) => {
+        if (url) {
+          newCloudinaryUrls.set(i, url);
+        }
+      });
+      
+      cloudinaryUrls.current = newCloudinaryUrls;
+    }
+  };
+
   const handleAddToCart = async () => {
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
@@ -438,39 +615,46 @@ function UploadPageContent() {
               {/* Selected Images Display */}
               {images.length > 0 && (
                 <div className="space-y-4">
-                  <div className="flex flex-nowrap justify-center gap-1 md:gap-4 w-full max-w-none mx-auto px-6 overflow-visible">
-                    {images.slice(0, 5).map((url, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className="relative w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0 mx-auto"
-                        >
-                          <img
-                            src={url}
-                            alt={
-                              locale === "en"
-                                ? `Selected photo ${index + 1}`
-                                : `תמונה נבחרת ${index + 1}`
-                            }
-                            className="w-full h-full object-cover border-2 border-primary-orange rounded-lg"
-                            loading="eager"
-                            decoding="async"
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={images.slice(0, 5).map((_, index) => index.toString())}
+                      strategy={horizontalListSortingStrategy}
+                    >
+                      <div
+                        className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end"
+                        style={{
+                          perspective: "1000px",
+                          transformStyle: "preserve-3d",
+                        }}
+                      >
+                        {images.slice(0, 5).map((url, index) => (
+                          <SortableImageItem
+                            key={url} // Use URL as key to prevent re-renders on reorder
+                            id={index.toString()}
+                            url={url}
+                            index={index}
+                            locale={locale}
+                            onRemove={handleRemoveImage}
+                            isSubmitting={isSubmitting}
                           />
-                          <button
-                            onClick={() => handleRemoveImage(index)}
-                            className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
-                            disabled={isSubmitting}
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
 
                   {/* Action Buttons */}
                   {selectedImagesCount >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
+                      <p
+                        className="text-sm font-body text-dark-gray text-center"
+                        style={{ marginTop: "28px" }}
+                      >
+                        {t("upload.dragToReorder")}
+                      </p>
                       <Button
                         variant="contained"
                         color="primary"
@@ -484,6 +668,7 @@ function UploadPageContent() {
                           fontWeight: 700,
                           py: { xs: 1.5, sm: 2 },
                           boxShadow: "none",
+                          marginTop: "-8px",
                         }}
                       >
                         {isSubmitting ? (

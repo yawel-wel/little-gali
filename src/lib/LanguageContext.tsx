@@ -445,6 +445,7 @@ const hebrewTranslations = {
   "upload.uploadingAndAdding": "מעלה תמונות ומוסיף לעגלה...",
   "upload.updating": "מעדכן...",
   "upload.addToCart": "הוסף לעגלה",
+  "upload.dragToReorder": "הזיזו את התמונות בשביל לבחור את הסדר שיופיע בספרון",
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
   "upload.photoNote":
@@ -863,6 +864,7 @@ const englishTranslations = {
   "upload.uploadingAndAdding": "Uploading photos and adding to cart...",
   "upload.updating": "Updating...",
   "upload.addToCart": "Add to Cart",
+  "upload.dragToReorder": "Drag the images to choose the order that will appear in the booklet",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
   "upload.photoNote":
