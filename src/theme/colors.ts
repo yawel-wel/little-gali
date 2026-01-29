@@ -62,4 +62,3 @@ export const muiPalette: PaletteOptions = {
     paper: "#FFFFFF",
   },
 };
-

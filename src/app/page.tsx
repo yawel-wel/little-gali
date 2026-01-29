@@ -12,7 +12,6 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
+import MuiButton from "@mui/material/Button";
 
 function ComingSoonSection({
   prefersReducedMotion,
@@ -304,15 +304,26 @@ function ComingSoonSection({
                       dir={locale === "en" ? "ltr" : "rtl"}
                     />
                   </div>
-                  <Button
+                  <MuiButton
                     type="submit"
                     disabled={isSubmitting}
-                    className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-full font-body-bold text-base md:text-lg transition-all duration-200 whitespace-nowrap"
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                      px: 2.5,
+                      py: 0.75,
+                      minWidth: "auto",
+                      fontFamily: "var(--font-assistant)",
+                      fontWeight: 700,
+                      fontSize: { xs: "0.85rem", md: "0.9rem" },
+                      textTransform: "none",
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     {isSubmitting
                       ? t("home.comingSoon.submitting")
                       : t("home.comingSoon.button")}
-                  </Button>
+                  </MuiButton>
                 </div>
 
                 {/* Mobile: Vertical Layout */}
@@ -327,15 +338,25 @@ function ComingSoonSection({
                     className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-3.5 text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
                     dir={locale === "en" ? "ltr" : "rtl"}
                   />
-                  <Button
+                  <MuiButton
+                    fullWidth
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full cursor-pointer bg-primary-orange hover:bg-primary-orange/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-full font-body-bold text-base transition-all duration-200"
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      fontFamily: "var(--font-assistant)",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      textTransform: "none",
+                    }}
                   >
                     {isSubmitting
                       ? t("home.comingSoon.submitting")
                       : t("home.comingSoon.button")}
-                  </Button>
+                  </MuiButton>
                 </div>
 
                 {/* Error Message */}
@@ -688,19 +709,29 @@ export default function Home() {
                 <div className="pt-6">
                   <motion.div
                     className="fixed bottom-4 left-1/2 w-[calc(100%-32px)] max-w-md -translate-x-1/2 z-40 sm:relative sm:bottom-auto sm:left-auto sm:w-auto sm:max-w-none sm:translate-x-0"
-                    whileHover={{
-                      scale: 1.05,
-                      y: -2,
-                      transition: { duration: 0.2, ease: easeOwlet },
-                    }}
                   >
                     <a href="/upload">
-                      <Button
-                        size="lg"
-                        className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 md:!bg-transparent md:hover:!bg-white/5 md:backdrop-blur-md border-0 md:border md:border-white text-white px-10 py-4 rounded md:rounded-md font-body-bold text-base md:text-lg transition-all duration-200 shadow-2xl md:shadow-none w-full sm:w-auto"
+                      <MuiButton
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                          width: { xs: "100%", sm: "auto" },
+                          px: { xs: 3, sm: 4 },
+                          py: { xs: 1.5, sm: 1.5 },
+                          fontFamily: "var(--font-assistant)",
+                          fontWeight: 700,
+                          fontSize: { xs: "0.95rem", sm: "1rem" },
+                          textTransform: "none",
+                          bgcolor: { xs: "primary.main", md: "transparent" },
+                          border: {
+                            xs: "none",
+                            md: "1px solid rgba(255,255,255,0.9)",
+                          },
+                          backdropFilter: { md: "blur(12px)" },
+                        }}
                       >
                         {t("home.hero.cta")}
-                      </Button>
+                      </MuiButton>
                     </a>
                   </motion.div>
                 </div>
@@ -806,17 +837,22 @@ export default function Home() {
 
                   {/* CTA Button */}
                   <div className="flex justify-center lg:justify-start pt-2">
-                    <motion.div
-                      whileHover={{
-                        scale: 1.01,
-                        y: -1,
-                        transition: { duration: 0.2, ease: easeOwlet },
-                      }}
-                    >
+                    <motion.div>
                       <a href="/upload">
-                        <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-5 rounded-full font-body-bold text-base transition-all duration-200">
+                        <MuiButton
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            px: 4,
+                            py: 1.5,
+                            fontFamily: "var(--font-assistant)",
+                            fontWeight: 700,
+                            fontSize: "0.95rem",
+                            textTransform: "none",
+                          }}
+                        >
                           {t("home.book.cta")}
-                        </Button>
+                        </MuiButton>
                       </a>
                     </motion.div>
                   </div>
@@ -1113,17 +1149,22 @@ export default function Home() {
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
-              <motion.div
-                whileHover={{
-                  scale: 1.02,
-                  y: -2,
-                  transition: { type: "spring", stiffness: 200, damping: 20 },
-                }}
-              >
+              <motion.div>
                 <a href="/upload">
-                  <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-4 rounded-full font-body-bold text-lg transition-all duration-200">
+                  <MuiButton
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      fontFamily: "var(--font-assistant)",
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                      textTransform: "none",
+                    }}
+                  >
                     {t("home.howItWorks.cta")}
-                  </Button>
+                  </MuiButton>
                 </a>
               </motion.div>
             </div>
@@ -1746,17 +1787,22 @@ export default function Home() {
 
             {/* Button to navigate to Q&A page */}
             <div className="text-center mt-12">
-              <motion.div
-                whileHover={{
-                  scale: 1.02,
-                  y: -2,
-                  transition: { type: "spring", stiffness: 200, damping: 20 },
-                }}
-              >
+              <motion.div>
                 <a href="/qa">
-                  <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-sm transition-all duration-200">
+                  <MuiButton
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                      px: 3,
+                      py: 1.25,
+                      fontFamily: "var(--font-assistant)",
+                      fontWeight: 700,
+                      fontSize: "0.9rem",
+                      textTransform: "none",
+                    }}
+                  >
                     {t("home.qa.cta")}
-                  </Button>
+                  </MuiButton>
                 </a>
               </motion.div>
             </div>

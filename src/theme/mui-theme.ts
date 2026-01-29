@@ -7,5 +7,18 @@ import { muiPalette } from "./colors";
 export const muiTheme = createTheme({
   direction: "rtl",
   palette: muiPalette,
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          boxShadow: "none",
+          "&:hover": {
+            boxShadow: "none",
+            opacity: 0.7,
+          },
+        },
+      },
+    },
+  },
 });
-
