@@ -357,7 +357,7 @@ export default function CartPage() {
                           </div>
                           <div className="pt-4 border-t border-gray-200">
                             <p
-                              className={`text-sm text-medium-gray font-body mb-4 ${
+                              className={`text-sm text-medium-gray font-body mb-2 ${
                                 locale === "en" ? "text-left" : "text-right"
                               }`}
                             >
@@ -524,7 +524,7 @@ export default function CartPage() {
                         </div>
                         <div className="pt-4 border-t border-gray-200">
                           <p
-                            className={`text-sm text-medium-gray font-body mb-4 ${
+                            className={`text-sm text-medium-gray font-body mb-2 ${
                               locale === "en" ? "text-left" : "text-right"
                             }`}
                           >
@@ -541,7 +541,7 @@ export default function CartPage() {
                       </div>
 
                       {/* Checkout Button */}
-                      <div className="mt-6 space-y-3">
+                      <div className="mt-6 flex flex-col gap-2">
                         <Button
                           variant="contained"
                           color="primary"
