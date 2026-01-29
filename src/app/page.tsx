@@ -12,6 +12,7 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
+import { TestimonialsSection } from "@/components/testimonials-section";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -599,12 +600,12 @@ export default function Home() {
     };
   }, []);
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F7F5F2" }}>
       <Header />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[120px] pb-24 sm:pb-0">
+        <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[120px]">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
             <motion.div
@@ -760,7 +761,8 @@ export default function Home() {
         </section>
         {/* הספרון שלנו Section */}
         <motion.section
-          className="relative bg-white py-12 lg:py-16"
+          className="relative -mt-0 py-12 lg:py-16"
+          style={{ backgroundColor: "#F7F5F2" }}
           initial={
             prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
           }
@@ -909,6 +911,9 @@ export default function Home() {
             </div>
           </div>
         </motion.section>
+
+        {/* Testimonials Section */}
+        <TestimonialsSection />
 
         {/* How It Works Section */}
         <motion.section

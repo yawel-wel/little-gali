@@ -371,6 +371,8 @@ const hebrewTranslations = {
   "home.comingSoon.success": "תודה! נעדכן אתכם ברגע שהמוצר יהיה זמין",
   "home.comingSoon.successTitle": "תודה רבה!",
   "home.comingSoon.successMessage": "נעדכן אתכם ברגע שספרוני הבד יגיעו",
+  "home.testimonials.title": "מה אומרים עלינו",
+  "home.testimonials.titleHighlight": "עלינו",
   "qa.question1": "ממה הספרון עשוי?",
   "qa.answer1": "הספרון עשוי מנייר איכותי ועבה שנעבר למינציה.",
   "qa.question2": "כמה תמונות צריך לבחור?",
@@ -787,6 +789,8 @@ const englishTranslations = {
   "home.comingSoon.successTitle": "Thank You!",
   "home.comingSoon.successMessage":
     "We'll update you when the fabric books arrive",
+  "home.testimonials.title": "What They Say About Us",
+  "home.testimonials.titleHighlight": "About Us",
   "qa.question1": "What is the book made of?",
   "qa.answer1":
     "The book is made of high-quality, thick paper that has been laminated.",
