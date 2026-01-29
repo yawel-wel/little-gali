@@ -789,7 +789,7 @@ const englishTranslations = {
   "home.comingSoon.successTitle": "Thank You!",
   "home.comingSoon.successMessage":
     "We'll update you when the fabric books arrive",
-  "home.testimonials.title": "What They Say About Us",
+  "home.testimonials.title": "What People Say About Us",
   "home.testimonials.titleHighlight": "About Us",
   "qa.question1": "What is the book made of?",
   "qa.answer1":
