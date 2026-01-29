@@ -6,6 +6,7 @@ import { UploadImagesProvider } from "@/lib/UploadImagesContext";
 import { CartProvider } from "@/lib/CartContext";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { MuiThemeProvider } from "@/theme/MuiThemeProvider";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -107,11 +108,13 @@ export default function RootLayout({
         className={`${heebo.variable} ${assistant.variable} antialiased overflow-x-hidden`}
         suppressHydrationWarning
       >
-        <LanguageProvider>
-          <CartProvider>
-            <UploadImagesProvider>{children}</UploadImagesProvider>
-          </CartProvider>
-        </LanguageProvider>
+        <MuiThemeProvider>
+          <LanguageProvider>
+            <CartProvider>
+              <UploadImagesProvider>{children}</UploadImagesProvider>
+            </CartProvider>
+          </LanguageProvider>
+        </MuiThemeProvider>
         <SpeedInsights />
         <Analytics />
       </body>
