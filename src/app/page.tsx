@@ -664,19 +664,37 @@ export default function Home() {
                               <span className="relative z-10">
                                 {highlightText}
                               </span>
-                              <span
-                                className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+                              <motion.svg
+                                className="absolute bottom-0 left-0"
                                 style={{
-                                  height: "8px",
-                                  borderRadius: "6px 6px 0 0",
-                                  transform: "rotate(-2deg) translateY(0px)",
-                                  background:
-                                    "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-                                  boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
                                   width: "110%",
                                   left: "-5%",
+                                  height: "14px",
+                                  transform: "rotate(-2deg)",
+                                  transformOrigin: "right center",
+                                  overflow: "visible",
                                 }}
-                              ></span>
+                                initial={{ scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
+                                transition={{
+                                  delay: 0.75,
+                                  duration: 0.8,
+                                  ease: [0.16, 1, 0.3, 1],
+                                }}
+                                preserveAspectRatio="none"
+                                viewBox="0 0 100 14"
+                              >
+                                <path
+                                  d="M 0 14 Q 50 10, 100 14"
+                                  stroke="rgb(229, 84, 61)"
+                                  strokeWidth="8"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  style={{
+                                    filter: "drop-shadow(0 2px 4px rgba(229, 84, 61, 0.3))",
+                                  }}
+                                />
+                              </motion.svg>
                             </span>
                             {afterHighlight}
                           </h2>
@@ -698,6 +716,7 @@ export default function Home() {
                           highlightText={highlightText}
                           color="text-white"
                           className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                          animateUnderline={true}
                         >
                           {titleText}
                         </Title>

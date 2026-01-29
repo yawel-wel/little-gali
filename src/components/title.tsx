@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 interface TitleProps {
   /**
    * The full title text. The `highlightText` should be a substring of this.
@@ -23,6 +25,10 @@ interface TitleProps {
    * Text color class (e.g., "text-white", "text-dark-gray")
    */
   color?: string;
+  /**
+   * Whether to animate the underline on mount (for hero section)
+   */
+  animateUnderline?: boolean;
 }
 
 const sizeClasses = {
@@ -48,6 +54,7 @@ export function Title({
   className = "",
   roundedUnderline = false,
   color = "text-dark-gray",
+  animateUnderline = false,
 }: TitleProps) {
   // Find the position of the highlight text in the title
   const highlightIndex = children.indexOf(highlightText);
@@ -67,18 +74,17 @@ export function Title({
   const beforeText = children.substring(0, highlightIndex);
   const afterText = children.substring(highlightIndex + highlightText.length);
 
-  // Determine the underline style based on roundedUnderline and size
-  let borderRadius: string;
-  let transform: string;
+  // Determine the rotation based on roundedUnderline
+  const rotation = roundedUnderline ? -1 : -2;
+  const height = parseInt(underlineHeight[size]) || 8;
+  const svgHeight = Math.max(height + 6, 14); // Add extra height for the curve
 
-  if (roundedUnderline) {
-    borderRadius = "4px";
-    transform = "rotate(-1deg) translateY(0px)";
-  } else {
-    const isSmallSize = size === "sm";
-    borderRadius = isSmallSize ? "4px" : "6px 6px 0 0";
-    transform = "rotate(-2deg) translateY(0px)";
-  }
+  // Create a curvy underline path - smooth arc that curves upward in the middle
+  // Using a quadratic Bezier curve for a smooth, organic curve that faces up
+  // Start and end points are lower, control point is higher to create upward curve
+  const pathData = `M 0 ${svgHeight} Q 50 ${svgHeight - 4}, 100 ${svgHeight}`;
+
+  const UnderlineComponent = animateUnderline ? motion.svg : "svg";
 
   return (
     <h2
@@ -87,19 +93,39 @@ export function Title({
       {beforeText}
       <span className="relative inline-block">
         <span className="relative z-10">{highlightText}</span>
-        <span
-          className="absolute bottom-0 left-0 right-0 transform -rotate-1"
+        <UnderlineComponent
+          className="absolute bottom-0 left-0"
           style={{
-            height: underlineHeight[size],
-            borderRadius: borderRadius,
-            transform: transform,
-            background:
-              "linear-gradient(90deg, rgba(229, 84, 61, 0.6) 0%, rgba(229, 84, 61, 0.8) 50%, rgba(229, 84, 61, 0.6) 100%)",
-            boxShadow: "0 2px 4px rgba(229, 84, 61, 0.3)",
             width: "110%",
             left: "-5%",
+            height: `${svgHeight}px`,
+            transform: `rotate(${rotation}deg)`,
+            transformOrigin: animateUnderline ? "right center" : "left center",
+            overflow: "visible",
           }}
-        ></span>
+          {...(animateUnderline && {
+            initial: { scaleX: 0 },
+            animate: { scaleX: 1 },
+            transition: {
+              delay: 0.75,
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+            },
+          })}
+          preserveAspectRatio="none"
+          viewBox={`0 0 100 ${svgHeight}`}
+        >
+          <path
+            d={pathData}
+            stroke="rgb(229, 84, 61)"
+            strokeWidth={height}
+            fill="none"
+            strokeLinecap="round"
+            style={{
+              filter: "drop-shadow(0 2px 4px rgba(229, 84, 61, 0.3))",
+            }}
+          />
+        </UnderlineComponent>
       </span>
       {afterText}
     </h2>
