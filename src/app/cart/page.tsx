@@ -3,7 +3,6 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +17,7 @@ import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
+import Button from "@mui/material/Button";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -376,9 +376,19 @@ export default function CartPage() {
                         {/* Checkout Button */}
                         <div className="mt-6">
                           <Button
+                            variant="contained"
+                            color="primary"
                             onClick={handleCheckout}
                             disabled={isCheckingOut || isLoading}
-                            className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
+                            className="w-full cursor-pointer"
+                            sx={{
+                              borderRadius: "12px",
+                              textTransform: "none",
+                              fontSize: "0.95rem",
+                              fontWeight: 700,
+                              py: 1.1,
+                              minHeight: 44,
+                            }}
                           >
                             {isCheckingOut ? (
                               <>
@@ -398,9 +408,19 @@ export default function CartPage() {
                         {/* Add Book Button */}
                         <div className="mt-3">
                           <Button
+                            variant="outlined"
+                            color="primary"
                             onClick={() => router.push("/upload")}
-                            variant="outline"
-                            className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
+                            className="w-full cursor-pointer"
+                            sx={{
+                              borderRadius: "12px",
+                              textTransform: "none",
+                              fontSize: "0.9rem",
+                              fontWeight: 700,
+                              py: 0.9,
+                              minHeight: 40,
+                              borderWidth: 2,
+                            }}
                           >
                             {t("cart.addBook")}
                           </Button>
@@ -523,9 +543,19 @@ export default function CartPage() {
                       {/* Checkout Button */}
                       <div className="mt-6 space-y-3">
                         <Button
+                          variant="contained"
+                          color="primary"
                           onClick={handleCheckout}
                           disabled={isCheckingOut || isLoading}
-                          className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-6 px-8 text-lg cursor-pointer"
+                          className="w-full cursor-pointer"
+                          sx={{
+                            borderRadius: "12px",
+                            textTransform: "none",
+                            fontSize: "0.95rem",
+                            fontWeight: 700,
+                            py: 1.1,
+                            minHeight: 44,
+                          }}
                         >
                           {isCheckingOut ? (
                             <>
@@ -544,9 +574,19 @@ export default function CartPage() {
                         {/* Add Book Button */}
                         <div>
                           <Button
+                            variant="outlined"
+                            color="primary"
                             onClick={() => router.push("/upload")}
-                            variant="outline"
-                            className="w-full border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-body-bold cursor-pointer"
+                            className="w-full cursor-pointer"
+                            sx={{
+                              borderRadius: "12px",
+                              textTransform: "none",
+                              fontSize: "0.9rem",
+                              fontWeight: 700,
+                              py: 0.9,
+                              minHeight: 40,
+                              borderWidth: 2,
+                            }}
                           >
                             {t("cart.addBook")}
                           </Button>
@@ -579,8 +619,19 @@ export default function CartPage() {
                     {t("cart.startCreating")}
                   </p>
                   <Button
+                    variant="contained"
+                    color="primary"
                     onClick={() => router.push("/upload")}
-                    className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 px-8 cursor-pointer"
+                    className="cursor-pointer"
+                    sx={{
+                      borderRadius: "12px",
+                      textTransform: "none",
+                      fontSize: "0.9rem",
+                      fontWeight: 700,
+                      py: 0.9,
+                      px: 3,
+                      minHeight: 40,
+                    }}
                   >
                     {t("cart.createBook")}
                   </Button>
@@ -620,15 +671,26 @@ export default function CartPage() {
             } gap-2 sm:gap-0 mt-4`}
           >
             <Button
+              variant="contained"
+              color="primary"
               onClick={handleConfirmRemove}
-              className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold cursor-pointer"
+              className="cursor-pointer"
+              sx={{
+                textTransform: "none",
+                fontWeight: 700,
+              }}
             >
               {t("cart.remove")}
             </Button>
             <Button
+              variant="outlined"
+              color="primary"
               onClick={handleCancelRemove}
-              variant="outline"
-              className="border-gray-300 text-dark-gray hover:bg-gray-50 font-body-bold cursor-pointer"
+              className="cursor-pointer"
+              sx={{
+                textTransform: "none",
+                fontWeight: 700,
+              }}
             >
               {t("cart.cancel")}
             </Button>

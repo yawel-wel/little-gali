@@ -435,7 +435,7 @@ const hebrewTranslations = {
   "upload.title": "בואו ניצור לתינוק שלכם ספרון אישי",
   "upload.titleHighlight": "אישי",
   "upload.description":
-    "בחרו 5 תמונות שיופיעו בספרון.\nאין צורך בתמונה מושלמת, אנחנו נדאג שהפנים, ההבעה והחום האנושי שבתמונה יבואו לידי ביטוי.",
+    "בחרו 5 תמונות שיופיעו בספרון.\nחמשת התמונות יופיע בצד אחד בשחור לבן ובצד השני בצבעוני.",
   "upload.imagesCount": "מתוך 5 תמונות",
   "upload.selectExactly5": "אנא בחר בדיוק 5 תמונות",
   "upload.waitForUpload": "אנא המתן עד שהתמונות יסיימו להעלות",
@@ -447,6 +447,8 @@ const hebrewTranslations = {
   "upload.addToCart": "הוסף לעגלה",
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
+  "upload.photoNote":
+    "אין צורך בתמונה מושלמת, אנחנו נדאג שהפנים, ההבעה והחום האנושי שבתמונה יבואו לידי ביטוי.",
 
   // Style Selector
   "styleSelector.title": "בחרו את הסגנון שלכם:",
@@ -851,7 +853,7 @@ const englishTranslations = {
   "upload.title": "Let's Create a Personalized Book for Your Baby",
   "upload.titleHighlight": "Personalized",
   "upload.description":
-    "Select 5 photos that will appear in the book.\nNo need for a perfect photo, we'll make sure the faces, expressions, and human warmth in the photo come through.",
+    "Select 5 photos that will appear in the book.\nThe five photos will appear on one side in black and white and on the other in color.",
   "upload.imagesCount": "out of 5 photos",
   "upload.selectExactly5": "Please select exactly 5 photos",
   "upload.waitForUpload": "Please wait until photos finish uploading",
@@ -863,6 +865,8 @@ const englishTranslations = {
   "upload.addToCart": "Add to Cart",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
+  "upload.photoNote":
+    "No need for a perfect photo, we'll make sure the faces, expressions, and human warmth in the photo come through.",
 
   // Style Selector
   "styleSelector.title": "Choose Your Style:",

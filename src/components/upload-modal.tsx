@@ -3,6 +3,7 @@
 import { X, Check } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useEffect } from "react";
+import Button from "@mui/material/Button";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -333,7 +334,19 @@ export function UploadModal({
           {/* CTA Button */}
           {showUploadButton && (
             <div className="mt-4 flex justify-center">
-              <button
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  height: 44,
+                  px: 3,
+                  maxWidth: 280,
+                  boxShadow: "none",
+                }}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -346,7 +359,7 @@ export function UploadModal({
                     });
                   });
                 }}
-                className="cursor-pointer w-full max-w-[280px] bg-[#E15B3A] hover:bg-[#D44E2E] hover:opacity-90 text-white font-medium text-base h-11 px-6 rounded-xl shadow-md flex items-center justify-center gap-2 transition-opacity"
+                className="cursor-pointer w-full max-w-[280px] shadow-md flex items-center justify-center gap-2"
               >
                 {t("uploadModal.chooseFromDevice")}
                 <svg
@@ -362,7 +375,7 @@ export function UploadModal({
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-              </button>
+              </Button>
             </div>
           )}
 

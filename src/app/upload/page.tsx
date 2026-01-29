@@ -12,6 +12,7 @@ import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
 import { useLanguage } from "@/lib/LanguageContext";
+import Button from "@mui/material/Button";
 
 function UploadPageContent() {
   const router = useRouter();
@@ -470,22 +471,46 @@ function UploadPageContent() {
                   {/* Action Buttons */}
                   {selectedImagesCount >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      <button
+                      <Button
+                        variant="contained"
+                        color="primary"
                         onClick={handleAddToCart}
                         disabled={isSubmitting}
-                        className="w-full bg-primary-orange hover:bg-primary-orange/90 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-body-bold text-lg py-3 sm:py-4 rounded-xl transition-opacity shadow-md hover:shadow-lg cursor-pointer relative z-10 flex items-center justify-center"
-                        style={{ touchAction: "manipulation" }}
+                        className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        sx={{
+                          borderRadius: "12px",
+                          textTransform: "none",
+                          fontSize: "1rem",
+                          fontWeight: 700,
+                          py: { xs: 1.5, sm: 2 },
+                          boxShadow: "none",
+                        }}
                       >
                         {isSubmitting ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                           t("upload.addToCart")
                         )}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="primary"
                         onClick={handleStartOver}
-                        className="w-full bg-white hover:bg-gray-50 text-dark-gray font-body-bold text-base py-3 sm:py-4 rounded-xl border border-gray-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                        style={{ touchAction: "manipulation" }}
+                        className="w-full cursor-pointer flex items-center justify-center gap-2"
+                        sx={{
+                          borderRadius: "12px",
+                          textTransform: "none",
+                          fontSize: "0.95rem",
+                          fontWeight: 700,
+                          py: { xs: 1.5, sm: 2 },
+                          borderColor: "#D1D5DB",
+                          color: "#374151",
+                          backgroundColor: "#FFFFFF",
+                          "&:hover": {
+                            backgroundColor: "#F9FAFB",
+                            borderColor: "#D1D5DB",
+                          },
+                        }}
                       >
                         <svg
                           className="w-5 h-5"
@@ -500,8 +525,10 @@ function UploadPageContent() {
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                           />
                         </svg>
-                        {t("upload.startOver")}
-                      </button>
+                        <span className="font-body-bold text-base">
+                          {t("upload.startOver")}
+                        </span>
+                      </Button>
                       {/* Status Message */}
                       {submitStatus.type && (
                         <div
@@ -533,6 +560,9 @@ function UploadPageContent() {
 
                   {/* Image Upload Tip */}
                   <div className="text-center">
+                    <p className="mt-2 text-sm font-body text-dark-gray">
+                      {t("upload.photoNote")}
+                    </p>
                     <div
                       className="inline-flex items-center gap-2 text-primary-orange cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={handleInfoClick}

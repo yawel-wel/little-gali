@@ -10,12 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/CartContext";
 import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
 import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageContext";
+import Button from "@mui/material/Button";
 
 export function CartDrawer() {
   const { cart, isLoading, removeFromCart } = useCart();
@@ -77,9 +77,15 @@ export function CartDrawer() {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="relative text-dark-gray cursor-pointer hover:bg-transparent"
+          variant="text"
+          color="primary"
+          className="relative text-dark-gray cursor-pointer hover:bg-transparent min-w-0 p-0"
+          sx={{
+            minWidth: 0,
+            padding: 0,
+            borderRadius: "9999px",
+            "&:hover": { backgroundColor: "transparent", opacity: 0.7 },
+          }}
         >
           <ShoppingCart className="h-6 w-6" />
           {cartItemCount > 0 && (
@@ -212,8 +218,19 @@ export function CartDrawer() {
                 <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-medium-gray font-body">{t("cart.empty")}</p>
                 <Button
+                  variant="contained"
+                  color="primary"
                   onClick={() => router.push("/upload")}
-                  className="mt-4 bg-primary-orange hover:bg-primary-orange/90 text-white cursor-pointer"
+                  className="mt-4 cursor-pointer"
+                  sx={{
+                    textTransform: "none",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    borderRadius: "10px",
+                    py: 0.6,
+                    px: 2,
+                    minHeight: 34,
+                  }}
                 >
                   {t("nav.createBook")}
                 </Button>
@@ -242,10 +259,19 @@ export function CartDrawer() {
                 </span>
               </div>
               <Button
+                variant="contained"
+                color="primary"
                 onClick={handleCheckout}
-                className="w-full bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold py-3 cursor-pointer"
+                className="w-full cursor-pointer"
                 disabled={isLoading || isRemoving !== null}
-                style={{
+                sx={{
+                  textTransform: "none",
+                  fontSize: "0.9rem",
+                  fontWeight: 700,
+                  borderRadius: "10px",
+                  py: 0.8,
+                  minHeight: 38,
+                  mb: "8px",
                   cursor:
                     isLoading || isRemoving !== null
                       ? "not-allowed"
@@ -262,9 +288,19 @@ export function CartDrawer() {
                 )}
               </Button>
               <Button
+                variant="outlined"
+                color="primary"
                 onClick={() => router.push("/cart")}
-                variant="outline"
-                className="w-full mt-2 border-primary-orange text-primary-orange hover:bg-primary-orange/10 cursor-pointer"
+                className="w-full cursor-pointer"
+                sx={{
+                  textTransform: "none",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  borderRadius: "10px",
+                  py: 0.6,
+                  minHeight: 34,
+                  borderWidth: 1.5,
+                }}
               >
                 {t("cart.viewFull")}
               </Button>
@@ -286,15 +322,26 @@ export function CartDrawer() {
           </DialogHeader>
           <DialogFooter className="flex-row-reverse gap-2 sm:gap-0 mt-4">
             <Button
+              variant="contained"
+              color="primary"
               onClick={handleConfirmRemove}
-              className="bg-primary-orange hover:bg-primary-orange/90 text-white font-body-bold cursor-pointer"
+              className="cursor-pointer"
+              sx={{
+                textTransform: "none",
+                fontWeight: 700,
+              }}
             >
               {t("cart.remove")}
             </Button>
             <Button
+              variant="outlined"
+              color="primary"
               onClick={handleCancelRemove}
-              variant="outline"
-              className="border-gray-300 text-dark-gray hover:bg-gray-50 font-body-bold cursor-pointer"
+              className="cursor-pointer"
+              sx={{
+                textTransform: "none",
+                fontWeight: 700,
+              }}
             >
               {t("cart.cancel")}
             </Button>
