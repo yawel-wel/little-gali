@@ -302,18 +302,18 @@ const hebrewTranslations = {
   "home.book.secondBook": "ספר שני ב-₪99 בלבד",
   "home.book.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
   "home.book.cta": "צרו עכשיו את הספרון האישי שלכם",
-  "home.howItWorks.title": "איך זה עובד – בשלושה צעדים פשוטים",
+  "home.howItWorks.title": "איך זה עובד",
   "home.howItWorks.titleHighlight": "עובד",
   "home.howItWorks.subtitle":
     "כל מה שצריך זה כמה תמונות אהובות – אנחנו נדאג לכל השאר",
   "home.howItWorks.step1.label": "אתם עושים",
   "home.howItWorks.step1.title": "מעלים תמונות",
   "home.howItWorks.step1.description":
-    "מעלים 5 תמונות אהובות של התינוק או המשפחה – זה לוקח פחות מדקה",
+    "בחרו 5 תמונות שיופיעו בספרון ובחרו את הסגנון שאהבתם לצד הצבעוני",
   "home.howItWorks.step2.label": "אנחנו עושים",
-  "home.howItWorks.step2.title": "מעבדים את התמונות",
+  "home.howItWorks.step2.title": "יוצרים את הספרון",
   "home.howItWorks.step2.description":
-    "בעזרת בינה מלאכותית (AI) אנחנו ממירים את התמונות לגרסאות ברורות וידידותיות לתינוק – בשחור-לבן ובצבע.",
+    "אנחנו ניצור מהתמונות ספרון דו צדדי.\nצד אחד עם חמשת התמונות בשחור לבן, וצד שני עם \nאותם חמש תמונות בעיבוד צבעוני.",
   "home.howItWorks.step3.label": "אנחנו עושים",
   "home.howItWorks.step3.title": "מדפיסים את הספרון",
   "home.howItWorks.step3.description":
@@ -717,8 +717,8 @@ const englishTranslations = {
   "home.book.secondBook": "Second book for only ₪99",
   "home.book.discountNote": "* Discount is automatically applied at checkout",
   "home.book.cta": "Create Your Personal Book Now",
-  "home.howItWorks.title": "How It Works – In Three Simple Steps",
-  "home.howItWorks.titleHighlight": "Works",
+  "home.howItWorks.title": "How it works",
+  "home.howItWorks.titleHighlight": "works",
   "home.howItWorks.subtitle":
     "All you need are a few favorite photos – we'll take care of the rest",
   "home.howItWorks.step1.label": "You do",

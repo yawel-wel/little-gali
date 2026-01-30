@@ -939,14 +939,13 @@ export default function Home() {
               >
                 {t("home.howItWorks.title")}
               </Title>
-              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
-                {t("home.howItWorks.subtitle")}
-              </p>
             </div>
 
-            {/* Steps Grid */}
+            {/* Steps - Side by Side Layout */}
             <motion.div
-              className="flex flex-col md:grid md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto space-y-12 md:space-y-0 px-3 md:px-0"
+              className={`flex flex-col lg:flex-row gap-8 lg:gap-0 max-w-6xl mx-auto relative items-start ${
+                locale === "he" ? "lg:flex-row-reverse" : ""
+              }`}
               initial={prefersReducedMotion ? false : "hidden"}
               whileInView={prefersReducedMotion ? undefined : "show"}
               viewport={{ once: true, amount: 0.15 }}
@@ -957,171 +956,49 @@ export default function Home() {
                 },
               }}
             >
-              {/* Step 1 */}
-              <motion.div
-                className="text-center relative"
-                variants={{
-                  hidden: { opacity: 0, y: 40 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.2, ease: easeOwlet },
-                  },
-                }}
-              >
-                {/* Step Image */}
-                <div className="mb-4">
-                  <motion.div
-                    className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
-                    style={{ backgroundColor: "#F3EEE8" }}
-                    whileHover={{
-                      scale: 1.02,
-                      y: -2,
-                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      },
-                    }}
-                  >
-                    <Image
-                      src="/upload-images.jpeg"
-                      alt="Upload Images"
-                      width={224}
-                      height={224}
-                      className="w-full h-full object-contain"
-                      loading="lazy"
-                    />
-                  </motion.div>
-                </div>
-
-                {/* Step Number */}
-                <div className="relative inline-block mb-4">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFD8D0" }}
-                  >
-                    <span className="text-dark-gray font-heading text-base font-bold">
-                      1
-                    </span>
-                  </div>
-                </div>
-
-                {/* Step Content */}
-                <div className="space-y-4 mt-3 max-w-sm mx-auto">
-                  {/* Step Text */}
-                  <div className="mb-1">
-                    <p className="text-primary-orange text-sm font-body-bold">
-                      {t("home.howItWorks.step1.label")}
-                    </p>
-                  </div>
-
-                  <h3 className="text-xl font-heading text-dark-gray">
-                    {t("home.howItWorks.step1.title")}
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed">
-                    {t("home.howItWorks.step1.description")}
-                  </p>
-                </div>
-
-                {/* Connecting line to next step */}
-                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-primary-orange to-soft-peach opacity-30"></div>
-              </motion.div>
-
               {/* Step 2 */}
               <motion.div
-                className="text-center relative"
+                className="flex-1 text-center order-2 lg:order-none lg:-mr-8"
                 variants={{
                   hidden: { opacity: 0, y: 40 },
                   show: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 1.2, ease: easeOwlet },
+                    transition: { duration: 1.2, ease: easeOwlet, delay: 0.2 },
                   },
                 }}
               >
-                {/* Step Image */}
-                <div className="mb-4">
-                  <motion.div
-                    className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
-                    style={{ backgroundColor: "#F3EEE8" }}
-                    whileHover={{
-                      scale: 1.02,
-                      y: -2,
-                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      },
-                    }}
-                  >
-                    <Image
-                      src="/transform-images.png"
-                      alt="Transform Images"
-                      width={224}
-                      height={224}
-                      className="w-full h-full object-contain"
-                      loading="lazy"
-                    />
-                  </motion.div>
-                </div>
-
                 {/* Step Number */}
-                <div className="relative inline-block mb-4">
+                <div className="relative inline-block mb-6">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFD8D0" }}
+                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
+                    style={{ backgroundColor: "#FFFFFF" }}
                   >
-                    <span className="text-dark-gray font-heading text-base font-bold">
+                    <span className="text-dark-gray font-heading text-2xl font-bold">
                       2
                     </span>
                   </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-4 mt-3 max-w-sm mx-auto">
-                  {/* Step Text */}
-                  <div className="mb-1">
-                    <p className="text-primary-orange text-sm font-body-bold">
-                      {t("home.howItWorks.step2.label")}
-                    </p>
-                  </div>
-
-                  <h3 className="text-xl font-heading text-dark-gray">
+                <div className="space-y-3 max-w-md mx-auto mb-6">
+                  <p className="text-sm font-body-bold text-primary-orange mb-1">
+                    {t("home.howItWorks.step2.label")}
+                  </p>
+                  <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
                     {t("home.howItWorks.step2.title")}
                   </h3>
-                  <p className="font-body text-medium-gray leading-relaxed">
+                  <p className="font-body text-medium-gray leading-relaxed text-base lg:text-lg">
                     {t("home.howItWorks.step2.description")}
                   </p>
                 </div>
 
-                {/* Connecting line to next step */}
-                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-soft-peach to-soft-blue opacity-30"></div>
-              </motion.div>
-
-              {/* Step 3 */}
-              <motion.div
-                className="text-center relative"
-                variants={{
-                  hidden: { opacity: 0, y: 40 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.2, ease: easeOwlet },
-                  },
-                }}
-              >
-                {/* Step Image */}
-                <div className="mb-4">
+                {/* Step Image - Large */}
+                <div>
                   <motion.div
-                    className="w-64 md:w-56 h-64 md:h-56 mx-auto p-3 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
-                    style={{ backgroundColor: "#F3EEE8" }}
+                    className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden transition-transform duration-300"
                     whileHover={{
                       scale: 1.02,
-                      y: -2,
-                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
                       transition: {
                         type: "spring",
                         stiffness: 200,
@@ -1130,43 +1007,76 @@ export default function Home() {
                     }}
                   >
                     <Image
-                      src="/print-book.jpeg"
-                      alt="Print Book"
-                      width={224}
-                      height={224}
-                      className="w-full h-full object-contain"
+                      src="/book-example-pencil.jpeg"
+                      alt="Transform Images"
+                      width={500}
+                      height={500}
+                      className="w-full h-full object-cover"
                       loading="lazy"
                     />
                   </motion.div>
                 </div>
+              </motion.div>
 
+              {/* Step 1 */}
+              <motion.div
+                className="flex-1 text-center order-1 lg:order-none lg:-ml-8"
+                variants={{
+                  hidden: { opacity: 0, y: 40 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.2, ease: easeOwlet, delay: 0 },
+                  },
+                }}
+              >
                 {/* Step Number */}
-                <div className="relative inline-block mb-4">
+                <div className="relative inline-block mb-6">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-                    style={{ backgroundColor: "#FFD8D0" }}
+                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
+                    style={{ backgroundColor: "#FFFFFF" }}
                   >
-                    <span className="text-dark-gray font-heading text-base font-bold">
-                      3
+                    <span className="text-dark-gray font-heading text-2xl font-bold">
+                      1
                     </span>
                   </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-4 mt-3 max-w-sm mx-auto">
-                  {/* Step Text */}
-                  <div className="mb-1">
-                    <p className="text-primary-orange text-sm font-body-bold">
-                      {t("home.howItWorks.step3.label")}
-                    </p>
-                  </div>
-
-                  <h3 className="text-xl font-heading text-dark-gray">
-                    {t("home.howItWorks.step3.title")}
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed">
-                    {t("home.howItWorks.step3.description")}
+                <div className="space-y-3 max-w-md mx-auto mb-6">
+                  <p className="text-sm font-body-bold text-primary-orange mb-1">
+                    {t("home.howItWorks.step1.label")}
                   </p>
+                  <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
+                    {t("home.howItWorks.step1.title")}
+                  </h3>
+                  <p className="font-body text-medium-gray leading-relaxed text-base lg:text-lg">
+                    {t("home.howItWorks.step1.description")}
+                  </p>
+                </div>
+
+                {/* Step Image - Large */}
+                <div>
+                  <motion.div
+                    className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden transition-transform duration-300"
+                    whileHover={{
+                      scale: 1.02,
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20,
+                      },
+                    }}
+                  >
+                    <Image
+                      src="/upload-images.png"
+                      alt="Upload Images"
+                      width={500}
+                      height={500}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </motion.div>
                 </div>
               </motion.div>
             </motion.div>
