@@ -9,7 +9,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { CartDrawer } from "@/components/cart-drawer";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { TopBanner } from "@/components/top-banner";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
@@ -76,12 +75,11 @@ export function Header() {
 
   return (
     <>
-      <TopBanner />
       <motion.header
         className="fixed left-0 right-0 z-50 transition-[top] duration-300 ease-in-out"
         style={{ 
           backgroundColor: "#F9F7EE",
-          top: "var(--banner-height, 40px)",
+          top: 0,
           marginTop: 0
         }}
         initial={prefersReducedMotion ? false : { y: -100 }}
