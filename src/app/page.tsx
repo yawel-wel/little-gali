@@ -442,6 +442,7 @@ export default function Home() {
 
     let currentSlide = 0;
     let touchStartX = 0;
+    let touchStartY = 0;
     let touchEndX = 0;
     let isDragging = false;
 
@@ -493,26 +494,38 @@ export default function Home() {
         // Touch/swipe handlers for mobile
         const touchStartHandler = (e: TouchEvent) => {
           touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
           touchEndX = touchStartX;
-          isDragging = true;
+          isDragging = false; // Don't start dragging immediately
           container.style.transition = "none";
         };
 
         const touchMoveHandler = (e: TouchEvent) => {
-          if (!isDragging) return;
-
           touchEndX = e.touches[0].clientX;
-          const diff = touchStartX - touchEndX;
+          const touchEndY = e.touches[0].clientY;
+          const diffX = touchStartX - touchEndX;
+          const diffY = touchStartY - touchEndY;
 
-          // Only prevent default if swiping horizontally
-          if (Math.abs(diff) > 10) {
+          // Only start dragging if horizontal movement is clearly greater than vertical
+          // This allows vertical scrolling to work normally
+          if (!isDragging) {
+            if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+              isDragging = true;
+            } else {
+              // User is scrolling vertically, don't interfere
+              return;
+            }
+          }
+
+          // Only prevent default if we're clearly swiping horizontally
+          if (Math.abs(diffX) > Math.abs(diffY)) {
             e.preventDefault();
           }
 
           // Calculate current position
           const currentTranslate = currentSlide === 0 ? 0 : 60;
           const newTranslate =
-            currentTranslate + (diff / container.offsetWidth) * 100;
+            currentTranslate + (diffX / container.offsetWidth) * 100;
 
           // Constrain movement
           const minTranslate = 0;
