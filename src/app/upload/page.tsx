@@ -109,9 +109,7 @@ function SortableImageItem({
         transformOrigin: isDesktop ? origin : undefined,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
         cursor: isDragging ? "grabbing" : "grab",
-        // Use manipulation to allow scrolling but prevent double-tap zoom
-        // During active drag, use none to prevent scroll interference
-        touchAction: isDragging ? "none" : "manipulation",
+        touchAction: "none", // Prevent default touch behaviors on mobile
         WebkitTouchCallout: "none", // Prevent iOS callout menu
         WebkitUserSelect: "none", // Prevent text selection
         userSelect: "none",
