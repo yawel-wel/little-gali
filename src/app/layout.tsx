@@ -64,7 +64,6 @@ export default function RootLayout({
     <html
       lang="he"
       dir="rtl"
-      className="overflow-x-hidden"
       suppressHydrationWarning
     >
       <head>
@@ -105,7 +104,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${heebo.variable} ${assistant.variable} antialiased overflow-x-hidden`}
+        className={`${heebo.variable} ${assistant.variable} antialiased`}
         suppressHydrationWarning
       >
         <MuiThemeProvider>
