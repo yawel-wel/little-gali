@@ -944,7 +944,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-8 lg:mb-16">
               <Title
                 highlightText={t("home.howItWorks.titleHighlight")}
                 size="lg"
@@ -984,17 +984,17 @@ export default function Home() {
                 {/* Step Number */}
                 <div className="relative inline-block mb-6">
                   <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
+                    className="w-10 h-10 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
                     style={{ backgroundColor: "#FFFFFF" }}
                   >
-                    <span className="text-dark-gray font-heading text-2xl font-bold">
+                    <span className="text-dark-gray font-heading text-lg lg:text-2xl font-bold">
                       2
                     </span>
                   </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-3 max-w-md mx-auto mb-6">
+                <div className="space-y-3 max-w-xs mx-auto mb-6">
                   <p className="text-sm font-body-bold text-primary-orange mb-1">
                     {t("home.howItWorks.step2.label")}
                   </p>
@@ -1044,19 +1044,19 @@ export default function Home() {
                 }}
               >
                 {/* Step Number */}
-                <div className="relative inline-block mb-6">
+                <div className="relative inline-block mb-6 lg:mb-6 -mt-6 lg:mt-0">
                   <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
+                    className="w-10 h-10 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
                     style={{ backgroundColor: "#FFFFFF" }}
                   >
-                    <span className="text-dark-gray font-heading text-2xl font-bold">
+                    <span className="text-dark-gray font-heading text-lg lg:text-2xl font-bold">
                       1
                     </span>
                   </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="space-y-3 max-w-md mx-auto mb-6">
+                <div className="space-y-3 max-w-xs mx-auto mb-6">
                   <p className="text-sm font-body-bold text-primary-orange mb-1">
                     {t("home.howItWorks.step1.label")}
                   </p>

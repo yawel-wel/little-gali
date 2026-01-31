@@ -17,13 +17,13 @@ const mockTestimonials: Testimonial[] = [
   {
     id: 1,
     rating: 5,
-    text: "המתנה הכי יפה שקיבלת ללידה🥹 מומלץ בחום! שירות מושלם והתוצר מדהים‎",
+    text: "המתנה הכי יפה שקיבלת ללידה 🥹 מומלץ בחום! שירות מושלם והתוצר מדהים‎",
     name: "Ella Abramovitch",
   },
   {
     id: 2,
     rating: 5,
-    text: "ספרון אישי, ייחודי ופשוט הכי מושלם שאפשר לבקש!התינוק שלנו פשוט התאהב בספרון ולא מפסיק להוריד את העיניים ממנו!! כיף גדול!התמונות הצבעוניות והשחור לבן יצאו נהדרות ❤️ממליץ כמתנה לכל הורה חדש!",
+    text: "ספרון אישי, ייחודי ופשוט הכי מושלם שאפשר לבקש! התינוק שלנו פשוט התאהב בספרון ולא מפסיק להוריד את העיניים ממנו!! כיף גדול! התמונות הצבעוניות והשחור לבן יצאו נהדרות ❤️ ממליץ כמתנה לכל הורה חדש!",
     name: "Pavel Krigman",
   },
   {
@@ -41,7 +41,7 @@ const mockTestimonials: Testimonial[] = [
   {
     id: 5,
     rating: 5,
-    text: "הספרון ממש מקורי ומקסים!יכול לשמש בכל מיני סיטואציות, והרבה יותר מענין ומסקרן את הקטנים מאשר הספרון הקלאסי.אהבנו מאוד מאוד ❤️‎",
+    text: "הספרון ממש מקורי ומקסים!יכול לשמש בכל מיני סיטואציות, והרבה יותר מענין ומסקרן את הקטנים מאשר הספרון הקלאסי. אהבנו מאוד מאוד ❤️ ‎",
     name: "Maya Zohar",
   },
   {
@@ -89,7 +89,7 @@ const mockTestimonials: Testimonial[] = [
   {
     id: 13,
     rating: 5,
-    text: "ספרון אישי ומקסים!! הבת שלי בת החצי שנה נהנית להסתכל על התמונות של הסבים והסבתות שלה😍",
+    text: "ספרון אישי ומקסים!! הבת שלי בת החצי שנה נהנית להסתכל על התמונות של הסבים והסבתות שלה 😍",
     name: "Moran Langsam",
   },
   {
@@ -205,6 +205,7 @@ export function TestimonialsSection() {
     return name.charAt(0).toUpperCase();
   };
 
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
       <svg
@@ -239,7 +240,7 @@ export function TestimonialsSection() {
 
   return (
     <motion.section
-      className="relative py-16 lg:py-24 bg-white"
+      className="relative pt-16 lg:pt-24 pb-0 lg:pb-4 bg-white h-[520px] lg:h-[570px]"
       initial={
         prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
       }
@@ -308,7 +309,7 @@ export function TestimonialsSection() {
           </div>
 
           {/* Single Large Testimonial Card */}
-          <div className="relative">
+          <div className="relative h-[280px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -316,28 +317,28 @@ export function TestimonialsSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.4, ease: easeOwlet }}
-                className="relative"
+                className="relative h-full"
               >
                 {/* Speech Bubble Card */}
                 <div
-                  className="bg-white rounded-2xl p-8 shadow-lg relative"
+                  className="bg-white rounded-2xl p-8 shadow-lg relative h-full flex flex-col"
                   style={{
                     clipPath:
                       "polygon(0% 0%, 100% 0%, 100% calc(100% - 20px), calc(50% + 40px) calc(100% - 20px), 50% 100%, calc(50% - 40px) calc(100% - 20px), 0% calc(100% - 20px))",
                   }}
                 >
                   {/* Stars */}
-                  <div className="flex gap-1 justify-center mb-3">
+                  <div className="flex gap-1 justify-center mb-3 flex-shrink-0">
                     {renderStars(mockTestimonials[currentIndex].rating)}
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-base lg:text-lg font-body text-dark-gray leading-relaxed text-center mb-6">
+                  <p className="text-base lg:text-lg font-body text-dark-gray leading-relaxed text-center mb-6 overflow-y-auto max-h-[180px]" dir={locale === "he" ? "rtl" : "ltr"}>
                     {mockTestimonials[currentIndex].text}
                   </p>
 
                   {/* Author Name */}
-                  <div className="text-sm font-body text-gray-500 text-center" dir="ltr">
+                  <div className="text-sm font-body text-gray-500 text-center flex-shrink-0" dir="ltr">
                     -{mockTestimonials[currentIndex].name}
                   </div>
                 </div>
@@ -413,29 +414,29 @@ export function TestimonialsSection() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -100 }}
                 transition={{ duration: 0.3, ease: easeOwlet }}
-                className="px-4"
+                className="px-4 h-[300px]"
               >
 
                 {/* Speech Bubble Card */}
                 <div
-                  className="bg-white rounded-2xl p-6 shadow-lg relative"
+                  className="bg-white rounded-2xl p-6 shadow-lg relative h-full flex flex-col"
                   style={{
                     clipPath:
                       "polygon(0% 0%, 100% 0%, 100% calc(100% - 20px), calc(50% + 40px) calc(100% - 20px), 50% 100%, calc(50% - 40px) calc(100% - 20px), 0% calc(100% - 20px))",
                   }}
                 >
                   {/* Stars */}
-                  <div className="flex gap-1 justify-center mb-2">
+                  <div className="flex gap-1 justify-center mb-3 flex-shrink-0">
                     {renderStars(mockTestimonials[currentIndex].rating)}
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-base font-body text-dark-gray leading-relaxed mb-4 text-center">
+                  <p className="text-base font-body text-dark-gray leading-relaxed mb-6 text-center overflow-y-auto max-h-[200px]" dir={locale === "he" ? "rtl" : "ltr"}>
                     {mockTestimonials[currentIndex].text}
                   </p>
 
                   {/* Author Name */}
-                  <div className="text-sm font-body text-gray-500 text-center" dir="ltr">
+                  <div className="text-sm font-body text-gray-500 text-center flex-shrink-0" dir="ltr">
                     -{mockTestimonials[currentIndex].name}
                   </div>
                 </div>
