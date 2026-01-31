@@ -6,8 +6,6 @@ import {
   motion,
   AnimatePresence,
   useReducedMotion,
-  useScroll,
-  useTransform,
 } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -23,6 +21,8 @@ import {
 import { BOOK_PRICE } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import MobileStepper from "@mui/material/MobileStepper";
 
 function ComingSoonSection({
   prefersReducedMotion,
@@ -382,235 +382,124 @@ function ComingSoonSection({
   );
 }
 
+// Simple carousel component for dual design section
+function DualDesignCarousel() {
+  const { t, locale } = useLanguage();
+  const [activeStep, setActiveStep] = useState(0);
+  const maxSteps = 2;
+
+  const designs = [
+    {
+      title: t("home.dualDesign.bw.title"),
+      description: t("home.dualDesign.bw.description"),
+      image: "/black-and-white-example.png",
+      bgColor: "#F7F8FA",
+    },
+    {
+      title: t("home.dualDesign.color.title"),
+      description: t("home.dualDesign.color.description"),
+      image: "/colorful-example.png",
+      bgColor: "#FFF7F2",
+    },
+  ];
+
+  return (
+    <Box sx={{ width: "100%", flexGrow: 1 }}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeStep}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+          className="w-4/5 mx-auto"
+        >
+          <div
+            className="rounded-2xl p-6 text-center"
+            style={{ backgroundColor: designs[activeStep].bgColor }}
+          >
+            <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9">
+              {designs[activeStep].title}
+            </h3>
+            <p className="text-xs font-body text-medium-gray mb-4">
+              {designs[activeStep].description}
+            </p>
+            <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
+              <Image
+                src={designs[activeStep].image}
+                alt={designs[activeStep].title}
+                width={160}
+                height={160}
+                className="object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+      <MobileStepper
+        variant="dots"
+        steps={maxSteps}
+        position="static"
+        activeStep={activeStep}
+        sx={{
+          background: "transparent",
+          justifyContent: "center",
+          mt: 2,
+          "& .MuiMobileStepper-dot": {
+            backgroundColor: "#d1d5db",
+          },
+          "& .MuiMobileStepper-dotActive": {
+            backgroundColor: "#F4A261",
+          },
+        }}
+        nextButton={
+          <div
+            onClick={() => setActiveStep((prev) => (prev + 1) % maxSteps)}
+            style={{ cursor: "pointer", width: 0, height: 0, opacity: 0 }}
+          />
+        }
+        backButton={
+          <div
+            onClick={() =>
+              setActiveStep((prev) => (prev - 1 + maxSteps) % maxSteps)
+            }
+            style={{ cursor: "pointer", width: 0, height: 0, opacity: 0 }}
+          />
+        }
+      />
+      <div className="flex justify-center gap-4 mt-4">
+        {[0, 1].map((step) => (
+          <button
+            key={step}
+            onClick={() => setActiveStep(step)}
+            className={`w-3 h-3 rounded-full transition-all duration-200 ${
+              activeStep === step ? "bg-[#F4A261]" : "bg-gray-300"
+            }`}
+            aria-label={`Go to slide ${step + 1}`}
+          />
+        ))}
+      </div>
+    </Box>
+  );
+}
+
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 300], [0, -8]);
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640); // sm breakpoint
-    };
-    checkMobile();
-    // Debounce resize listener for better performance
-    let timeoutId: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(checkMobile, 150);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(timeoutId);
-    };
-  }, []);
 
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
-      // Use requestAnimationFrame for better performance
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const element = document.querySelector(hash);
-          if (element) {
-            const yOffset = -80; // Offset for header
-            const y =
-              element.getBoundingClientRect().top +
-              window.pageYOffset +
-              yOffset;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 100);
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
-    const clickHandlers: Array<{
-      element: Element;
-      handler: (e: Event) => void;
-    }> = [];
-    const touchHandlers: Array<{
-      element: Element;
-      handlers: { event: string; handler: (e: Event) => void }[];
-    }> = [];
-
-    let currentSlide = 0;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let isDragging = false;
-
-    function goToSlide(
-      index: number,
-      container: HTMLElement,
-      dots: NodeListOf<Element>
-    ) {
-      currentSlide = index;
-
-      // Update active dot
-      dots.forEach((d, i) => {
-        if (i === index) {
-          d.className =
-            "w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200 cursor-pointer";
-        } else {
-          d.className =
-            "w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200 cursor-pointer";
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-      });
-
-      // Move carousel
-      if (index === 0) {
-        container.style.transform = "translateX(0%)";
-      } else if (index === 1) {
-        container.style.transform = "translateX(60%)";
-      }
+      }, 100);
     }
-
-    function initCarousel() {
-      const container = document.getElementById("carousel-container");
-      const dots = document.querySelectorAll("[data-slide]");
-
-      if (container && dots.length > 0) {
-        // Set initial position to show first slide
-        goToSlide(0, container, dots);
-
-        // Dot click handlers
-        dots.forEach((dot, index) => {
-          const handler = (e: Event) => {
-            e.preventDefault();
-            goToSlide(index, container, dots);
-          };
-
-          dot.addEventListener("click", handler);
-          clickHandlers.push({ element: dot, handler });
-        });
-
-        // Touch/swipe handlers for mobile
-        const touchStartHandler = (e: TouchEvent) => {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-          touchEndX = touchStartX;
-          isDragging = false; // Don't start dragging immediately
-          container.style.transition = "none";
-        };
-
-        const touchMoveHandler = (e: TouchEvent) => {
-          touchEndX = e.touches[0].clientX;
-          const touchEndY = e.touches[0].clientY;
-          const diffX = touchStartX - touchEndX;
-          const diffY = touchStartY - touchEndY;
-
-          // Only start dragging if horizontal movement is clearly greater than vertical
-          // This allows vertical scrolling to work normally
-          if (!isDragging) {
-            if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
-              isDragging = true;
-            } else {
-              // User is scrolling vertically, don't interfere
-              return;
-            }
-          }
-
-          // Only prevent default if we're clearly swiping horizontally
-          if (Math.abs(diffX) > Math.abs(diffY)) {
-            e.preventDefault();
-          }
-
-          // Calculate current position
-          const currentTranslate = currentSlide === 0 ? 0 : 60;
-          const newTranslate =
-            currentTranslate + (diffX / container.offsetWidth) * 100;
-
-          // Constrain movement
-          const minTranslate = 0;
-          const maxTranslate = 60;
-          const constrainedTranslate = Math.max(
-            minTranslate,
-            Math.min(maxTranslate, newTranslate)
-          );
-
-          container.style.transform = `translateX(${constrainedTranslate}%)`;
-        };
-
-        const touchEndHandler = () => {
-          if (!isDragging) return;
-          isDragging = false;
-          container.style.transition = "transform 0.3s ease-in-out";
-
-          const swipeDistance = touchStartX - touchEndX;
-          const swipeThreshold = 50; // Minimum distance for swipe
-
-          if (Math.abs(swipeDistance) > swipeThreshold) {
-            if (swipeDistance > 0 && currentSlide > 0) {
-              // Swipe left - go to previous slide
-              goToSlide(currentSlide - 1, container, dots);
-            } else if (swipeDistance < 0 && currentSlide < 1) {
-              // Swipe right - go to next slide
-              goToSlide(currentSlide + 1, container, dots);
-            } else {
-              // Return to current slide
-              goToSlide(currentSlide, container, dots);
-            }
-          } else {
-            // Return to current slide if swipe wasn't significant
-            goToSlide(currentSlide, container, dots);
-          }
-        };
-
-        container.addEventListener(
-          "touchstart",
-          touchStartHandler as EventListener
-        );
-        container.addEventListener(
-          "touchmove",
-          touchMoveHandler as EventListener
-        );
-        container.addEventListener(
-          "touchend",
-          touchEndHandler as EventListener
-        );
-
-        touchHandlers.push({
-          element: container,
-          handlers: [
-            {
-              event: "touchstart",
-              handler: touchStartHandler as EventListener,
-            },
-            { event: "touchmove", handler: touchMoveHandler as EventListener },
-            { event: "touchend", handler: touchEndHandler as EventListener },
-          ],
-        });
-      } else {
-        timeoutId = setTimeout(initCarousel, 100);
-      }
-    }
-
-    // Initialize carousel after component mounts with requestAnimationFrame
-    requestAnimationFrame(() => {
-      initCarousel();
-    });
-
-    // Cleanup function
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      clickHandlers.forEach(({ element, handler }) => {
-        element.removeEventListener("click", handler);
-      });
-      touchHandlers.forEach(({ element, handlers }) => {
-        handlers.forEach(({ event, handler }) => {
-          element.removeEventListener(event, handler);
-        });
-      });
-    };
   }, []);
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F7F5F2" }}>
@@ -621,17 +510,7 @@ export default function Home() {
         <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[120px]">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
-            <motion.div
-              style={{ y: prefersReducedMotion ? 0 : heroY }}
-              initial={prefersReducedMotion ? false : { scale: 1.2 }}
-              animate={
-                prefersReducedMotion
-                  ? undefined
-                  : { scale: isMobile ? 1.5 : 1.0 }
-              }
-              transition={{ duration: 5, ease: easeOwlet }}
-              className="w-full h-full relative"
-            >
+            <div className="w-full h-full relative">
               <Image
                 src="/hero-image.jpeg"
                 alt="Baby book example"
@@ -642,7 +521,7 @@ export default function Home() {
               />
               {/* Lighter gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
-            </motion.div>
+            </div>
           </div>
           {/* Content Overlay - center-aligned */}
           <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -740,9 +619,7 @@ export default function Home() {
                 </div>
                 {/* CTA Button */}
                 <div className="pt-6">
-                  <motion.div
-                    className="relative w-auto"
-                  >
+                  <div className="relative w-auto">
                     <a href="/upload">
                       <MuiButton
                         variant="contained"
@@ -762,7 +639,7 @@ export default function Home() {
                         {t("home.hero.cta")}
                       </MuiButton>
                     </a>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -772,13 +649,10 @@ export default function Home() {
         <motion.section
           className="relative -mt-0 py-12 lg:py-16"
           style={{ backgroundColor: "#F7F5F2" }}
-          initial={
-            prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
-          }
-          animate={
-            prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
-          }
-          transition={{ duration: 0.9, ease: easeOwlet }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
@@ -867,7 +741,7 @@ export default function Home() {
 
                   {/* CTA Button */}
                   <div className="flex justify-center lg:justify-start pt-2">
-                    <motion.div>
+                    <div>
                       <a href="/upload">
                         <MuiButton
                           variant="contained"
@@ -884,7 +758,7 @@ export default function Home() {
                           {t("home.book.cta")}
                         </MuiButton>
                       </a>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
 
@@ -892,17 +766,12 @@ export default function Home() {
                 <div className="order-2 lg:order-2">
                   <div className="w-full">
                     <div className="aspect-square rounded-lg overflow-hidden">
-                      <motion.div
-                        initial={prefersReducedMotion ? false : { scale: 1.12 }}
-                        animate={
-                          prefersReducedMotion ? undefined : { scale: 1 }
-                        }
-                        transition={{ duration: 2.2, ease: easeOwlet }}
-                        whileHover={{
-                          scale: 1.04,
-                          transition: { duration: 0.5, ease: easeOwlet },
-                        }}
+                      <motion.div 
                         className="w-full h-full relative"
+                        initial={prefersReducedMotion ? undefined : { scale: 1.08, opacity: 0 }}
+                        whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.8, ease: easeOwlet }}
+                        viewport={{ once: true, amount: 0.3 }}
                       >
                         <Image
                           src="/our-book.jpg"
@@ -929,13 +798,9 @@ export default function Home() {
           id="how-it-works"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
-          initial={
-            prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
-          }
-          whileInView={
-            prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
-          }
-          transition={{ duration: 0.9, ease: easeOwlet }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: easeOwlet }}
           viewport={{ once: true, amount: 0.1 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -955,26 +820,22 @@ export default function Home() {
               className={`flex flex-col lg:flex-row gap-8 lg:gap-0 max-w-6xl mx-auto relative items-start ${
                 locale === "he" ? "lg:flex-row-reverse" : ""
               }`}
-              initial={prefersReducedMotion ? false : "hidden"}
+              initial={prefersReducedMotion ? undefined : "hidden"}
               whileInView={prefersReducedMotion ? undefined : "show"}
               viewport={{ once: true, amount: 0.15 }}
               variants={{
                 hidden: {},
                 show: {
-                  transition: { staggerChildren: 0.2 },
+                  transition: { staggerChildren: 0.15 },
                 },
               }}
             >
               {/* Step 2 */}
-              <motion.div
+              <motion.div 
                 className="flex-1 text-center order-2 lg:order-none lg:-mr-8"
                 variants={{
-                  hidden: { opacity: 0, y: 40 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.2, ease: easeOwlet, delay: 0.2 },
-                  },
+                  hidden: { opacity: 0, y: 30 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeOwlet } },
                 }}
               >
                 {/* Step Number */}
@@ -1003,18 +864,13 @@ export default function Home() {
                 </div>
 
                 {/* Step Image - Large */}
-                <div>
-                  <motion.div
-                    className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden transition-transform duration-300"
-                    whileHover={{
-                      scale: 1.02,
-                      transition: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      },
-                    }}
-                  >
+                <motion.div
+                  initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
+                  whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, ease: easeOwlet, delay: 0.2 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
                     <Image
                       src="/book-example-pencil.jpeg"
                       alt="Transform Images"
@@ -1023,20 +879,16 @@ export default function Home() {
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
-                  </motion.div>
-                </div>
+                  </div>
+                </motion.div>
               </motion.div>
 
               {/* Step 1 */}
-              <motion.div
+              <motion.div 
                 className="flex-1 text-center order-1 lg:order-none lg:-ml-8"
                 variants={{
-                  hidden: { opacity: 0, y: 40 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.2, ease: easeOwlet, delay: 0 },
-                  },
+                  hidden: { opacity: 0, y: 30 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeOwlet } },
                 }}
               >
                 {/* Step Number */}
@@ -1065,18 +917,13 @@ export default function Home() {
                 </div>
 
                 {/* Step Image - Large */}
-                <div>
-                  <motion.div
-                    className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden transition-transform duration-300"
-                    whileHover={{
-                      scale: 1.02,
-                      transition: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      },
-                    }}
-                  >
+                <motion.div
+                  initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
+                  whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, ease: easeOwlet, delay: 0.2 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
                     <Image
                       src="/upload-images.png"
                       alt="Upload Images"
@@ -1085,42 +932,46 @@ export default function Home() {
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
-                  </motion.div>
-                </div>
+                  </div>
+                </motion.div>
               </motion.div>
             </motion.div>
 
             {/* Bottom CTA */}
-            <div className="text-center mt-16">
-              <motion.div>
-                <a href="/upload">
-                  <MuiButton
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      px: 4,
-                      py: 1.5,
-                      fontFamily: "var(--font-assistant)",
-                      fontWeight: 700,
-                      fontSize: "1rem",
-                      textTransform: "none",
-                    }}
-                  >
-                    {t("home.howItWorks.cta")}
-                  </MuiButton>
-                </a>
-              </motion.div>
-            </div>
+            <motion.div 
+              className="text-center mt-16"
+              initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: easeOwlet, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <a href="/upload">
+                <MuiButton
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    fontFamily: "var(--font-assistant)",
+                    fontWeight: 700,
+                    fontSize: "1rem",
+                    textTransform: "none",
+                  }}
+                >
+                  {t("home.howItWorks.cta")}
+                </MuiButton>
+              </a>
+            </motion.div>
           </div>
         </motion.section>
 
         {/* Dual Design Section */}
         <motion.section
           className="relative bg-white py-8 lg:py-12"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.6, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1145,11 +996,7 @@ export default function Home() {
                 style={{ top: "38px" }}
               >
                 <div className="w-26 h-26 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                  <motion.div
-                    whileHover={{ scale: 1.06 }}
-                    transition={{ duration: 3.5, ease: easeOwlet }}
-                    className="w-full h-full relative"
-                  >
+                  <div className="w-full h-full relative">
                     <Image
                       src="/original-example.jpeg"
                       alt="Original Example"
@@ -1158,127 +1005,21 @@ export default function Home() {
                       loading="lazy"
                       sizes="128px"
                     />
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 
               {/* Mobile Carousel */}
-              <div className="md:hidden">
-                <div className="relative overflow-hidden">
-                  <div
-                    className="flex transition-transform duration-300 ease-in-out pt-12 cursor-grab active:cursor-grabbing"
-                    id="carousel-container"
-                    style={{ touchAction: "pan-x pan-y" }}
-                  >
-                    {/* Slide 1 - Black and White (Left) */}
-                    <div className="w-4/5 flex-shrink-0 pr-4">
-                      <motion.div
-                        className="rounded-2xl p-6 text-center"
-                        style={{ backgroundColor: "#F7F8FA" }}
-                        whileHover={{
-                          scale: 1.02,
-                          y: -2,
-                          boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                          transition: {
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 20,
-                          },
-                        }}
-                      >
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          {t("home.dualDesign.bw.title")}
-                        </h3>
-                        <p className="text-xs font-body text-medium-gray mb-4">
-                          {t("home.dualDesign.bw.description")}
-                        </p>
-                        <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
-                          <motion.div
-                            whileHover={{ scale: 1.06 }}
-                            transition={{ duration: 3.5, ease: easeOwlet }}
-                            className="w-full h-full relative"
-                          >
-                            <Image
-                              src="/black-and-white-example.png"
-                              alt="Black and White Example"
-                              fill
-                              className="object-cover"
-                              loading="lazy"
-                              sizes="160px"
-                            />
-                          </motion.div>
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Slide 2 - Colorful (Right) */}
-                    <div className="w-4/5 flex-shrink-0 pr-4">
-                      <motion.div
-                        className="rounded-2xl p-6 text-center"
-                        style={{ backgroundColor: "#FFF7F2" }}
-                        whileHover={{
-                          scale: 1.02,
-                          y: -2,
-                          boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                          transition: {
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 20,
-                          },
-                        }}
-                      >
-                        <h3 className="text-lg font-heading text-dark-gray mb-2 mt-9 md:mt-0">
-                          {t("home.dualDesign.color.title")}
-                        </h3>
-                        <p className="text-xs font-body text-medium-gray mb-4">
-                          {t("home.dualDesign.color.description")}
-                        </p>
-                        <div className="w-40 h-40 mx-auto overflow-hidden rounded-lg">
-                          <motion.div
-                            whileHover={{ scale: 1.06 }}
-                            transition={{ duration: 3.5, ease: easeOwlet }}
-                            className="w-full h-full relative"
-                          >
-                            <Image
-                              src="/colorful-example.png"
-                              alt="Colorful Example"
-                              fill
-                              className="object-cover"
-                              loading="lazy"
-                              sizes="160px"
-                            />
-                          </motion.div>
-                        </div>
-                      </motion.div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pagination Dots */}
-                <div className="flex justify-center mt-6 space-x-2">
-                  <button
-                    className="cursor-pointer w-3 h-3 rounded-full bg-[#F4A261] transition-all duration-200"
-                    data-slide="0"
-                  ></button>
-                  <button
-                    className="cursor-pointer w-3 h-3 rounded-full bg-gray-300 hover:bg-[#F4A261] transition-all duration-200"
-                    data-slide="1"
-                  ></button>
-                </div>
+              <div className="md:hidden pt-12">
+                <DualDesignCarousel />
               </div>
 
               {/* Desktop Grid */}
               <div className="hidden md:grid md:grid-cols-2 gap-0 relative">
                 {/* Left Side - Black and White */}
-                <motion.div
+                <div
                   className="rounded-l-2xl p-8 text-center relative pt-16"
                   style={{ backgroundColor: "#F7F8FA" }}
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
-                  whileInView={
-                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
-                  }
-                  transition={{ duration: 0.7, ease: "easeOut" }}
-                  viewport={{ once: true, amount: 0.3 }}
                 >
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
                     {t("home.dualDesign.bw.title")}
@@ -1286,19 +1027,7 @@ export default function Home() {
                   <p className="text-sm font-body text-medium-gray mb-4">
                     {t("home.dualDesign.bw.description")}
                   </p>
-                  <motion.div
-                    className="w-56 h-56 mx-auto"
-                    whileHover={{
-                      scale: 1.02,
-                      y: -2,
-                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      },
-                    }}
-                  >
+                  <div className="w-56 h-56 mx-auto">
                     <Image
                       src="/black-and-white-example.png"
                       alt="Black and White Example"
@@ -1307,19 +1036,13 @@ export default function Home() {
                       className="w-full h-full object-cover rounded-lg"
                       loading="lazy"
                     />
-                  </motion.div>
-                </motion.div>
+                  </div>
+                </div>
 
                 {/* Right Side - Colorful */}
-                <motion.div
+                <div
                   className="rounded-r-2xl p-8 text-center relative pt-16"
                   style={{ backgroundColor: "#FFF7F2" }}
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 30 }}
-                  whileInView={
-                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
-                  }
-                  transition={{ duration: 0.7, ease: "easeOut" }}
-                  viewport={{ once: true, amount: 0.3 }}
                 >
                   <h3 className="text-xl font-heading text-dark-gray mb-2">
                     {t("home.dualDesign.color.title")}
@@ -1327,19 +1050,7 @@ export default function Home() {
                   <p className="text-sm font-body text-medium-gray mb-4">
                     {t("home.dualDesign.color.description")}
                   </p>
-                  <motion.div
-                    className="w-56 h-56 mx-auto"
-                    whileHover={{
-                      scale: 1.02,
-                      y: -2,
-                      boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      },
-                    }}
-                  >
+                  <div className="w-56 h-56 mx-auto">
                     <Image
                       src="/colorful-example.png"
                       alt="Colorful Example"
@@ -1348,8 +1059,8 @@ export default function Home() {
                       className="w-full h-full object-cover rounded-lg"
                       loading="lazy"
                     />
-                  </motion.div>
-                </motion.div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1371,10 +1082,10 @@ export default function Home() {
         {/* Choose Your Path Section */}
         <motion.section
           className="relative bg-[#F3EEE8] py-16 lg:py-24"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.6, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1388,28 +1099,24 @@ export default function Home() {
             </div>
 
             {/* 4 Column Grid */}
-            <motion.div
+            <motion.div 
               className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto"
-              initial={prefersReducedMotion ? false : "hidden"}
+              initial={prefersReducedMotion ? undefined : "hidden"}
               whileInView={prefersReducedMotion ? undefined : "show"}
-              viewport={{ once: true, amount: 0.25 }}
+              viewport={{ once: true, amount: 0.2 }}
               variants={{
                 hidden: {},
                 show: {
-                  transition: { staggerChildren: 0.15 },
+                  transition: { staggerChildren: 0.1 },
                 },
               }}
             >
               {/* Column 1 */}
-              <motion.div
+              <motion.div 
                 className="text-center"
                 variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.1, ease: easeOwlet },
-                  },
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
                 }}
               >
                 {/* Image */}
@@ -1436,15 +1143,11 @@ export default function Home() {
               </motion.div>
 
               {/* Column 2 */}
-              <motion.div
+              <motion.div 
                 className="text-center"
                 variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.1, ease: easeOwlet },
-                  },
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
                 }}
               >
                 {/* Image */}
@@ -1471,15 +1174,11 @@ export default function Home() {
               </motion.div>
 
               {/* Column 3 */}
-              <motion.div
+              <motion.div 
                 className="text-center"
                 variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.1, ease: easeOwlet },
-                  },
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
                 }}
               >
                 {/* Image */}
@@ -1506,15 +1205,11 @@ export default function Home() {
               </motion.div>
 
               {/* Column 4 */}
-              <motion.div
+              <motion.div 
                 className="text-center"
                 variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 1.1, ease: easeOwlet },
-                  },
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
                 }}
               >
                 {/* Image */}
@@ -1547,25 +1242,22 @@ export default function Home() {
         <motion.section
           id="about"
           className="relative bg-white pb-6"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
-              <div className="relative rounded-3xl overflow-hidden">
-                <motion.div
-                  initial={prefersReducedMotion ? false : { scale: 1 }}
-                  whileInView={
-                    prefersReducedMotion ? undefined : { scale: 1.06 }
-                  }
-                  whileHover={{ scale: 1.06 }}
-                  transition={{ duration: 2.5, ease: easeOwlet }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  className="w-full aspect-[4/3] relative"
-                >
+              <motion.div 
+                className="relative rounded-3xl overflow-hidden"
+                initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
+                whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                transition={{ duration: 0.7, ease: easeOwlet, delay: 0.1 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <div className="w-full aspect-[4/3] relative">
                   <Image
                     src="/about-us.jpg"
                     alt="About Us"
@@ -1574,8 +1266,8 @@ export default function Home() {
                     loading="lazy"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
-                </motion.div>
-              </div>
+                </div>
+              </motion.div>
 
               {/* Right Column - Text Content */}
               <div className="relative">
@@ -1623,10 +1315,10 @@ export default function Home() {
           id="qa"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: easeOwlet }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1730,7 +1422,7 @@ export default function Home() {
 
             {/* Button to navigate to Q&A page */}
             <div className="text-center mt-12">
-              <motion.div>
+              <div>
                 <a href="/qa">
                   <MuiButton
                     variant="contained"
@@ -1747,7 +1439,7 @@ export default function Home() {
                     {t("home.qa.cta")}
                   </MuiButton>
                 </a>
-              </motion.div>
+              </div>
             </div>
           </div>
         </motion.section>

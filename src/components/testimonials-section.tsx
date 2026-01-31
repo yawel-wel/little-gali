@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Title } from "./title";
+import IconButton from "@mui/material/IconButton";
 
 interface Testimonial {
   id: number;
@@ -106,19 +107,7 @@ export function TestimonialsSection() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Auto-rotate every 5 seconds
   useEffect(() => {
@@ -149,35 +138,6 @@ export function TestimonialsSection() {
         setCurrentIndex((prev) => (prev + 1) % mockTestimonials.length);
       }, 5000);
     }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) {
-      setTouchStart(0);
-      setTouchEnd(0);
-      return;
-    }
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) {
-      nextTestimonial();
-    }
-    if (isRightSwipe) {
-      prevTestimonial();
-    }
-
-    setTouchStart(0);
-    setTouchEnd(0);
   };
 
   const nextTestimonial = () => {
@@ -241,13 +201,9 @@ export function TestimonialsSection() {
   return (
     <motion.section
       className="relative pt-16 lg:pt-24 pb-0 lg:pb-4 bg-white h-[520px] lg:h-[570px]"
-      initial={
-        prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
-      }
-      whileInView={
-        prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
-      }
-      transition={{ duration: 0.9, ease: easeOwlet }}
+      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: easeOwlet }}
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -349,12 +305,7 @@ export function TestimonialsSection() {
 
         {/* Mobile Layout */}
         <div className="md:hidden w-full">
-          <div
-            className="relative overflow-hidden w-full"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
+          <div className="relative overflow-hidden w-full">
             {/* Profile Pictures Row - Mobile */}
             <div className="flex items-center justify-center gap-6 mb-4 relative px-4">
               {(() => {
