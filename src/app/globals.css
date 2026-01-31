@@ -122,12 +122,12 @@
     @apply bg-background text-foreground;
     overscroll-behavior-y: none;
     overflow-y: auto;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
   }
   html {
     overflow-x: hidden;
     overflow-y: auto;
-    overscroll-behavior-y: none;
+    /* overscroll-behavior-y: none; */
   }
 }
 
