@@ -741,26 +741,22 @@ export default function Home() {
                 {/* CTA Button */}
                 <div className="pt-6">
                   <motion.div
-                    className="fixed bottom-4 left-1/2 w-[calc(100%-32px)] max-w-md -translate-x-1/2 z-40 sm:relative sm:bottom-auto sm:left-auto sm:w-auto sm:max-w-none sm:translate-x-0"
+                    className="relative w-auto"
                   >
                     <a href="/upload">
                       <MuiButton
                         variant="contained"
                         color="primary"
                         sx={{
-                          width: { xs: "100%", sm: "auto" },
-                          px: { xs: 3, sm: 4 },
-                          py: { xs: 1.5, sm: 1.5 },
+                          px: 4,
+                          py: 1.5,
                           fontFamily: "var(--font-assistant)",
                           fontWeight: 700,
-                          fontSize: { xs: "0.95rem", sm: "1rem" },
+                          fontSize: "1rem",
                           textTransform: "none",
-                          bgcolor: { xs: "primary.main", md: "transparent" },
-                          border: {
-                            xs: "none",
-                            md: "1px solid rgba(255,255,255,0.9)",
-                          },
-                          backdropFilter: { md: "blur(12px)" },
+                          bgcolor: "transparent",
+                          border: "1px solid rgba(255,255,255,0.9)",
+                          backdropFilter: "blur(12px)",
                         }}
                       >
                         {t("home.hero.cta")}
