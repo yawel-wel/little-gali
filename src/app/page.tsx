@@ -409,13 +409,20 @@ export default function Home() {
       }, 100);
     }
   }, []);
+
+  // Explicitly reset scroll after mount
+  useEffect(() => {
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
+  }, []);
+
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F7F5F2" }}>
+    <div className="overflow-x-hidden" style={{ backgroundColor: "#F7F5F2" }}>
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-[72px]">
         {/* Hero Section */}
-        <section className="relative w-full h-[500px] md:h-[600px] lg:h-[650px] overflow-hidden pt-[120px]">
+        <section className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
             <div className="w-full h-full relative">
@@ -432,7 +439,7 @@ export default function Home() {
             </div>
           </div>
           {/* Content Overlay - center-aligned */}
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div className="absolute inset-0 z-10 flex items-start md:items-center justify-center pt-16 md:pt-0">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center space-y-5 md:space-y-6 max-w-2xl mx-auto">
                 {/* Title - centered with better contrast */}
@@ -525,8 +532,8 @@ export default function Home() {
                     }
                   })()}
                 </div>
-                {/* CTA Button */}
-                <div className="pt-6">
+                {/* CTA Button - Desktop Only */}
+                <div className="pt-6 hidden md:block">
                   <div className="relative w-auto">
                     <a href="/upload">
                       <MuiButton
@@ -1249,6 +1256,30 @@ export default function Home() {
       </main>
 
       <Footer />
+
+      {/* Fixed Bottom CTA Button - Mobile Only */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white to-transparent pointer-events-none">
+        <div className="pointer-events-auto">
+          <a href="/upload" className="block">
+            <MuiButton
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontFamily: "var(--font-assistant)",
+                fontWeight: 700,
+                fontSize: "1rem",
+                textTransform: "none",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              }}
+            >
+              {t("home.hero.cta")}
+            </MuiButton>
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
