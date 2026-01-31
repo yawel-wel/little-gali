@@ -488,6 +488,18 @@ export default function Home() {
   const prefersReducedMotion = useReducedMotion();
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  // Check if mobile - starts as null to avoid hydration mismatch
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    const handleResize = () => checkMobile();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Handle hash scrolling on page load
   useEffect(() => {
@@ -649,10 +661,11 @@ export default function Home() {
         <motion.section
           className="relative -mt-0 py-12 lg:py-16"
           style={{ backgroundColor: "#F7F5F2" }}
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.05 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
@@ -768,8 +781,9 @@ export default function Home() {
                     <div className="aspect-square rounded-lg overflow-hidden">
                       <motion.div 
                         className="w-full h-full relative"
-                        initial={prefersReducedMotion ? undefined : { scale: 1.08, opacity: 0 }}
-                        whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                        initial={prefersReducedMotion || isMobile === true ? undefined : { scale: 1.08, opacity: 0 }}
+                        animate={isMobile === false && !prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                        whileInView={isMobile === false && !prefersReducedMotion ? { scale: 1, opacity: 1 } : undefined}
                         transition={{ duration: 0.8, ease: easeOwlet }}
                         viewport={{ once: true, amount: 0.3 }}
                       >
@@ -798,10 +812,11 @@ export default function Home() {
           id="how-it-works"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.1 }}
+          viewport={{ once: true, amount: 0.05 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -820,8 +835,9 @@ export default function Home() {
               className={`flex flex-col lg:flex-row gap-8 lg:gap-0 max-w-6xl mx-auto relative items-start ${
                 locale === "he" ? "lg:flex-row-reverse" : ""
               }`}
-              initial={prefersReducedMotion ? undefined : "hidden"}
-              whileInView={prefersReducedMotion ? undefined : "show"}
+              initial={prefersReducedMotion || isMobile === true ? undefined : "hidden"}
+              animate={isMobile === false && !prefersReducedMotion ? undefined : "show"}
+              whileInView={isMobile === false && !prefersReducedMotion ? "show" : undefined}
               viewport={{ once: true, amount: 0.15 }}
               variants={{
                 hidden: {},
@@ -968,10 +984,11 @@ export default function Home() {
         {/* Dual Design Section */}
         <motion.section
           className="relative bg-white py-8 lg:py-12"
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.05 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1082,10 +1099,11 @@ export default function Home() {
         {/* Choose Your Path Section */}
         <motion.section
           className="relative bg-[#F3EEE8] py-16 lg:py-24"
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.05 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1101,8 +1119,9 @@ export default function Home() {
             {/* 4 Column Grid */}
             <motion.div 
               className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto"
-              initial={prefersReducedMotion ? undefined : "hidden"}
-              whileInView={prefersReducedMotion ? undefined : "show"}
+              initial={prefersReducedMotion || isMobile === true ? undefined : "hidden"}
+              animate={isMobile === false && !prefersReducedMotion ? undefined : "show"}
+              whileInView={isMobile === false && !prefersReducedMotion ? "show" : undefined}
               viewport={{ once: true, amount: 0.2 }}
               variants={{
                 hidden: {},
@@ -1242,18 +1261,20 @@ export default function Home() {
         <motion.section
           id="about"
           className="relative bg-white pb-6"
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.05 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
               <motion.div 
                 className="relative rounded-3xl overflow-hidden"
-                initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
-                whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                initial={prefersReducedMotion || isMobile === true ? undefined : { scale: 0.95, opacity: 0 }}
+                animate={isMobile === false && !prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+                whileInView={isMobile === false && !prefersReducedMotion ? { scale: 1, opacity: 1 } : undefined}
                 transition={{ duration: 0.7, ease: easeOwlet, delay: 0.1 }}
                 viewport={{ once: true, amount: 0.3 }}
               >
@@ -1315,10 +1336,11 @@ export default function Home() {
           id="qa"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.05 }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}

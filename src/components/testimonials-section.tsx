@@ -107,7 +107,19 @@ export function TestimonialsSection() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    const handleResize = () => checkMobile();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Auto-rotate every 5 seconds
   useEffect(() => {
@@ -201,10 +213,11 @@ export function TestimonialsSection() {
   return (
     <motion.section
       className="relative pt-16 lg:pt-24 pb-0 lg:pb-4 bg-white h-[520px] lg:h-[570px]"
-      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
+      animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.6, ease: easeOwlet }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.05 }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
