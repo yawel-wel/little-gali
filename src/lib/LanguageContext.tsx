@@ -119,6 +119,8 @@ const hebrewTranslations = {
   "cart.orderSummary": "סיכום הזמנה",
   "cart.itemsCount": "כמות פריטים:",
   "cart.deliveryTime": "זמן אספקה - עד 14 ימי עסקים",
+  "cart.shareConsent": "אפשר לשתף את הספרון שלי בעמוד של ליטל גלי כהשראה 💛",
+  "cart.shareConsentNote": "בלי שמות או פרטים מזהים.",
   "cart.readyMessage": "הודעה תשלח כשהספרון מוכן בשביל תיאום משלוח",
   "cart.checkoutProgress": "מעבר לתשלום...",
   "cart.addBook": "הוסף ספרון",
@@ -534,6 +536,8 @@ const englishTranslations = {
   "cart.orderSummary": "Order Summary",
   "cart.itemsCount": "Number of items:",
   "cart.deliveryTime": "Delivery time - up to 14 business days",
+  "cart.shareConsent": "You can share my book on Little Gali's page as inspiration 💛",
+  "cart.shareConsentNote": "Without names or identifying details.",
   "cart.readyMessage":
     "A message will be sent when the book is ready for pickup coordination",
   "cart.checkoutProgress": "Redirecting to payment...",

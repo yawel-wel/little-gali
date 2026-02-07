@@ -174,6 +174,7 @@ export async function POST(request: NextRequest) {
         totalAmount: cart.cost?.totalAmount?.amount,
         currencyCode: cart.cost?.totalAmount?.currencyCode,
         lines: lines,
+        attributes: cart.attributes || [],
       },
     });
   } catch (error: any) {

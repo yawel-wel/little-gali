@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -28,6 +29,8 @@ export default function CartPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+  const [shareConsent, setShareConsent] = useState(false);
+  const [isUpdatingConsent, setIsUpdatingConsent] = useState(false);
 
   // Fetch cart on mount if we have a cart ID
   useEffect(() => {
@@ -52,6 +55,64 @@ export default function CartPage() {
       setIsOptimisticAdding(false);
     }
   }, [cart]);
+
+  // Load share consent from cart attributes
+  useEffect(() => {
+    if (cart?.id) {
+      // Fetch cart attributes to get the current consent value
+      const loadConsent = async () => {
+        try {
+          const response = await fetch("/api/shopify/cart/get", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cartId: cart.id }),
+          });
+          const data = await response.json();
+          if (data.cart?.attributes) {
+            const consentAttr = data.cart.attributes.find(
+              (attr: any) => attr.key === "_share_consent"
+            );
+            if (consentAttr?.value === "true") {
+              setShareConsent(true);
+            }
+          }
+        } catch (error) {
+          console.error("Error loading consent:", error);
+        }
+      };
+      loadConsent();
+    }
+  }, [cart?.id]);
+
+  const handleShareConsentChange = async (checked: boolean) => {
+    if (!cart?.id || isUpdatingConsent) return;
+    
+    setShareConsent(checked);
+    setIsUpdatingConsent(true);
+    
+    try {
+      const response = await fetch("/api/shopify/cart/update-attributes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: cart.id,
+          attributes: [
+            { key: "_share_consent", value: checked ? "true" : "false" },
+          ],
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update consent");
+      }
+    } catch (error) {
+      console.error("Error updating consent:", error);
+      // Revert on error
+      setShareConsent(!checked);
+    } finally {
+      setIsUpdatingConsent(false);
+    }
+  };
 
   const handleRemoveClick = (lineId: string) => {
     setItemToRemove(lineId);
@@ -364,6 +425,36 @@ export default function CartPage() {
                             >
                               {t("cart.deliveryTime")}
                             </p>
+                          </div>
+                          <div className="pt-4 border-t border-gray-200">
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                id="shareBookConsent"
+                                size="small"
+                                checked={shareConsent}
+                                onChange={(e) => handleShareConsentChange(e.target.checked)}
+                                color="primary"
+                                sx={{
+                                  padding: 0,
+                                  marginTop: '2px',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                  },
+                                }}
+                              />
+                              <label
+                                htmlFor="shareBookConsent"
+                                className={`text-sm text-medium-gray font-body cursor-pointer ${
+                                  locale === "en" ? "text-left" : "text-right"
+                                }`}
+                              >
+                                {t("cart.shareConsent")}
+                                <br />
+                                <span className="text-xs">
+                                  {t("cart.shareConsentNote")}
+                                </span>
+                              </label>
+                            </div>
                           </div>
                         </div>
 
