@@ -99,6 +99,12 @@ const mockTestimonials: Testimonial[] = [
     text: "איכותי ומהמם! רעיון מושלם למתנה!!",
     name: "ליהי גרוסמן",
   },
+  {
+    id: 15,
+    rating: 5,
+    text: "גם האתר קל ונגיש, הגיע מהר בטירוף\nובעיקר פשוט מתנה מהממת\nתודה רבה!",
+    name: "Nurit Galor",
+  },
 ];
 
 const easeOwlet: any = [0.16, 1, 0.3, 1];
