@@ -15,10 +15,11 @@ import { useCart } from "@/lib/CartContext";
 import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
 import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -31,6 +32,10 @@ export default function CartPage() {
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const [shareConsent, setShareConsent] = useState(false);
   const [isUpdatingConsent, setIsUpdatingConsent] = useState(false);
+  const [addGiftMessage, setAddGiftMessage] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
+  const [isUpdatingGiftMessage, setIsUpdatingGiftMessage] = useState(false);
+  const giftMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch cart on mount if we have a cart ID
   useEffect(() => {
@@ -75,6 +80,21 @@ export default function CartPage() {
             if (consentAttr?.value === "true") {
               setShareConsent(true);
             }
+            
+            // Load gift message attributes
+            const giftMessageEnabledAttr = data.cart.attributes.find(
+              (attr: any) => attr.key === "_gift_message_enabled"
+            );
+            if (giftMessageEnabledAttr?.value === "true") {
+              setAddGiftMessage(true);
+            }
+            
+            const giftMessageAttr = data.cart.attributes.find(
+              (attr: any) => attr.key === "_gift_message"
+            );
+            if (giftMessageAttr?.value) {
+              setGiftMessage(giftMessageAttr.value);
+            }
           }
         } catch (error) {
           console.error("Error loading consent:", error);
@@ -113,6 +133,96 @@ export default function CartPage() {
       setIsUpdatingConsent(false);
     }
   };
+
+  const handleGiftMessageCheckboxChange = async (checked: boolean) => {
+    if (!cart?.id || isUpdatingGiftMessage) return;
+    
+    setAddGiftMessage(checked);
+    setIsUpdatingGiftMessage(true);
+    
+    // If unchecking, also clear the message
+    if (!checked) {
+      setGiftMessage("");
+    }
+    
+    try {
+      const attributes = [
+        { key: "_gift_message_enabled", value: checked ? "true" : "false" },
+      ];
+      
+      // If unchecking, also clear the stored message
+      if (!checked) {
+        attributes.push({ key: "_gift_message", value: "" });
+      }
+      
+      const response = await fetch("/api/shopify/cart/update-attributes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: cart.id,
+          attributes,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update gift message setting");
+      }
+    } catch (error) {
+      console.error("Error updating gift message setting:", error);
+      // Revert on error
+      setAddGiftMessage(!checked);
+    } finally {
+      setIsUpdatingGiftMessage(false);
+    }
+  };
+
+  const handleGiftMessageChange = (message: string) => {
+    // Limit to 200 characters
+    const limitedMessage = message.slice(0, 200);
+    setGiftMessage(limitedMessage);
+    
+    // Clear existing timeout
+    if (giftMessageTimeoutRef.current) {
+      clearTimeout(giftMessageTimeoutRef.current);
+    }
+    
+    // Set new timeout to save after user stops typing (500ms delay)
+    giftMessageTimeoutRef.current = setTimeout(async () => {
+      if (!cart?.id) return;
+      
+      setIsUpdatingGiftMessage(true);
+      
+      try {
+        const response = await fetch("/api/shopify/cart/update-attributes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cartId: cart.id,
+            attributes: [
+              { key: "_gift_message", value: limitedMessage },
+            ],
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to update gift message");
+        }
+      } catch (error) {
+        console.error("Error updating gift message:", error);
+      } finally {
+        setIsUpdatingGiftMessage(false);
+      }
+    }, 500);
+  };
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (giftMessageTimeoutRef.current) {
+        clearTimeout(giftMessageTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleRemoveClick = (lineId: string) => {
     setItemToRemove(lineId);
@@ -455,6 +565,67 @@ export default function CartPage() {
                                 </span>
                               </label>
                             </div>
+                          </div>
+
+                          {/* Gift Message Section */}
+                          <div className="pt-4 border-t border-gray-200">
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                id="addGiftMessage"
+                                size="small"
+                                checked={addGiftMessage}
+                                onChange={(e) => handleGiftMessageCheckboxChange(e.target.checked)}
+                                color="primary"
+                                sx={{
+                                  padding: 0,
+                                  marginTop: '2px',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                  },
+                                }}
+                              />
+                              <label
+                                htmlFor="addGiftMessage"
+                                className={`text-sm text-medium-gray font-body cursor-pointer ${
+                                  locale === "en" ? "text-left" : "text-right"
+                                }`}
+                              >
+                                {t("cart.addGiftMessage")}
+                              </label>
+                            </div>
+                            
+                            {addGiftMessage && (
+                              <div className="mt-3">
+                                <TextField
+                                  multiline
+                                  rows={3}
+                                  fullWidth
+                                  placeholder={t("cart.giftMessagePlaceholder")}
+                                  value={giftMessage}
+                                  onChange={(e) => handleGiftMessageChange(e.target.value)}
+                                  inputProps={{
+                                    maxLength: 200,
+                                    dir: locale === "en" ? "ltr" : "rtl",
+                                    style: { whiteSpace: 'pre-wrap' },
+                                  }}
+                                  sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                      fontFamily: 'inherit',
+                                      fontSize: '0.875rem',
+                                      '& fieldset': {
+                                        borderColor: 'rgba(0, 0, 0, 0.23)',
+                                      },
+                                      '&:hover fieldset': {
+                                        borderColor: 'rgba(0, 0, 0, 0.4)',
+                                      },
+                                      '&.Mui-focused fieldset': {
+                                        borderColor: 'primary.main',
+                                      },
+                                    },
+                                  }}
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
 
