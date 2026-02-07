@@ -196,16 +196,16 @@ export function CartDrawer() {
                           </span>
                         </div>
                         {/* Price - Bolder weight */}
-                        <p className="text-sm font-body-bold text-dark-gray">
+                        <p className="text-sm font-body-bold text-dark-gray text-right" dir="ltr">
                           {displayIndex > 1 ? (
                             <>
-                              <span className="line-through text-medium-gray mr-2">
+                              <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
+                              <span className="line-through text-medium-gray ml-2">
                                 {BOOK_PRICE}
                               </span>
-                              <span>{DISCOUNTED_BOOK_PRICE} ₪</span>
                             </>
                           ) : (
-                            <>{BOOK_PRICE} ₪</>
+                            <>₪ {BOOK_PRICE}</>
                           )}
                         </p>
                       </div>

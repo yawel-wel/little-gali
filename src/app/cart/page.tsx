@@ -257,16 +257,17 @@ export default function CartPage() {
                               className={`text-sm md:text-base font-body-bold text-dark-gray ${
                                 locale === "en" ? "text-left" : "text-right"
                               }`}
+                              dir="ltr"
                             >
                               {displayIndex > 1 ? (
                                 <>
-                                  <span className="line-through text-medium-gray mr-2">
+                                  <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
+                                  <span className="line-through text-medium-gray ml-2">
                                     {BOOK_PRICE}
                                   </span>
-                                  <span>{DISCOUNTED_BOOK_PRICE} ₪</span>
                                 </>
                               ) : (
-                                <>{BOOK_PRICE} ₪</>
+                                <>₪ {BOOK_PRICE}</>
                               )}
                             </p>
                           </div>
@@ -357,18 +358,11 @@ export default function CartPage() {
                           </div>
                           <div className="pt-4 border-t border-gray-200">
                             <p
-                              className={`text-sm text-medium-gray font-body mb-2 ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              {t("cart.deliveryTime")}
-                            </p>
-                            <p
                               className={`text-sm text-medium-gray font-body ${
                                 locale === "en" ? "text-left" : "text-right"
                               }`}
                             >
-                              {t("cart.readyMessage")}
+                              {t("cart.deliveryTime")}
                             </p>
                           </div>
                         </div>
@@ -524,18 +518,11 @@ export default function CartPage() {
                         </div>
                         <div className="pt-4 border-t border-gray-200">
                           <p
-                            className={`text-sm text-medium-gray font-body mb-2 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.deliveryTime")}
-                          </p>
-                          <p
                             className={`text-sm text-medium-gray font-body ${
                               locale === "en" ? "text-left" : "text-right"
                             }`}
                           >
-                            {t("cart.readyMessage")}
+                            {t("cart.deliveryTime")}
                           </p>
                         </div>
                       </div>

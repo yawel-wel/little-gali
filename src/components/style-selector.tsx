@@ -88,6 +88,10 @@ export function StyleSelector({
             <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
               {t("styleSelector.cartoon")}
             </span>
+            {/* Description */}
+            <span className="font-body text-xs sm:text-sm text-medium-gray text-center px-2 -mt-2">
+              {t("styleSelector.cartoonDescription")}
+            </span>
           </button>
 
           {/* Pencil Option */}
@@ -138,6 +142,10 @@ export function StyleSelector({
             {/* Label */}
             <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
               {t("styleSelector.pencil")}
+            </span>
+            {/* Description */}
+            <span className="font-body text-xs sm:text-sm text-medium-gray text-center px-2 -mt-2">
+              {t("styleSelector.pencilDescription")}
             </span>
           </button>
         </div>
@@ -304,6 +312,11 @@ export function StyleSelector({
                   </ul>
                 </div>
               </div>
+
+              {/* Bottom Note */}
+              <p className="text-xs sm:text-sm font-body text-medium-gray text-center mb-2">
+                {t("styleSelector.modal.bottomNote")}
+              </p>
 
               {/* Got it Button */}
               <div className="flex justify-center">
