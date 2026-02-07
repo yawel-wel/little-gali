@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Info, X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 
-export type StyleType = "cartoon" | "pencil";
+export type StyleType = "cartoon" | "pencil" | "watercolor";
 
 interface StyleSelectorProps {
   selectedStyle: StyleType;
@@ -43,7 +43,7 @@ export function StyleSelector({
         </div>
 
         {/* Style Options */}
-        <div className="flex flex-row gap-1 sm:gap-4 justify-center w-full max-w-full sm:max-w-2xl px-4 sm:px-0">
+        <div className="flex flex-row gap-1 sm:gap-4 justify-center w-full max-w-full sm:max-w-4xl px-4 sm:px-0">
           {/* Cartoon Option */}
           <button
             onClick={() => {
@@ -140,6 +140,52 @@ export function StyleSelector({
               {t("styleSelector.pencil")}
             </span>
           </button>
+
+          {/* Watercolor Option */}
+          <button
+            onClick={() => {
+              console.log("🎨 Style changed to: watercolor");
+              onStyleChange("watercolor");
+            }}
+            className={`flex flex-col items-center gap-3 sm:gap-4 p-3 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white mr-2 sm:mr-0 ${
+              selectedStyle === "watercolor"
+                ? "border-[4px] border-primary-orange"
+                : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
+            }`}
+            style={{
+              transform: "scale(1)",
+              transition: "all 0.2s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.02)";
+              if (selectedStyle !== "watercolor") {
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(0, 0, 0, 0.1)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "";
+            }}
+          >
+            {/* Watercolor Example Image */}
+            <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
+              <img
+                src="/style-example-watercolor.png"
+                alt={t("styleSelector.watercolorAlt")}
+                className="w-full h-full object-cover"
+                style={{ border: "none", outline: "none" }}
+                onError={(e) => {
+                  console.error("Failed to load watercolor style image");
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </div>
+            {/* Label */}
+            <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
+              {t("styleSelector.watercolor")}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -177,9 +223,10 @@ export function StyleSelector({
               </p>
 
               {/* Style Cards */}
-              <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-7 mb-5 sm:mb-6">
-                {/* Cartoon Card */}
-                <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
+              <div className="flex flex-col gap-4 sm:gap-6 mb-5 sm:mb-6">
+                <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-7">
+                  {/* Cartoon Card */}
+                  <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
                   {/* Icon + Style Name */}
                   <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
                     <h3 className="text-base sm:text-lg font-body-bold text-dark-gray">
@@ -203,47 +250,114 @@ export function StyleSelector({
 
                   {/* Description List */}
                   <ul className="space-y-1">
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
                         {t("styleSelector.modal.cartoon.bold")}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
                         {t("styleSelector.modal.cartoon.vibrant")}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
                         {t("styleSelector.modal.cartoon.modern")}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
                         {t("styleSelector.modal.cartoon.stylized")}
                       </span>
                     </li>
                   </ul>
                 </div>
 
-                {/* Pencil Card */}
-                <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
+                  {/* Pencil Card */}
+                  <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
+                    {/* Icon + Style Name */}
+                    <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+                      <h3 className="text-base sm:text-lg font-body-bold text-dark-gray">
+                        {t("styleSelector.pencil")}
+                      </h3>
+                    </div>
+
+                    {/* Example Image */}
+                    <div className="flex justify-center mb-3 sm:mb-4">
+                      <div className="w-full max-w-[160px] sm:max-w-[160px] md:max-w-[180px] h-[160px] sm:h-[160px] md:h-[180px] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                        <img
+                          src="/style-example-pencil.png"
+                          alt={t("styleSelector.pencilAlt")}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            if (
+                              e.currentTarget.src !== "/style-example-pencil2.png"
+                            ) {
+                              e.currentTarget.src = "/style-example-pencil2.png";
+                            } else {
+                              e.currentTarget.style.display = "none";
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Description List */}
+                    <ul className="space-y-1">
+                      <li className="flex items-center justify-center gap-2">
+                        <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                          •
+                        </span>
+                        <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                          {t("styleSelector.modal.pencil.soft")}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-center gap-2">
+                        <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                          •
+                        </span>
+                        <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                          {t("styleSelector.modal.pencil.delicate")}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-center gap-2">
+                        <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                          •
+                        </span>
+                        <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                          {t("styleSelector.modal.pencil.handDrawn")}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-center gap-2">
+                        <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                          •
+                        </span>
+                        <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                          {t("styleSelector.modal.pencil.realistic")}
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Watercolor Card - Full Width */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
                   {/* Icon + Style Name */}
                   <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
                     <h3 className="text-base sm:text-lg font-body-bold text-dark-gray">
-                      {t("styleSelector.pencil")}
+                      {t("styleSelector.watercolor")}
                     </h3>
                   </div>
 
@@ -251,17 +365,11 @@ export function StyleSelector({
                   <div className="flex justify-center mb-3 sm:mb-4">
                     <div className="w-full max-w-[160px] sm:max-w-[160px] md:max-w-[180px] h-[160px] sm:h-[160px] md:h-[180px] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                       <img
-                        src="/style-example-pencil.png"
-                        alt={t("styleSelector.pencilAlt")}
+                        src="/style-example-watercolor.png"
+                        alt={t("styleSelector.watercolorAlt")}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          if (
-                            e.currentTarget.src !== "/style-example-pencil2.png"
-                          ) {
-                            e.currentTarget.src = "/style-example-pencil2.png";
-                          } else {
-                            e.currentTarget.style.display = "none";
-                          }
+                          e.currentTarget.style.display = "none";
                         }}
                       />
                     </div>
@@ -269,36 +377,36 @@ export function StyleSelector({
 
                   {/* Description List */}
                   <ul className="space-y-1">
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
-                        {t("styleSelector.modal.pencil.soft")}
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                        {t("styleSelector.modal.watercolor.flowing")}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
-                        {t("styleSelector.modal.pencil.delicate")}
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                        {t("styleSelector.modal.watercolor.dreamy")}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
-                        {t("styleSelector.modal.pencil.handDrawn")}
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                        {t("styleSelector.modal.watercolor.organic")}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center gap-2">
                       <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
                         •
                       </span>
-                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
-                        {t("styleSelector.modal.pencil.realistic")}
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal text-center">
+                        {t("styleSelector.modal.watercolor.artistic")}
                       </span>
                     </li>
                   </ul>

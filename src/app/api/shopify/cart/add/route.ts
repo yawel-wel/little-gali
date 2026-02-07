@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
-      style?: "cartoon" | "pencil";
+      style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
     };
 
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
             { key: "_image_5", value: urls[4] },
             // Always include style attribute (default to "cartoon" if not provided)
             // Ensure style is valid before saving
-            ...(style && (style === "cartoon" || style === "pencil")
+            ...(style && (style === "cartoon" || style === "pencil" || style === "watercolor")
               ? [
                   {
                     key: "_style",
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
 
     // Validate and normalize style (use this throughout the function)
     const styleToStore =
-      style && (style === "cartoon" || style === "pencil") ? style : "cartoon";
+      style && (style === "cartoon" || style === "pencil" || style === "watercolor") ? style : "cartoon";
 
     if (lineId) {
       try {
@@ -301,14 +301,14 @@ export async function POST(request: NextRequest) {
           );
 
         // Extract style from attributes (check both "style" and "_style")
-        let itemStyle: "cartoon" | "pencil" | undefined = undefined;
+        let itemStyle: "cartoon" | "pencil" | "watercolor" | undefined = undefined;
         if (Array.isArray(node.attributes)) {
           const styleAttr = node.attributes.find(
             (a: any) => a.key === "style" || a.key === "_style"
           );
           if (
             styleAttr &&
-            (styleAttr.value === "cartoon" || styleAttr.value === "pencil")
+            (styleAttr.value === "cartoon" || styleAttr.value === "pencil" || styleAttr.value === "watercolor")
           ) {
             itemStyle = styleAttr.value;
           }
