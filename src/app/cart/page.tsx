@@ -259,7 +259,7 @@ export default function CartPage() {
                               }`}
                               dir="ltr"
                             >
-                              {displayIndex > 1 ? (
+                              {displayIndex % 2 === 0 ? (
                                 <>
                                   <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
                                   <span className="line-through text-medium-gray ml-2">
@@ -324,7 +324,7 @@ export default function CartPage() {
                                   {cart.items.reduce(
                                     (sum, item, index) =>
                                       sum +
-                                      (index === 0
+                                      (index % 2 === 0
                                         ? BOOK_PRICE
                                         : DISCOUNTED_BOOK_PRICE) *
                                         item.quantity,
@@ -345,7 +345,7 @@ export default function CartPage() {
                                   {cart.items.reduce(
                                     (sum, item, index) =>
                                       sum +
-                                      (index === 0
+                                      (index % 2 === 0
                                         ? BOOK_PRICE
                                         : DISCOUNTED_BOOK_PRICE) *
                                         item.quantity,

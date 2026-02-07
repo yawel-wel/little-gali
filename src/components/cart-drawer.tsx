@@ -251,7 +251,7 @@ export function CartDrawer() {
                     .reduce(
                       (sum, item, index) =>
                         sum +
-                        (index === 0 ? BOOK_PRICE : DISCOUNTED_BOOK_PRICE) *
+                        (index % 2 === 0 ? BOOK_PRICE : DISCOUNTED_BOOK_PRICE) *
                           item.quantity,
                       0
                     )}{" "}
