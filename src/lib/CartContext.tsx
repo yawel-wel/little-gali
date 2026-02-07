@@ -9,7 +9,7 @@ export interface CartItem {
   imageUrls: string[];
   title?: string;
   lineId?: string;
-  style?: "cartoon" | "pencil";
+  style?: "cartoon" | "pencil" | "watercolor";
 }
 
 export interface Cart {
@@ -29,7 +29,7 @@ interface CartContextType {
     quantity?: number,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil"
+    style?: "cartoon" | "pencil" | "watercolor"
   ) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             lId: string,
             attempts = 3,
             delayMs = 200
-          ): Promise<{ imageUrls: string[]; style?: "cartoon" | "pencil" }> => {
+          ): Promise<{ imageUrls: string[]; style?: "cartoon" | "pencil" | "watercolor" }> => {
             for (let i = 0; i < attempts; i++) {
               try {
                 const res = await fetch(
@@ -175,7 +175,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 const styleAttr = line.attributes.find(
                   (attr: any) => attr.key === "style" || attr.key === "_style"
                 );
-                if (styleAttr && (styleAttr.value === "cartoon" || styleAttr.value === "pencil")) {
+                if (styleAttr && (styleAttr.value === "cartoon" || styleAttr.value === "pencil" || styleAttr.value === "watercolor")) {
                   style = styleAttr.value;
                 }
               }
@@ -224,7 +224,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number = 1,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil"
+    style?: "cartoon" | "pencil" | "watercolor"
   ) => {
     setIsLoading(true);
     try {

@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 // In-memory storage for cart images (in production, use a database)
-// Key: cartId, Value: { [lineId]: { imageUrls: string[], style?: "cartoon" | "pencil" } }
-const cartImagesStore = new Map<string, { [lineId: string]: { imageUrls: string[]; style?: "cartoon" | "pencil" } }>();
+// Key: cartId, Value: { [lineId]: { imageUrls: string[], style?: "cartoon" | "pencil" | "watercolor" } }
+const cartImagesStore = new Map<string, { [lineId: string]: { imageUrls: string[]; style?: "cartoon" | "pencil" | "watercolor" } }>();
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       cartId: string;
       lineId?: string;
       imageUrls: string[];
-      style?: "cartoon" | "pencil";
+      style?: "cartoon" | "pencil" | "watercolor";
     };
 
     if (!cartId || !imageUrls || imageUrls.length !== 5) {
