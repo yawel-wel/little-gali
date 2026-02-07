@@ -787,6 +787,99 @@ export default function CartPage() {
                             {t("cart.deliveryTime")}
                           </p>
                         </div>
+                        
+                        {/* Share Consent - Mobile */}
+                        <div className="pt-4 border-t border-gray-200">
+                          <div className="flex items-start gap-2">
+                            <Checkbox
+                              id="shareBookConsentMobile"
+                              size="small"
+                              checked={shareConsent}
+                              onChange={(e) => handleShareConsentChange(e.target.checked)}
+                              color="primary"
+                              sx={{
+                                padding: 0,
+                                marginTop: '2px',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                },
+                              }}
+                            />
+                            <label
+                              htmlFor="shareBookConsentMobile"
+                              className={`text-sm text-medium-gray font-body cursor-pointer ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.shareConsent")}
+                              <br />
+                              <span className="text-xs">
+                                {t("cart.shareConsentNote")}
+                              </span>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Gift Message Section - Mobile */}
+                        <div className="pt-4 border-t border-gray-200">
+                          <div className="flex items-start gap-2">
+                            <Checkbox
+                              id="addGiftMessageMobile"
+                              size="small"
+                              checked={addGiftMessage}
+                              onChange={(e) => handleGiftMessageCheckboxChange(e.target.checked)}
+                              color="primary"
+                              sx={{
+                                padding: 0,
+                                marginTop: '2px',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                },
+                              }}
+                            />
+                            <label
+                              htmlFor="addGiftMessageMobile"
+                              className={`text-sm text-medium-gray font-body cursor-pointer ${
+                                locale === "en" ? "text-left" : "text-right"
+                              }`}
+                            >
+                              {t("cart.addGiftMessage")}
+                            </label>
+                          </div>
+                          
+                          {addGiftMessage && (
+                            <div className="mt-3">
+                              <TextField
+                                multiline
+                                rows={3}
+                                fullWidth
+                                placeholder={t("cart.giftMessagePlaceholder")}
+                                value={giftMessage}
+                                onChange={(e) => handleGiftMessageChange(e.target.value)}
+                                inputProps={{
+                                  maxLength: 200,
+                                  dir: locale === "en" ? "ltr" : "rtl",
+                                  style: { whiteSpace: 'pre-wrap' },
+                                }}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    fontFamily: 'inherit',
+                                    fontSize: '0.875rem',
+                                    '& fieldset': {
+                                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                                    },
+                                    '&:hover fieldset': {
+                                      borderColor: 'rgba(0, 0, 0, 0.4)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                      borderColor: 'primary.main',
+                                    },
+                                  },
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Checkout Button */}
