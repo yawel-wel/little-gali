@@ -468,21 +468,29 @@ export default function Home() {
         <section className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
-            <div className="w-full h-full relative">
+            <motion.div 
+              className="w-full h-full relative"
+              initial={{ scale: 1 }}
+              animate={{ scale: isMobile ? 1.20 : 1.05 }}
+              transition={{ 
+                duration: 8, 
+                ease: "easeOut"
+              }}
+            >
               <Image
                 src="/hero-image.jpeg"
                 alt="Baby book example"
                 fill
                 priority
-                className="object-cover sm:object-[center_40%]"
+                className="object-cover sm:object-[center_65%]"
                 sizes="100vw"
               />
               {/* Lighter gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-black/20" />
-            </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10" />
+            </motion.div>
           </div>
           {/* Content Overlay - center-aligned */}
-          <div className="absolute inset-0 z-10 flex items-start md:items-center justify-center pt-16 md:pt-0">
+          <div className="absolute inset-0 z-10 flex items-start justify-center pt-16 md:pt-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center space-y-5 md:space-y-6 max-w-2xl mx-auto">
                 {/* Title - centered with better contrast */}
