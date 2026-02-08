@@ -353,20 +353,21 @@ const hebrewTranslations = {
   "home.about.title": "מי אנחנו",
   "home.about.titleHighlight": "אנחנו",
   "home.about.paragraph1":
-    "את Little Gali פתחתי בערך חודשיים אחרי שגלי שלי נולדה. מצאתי את עצמי נשאבת לזה – חושבת על זה, מתכננת, מעצבת את האתר, ובכל פעם שמישהי העלתה תמונות לספרון – זה היה הדבר הראשון שרציתי לעשות.",
+    "את Little Gali פתחתי כחודשיים אחרי שגלי נולדה, בעיקר מתוך סקרנות ורצון ליצור משהו חדש. מצאתי את עצמי משקיעה בזה יותר ויותר: חושבת על המוצר, מעצבת, בונה את האתר, ובעיקר מתרגשת מכל הזמנה מחדש.",
   "home.about.paragraph2":
-    "נהניתי מהתהליך עצמו, מליצור משהו חדש, ובעיקר מלראות את התגובות של האמהות כשהספרונים הגיעו אליהן. הרגשתי שאני עושה משהו מיוחד, שיש לו מקום, ושגם אני הייתי רוצה אותו בשביל גלי שלי (ואל דאגה – הכנתי לה כבר כמה וכמה ספרונים משלה).",
+    "מהר מאוד הבנתי שזה לא רק תהליך יצירתי בשבילי. התגובות של אמהות שקיבלו את הספרון חידדו שיש כאן משהו אחר - אישי ומיוחד. מוצר שגם אני הייתי בוחרת עבור גלי שלי, אולי בגלל זה היא ממשיכה לקבל עוד ועוד ספרונים עד עכשיו.",
   "home.about.paragraph3":
-    "אני מקווה שכמוני יהיו עוד אמהות שימצאו בספרון הזה ערך, שירצו אחד כזה לתינוק שלהן. ובסוף – זה גם בשבילנו. לראות את התינוק שלנו מסתכל על התמונות של המשפחה בסקרנות ולהתרגש בכל פעם מחדש.",
+    "הספרון נולד כמוצר לתינוק, אבל גם כמתנה מקורית: כזו שיש בה מחשבה וקשר אישי, וכזו שרוצים להשאיר בבית לא רק לשימוש — אלא גם כחפץ שנעים לראות.",
   "home.qa.title": "שאלו אותנו",
   "home.qa.titleHighlight": "אותנו",
   "home.qa.subtitle": "התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו",
   "home.qa.cta": "לכל השאלות והתשובות",
   "home.comingSoon.title": "משהו מיוחד בדרך",
   "home.comingSoon.titleHighlight": "מיוחד",
+  "home.comingSoon.comingSoon": "בקרוב",
   "home.comingSoon.productName": "ספרוני בד מיוחדים",
   "home.comingSoon.subtitle":
-    "בקרוב!\nספרונים מבד שמכילים את התמונות שלכם.\nהשאירו מייל ואנחנו נדאג לעדכן אתכם ראשונים כשהם יגיעו.",
+    "ספרונים מבד שמכילים את התמונות שלכם.\nהשאירו מייל ואנחנו נדאג לעדכן אתכם ראשונים כשהם יגיעו.",
   "home.comingSoon.emailPlaceholder": "כתובת המייל שלכם",
   "home.comingSoon.button": "עדכנו אותי",
   "home.comingSoon.submitting": "שולח...",
@@ -378,29 +379,29 @@ const hebrewTranslations = {
   "home.testimonials.title": "מה אומרים עלינו",
   "home.testimonials.titleHighlight": "עלינו",
   "qa.question1": "ממה הספרון עשוי?",
-  "qa.answer1": "הספרון עשוי מנייר איכותי ועבה שנעבר למינציה.",
+  "qa.answer1": "הספרון עשוי מנייר איכותי ועבה שנעבר למינציה. הספרון יציב וניתן להעמיד אותו בקלות.",
   "qa.question2": "כמה תמונות צריך לבחור?",
   "qa.answer2":
     "5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד השני בצבעוני.",
   "qa.question3": "מי כדאי שיהיה בספרון?",
   "qa.answer3":
-    "אנשים קרובים שתינוקכם יכיר ויתחבר אליהם – הורים, סבים, אחים, חבר קרוב ואפילו חיית המחמד המשפחתית.",
+    "כל מי שאתם רוצים להראות לתינוק. כמה רעיונות: משפחה קרובה, משפחה רחוקה, חברים, חיות מחמד.",
   "qa.question4": "איזה תמונה מתאימה?",
   "qa.answer4":
-    "תמונה ברורה של הפנים, בלי משקפי שמש ועדיף עם חיוך. לא קרובה מדי לפנים. הימנעו מתמונות מטושטשות או עם תאורה גרועה.",
+    "מבחינה טכנית, התמונות הטובות ביותר הן אלו שרואים בהן בבירור את הפנים, לא בפרופיל ובתאורה טובה. מבחינה לא טכנית, התמונות שיוצאות הכי יפה הן אלו ש״תופסות״ רגע מיוחד, תמונות של חיוך ושל כיף. מסוג הדברים שקשה להסביר במילים אבל קל להרגיש.",
   "qa.question5": "אפשר לשים כמה אנשים בתמונה אחת?",
   "qa.answer5":
-    "כן, בהחלט! ניתן להעלות תמונה עם שני אנשים במידה והתמונה תהיה ברורה ומוארת היטב. עדיף להימנע מתמונות עם יותר משני אנשים מאחר ועיבוד התמונה עלול להיפגע וגם כי תמונה עם יותר מדיי פרטים אינה מותאמת לתינוקות.",
+    "כן בהחלט. רק שימו לב שכל הפנים של האנשים בתמונה נראים באופן ברור ושהיא לא עמוסה מדיי כי זה יכול לפגוע באיכות התוצאה.",
   "qa.question6": "האם הרקע משנה?",
   "qa.answer6": "לא. הרקע מוסר אוטומטית ומוחלף בלבן.",
   "qa.question7": "איך מנקים את הספרון?",
   "qa.answer7": "אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם מים.",
   "qa.question8": "כמה זמן לוקח להכין את הספרון?",
   "qa.answer8":
-    "תהליך ההכנה לוקח 7-10 ימי עבודה מרגע קבלת התמונות. אנו שולחים עדכון על התקדמות ומעדכנים אתכם כשהספרון מוכן לאיסוף או למשלוח.",
+    "תהליך ההכנה לוקח עד 14 ימי עבודה מרגע קבלת התמונות. אנו נעדכן אתכם כשהספרון מוכן לאיסוף או למשלוח.",
   "qa.question9": "מה אם אני לא מרוצה מהספרון?",
   "qa.answer9":
-    "המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם זה לא המצב אנחנו מאפשרים להחזיר את הספרון ולקבל את התשלום בחזרה.",
+    "המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם קיבלתם את הספרון ומשהו בו לא עבד לכם כמו שציפיתם, מוזמנים לפנות אליי.",
   "qa.notFound": "לא מצאתם את התשובה שחיפשתם?",
   "qa.contact": "צרו איתנו קשר",
 
@@ -775,11 +776,11 @@ const englishTranslations = {
   "home.about.title": "Who We Are",
   "home.about.titleHighlight": "We",
   "home.about.paragraph1":
-    "I opened Little Gali about two months after my Gali was born. I found myself drawn to it – thinking about it, planning, designing the website, and every time someone uploaded photos for a book – it was the first thing I wanted to do.",
+    "I opened Little Gali about two months after Gali was born, mainly out of curiosity and a desire to create something new. I found myself investing more and more into it: thinking about the product, designing, building the website, and especially getting excited about every new order.",
   "home.about.paragraph2":
-    "I enjoyed the process itself, creating something new, and especially seeing the mothers' reactions when the books arrived. I felt I was doing something special, that had a place, and that I would want one for my Gali too (and don't worry – I've already made her several of her own books).",
+    "Very quickly I understood this wasn't just a creative process for me. The feedback from mothers who received the book highlighted that there's something else here - personal and special. A product that I would also choose for my Gali, maybe that's why she continues to receive more and more books until now.",
   "home.about.paragraph3":
-    "I hope that like me, there will be more mothers who find value in this book, who will want one for their baby. And in the end – it's also for us. To see our baby looking at the family photos with curiosity and getting excited every time.",
+    "The book was born as a product for babies, but also as an original gift: one with thought and personal connection, and one you want to keep at home not just for use — but also as an object that's pleasant to look at.",
   "home.qa.title": "Ask Us",
   "home.qa.titleHighlight": "Us",
   "home.qa.subtitle":
@@ -787,9 +788,10 @@ const englishTranslations = {
   "home.qa.cta": "All Questions and Answers",
   "home.comingSoon.title": "Something Special Coming Soon",
   "home.comingSoon.titleHighlight": "Special",
+  "home.comingSoon.comingSoon": "Coming Soon",
   "home.comingSoon.productName": "Special Fabric Books",
   "home.comingSoon.subtitle":
-    "Coming soon!\nFabric books that contain your photos.\nLeave your email and we'll make sure to update you first when they arrive",
+    "Fabric books that contain your photos.\nLeave your email and we'll make sure to update you first when they arrive",
   "home.comingSoon.emailPlaceholder": "Your email address",
   "home.comingSoon.button": "Notify Me",
   "home.comingSoon.submitting": "Sending...",
@@ -804,19 +806,19 @@ const englishTranslations = {
   "home.testimonials.titleHighlight": "About Us",
   "qa.question1": "What is the book made of?",
   "qa.answer1":
-    "The book is made of high-quality, thick paper that has been laminated.",
+    "The book is made of high-quality, thick paper that has been laminated. The book is stable and can be easily stood up.",
   "qa.question2": "How many photos should I choose?",
   "qa.answer2":
     "Only 5 photos. The same photos appear on one side in black and white and on the other side in color.",
   "qa.question3": "Who should be in the book?",
   "qa.answer3":
-    "Close people that your baby will recognize and connect with – parents, grandparents, siblings, a close friend, and even the family pet.",
+    "Anyone you want to show your baby. Some ideas: close family, extended family, friends, pets.",
   "qa.question4": "What kind of photo is suitable?",
   "qa.answer4":
-    "A clear photo of the face, without sunglasses and preferably with a smile. Not too close to the face. Avoid blurry photos or photos with poor lighting.",
+    "Technically speaking, the best photos are those where you can clearly see the faces, not in profile and with good lighting. Non-technically, the photos that turn out most beautiful are those that \"capture\" a special moment, photos of smiles and fun. The kind of things that are hard to explain in words but easy to feel.",
   "qa.question5": "Can I put multiple people in one photo?",
   "qa.answer5":
-    "Yes, absolutely! You can upload a photo with two people as long as the photo is clear and well-lit. It's better to avoid photos with more than two people since image processing may be affected and also because a photo with too many details is not suitable for babies.",
+    "Yes, absolutely. Just make sure that all the faces of the people in the photo are clearly visible and that it's not too crowded, as this can affect the quality of the result.",
   "qa.question6": "Does the background matter?",
   "qa.answer6":
     "No. The background is automatically removed and replaced with white.",
@@ -825,10 +827,10 @@ const englishTranslations = {
     "You can gently wipe with a damp cloth. Avoid direct contact with water.",
   "qa.question8": "How long does it take to prepare the book?",
   "qa.answer8":
-    "The preparation process takes 7-10 business days from the moment we receive the photos. We send updates on progress and notify you when the book is ready for pickup or shipping.",
+    "The preparation process takes up to 14 business days from the moment we receive the photos. We will notify you when the book is ready for pickup or shipping.",
   "qa.question9": "What if I'm not satisfied with the book?",
   "qa.answer9":
-    "Our goal is for you to love and be satisfied with your book. If that's not the case, we allow you to return the book and receive a full refund.",
+    "Our goal is for you to love and be satisfied with your book. If you received the book and something didn't work for you as you expected, feel free to reach out to me.",
   "qa.notFound": "Didn't find the answer you were looking for?",
   "qa.contact": "Contact Us",
 

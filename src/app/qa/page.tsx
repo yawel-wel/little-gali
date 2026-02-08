@@ -34,7 +34,7 @@ export default function QAPage() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
             {/* Section Title */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-10 md:mb-16">
               <Title highlightText={t("home.qa.titleHighlight")} size="lg" className="mb-4">
                 {t("home.qa.title")}
               </Title>
@@ -56,7 +56,7 @@ export default function QAPage() {
                 },
               }}
             >
-              <Accordion type="single" collapsible className="space-y-4">
+              <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
                 <motion.div
                   variants={{
                     hidden: { opacity: 0, y: 16 },
@@ -69,7 +69,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-1"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -100,7 +100,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-2"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -131,7 +131,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-3"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -162,7 +162,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-4"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -193,7 +193,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-5"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -224,7 +224,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-6"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -255,7 +255,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-7"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -286,7 +286,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-8"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -317,7 +317,7 @@ export default function QAPage() {
                 >
                   <AccordionItem
                     value="item-9"
-                    className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                   >
                     <AccordionTrigger
                       className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${

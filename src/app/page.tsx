@@ -21,6 +21,7 @@ import {
 import { BOOK_PRICE } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 function ComingSoonSection({
   prefersReducedMotion,
@@ -162,9 +163,26 @@ function ComingSoonSection({
             </motion.div>
           </div>
 
+          {/* Coming Soon Label */}
+          <motion.div
+            className="mb-0 mt-5"
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              show: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.7, ease: easeOwlet },
+              },
+            }}
+          >
+            <p className="text-sm font-body-bold text-primary-orange text-center">
+              {t("home.comingSoon.comingSoon")}
+            </p>
+          </motion.div>
+
           {/* Product Name - Secondary, Medium-Large */}
           <motion.div
-            className="mb-4 mt-5"
+            className="mb-4"
             variants={{
               hidden: { opacity: 0, y: 16 },
               show: {
@@ -191,7 +209,7 @@ function ComingSoonSection({
               },
             }}
           >
-            <p className="text-base font-body text-medium-gray whitespace-pre-line">
+            <p className="text-base font-body text-medium-gray whitespace-pre-line text-center">
               {t("home.comingSoon.subtitle")}
             </p>
           </motion.div>
@@ -325,31 +343,56 @@ function ComingSoonSection({
                   </MuiButton>
                 </div>
 
-                {/* Mobile: Vertical Layout */}
-                <div className="md:hidden space-y-3">
-                  <Input
+                {/* Mobile: Horizontal Layout */}
+                <div className="md:hidden flex gap-3 items-center justify-center">
+                  <TextField
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("home.comingSoon.emailPlaceholder")}
                     required
                     disabled={isSubmitting}
-                    className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-3.5 text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
-                    dir={locale === "en" ? "ltr" : "rtl"}
+                    variant="outlined"
+                    inputProps={{
+                      dir: locale === "en" ? "ltr" : "rtl",
+                    }}
+                    sx={{
+                      flex: 1,
+                      maxWidth: "350px",
+                      "& .MuiOutlinedInput-root": {
+                        fontFamily: "var(--font-assistant)",
+                        fontSize: "1rem",
+                        backgroundColor: "white",
+                        "& fieldset": {
+                          borderColor: "rgba(0, 0, 0, 0.23)",
+                          borderWidth: "1.5px",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgba(0, 0, 0, 0.4)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#E16854",
+                          borderWidth: "2px",
+                        },
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        padding: "10px 14px",
+                      },
+                    }}
                   />
                   <MuiButton
-                    fullWidth
                     type="submit"
                     disabled={isSubmitting}
                     variant="contained"
                     color="primary"
                     sx={{
-                      px: 4,
-                      py: 1.5,
+                      px: 3,
+                      py: 1,
                       fontFamily: "var(--font-assistant)",
                       fontWeight: 700,
-                      fontSize: "0.95rem",
+                      fontSize: "0.9rem",
                       textTransform: "none",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {isSubmitting
@@ -858,7 +901,7 @@ export default function Home() {
 
             {/* Bottom CTA */}
             <motion.div 
-              className="text-center mt-16"
+              className="text-center mt-10 md:mt-16"
               initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
               whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: easeOwlet, delay: 0.3 }}
@@ -1048,7 +1091,7 @@ export default function Home() {
         {/* Meet Us Section */}
         <motion.section
           id="about"
-          className="relative bg-white pb-6"
+          className={`relative bg-white ${locale === "en" ? "py-16 md:py-20" : "pb-6"}`}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -1132,7 +1175,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-10 md:mb-16">
               <Title
                 highlightText={t("home.qa.titleHighlight")}
                 size="lg"
@@ -1147,10 +1190,10 @@ export default function Home() {
 
             {/* Accordion */}
             <div className="max-w-4xl mx-auto">
-              <Accordion type="single" collapsible className="space-y-4">
+              <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
                 <AccordionItem
                   value="item-1"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                 >
                   <AccordionTrigger
                     className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -1170,7 +1213,7 @@ export default function Home() {
 
                 <AccordionItem
                   value="item-2"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                 >
                   <AccordionTrigger
                     className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -1190,7 +1233,7 @@ export default function Home() {
 
                 <AccordionItem
                   value="item-3"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                 >
                   <AccordionTrigger
                     className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
@@ -1210,7 +1253,7 @@ export default function Home() {
 
                 <AccordionItem
                   value="item-9"
-                  className="border border-soft-peach-light rounded-lg px-6 py-4 bg-white shadow-sm cursor-pointer"
+                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                 >
                   <AccordionTrigger
                     className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
