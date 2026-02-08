@@ -71,6 +71,21 @@ export default function RootLayout({
           name="google-site-verification"
           content="Fy9eAB6H8N1DkO006a1eYCRc99aOjEioAiBJDNLRZZ4"
         />
+        {/* Google Analytics */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-7NHYLBNE1J"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-7NHYLBNE1J');
+            `,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
