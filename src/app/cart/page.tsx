@@ -420,6 +420,8 @@ export default function CartPage() {
                                   ? t("cart.style.cartoon")
                                   : item.style === "pencil"
                                   ? t("cart.style.pencil")
+                                  : item.style === "watercolor"
+                                  ? t("cart.style.watercolor")
                                   : t("cart.style.cartoon")}
                               </span>
                             </div>

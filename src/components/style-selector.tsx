@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Info, X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 
-export type StyleType = "cartoon" | "pencil";
+export type StyleType = "cartoon" | "pencil" | "watercolor";
 
 interface StyleSelectorProps {
   selectedStyle: StyleType;
@@ -43,14 +43,14 @@ export function StyleSelector({
         </div>
 
         {/* Style Options */}
-        <div className="flex flex-row gap-1 sm:gap-4 justify-center w-full max-w-full sm:max-w-2xl px-4 sm:px-0">
+        <div className="flex flex-row gap-1.5 sm:gap-4 justify-center w-full max-w-full sm:max-w-2xl px-2 sm:px-0">
           {/* Cartoon Option */}
           <button
             onClick={() => {
               console.log("🎨 Style changed to: cartoon");
               onStyleChange("cartoon");
             }}
-            className={`flex flex-col items-center gap-3 sm:gap-4 p-3 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ml-2 sm:ml-0 ${
+            className={`flex flex-col items-center gap-2 sm:gap-4 p-2.5 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ${
               selectedStyle === "cartoon"
                 ? "border-[4px] border-primary-orange"
                 : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
@@ -72,7 +72,7 @@ export function StyleSelector({
             }}
           >
             {/* Cartoon Example Image */}
-            <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
+            <div className="w-[85px] h-[85px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
               <img
                 src="/style-example-cartoon.png"
                 alt={t("styleSelector.cartoonAlt")}
@@ -100,7 +100,7 @@ export function StyleSelector({
               console.log("🎨 Style changed to: pencil");
               onStyleChange("pencil");
             }}
-            className={`flex flex-col items-center gap-3 sm:gap-4 p-3 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ml-2 mr-2 sm:ml-0 sm:mr-0 ${
+            className={`flex flex-col items-center gap-2 sm:gap-4 p-2.5 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ${
               selectedStyle === "pencil"
                 ? "border-[4px] border-primary-orange"
                 : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
@@ -122,7 +122,7 @@ export function StyleSelector({
             }}
           >
             {/* Pencil Example Image */}
-            <div className="w-[100px] h-[100px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
+            <div className="w-[85px] h-[85px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
               <img
                 src="/style-example-pencil.png"
                 alt={t("styleSelector.pencilAlt")}
@@ -146,6 +146,56 @@ export function StyleSelector({
             {/* Description */}
             <span className="font-body text-xs sm:text-sm text-medium-gray text-center px-2 -mt-2">
               {t("styleSelector.pencilDescription")}
+            </span>
+          </button>
+
+          {/* Watercolor Option */}
+          <button
+            onClick={() => {
+              console.log("🎨 Style changed to: watercolor");
+              onStyleChange("watercolor");
+            }}
+            className={`flex flex-col items-center gap-2 sm:gap-4 p-2.5 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ${
+              selectedStyle === "watercolor"
+                ? "border-[4px] border-primary-orange"
+                : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
+            }`}
+            style={{
+              transform: "scale(1)",
+              transition: "all 0.2s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.02)";
+              if (selectedStyle !== "watercolor") {
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(0, 0, 0, 0.1)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "";
+            }}
+          >
+            {/* Watercolor Example Image */}
+            <div className="w-[85px] h-[85px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
+              <img
+                src="/style-example-watercolor.png"
+                alt={t("styleSelector.watercolorAlt")}
+                className="w-full h-full object-cover"
+                style={{ border: "none", outline: "none" }}
+                onError={(e) => {
+                  console.error("Failed to load watercolor style image");
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </div>
+            {/* Label */}
+            <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
+              {t("styleSelector.watercolor")}
+            </span>
+            {/* Description */}
+            <span className="font-body text-xs sm:text-sm text-medium-gray text-center px-2 -mt-2">
+              {t("styleSelector.watercolorDescription")}
             </span>
           </button>
         </div>
@@ -185,7 +235,7 @@ export function StyleSelector({
               </p>
 
               {/* Style Cards */}
-              <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-7 mb-5 sm:mb-6">
+              <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-7 mb-5 sm:mb-6 overflow-x-auto">
                 {/* Cartoon Card */}
                 <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
                   {/* Icon + Style Name */}
@@ -307,6 +357,74 @@ export function StyleSelector({
                       </span>
                       <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
                         {t("styleSelector.modal.pencil.realistic")}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Watercolor Card */}
+                <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-5 md:p-6 bg-white">
+                  {/* Icon + Style Name */}
+                  <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+                    <h3 className="text-base sm:text-lg font-body-bold text-dark-gray">
+                      {t("styleSelector.watercolor")}
+                    </h3>
+                  </div>
+
+                  {/* Example Image */}
+                  <div className="flex justify-center mb-3 sm:mb-4">
+                    <div className="w-full max-w-[160px] sm:max-w-[160px] md:max-w-[180px] h-[160px] sm:h-[160px] md:h-[180px] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                      <img
+                        src="/style-example-watercolor.png"
+                        alt={t("styleSelector.watercolorAlt")}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description List */}
+                  <ul className="space-y-1">
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                        •
+                      </span>
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                        {t("styleSelector.modal.watercolor.artistic")}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                        •
+                      </span>
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                        {t("styleSelector.modal.watercolor.colorful")}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                        •
+                      </span>
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                        {t("styleSelector.modal.watercolor.fluid")}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                        •
+                      </span>
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                        {t("styleSelector.modal.watercolor.unique")}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary-orange text-sm sm:text-base flex-shrink-0">
+                        •
+                      </span>
+                      <span className="text-dark-gray font-body text-sm sm:text-base leading-normal">
+                        {t("styleSelector.modal.watercolor.notSuitable")}
                       </span>
                     </li>
                   </ul>
