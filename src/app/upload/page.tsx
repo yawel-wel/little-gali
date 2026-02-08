@@ -562,13 +562,13 @@ function UploadPageContent() {
 
       <main className="flex-1">
         <section
-          className="relative py-10 lg:py-16 pt-20 md:pt-16"
+          className="relative py-10 lg:py-16 pt-16 md:pt-12"
           style={{ backgroundColor: "#F3EEE8" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-16 md:pt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-8 md:pt-6">
             <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
-              <div className="text-center md:mt-4">
+              <div className="text-center md:mt-2">
                 <Title
                   highlightText={t("upload.titleHighlight")}
                   size="xl"
@@ -580,7 +580,7 @@ function UploadPageContent() {
               </div>
 
               {/* First Paragraph */}
-              <div className="text-center mb-8">
+              <div className="text-center mb-8 -mt-4">
                 <p className="text-lg font-body text-dark-gray leading-relaxed text-center">
                   {t("upload.description")
                     .split("\n")
