@@ -29,6 +29,14 @@ interface TitleProps {
    * Whether to animate the underline on mount (for hero section)
    */
   animateUnderline?: boolean;
+  /**
+   * HTML heading element to use (h1, h2, h3, etc.)
+   */
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  /**
+   * ID for the heading element
+   */
+  id?: string;
 }
 
 const sizeClasses = {
@@ -55,6 +63,8 @@ export function Title({
   roundedUnderline = false,
   color = "text-dark-gray",
   animateUnderline = false,
+  as: HeadingTag = "h2",
+  id,
 }: TitleProps) {
   // Find the position of the highlight text in the title
   const highlightIndex = children.indexOf(highlightText);
@@ -62,11 +72,12 @@ export function Title({
   // If highlight text not found, just return the children
   if (highlightIndex === -1) {
     return (
-      <h2
+      <HeadingTag
+        id={id}
         className={`font-heading ${color} leading-tight ${sizeClasses[size]} ${className}`}
       >
         {children}
-      </h2>
+      </HeadingTag>
     );
   }
 
@@ -87,7 +98,8 @@ export function Title({
   const UnderlineComponent = animateUnderline ? motion.svg : "svg";
 
   return (
-    <h2
+    <HeadingTag
+      id={id}
       className={`font-heading ${color} leading-tight ${sizeClasses[size]} ${className}`}
     >
       {beforeText}
@@ -95,6 +107,7 @@ export function Title({
         <span className="relative z-10">{highlightText}</span>
         <UnderlineComponent
           className="absolute bottom-0 left-0"
+          aria-hidden="true"
           style={{
             width: "110%",
             left: "-5%",
@@ -128,6 +141,6 @@ export function Title({
         </UnderlineComponent>
       </span>
       {afterText}
-    </h2>
+    </HeadingTag>
   );
 }

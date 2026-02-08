@@ -76,6 +76,7 @@ export function Header() {
   return (
     <>
       <motion.header
+        role="banner"
         className="fixed left-0 right-0 z-50 transition-[top] duration-300 ease-in-out"
         style={{ 
           backgroundColor: "#F9F7EE",
@@ -121,10 +122,11 @@ export function Header() {
               <SheetContent
                 side={locale === "he" ? "right" : "left"}
                 className="w-[300px] sm:w-[400px]"
+                aria-label={t("nav.menuAriaLabel")}
               >
                 <div className="flex flex-col h-full">
                   {/* Navigation */}
-                  <nav className="flex-1 pt-14 pb-6">
+                  <nav className="flex-1 pt-14 pb-6" aria-label={t("nav.mainNavAriaLabel")}>
                     <div
                       className={`space-y-3 ${
                         locale === "he" ? "pr-6" : "pl-6"
@@ -143,6 +145,7 @@ export function Header() {
                               ? "text-primary-orange"
                               : "text-dark-gray hover:text-primary-orange"
                           }`}
+                          aria-current={item.active ? "page" : undefined}
                         >
                           {item.name}
                         </a>
@@ -156,7 +159,7 @@ export function Header() {
                       </div>
                       {/* CTA Button */}
                       <div className="mt-6 pr-0">
-                        <a href="/upload">
+                        <a href="/upload" aria-label={t("nav.createBookAriaLabel")}>
                           <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
                             {t("nav.createBook")}
                           </Button>

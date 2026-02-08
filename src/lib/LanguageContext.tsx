@@ -93,6 +93,12 @@ const hebrewTranslations = {
   "nav.inspiration": "השראה",
   "nav.contact": "צור קשר",
   "nav.createBook": "צרו ספרון",
+  "nav.menuAriaLabel": "תפריט ניווט ראשי",
+  "nav.mainNavAriaLabel": "ניווט ראשי",
+  "nav.createBookAriaLabel": "עבור לעמוד יצירת ספרון",
+
+  // Accessibility
+  "accessibility.skipToMain": "דלג לתוכן הראשי",
 
   // Top Banner
   "banner.shipping": "משלוחים לכל הארץ",
@@ -298,6 +304,8 @@ const hebrewTranslations = {
   "home.hero.title": "ספרון לתינוק|מהתמונות שלכם",
   "home.hero.titleHighlight": "שלכם",
   "home.hero.cta": "צרו ספרון עכשיו",
+  "home.hero.ariaLabel": "קטע פתיחה - ספרון לתינוק",
+  "home.hero.ctaAriaLabel": "עבור לעמוד יצירת ספרון",
   "home.book.title": "ספרון הנייר שלנו",
   "home.book.titleHighlight": "הנייר",
   "home.book.subtitle": "ספרון אישי לתינוק – עם תמונות המשפחה שלכם",
@@ -307,6 +315,9 @@ const hebrewTranslations = {
   "home.book.secondBook": "ספר שני ב-₪99 בלבד",
   "home.book.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
   "home.book.cta": "צרו עכשיו את הספרון האישי שלכם",
+  "home.book.ariaLabel": "פרטי המוצר - ספרון הנייר שלנו",
+  "home.book.imageAlt": "תמונה של ספרון הנייר",
+  "home.book.ctaAriaLabel": "עבור לעמוד יצירת ספרון אישי",
   "home.howItWorks.title": "איך זה עובד",
   "home.howItWorks.titleHighlight": "עובד",
   "home.howItWorks.subtitle":
@@ -315,15 +326,18 @@ const hebrewTranslations = {
   "home.howItWorks.step1.title": "מעלים תמונות",
   "home.howItWorks.step1.description":
     "בחרו 5 תמונות שיופיעו בספרון ובחרו את הסגנון שאהבתם לצד הצבעוני",
+  "home.howItWorks.step1.imageAlt": "דוגמה להעלאת תמונות",
   "home.howItWorks.step2.label": "אנחנו עושים",
   "home.howItWorks.step2.title": "יוצרים את הספרון",
   "home.howItWorks.step2.description":
     "אנחנו ניצור מהתמונות ספרון דו צדדי.\nצד אחד עם חמשת התמונות בשחור לבן, וצד שני עם \nאותם חמש תמונות בעיבוד צבעוני.",
+  "home.howItWorks.step2.imageAlt": "דוגמה לתמונות מעובדות בספרון",
   "home.howItWorks.step3.label": "אנחנו עושים",
   "home.howItWorks.step3.title": "מדפיסים את הספרון",
   "home.howItWorks.step3.description":
     "אנחנו מדפיסים את הספרון האישי שלכם באיכות גבוהה ושולחים אותו עד הבית – מוכן לשימוש ולמזכרת.",
   "home.howItWorks.cta": "התחילו עכשיו",
+  "home.howItWorks.ctaAriaLabel": "התחל ליצור ספרון עכשיו",
   "home.dualDesign.title": "התמונה שלכם – גם לפוקוס הראשון וגם לצבעים הראשונים",
   "home.dualDesign.titleHighlight": "שלכם",
   "home.dualDesign.description":
@@ -338,21 +352,27 @@ const hebrewTranslations = {
   "home.dualDesign.moreExamplesLink": "גלו כאן",
   "home.special.title": "מה הופך את הספרון שלנו למיוחד",
   "home.special.titleHighlight": "למיוחד",
+  "home.special.ariaLabel": "מה מיוחד בספרון שלנו",
   "home.special.item1.title": "להסתכל על הקרובים ביותר",
   "home.special.item1.description":
     "הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר מימיו הראשונים",
+  "home.special.item1.imageAlt": "זוג צעיר",
   "home.special.item2.title": "להכיר את המשפחה",
   "home.special.item2.description":
     "הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק",
+  "home.special.item2.imageAlt": "אחות צעירה",
   "home.special.item3.title": "מזכרת מתוקה",
   "home.special.item3.description":
     "ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק",
+  "home.special.item3.imageAlt": "הורה ובן",
   "home.special.item4.title": "לא עוד מוצר גנרי",
   "home.special.item4.description":
     "במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה",
+  "home.special.item4.imageAlt": "אבא ובן",
   "home.about.brand": "ליטל גלי",
   "home.about.title": "מי אנחנו",
   "home.about.titleHighlight": "אנחנו",
+  "home.about.imageAlt": "תמונת צוות ליטל גלי",
   "home.about.paragraph1":
     "את Little Gali פתחתי כחודשיים אחרי שגלי נולדה, בעיקר מתוך סקרנות ורצון ליצור משהו חדש. מצאתי את עצמי משקיעה בזה יותר ויותר: חושבת על המוצר, מעצבת, בונה את האתר, ובעיקר מתרגשת מכל הזמנה מחדש.",
   "home.about.paragraph2":
@@ -363,6 +383,7 @@ const hebrewTranslations = {
   "home.qa.titleHighlight": "אותנו",
   "home.qa.subtitle": "התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו",
   "home.qa.cta": "לכל השאלות והתשובות",
+  "home.qa.ctaAriaLabel": "עבור לעמוד שאלות ותשובות המלא",
   "home.comingSoon.title": "משהו מיוחד בדרך",
   "home.comingSoon.titleHighlight": "מיוחד",
   "home.comingSoon.comingSoon": "בקרוב",
@@ -377,6 +398,7 @@ const hebrewTranslations = {
   "home.comingSoon.success": "תודה! נעדכן אתכם ברגע שהמוצר יהיה זמין",
   "home.comingSoon.successTitle": "תודה רבה!",
   "home.comingSoon.successMessage": "נעדכן אתכם ברגע שספרוני הבד יגיעו",
+  "home.comingSoon.imageAlt": "תמונה של מוצר בקרוב",
   "home.testimonials.title": "מה אומרים עלינו",
   "home.testimonials.titleHighlight": "עלינו",
   "qa.question1": "ממה הספרון עשוי?",
@@ -521,6 +543,12 @@ const englishTranslations = {
   "nav.inspiration": "Inspiration",
   "nav.contact": "Contact",
   "nav.createBook": "Create Book",
+  "nav.menuAriaLabel": "Main navigation menu",
+  "nav.mainNavAriaLabel": "Main navigation",
+  "nav.createBookAriaLabel": "Go to book creation page",
+
+  // Accessibility
+  "accessibility.skipToMain": "Skip to main content",
 
   // Top Banner
   "banner.shipping": "Shipping Nationwide",
@@ -730,6 +758,8 @@ const englishTranslations = {
   "home.hero.title": "Personalized Baby Book",
   "home.hero.titleHighlight": "Personalized",
   "home.hero.cta": "Create Your Book Now",
+  "home.hero.ariaLabel": "Hero section - Personalized baby book",
+  "home.hero.ctaAriaLabel": "Go to book creation page",
   "home.book.title": "Our Paper Book",
   "home.book.titleHighlight": "Paper",
   "home.book.subtitle": "Personal baby book – with your family photos",
@@ -739,6 +769,9 @@ const englishTranslations = {
   "home.book.secondBook": "Every second book for only ₪99",
   "home.book.discountNote": "* Discount is automatically applied at checkout",
   "home.book.cta": "Create Your Personal Book Now",
+  "home.book.ariaLabel": "Product details - Our paper book",
+  "home.book.imageAlt": "Image of the paper book",
+  "home.book.ctaAriaLabel": "Go to personal book creation page",
   "home.howItWorks.title": "How it works",
   "home.howItWorks.titleHighlight": "works",
   "home.howItWorks.subtitle":
@@ -747,15 +780,18 @@ const englishTranslations = {
   "home.howItWorks.step1.title": "Upload photos",
   "home.howItWorks.step1.description":
     "Upload 5 favorite photos of the baby or family – it takes less than a minute",
+  "home.howItWorks.step1.imageAlt": "Example of photo upload",
   "home.howItWorks.step2.label": "We do",
   "home.howItWorks.step2.title": "Process the images",
   "home.howItWorks.step2.description":
     "Using artificial intelligence (AI), we convert the images into clear, baby-friendly versions – in black and white and in color.",
+  "home.howItWorks.step2.imageAlt": "Example of processed images in book",
   "home.howItWorks.step3.label": "We do",
   "home.howItWorks.step3.title": "Print the book",
   "home.howItWorks.step3.description":
     "We print your personal book in high quality and ship it to your home – ready to use and cherish.",
   "home.howItWorks.cta": "Get Started Now",
+  "home.howItWorks.ctaAriaLabel": "Start creating a book now",
   "home.dualDesign.title": "Your Photo – For First Focus and First Colors",
   "home.dualDesign.titleHighlight": "Your",
   "home.dualDesign.description":
@@ -770,21 +806,27 @@ const englishTranslations = {
   "home.dualDesign.moreExamplesLink": "Discover here",
   "home.special.title": "What Makes Our Book Special",
   "home.special.titleHighlight": "Special",
+  "home.special.ariaLabel": "What makes our book special",
   "home.special.item1.title": "Look at the closest ones",
   "home.special.item1.description":
     "The faces of the primary caregivers are familiar to the baby and soothe them from their first days",
+  "home.special.item1.imageAlt": "Young couple",
   "home.special.item2.title": "Meet the family",
   "home.special.item2.description":
     "An opportunity to be exposed to and look at the family the baby is joining",
+  "home.special.item2.imageAlt": "Young sister",
   "home.special.item3.title": "Sweet keepsake",
   "home.special.item3.description":
     "A book that is personal and serves as a keepsake for a short and wonderful period in the baby's life",
+  "home.special.item3.imageAlt": "Parent and son",
   "home.special.item4.title": "No more generic products",
   "home.special.item4.description":
     "Instead of looking at shapes and patterns, let your baby look at the family",
+  "home.special.item4.imageAlt": "Dad and son",
   "home.about.brand": "Little Gali",
   "home.about.title": "Who We Are",
   "home.about.titleHighlight": "We",
+  "home.about.imageAlt": "Little Gali team photo",
   "home.about.paragraph1":
     "I opened Little Gali about two months after Gali was born, mainly out of curiosity and a desire to create something new. I found myself investing more and more into it: thinking about the product, designing, building the website, and especially getting excited about every new order.",
   "home.about.paragraph2":
@@ -796,6 +838,7 @@ const englishTranslations = {
   "home.qa.subtitle":
     "Answers to the most common questions about our book and services",
   "home.qa.cta": "All Questions and Answers",
+  "home.qa.ctaAriaLabel": "Go to full Q&A page",
   "home.comingSoon.title": "Something Special Coming Soon",
   "home.comingSoon.titleHighlight": "Special",
   "home.comingSoon.comingSoon": "Coming Soon",
@@ -807,13 +850,12 @@ const englishTranslations = {
   "home.comingSoon.submitting": "Sending...",
   "home.comingSoon.error": "Invalid email address",
   "home.comingSoon.errorGeneric": "Something went wrong, please try again",
-  "home.comingSoon.success":
-    "Thank you! We'll update you as soon as the product is available",
+  "home.comingSoon.success": "Thank you! We'll update you when the product is available",
   "home.comingSoon.successTitle": "Thank You!",
-  "home.comingSoon.successMessage":
-    "We'll update you when the fabric books arrive",
+  "home.comingSoon.successMessage": "We'll update you when the fabric books arrive",
+  "home.comingSoon.imageAlt": "Coming soon product image",
   "home.testimonials.title": "What People Say About Us",
-  "home.testimonials.titleHighlight": "About Us",
+  "home.testimonials.titleHighlight": "Say",
   "qa.question1": "What is the book made of?",
   "qa.answer1":
     "The book is made of high-quality, thick paper that has been laminated. The book is stable and can be easily stood up.",

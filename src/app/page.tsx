@@ -153,7 +153,7 @@ function ComingSoonSection({
             >
               <Image
                 src="/coming-soon.jpg"
-                alt="Coming Soon"
+                alt={t("home.comingSoon.imageAlt")}
                 width={600}
                 height={400}
                 className="w-full h-auto object-cover"
@@ -461,11 +461,18 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden" style={{ backgroundColor: "#F7F5F2" }}>
+      {/* Skip to main content link for keyboard navigation */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary-orange focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-body-bold"
+      >
+        {t("accessibility.skipToMain")}
+      </a>
       <Header />
 
-      <main className="flex-1 pt-[72px]">
+      <main id="main-content" className="flex-1 pt-[72px]">
         {/* Hero Section */}
-        <section className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
+        <section aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
           {/* Background Image - positioned top-right */}
           <div className="absolute inset-0">
             <motion.div 
@@ -515,7 +522,7 @@ export default function Home() {
                         );
 
                         return (
-                          <h2 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
+                          <h1 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
                             {line1}
                             <br />
                             {beforeHighlight}
@@ -525,6 +532,7 @@ export default function Home() {
                               </span>
                               <motion.svg
                                 className="absolute bottom-0 left-0"
+                                aria-hidden="true"
                                 style={{
                                   width: "110%",
                                   left: "-5%",
@@ -556,22 +564,23 @@ export default function Home() {
                               </motion.svg>
                             </span>
                             {afterHighlight}
-                          </h2>
+                          </h1>
                         );
                       } else {
                         // Fallback if highlight not found in second line
                         return (
-                          <h2 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
+                          <h1 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
                             {line1}
                             <br />
                             {line2}
-                          </h2>
+                          </h1>
                         );
                       }
                     } else {
                       // English or other: use Title component as before
                       return (
                         <Title
+                          as="h1"
                           highlightText={highlightText}
                           color="text-white"
                           className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
@@ -586,7 +595,7 @@ export default function Home() {
                 {/* CTA Button - Desktop Only */}
                 <div className="pt-6 hidden md:block">
                   <div className="relative w-auto">
-                    <a href="/upload">
+                    <a href="/upload" aria-label={t("home.hero.ctaAriaLabel")}>
                       <MuiButton
                         variant="contained"
                         color="primary"
@@ -613,6 +622,7 @@ export default function Home() {
         </section>
         {/* הספרון שלנו Section */}
         <motion.section
+          aria-label={t("home.book.ariaLabel")}
           className="relative -mt-0 py-12 lg:py-16"
           style={{ backgroundColor: "#F7F5F2" }}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
@@ -709,7 +719,7 @@ export default function Home() {
                   {/* CTA Button */}
                   <div className="flex justify-center lg:justify-start pt-2">
                     <div>
-                      <a href="/upload">
+                      <a href="/upload" aria-label={t("home.book.ctaAriaLabel")}>
                         <MuiButton
                           variant="contained"
                           color="primary"
@@ -741,14 +751,14 @@ export default function Home() {
                         transition={{ duration: 0.8, ease: easeOwlet }}
                         viewport={{ once: true, amount: 0.3 }}
                       >
-                        <Image
-                          src="/our-book.jpg"
-                          alt="Book showcase"
-                          fill
-                          className="object-cover"
-                          priority
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
+                      <Image
+                        src="/our-book.jpg"
+                        alt={t("home.book.imageAlt")}
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
                       </motion.div>
                     </div>
                   </div>
@@ -764,6 +774,7 @@ export default function Home() {
         {/* How It Works Section */}
         <motion.section
           id="how-it-works"
+          aria-labelledby="how-it-works-heading"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
@@ -776,6 +787,8 @@ export default function Home() {
             {/* Section Title */}
             <div className="text-center mb-8 lg:mb-16">
               <Title
+                as="h2"
+                id="how-it-works-heading"
                 highlightText={t("home.howItWorks.titleHighlight")}
                 size="lg"
                 className="mb-4"
@@ -843,7 +856,7 @@ export default function Home() {
                   <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
                     <Image
                       src="/book-example-pencil.jpeg"
-                      alt="Transform Images"
+                      alt={t("home.howItWorks.step2.imageAlt")}
                       width={500}
                       height={500}
                       className="w-full h-full object-cover"
@@ -896,7 +909,7 @@ export default function Home() {
                   <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
                     <Image
                       src="/upload-images.png"
-                      alt="Upload Images"
+                      alt={t("home.howItWorks.step1.imageAlt")}
                       width={500}
                       height={500}
                       className="w-full h-full object-cover"
@@ -915,7 +928,7 @@ export default function Home() {
               transition={{ duration: 0.5, ease: easeOwlet, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <a href="/upload">
+              <a href="/upload" aria-label={t("home.howItWorks.ctaAriaLabel")}>
                 <MuiButton
                   variant="contained"
                   color="primary"
@@ -937,6 +950,7 @@ export default function Home() {
 
         {/* Choose Your Path Section */}
         <motion.section
+          aria-label={t("home.special.ariaLabel")}
           className="relative bg-[#F3EEE8] py-16 lg:py-24"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
@@ -981,7 +995,7 @@ export default function Home() {
                 <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
                   <Image
                     src="/couple.png"
-                    alt="Couple"
+                    alt={t("home.special.item1.imageAlt")}
                     fill
                     className="object-cover rounded-lg"
                     loading="lazy"
@@ -1012,7 +1026,7 @@ export default function Home() {
                 <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
                   <Image
                     src="/sister.png"
-                    alt="Young Sister"
+                    alt={t("home.special.item2.imageAlt")}
                     fill
                     className="object-cover rounded-lg"
                     loading="lazy"
@@ -1043,7 +1057,7 @@ export default function Home() {
                 <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
                   <Image
                     src="/parent-and-son.png"
-                    alt="Parent and Son"
+                    alt={t("home.special.item3.imageAlt")}
                     fill
                     className="object-cover rounded-lg"
                     loading="lazy"
@@ -1074,7 +1088,7 @@ export default function Home() {
                 <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
                   <Image
                     src="/dad-and-son.png"
-                    alt="Dad and Son"
+                    alt={t("home.special.item4.imageAlt")}
                     fill
                     className="object-cover rounded-lg"
                     loading="lazy"
@@ -1099,6 +1113,7 @@ export default function Home() {
         {/* Meet Us Section */}
         <motion.section
           id="about"
+          aria-labelledby="about-heading"
           className={`relative bg-white ${locale === "en" ? "py-16 md:py-20" : "pb-6"}`}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
@@ -1117,10 +1132,10 @@ export default function Home() {
                 transition={{ duration: 0.7, ease: easeOwlet, delay: 0.1 }}
                 viewport={{ once: true, amount: 0.3 }}
               >
-                <div className="w-full aspect-[4/3] relative">
+                  <div className="w-full aspect-[4/3] relative">
                   <Image
                     src="/about-us.jpg"
-                    alt="About Us"
+                    alt={t("home.about.imageAlt")}
                     fill
                     className="object-cover"
                     loading="lazy"
@@ -1140,6 +1155,8 @@ export default function Home() {
 
                   {/* Main heading */}
                   <Title
+                    as="h2"
+                    id="about-heading"
                     highlightText={t("home.about.titleHighlight")}
                     size="lg"
                   >
@@ -1173,6 +1190,7 @@ export default function Home() {
         {/* Q&A Section */}
         <motion.section
           id="qa"
+          aria-labelledby="qa-heading"
           className="relative py-16 lg:py-24"
           style={{ backgroundColor: "#F9F7EE" }}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
@@ -1185,6 +1203,8 @@ export default function Home() {
             {/* Section Title */}
             <div className="text-center mb-10 md:mb-16">
               <Title
+                as="h2"
+                id="qa-heading"
                 highlightText={t("home.qa.titleHighlight")}
                 size="lg"
                 className="mb-4"
@@ -1284,7 +1304,7 @@ export default function Home() {
             {/* Button to navigate to Q&A page */}
             <div className="text-center mt-12">
               <div>
-                <a href="/qa">
+                <a href="/qa" aria-label={t("home.qa.ctaAriaLabel")}>
                   <MuiButton
                     variant="contained"
                     color="primary"
@@ -1311,7 +1331,7 @@ export default function Home() {
       {/* Fixed Bottom CTA Button - Mobile Only */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white to-transparent pointer-events-none">
         <div className="pointer-events-auto">
-          <a href="/upload" className="block">
+          <a href="/upload" className="block" aria-label={t("home.hero.ctaAriaLabel")}>
             <MuiButton
               variant="contained"
               color="primary"
