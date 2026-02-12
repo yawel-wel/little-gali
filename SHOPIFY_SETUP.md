@@ -15,6 +15,12 @@ SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_storefront_access_token
 SHOPIFY_PRODUCT_VARIANT_ID=gid://shopify/ProductVariant/YOUR_VARIANT_ID
 SHOPIFY_WEBHOOK_SECRET=your_webhook_secret
 
+# Gift Card Product Variants (for different options)
+SHOPIFY_GIFT_CARD_VARIANT_ID_ONE_NO_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
+SHOPIFY_GIFT_CARD_VARIANT_ID_ONE_WITH_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
+SHOPIFY_GIFT_CARD_VARIANT_ID_TWO_NO_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
+SHOPIFY_GIFT_CARD_VARIANT_ID_TWO_WITH_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
+
 # Cloudinary Image Storage (Required - for storing images)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_UPLOAD_PRESET=your_upload_preset
@@ -102,7 +108,29 @@ Add the same environment variables in your Vercel project settings:
 
 **Free Tier:** 25GB storage, 25GB bandwidth/month - more than enough for most use cases!
 
-### 6. RESEND_API_KEY
+### 6. Gift Card Product Variant IDs
+
+**Setup Gift Cards in Shopify:**
+
+1. Go to your Shopify Admin → **Products** → **Gift Cards**
+2. If you haven't created gift cards yet:
+   - Click **Add gift card product**
+   - Shopify will automatically create a gift card product
+3. Edit your gift card product and add variants for different options:
+   - One personalized book without shipping
+   - One personalized book with shipping
+   - Two personalized books without shipping
+   - Two personalized books with shipping
+4. For each variant, get the variant ID from the URL when editing it
+5. Convert to GraphQL format: `gid://shopify/ProductVariant/XXXXXXXX`
+
+**Example:**
+- For "One book without shipping" variant with ID `41645760544871`
+- Environment variable: `SHOPIFY_GIFT_CARD_VARIANT_ID_ONE_NO_SHIPPING=gid://shopify/ProductVariant/41645760544871`
+
+**Note:** If you want different options, update the `GIFT_CARD_OPTIONS` array in `/src/lib/constants.ts` and add corresponding environment variables.
+
+### 7. RESEND_API_KEY
 
 - Already configured in your project
 - Get from [Resend Dashboard](https://resend.com/api-keys)

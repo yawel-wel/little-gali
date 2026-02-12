@@ -64,6 +64,7 @@ export function Header() {
   const mobileNavigationItems = [
     { nameKey: "nav.home", href: "/" },
     { nameKey: "nav.about", href: "/#about" },
+    { nameKey: "nav.giftCard", href: "/#gift-card" },
     { nameKey: "nav.qa", href: "/qa" },
     { nameKey: "nav.inspiration", href: "/inspiration" },
     { nameKey: "nav.contact", href: "/contact" },

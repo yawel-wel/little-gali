@@ -309,7 +309,12 @@ export default function CartPage() {
                   {/* Left Column: Cart Items */}
                   <div className="md:flex-1 space-y-4">
                     {[...cart.items].reverse().map((item, reversedIndex) => {
-                      const displayIndex = reversedIndex + 1;
+                      // Count only paper books for display index (skip gift cards)
+                      const reversedItems = [...cart.items].reverse();
+                      const paperBooksBeforeThis = reversedItems
+                        .slice(0, reversedIndex + 1)
+                        .filter((i) => !i.isGiftCard).length;
+                      const displayIndex = paperBooksBeforeThis;
                       return (
                         <div
                           key={item.id}
@@ -400,49 +405,73 @@ export default function CartPage() {
 
                           {/* Title, Style, and Price */}
                           <div className="mb-4">
-                            {/* Title - Smaller size, regular weight */}
-                            <h3
-                              className={`text-sm md:text-base font-body text-dark-gray mb-1 ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              {t("cart.book")} {displayIndex}
-                            </h3>
-                            {/* Color Style - Above price */}
-                            <div
-                              className={`text-sm text-medium-gray font-body mb-1 ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              <span>{t("cart.colorStyle")} </span>
-                              <span className="font-body text-dark-gray">
-                                {item.style === "cartoon"
-                                  ? t("cart.style.cartoon")
-                                  : item.style === "pencil"
-                                  ? t("cart.style.pencil")
-                                  : item.style === "watercolor"
-                                  ? t("cart.style.watercolor")
-                                  : t("cart.style.cartoon")}
-                              </span>
-                            </div>
-                            {/* Price - Smaller size, bolder weight */}
-                            <p
-                              className={`text-sm md:text-base font-body-bold text-dark-gray ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                              dir="ltr"
-                            >
-                              {displayIndex % 2 === 0 ? (
-                                <>
-                                  <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
-                                  <span className="line-through text-medium-gray ml-2">
-                                    {BOOK_PRICE}
+                            {item.isGiftCard ? (
+                              <>
+                                {/* Gift Card Title */}
+                                <h3
+                                  className={`text-sm md:text-base font-body text-dark-gray mb-1 ${
+                                    locale === "en" ? "text-left" : "text-right"
+                                  }`}
+                                >
+                                  {t("cart.giftCardTitle")}
+                                </h3>
+                                {/* Gift Card Price */}
+                                <p
+                                  className={`text-sm md:text-base font-body-bold text-dark-gray ${
+                                    locale === "en" ? "text-left" : "text-right"
+                                  }`}
+                                  dir="ltr"
+                                >
+                                  ₪ {item.giftCardAmount}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                {/* Title - Smaller size, regular weight */}
+                                <h3
+                                  className={`text-sm md:text-base font-body text-dark-gray mb-1 ${
+                                    locale === "en" ? "text-left" : "text-right"
+                                  }`}
+                                >
+                                  {t("cart.book")} {displayIndex}
+                                </h3>
+                                {/* Color Style - Above price */}
+                                <div
+                                  className={`text-sm text-medium-gray font-body mb-1 ${
+                                    locale === "en" ? "text-left" : "text-right"
+                                  }`}
+                                >
+                                  <span>{t("cart.colorStyle")} </span>
+                                  <span className="font-body text-dark-gray">
+                                    {item.style === "cartoon"
+                                      ? t("cart.style.cartoon")
+                                      : item.style === "pencil"
+                                      ? t("cart.style.pencil")
+                                      : item.style === "watercolor"
+                                      ? t("cart.style.watercolor")
+                                      : t("cart.style.cartoon")}
                                   </span>
-                                </>
-                              ) : (
-                                <>₪ {BOOK_PRICE}</>
-                              )}
-                            </p>
+                                </div>
+                                {/* Price - Smaller size, bolder weight */}
+                                <p
+                                  className={`text-sm md:text-base font-body-bold text-dark-gray ${
+                                    locale === "en" ? "text-left" : "text-right"
+                                  }`}
+                                  dir="ltr"
+                                >
+                                  {displayIndex % 2 === 0 ? (
+                                    <>
+                                      <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
+                                      <span className="line-through text-medium-gray ml-2">
+                                        {BOOK_PRICE}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>₪ {BOOK_PRICE}</>
+                                  )}
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
                       );
@@ -494,15 +523,7 @@ export default function CartPage() {
                             {locale === "he" ? (
                               <>
                                 <span className="text-xl font-body-bold text-black">
-                                  {cart.items.reduce(
-                                    (sum, item, index) =>
-                                      sum +
-                                      (index % 2 === 0
-                                        ? BOOK_PRICE
-                                        : DISCOUNTED_BOOK_PRICE) *
-                                        item.quantity,
-                                    0
-                                  )}{" "}
+                                  {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
                                   ₪
                                 </span>
                                 <span className="text-medium-gray font-body">
@@ -515,15 +536,7 @@ export default function CartPage() {
                                   {t("cart.total")}
                                 </span>
                                 <span className="text-xl font-body-bold text-black">
-                                  {cart.items.reduce(
-                                    (sum, item, index) =>
-                                      sum +
-                                      (index % 2 === 0
-                                        ? BOOK_PRICE
-                                        : DISCOUNTED_BOOK_PRICE) *
-                                        item.quantity,
-                                    0
-                                  )}{" "}
+                                  {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
                                   ₪
                                 </span>
                               </>
@@ -745,15 +758,7 @@ export default function CartPage() {
                           {locale === "he" ? (
                             <>
                               <span className="text-xl font-body-bold text-black">
-                                {cart.items.reduce(
-                                  (sum, item, index) =>
-                                    sum +
-                                    (index === 0
-                                      ? BOOK_PRICE
-                                      : DISCOUNTED_BOOK_PRICE) *
-                                      item.quantity,
-                                  0
-                                )}{" "}
+                                {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
                                 ₪
                               </span>
                               <span className="text-medium-gray font-body">
@@ -766,15 +771,7 @@ export default function CartPage() {
                                 {t("cart.total")}
                               </span>
                               <span className="text-xl font-body-bold text-black">
-                                {cart.items.reduce(
-                                  (sum, item, index) =>
-                                    sum +
-                                    (index === 0
-                                      ? BOOK_PRICE
-                                      : DISCOUNTED_BOOK_PRICE) *
-                                      item.quantity,
-                                  0
-                                )}{" "}
+                                {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
                                 ₪
                               </span>
                             </>

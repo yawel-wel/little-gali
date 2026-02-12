@@ -10,6 +10,8 @@ export interface CartItem {
   title?: string;
   lineId?: string;
   style?: "cartoon" | "pencil" | "watercolor";
+  isGiftCard?: boolean;
+  giftCardAmount?: number;
 }
 
 export interface Cart {
@@ -31,6 +33,7 @@ interface CartContextType {
     phoneNumber?: string,
     style?: "cartoon" | "pencil" | "watercolor"
   ) => Promise<void>;
+  addGiftCardToCart: (optionId: string) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   fetchCart: (cartId: string) => Promise<void>;
@@ -141,7 +144,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // Also check Shopify attributes for style (fallback)
           const cartItems: CartItem[] = await Promise.all(
             data.cart.lines.map(async (line: any) => {
-              const lineData = await fetchLineDataWithRetry(cartId, line.id);
+              // Check if this is a gift card first (skip image fetch for gift cards)
+              const isGiftCardCheck = line.attributes?.find(
+                (attr: any) => attr.key === "_type" && attr.value === "gift_card"
+              );
+              
+              const lineData = isGiftCardCheck 
+                ? { imageUrls: [] } 
+                : await fetchLineDataWithRetry(cartId, line.id);
               
               // Fallback to Shopify attributes if cart-images API returned empty (production issue)
               // This happens because in-memory storage doesn't work across serverless instances
@@ -168,10 +178,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 }
               }
               
+              // Check if this is a gift card
+              let isGiftCard = false;
+              let giftCardAmount = undefined;
+              if (line.attributes) {
+                const typeAttr = line.attributes.find(
+                  (attr: any) => attr.key === "_type"
+                );
+                if (typeAttr?.value === "gift_card") {
+                  isGiftCard = true;
+                  
+                  // Try to extract gift card amount from stored attribute first
+                  const amountAttr = line.attributes.find(
+                    (attr: any) => attr.key === "_gift_card_amount"
+                  );
+                  if (amountAttr?.value) {
+                    giftCardAmount = parseFloat(amountAttr.value);
+                  } else {
+                    // Fallback: Extract from line cost
+                    giftCardAmount = line.cost?.totalAmount?.amount ? 
+                      parseFloat(line.cost.totalAmount.amount) : undefined;
+                  }
+                }
+              }
+              
               // Check Shopify attributes for style (fallback if not in our storage)
               // Check both "style" (visible) and "_style" (hidden) attributes
               let style = lineData.style;
-              if (!style && line.attributes) {
+              if (!style && line.attributes && !isGiftCard) {
                 const styleAttr = line.attributes.find(
                   (attr: any) => attr.key === "style" || attr.key === "_style"
                 );
@@ -185,8 +219,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 lineId: line.id,
                 quantity: line.quantity,
                 title: line.title,
-                imageUrls: imageUrls,
-                style,
+                imageUrls: isGiftCard ? [] : imageUrls,
+                style: isGiftCard ? undefined : style,
+                isGiftCard,
+                giftCardAmount,
               };
             })
           );
@@ -284,6 +320,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const addGiftCardToCart = async (optionId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/shopify/cart/add-gift-card", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cartId: cart?.id,
+          optionId,
+          locale,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.cart) {
+          await fetchCart(data.cart.id);
+        }
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to add gift card to cart");
+      }
+    } catch (error) {
+      console.error("Error adding gift card to cart:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const updateQuantity = async (lineId: string, quantity: number) => {
     if (!cart?.id) return;
 
@@ -372,6 +440,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cart,
         isLoading,
         addToCart,
+        addGiftCardToCart,
         removeFromCart,
         updateQuantity,
         fetchCart,

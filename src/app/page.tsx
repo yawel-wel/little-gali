@@ -11,6 +11,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
+import { GiftCardSection } from "@/components/gift-card-section";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -1183,6 +1184,12 @@ export default function Home() {
 
         {/* Coming Soon Section */}
         <ComingSoonSection
+          prefersReducedMotion={prefersReducedMotion}
+          easeOwlet={easeOwlet}
+        />
+
+        {/* Gift Card Section */}
+        <GiftCardSection
           prefersReducedMotion={prefersReducedMotion}
           easeOwlet={easeOwlet}
         />

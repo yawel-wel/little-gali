@@ -41,6 +41,12 @@ export async function POST(request: NextRequest) {
               node {
                 id
                 quantity
+                cost {
+                  totalAmount {
+                    amount
+                    currencyCode
+                  }
+                }
                 merchandise {
                   ... on ProductVariant {
                     id

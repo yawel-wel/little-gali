@@ -109,7 +109,12 @@ export function CartDrawer() {
             ) : cart && cart.items.length > 0 ? (
               <div className="space-y-3 px-4">
                 {[...cart.items].reverse().map((item, reversedIndex) => {
-                  const displayIndex = reversedIndex + 1;
+                  // Count only paper books for display index (skip gift cards)
+                  const reversedItems = [...cart.items].reverse();
+                  const paperBooksBeforeThis = reversedItems
+                    .slice(0, reversedIndex + 1)
+                    .filter((i) => !i.isGiftCard).length;
+                  const displayIndex = paperBooksBeforeThis;
                   return (
                     <div
                       key={item.id}
@@ -180,36 +185,51 @@ export function CartDrawer() {
 
                       {/* Title, Style, and Price */}
                       <div className="mb-3">
-                        {/* Title - Smaller size */}
-                        <h3 className="text-sm font-body text-dark-gray mb-1">
-                          {t("cart.book")} {displayIndex}
-                        </h3>
-                        {/* Color Style - Above price */}
-                        <div className="text-xs text-medium-gray font-body mb-1">
-                          <span>{t("cart.colorStyle")} </span>
-                          <span className="font-body text-dark-gray">
-                            {item.style === "cartoon"
-                              ? t("cart.style.cartoon")
-                              : item.style === "pencil"
-                              ? t("cart.style.pencil")
-                              : item.style === "watercolor"
-                              ? t("cart.style.watercolor")
-                              : t("cart.style.cartoon")}
-                          </span>
-                        </div>
-                        {/* Price - Bolder weight */}
-                        <p className="text-sm font-body-bold text-dark-gray text-right" dir="ltr">
-                          {displayIndex > 1 ? (
-                            <>
-                              <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
-                              <span className="line-through text-medium-gray ml-2">
-                                {BOOK_PRICE}
+                        {item.isGiftCard ? (
+                          <>
+                            {/* Gift Card Title */}
+                            <h3 className="text-sm font-body text-dark-gray mb-1">
+                              {t("cart.giftCardTitle")}
+                            </h3>
+                            {/* Gift Card Price */}
+                            <p className="text-sm font-body-bold text-dark-gray text-right" dir="ltr">
+                              ₪ {item.giftCardAmount}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            {/* Title - Smaller size */}
+                            <h3 className="text-sm font-body text-dark-gray mb-1">
+                              {t("cart.book")} {displayIndex}
+                            </h3>
+                            {/* Color Style - Above price */}
+                            <div className="text-xs text-medium-gray font-body mb-1">
+                              <span>{t("cart.colorStyle")} </span>
+                              <span className="font-body text-dark-gray">
+                                {item.style === "cartoon"
+                                  ? t("cart.style.cartoon")
+                                  : item.style === "pencil"
+                                  ? t("cart.style.pencil")
+                                  : item.style === "watercolor"
+                                  ? t("cart.style.watercolor")
+                                  : t("cart.style.cartoon")}
                               </span>
-                            </>
-                          ) : (
-                            <>₪ {BOOK_PRICE}</>
-                          )}
-                        </p>
+                            </div>
+                            {/* Price - Bolder weight */}
+                            <p className="text-sm font-body-bold text-dark-gray text-right" dir="ltr">
+                              {displayIndex > 1 ? (
+                                <>
+                                  <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
+                                  <span className="line-through text-medium-gray ml-2">
+                                    {BOOK_PRICE}
+                                  </span>
+                                </>
+                              ) : (
+                                <>₪ {BOOK_PRICE}</>
+                              )}
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -248,15 +268,7 @@ export function CartDrawer() {
                   {t("cart.total")}
                 </span>
                 <span className="text-xl font-body-bold text-black">
-                  {[...cart.items]
-                    .reverse()
-                    .reduce(
-                      (sum, item, index) =>
-                        sum +
-                        (index % 2 === 0 ? BOOK_PRICE : DISCOUNTED_BOOK_PRICE) *
-                          item.quantity,
-                      0
-                    )}{" "}
+                  {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
                   ₪
                 </span>
               </div>
@@ -322,7 +334,7 @@ export function CartDrawer() {
               {t("cart.removeConfirm")}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-row-reverse gap-2 sm:gap-0 mt-4">
+          <DialogFooter className="flex-row-reverse gap-3 sm:gap-2 mt-4">
             <Button
               variant="contained"
               color="primary"

@@ -89,6 +89,7 @@ const hebrewTranslations = {
   // Navigation
   "nav.home": "בית",
   "nav.about": "אודותינו",
+  "nav.giftCard": "גיפט קארד",
   "nav.qa": "שאלות ותשובות",
   "nav.inspiration": "השראה",
   "nav.contact": "צור קשר",
@@ -136,6 +137,7 @@ const hebrewTranslations = {
   "cart.secondBook": "כל ספרון שני ב-99 ₪ 🎉",
   "cart.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
   "cart.startCreating": "התחל ליצור ספרון מותאם אישית",
+  "cart.giftCardTitle": "גיפט קארד",
   "cart.createBook": "צרו ספרון",
 
   // Inspiration Page
@@ -533,12 +535,30 @@ const hebrewTranslations = {
   "uploadModal.groupExample": "דוגמה קבוצתית",
   "uploadModal.goodExample1": "דוגמה טובה 1",
   "uploadModal.goodExample2": "דוגמה טובה 2",
+
+  // Gift Cards
+  "giftCard.title": "גיפט קארד לספרון אישי",
+  "giftCard.titleHighlight": "גיפט קארד",
+  "giftCard.description": "רוצים לתת את הספרון שלנו בתור מתנה אבל מעדיפים לאפשר להם לבחור תמונות וסגנון בעצמם?\nבדיוק בשביל זה יש לנו את הגיפט קארד שלנו.\nבסיום התשלום תקבלו למייל את פרטי הגיפט קארד אותו תוכלו להעביר כמתנה אישית ומיוחדת.",
+  "giftCard.selectOption": "בחרו אפשרות:",
+  "giftCard.addToCart": "הוסף לעגלה",
+  "giftCard.adding": "מוסיף...",
+  "giftCard.ariaLabel": "הוסף גיפט קארד לעגלה",
+  "giftCard.option1": "ספרון אישי אחד ללא משלוח",
+  "giftCard.option2": "ספרון אישי אחד כולל משלוח",
+  "giftCard.option3": "שני ספרונים אישיים ללא משלוח",
+  "giftCard.option4": "שני ספרונים אישיים כולל משלוח",
+  "giftCard.feature1": "הספרון השני ב99₪",
+  "giftCard.feature2": "בחירת 5 תמונות",
+  "giftCard.feature3": "בחירת סגנון",
+  "giftCard.feature4": "תוקף ללא הגבלה",
 };
 
 const englishTranslations = {
   // Navigation
   "nav.home": "Home",
   "nav.about": "About Us",
+  "nav.giftCard": "Gift Card",
   "nav.qa": "Q&A",
   "nav.inspiration": "Inspiration",
   "nav.contact": "Contact",
@@ -588,6 +608,7 @@ const englishTranslations = {
   "cart.secondBook": "Every second book for ₪99 🎉",
   "cart.discountNote": "* Discount is automatically applied at checkout",
   "cart.startCreating": "Start creating a personalized book",
+  "cart.giftCardTitle": "Gift Card",
   "cart.createBook": "Create Book",
 
   // Inspiration Page
@@ -995,4 +1016,21 @@ const englishTranslations = {
   "uploadModal.groupExample": "Group example",
   "uploadModal.goodExample1": "Good example 1",
   "uploadModal.goodExample2": "Good example 2",
+
+  // Gift Cards
+  "giftCard.title": "Gift Card for Personalized Book",
+  "giftCard.titleHighlight": "Gift Card",
+  "giftCard.description": "Want to give our book as a gift but prefer to let them choose the photos and style themselves?\nThat's exactly what our gift card is for.\nAfter payment, you'll receive the gift card details by email which you can pass on as a personal and special gift.",
+  "giftCard.selectOption": "Select Option:",
+  "giftCard.addToCart": "Add to Cart",
+  "giftCard.adding": "Adding...",
+  "giftCard.ariaLabel": "Add gift card to cart",
+  "giftCard.option1": "One Personalized Book (No Shipping)",
+  "giftCard.option2": "One Personalized Book (With Shipping)",
+  "giftCard.option3": "Two Personalized Books (No Shipping)",
+  "giftCard.option4": "Two Personalized Books (With Shipping)",
+  "giftCard.feature1": "Second book for ₪99",
+  "giftCard.feature2": "Choice of 5 photos",
+  "giftCard.feature3": "Choice of style",
+  "giftCard.feature4": "No expiration date",
 };
