@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
-      style?: "cartoon" | "pencil";
+      style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
     };
 
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
             { key: "_image_5", value: urls[4] },
             // Always include style attribute (default to "cartoon" if not provided)
             // Ensure style is valid before saving
-            ...(style && (style === "cartoon" || style === "pencil")
+            ...(style && (style === "cartoon" || style === "pencil" || style === "watercolor")
               ? [
                   {
                     key: "_style",

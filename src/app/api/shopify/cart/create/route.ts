@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
-      style?: "cartoon" | "pencil";
+      style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
     };
 
