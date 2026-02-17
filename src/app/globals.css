@@ -7,7 +7,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-assistant);
-  --font-mono: var(--font-heebo);
+  --font-mono: var(--font-assistant);
   --color-dark-blue: #1e3a8a;
   --color-darker-blue: #1e293b;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -276,13 +276,13 @@
 
   /* Typography System */
   .font-display {
-    font-family: var(--font-heebo), sans-serif;
+    font-family: var(--font-assistant), sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
 
   .font-heading {
-    font-family: var(--font-heebo), sans-serif;
+    font-family: var(--font-assistant), sans-serif;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
