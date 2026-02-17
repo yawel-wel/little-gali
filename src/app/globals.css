@@ -128,6 +128,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     /* overscroll-behavior-y: none; */
+    --banner-height: 0px;
   }
 
   /* Accessibility: Focus styles for keyboard navigation */
@@ -137,7 +138,7 @@
   textarea:focus-visible,
   select:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid #e5543d;
+    outline: 2px solid #e1b093;
     outline-offset: 2px;
   }
 
@@ -170,16 +171,27 @@
 @layer utilities {
   /* Primary Color Palette */
   .text-primary-orange {
-    color: #e5543d;
+    color: #e1b093;
   }
   .hover\:text-primary-orange:hover {
-    color: #e5543d;
+    color: #e1b093;
   }
   .bg-primary-orange {
-    background-color: #e5543d;
+    background-color: #e1b093;
   }
   .border-primary-orange {
-    border-color: #e5543d;
+    border-color: #e1b093;
+  }
+  
+  /* Accent Color (Burgundy) */
+  .text-accent-burgundy {
+    color: #693430;
+  }
+  .bg-accent-burgundy {
+    background-color: #693430;
+  }
+  .border-accent-burgundy {
+    border-color: #693430;
   }
 
   /* Soft Accent Colors from Screenshot */
@@ -235,6 +247,20 @@
   }
   .bg-soft-green-light {
     background-color: #f0fdf4;
+  }
+  
+  /* New Warm Neutral Backgrounds */
+  .bg-warm-light {
+    background-color: #F7F5F2;
+  }
+  .bg-warm-cream {
+    background-color: #F1ECE7;
+  }
+  .bg-warm-tan {
+    background-color: #E0D5C9;
+  }
+  .bg-warm-taupe {
+    background-color: #CABCB3;
   }
 
   /* Text Colors */

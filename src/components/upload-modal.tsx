@@ -292,6 +292,7 @@ export function UploadModal({
                   src="/group-example.jpeg"
                   alt={t("uploadModal.groupExample")}
                   className="w-full h-full object-cover"
+                  style={{ objectFit: 'cover' }}
                   loading="eager"
                 />
               </div>
@@ -307,6 +308,7 @@ export function UploadModal({
                   src="/good-example-1.jpg"
                   alt={t("uploadModal.goodExample1")}
                   className="w-full h-full object-cover"
+                  style={{ objectFit: 'cover' }}
                   loading="eager"
                 />
               </div>
@@ -322,6 +324,7 @@ export function UploadModal({
                   src="/good-example-2.jpg"
                   alt={t("uploadModal.goodExample2")}
                   className="w-full h-full object-cover"
+                  style={{ objectFit: 'cover' }}
                   loading="eager"
                 />
               </div>

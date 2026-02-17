@@ -110,7 +110,7 @@ export default function ContactPage() {
                   transition={{ duration: 1.1, ease: easeOwlet, delay: 0.1 }}
                   viewport={{ once: true, amount: 0.25 }}
                 >
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {/* Title */}
                     <div className="w-full">
                       <Title
@@ -120,10 +120,18 @@ export default function ContactPage() {
                       >
                         {t("contact.title")}
                       </Title>
+                      <div className="mt-4 text-center">
+                        <p className="text-base font-body text-medium-gray leading-relaxed">
+                          מתלבטים בקשר לתמונות? יש לכם שאלה?
+                        </p>
+                        <p className="text-base font-body text-medium-gray leading-relaxed">
+                          מוזמנים ליצור איתנו קשר ונשמח לעזור בכל נושא
+                        </p>
+                      </div>
                     </div>
 
                     {/* Image */}
-                    <div className="w-full h-64 lg:h-80 rounded-lg overflow-hidden md:mt-20">
+                    <div className="w-full h-64 lg:h-80 rounded-lg overflow-hidden">
                       <img
                         src="/contact-us.png"
                         alt="Contact Us"

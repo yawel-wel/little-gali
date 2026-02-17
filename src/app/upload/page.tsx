@@ -560,12 +560,12 @@ function UploadPageContent() {
     >
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         <section
-          className="relative py-10 lg:py-16 pt-16 md:pt-12"
+          className="relative py-10 lg:py-16 pt-6 md:pt-6"
           style={{ backgroundColor: "#F3EEE8" }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-8 md:pt-6">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-0 md:pt-0">
             <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
               <div className="text-center md:mt-2">

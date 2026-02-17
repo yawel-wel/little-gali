@@ -22,17 +22,17 @@ export default function QAPage() {
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F3EEE8" }}>
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Q&A Section */}
         <motion.section
-          className="relative py-16 lg:py-24 pt-20 md:pt-16"
+          className="relative py-16 lg:py-24 pt-24 md:pt-20"
           style={{ backgroundColor: "#F3EEE8" }}
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: easeOwlet }}
           viewport={{ once: true, amount: 0.25 }}
         >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
             <div className="text-center mb-10 md:mb-16">
               <Title highlightText={t("home.qa.titleHighlight")} size="lg" className="mb-4">

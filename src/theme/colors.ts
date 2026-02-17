@@ -6,8 +6,11 @@
 
 // Base brand colors (single source of truth)
 export const brandColors = {
-  // Main brand / CTA color (matches `.text-primary-orange` etc.)
-  primary: "#E5543D",
+  // Main brand / CTA color (warm beige/tan)
+  primary: "#e1b093",
+  
+  // Secondary/accent (rich burgundy)
+  accent: "#693430",
 
   // Supporting accent colors (soft, playful palette)
   secondary: "#F4A261", // soft peach
@@ -26,9 +29,13 @@ export const brandColors = {
     muted: "#718096", // light gray
   },
 
-  // Backgrounds
+  // Backgrounds - New warm neutral palette
   background: {
     default: "#FFFFFF",
+    light: "#F7F5F2", // lightest warm neutral
+    cream: "#F1ECE7", // warm cream
+    tan: "#E0D5C9", // light tan
+    taupe: "#CABCB3", // darker taupe
     softPeachLight: "#FEF3E7",
     softBlueLight: "#E3F2FD",
     softYellowLight: "#FFF9C4",
@@ -43,13 +50,13 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const muiPalette: PaletteOptions = {
   primary: {
     main: brandColors.primary,
-    light: brandColors.background.softPeachLight,
-    // Slightly darker than main; tweak if you like
-    dark: "#C14331",
+    light: brandColors.background.cream,
+    // Darker tan for primary dark
+    dark: "#B89275",
     contrastText: "#FFFFFF",
   },
   secondary: {
-    main: brandColors.secondary,
+    main: brandColors.accent, // Use burgundy accent
     contrastText: "#FFFFFF",
   },
   text: {

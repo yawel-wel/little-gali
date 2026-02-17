@@ -39,15 +39,14 @@ export default function InspirationPage() {
   };
   return (
     <div
-      className="min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: "#F3EEE8" }}
+      className="min-h-screen overflow-x-hidden bg-warm-cream"
     >
       <Header />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1" style={{ paddingTop: "calc(96px + var(--banner-height, 0px))" }}>
         {/* Section Title */}
         <motion.section
-          className="relative py-16 lg:py-24"
+          className="relative py-4 lg:py-6"
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: easeOwlet }}
@@ -108,9 +107,7 @@ export default function InspirationPage() {
                     <button
                       type="button"
                       onClick={() => toggleCard("card1")}
-                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer ${
-                        locale === "en" ? "justify-start" : "justify-end"
-                      }`}
+                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer justify-center md:justify-end`}
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card1
@@ -258,9 +255,7 @@ export default function InspirationPage() {
                     <button
                       type="button"
                       onClick={() => toggleCard("card2")}
-                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer ${
-                        locale === "en" ? "justify-start" : "justify-end"
-                      }`}
+                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer justify-center md:justify-end`}
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card2
@@ -425,9 +420,7 @@ export default function InspirationPage() {
                     <button
                       type="button"
                       onClick={() => toggleCard("card3")}
-                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer ${
-                        locale === "en" ? "justify-start" : "justify-end"
-                      }`}
+                      className={`flex items-center gap-3 mt-4 text-primary-orange hover:text-primary-orange/80 transition-all duration-200 cursor-pointer justify-center md:justify-end`}
                     >
                       <span className="font-body-bold text-sm">
                         {cardStates.card3

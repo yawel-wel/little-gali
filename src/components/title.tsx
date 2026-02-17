@@ -130,12 +130,12 @@ export function Title({
         >
           <path
             d={pathData}
-            stroke="rgb(229, 84, 61)"
+            stroke="rgb(105, 52, 48)"
             strokeWidth={height}
             fill="none"
             strokeLinecap="round"
             style={{
-              filter: "drop-shadow(0 2px 4px rgba(229, 84, 61, 0.3))",
+              filter: "drop-shadow(0 2px 4px rgba(105, 52, 48, 0.3))",
             }}
           />
         </UnderlineComponent>

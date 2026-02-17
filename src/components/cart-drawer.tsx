@@ -79,15 +79,16 @@ export function CartDrawer() {
         <Button
           variant="text"
           color="primary"
-          className="relative text-dark-gray cursor-pointer hover:bg-transparent min-w-0 p-0"
+          className="relative cursor-pointer hover:bg-transparent min-w-0 p-0"
           sx={{
             minWidth: 0,
             padding: 0,
             borderRadius: "9999px",
+            color: "#693430",
             "&:hover": { backgroundColor: "transparent", opacity: 0.7 },
           }}
         >
-          <ShoppingCart className="h-6 w-6" />
+          <ShoppingCart className="h-6 w-6" style={{ color: "#693430" }} />
           {cartItemCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-primary-orange text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {cartItemCount}

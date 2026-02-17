@@ -81,8 +81,7 @@ export function Header() {
         className="fixed left-0 right-0 z-50 transition-[top] duration-300 ease-in-out"
         style={{ 
           backgroundColor: "#F9F7EE",
-          top: 0,
-          marginTop: 0
+          top: "var(--banner-height, 0px)"
         }}
         initial={prefersReducedMotion ? false : { y: -100 }}
         animate={prefersReducedMotion ? undefined : { y: 0 }}
@@ -177,12 +176,12 @@ export function Header() {
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <a href="/" className="block">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Little Gali"
                 width={1440}
                 height={432}
                 priority
-                className="h-8 w-auto md:h-8 md:w-auto lg:h-10 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                className="h-24 w-auto md:h-24 md:w-auto lg:h-30 lg:w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
               />
             </a>
           </div>

@@ -7,6 +7,7 @@ import { CartProvider } from "@/lib/CartContext";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MuiThemeProvider } from "@/theme/MuiThemeProvider";
+import { TopBanner } from "@/components/top-banner";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -125,7 +126,10 @@ export default function RootLayout({
         <MuiThemeProvider>
           <LanguageProvider>
             <CartProvider>
-              <UploadImagesProvider>{children}</UploadImagesProvider>
+              <UploadImagesProvider>
+                <TopBanner />
+                {children}
+              </UploadImagesProvider>
             </CartProvider>
           </LanguageProvider>
         </MuiThemeProvider>

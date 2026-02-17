@@ -91,7 +91,7 @@ function ComingSoonSection({
   return (
     <motion.section
       className="relative py-16 lg:py-24"
-      style={{ backgroundColor: "#F3EEE8" }}
+      style={{ backgroundColor: "#F9F7EE" }}
       initial={
         prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
       }
@@ -461,7 +461,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="overflow-x-hidden" style={{ backgroundColor: "#F7F5F2" }}>
+    <div className="overflow-x-hidden bg-warm-light">
       {/* Skip to main content link for keyboard navigation */}
       <a 
         href="#main-content" 
@@ -471,7 +471,7 @@ export default function Home() {
       </a>
       <Header />
 
-      <main id="main-content" className="flex-1 pt-[72px]">
+      <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
         <section aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
           {/* Background Image - positioned top-right */}
@@ -554,12 +554,12 @@ export default function Home() {
                               >
                                 <path
                                   d="M 0 14 Q 50 10, 100 14"
-                                  stroke="rgb(229, 84, 61)"
+                                  stroke="rgb(105, 52, 48)"
                                   strokeWidth="8"
                                   fill="none"
                                   strokeLinecap="round"
                                   style={{
-                                    filter: "drop-shadow(0 2px 4px rgba(229, 84, 61, 0.3))",
+                                    filter: "drop-shadow(0 2px 4px rgba(105, 52, 48, 0.3))",
                                   }}
                                 />
                               </motion.svg>
@@ -593,8 +593,8 @@ export default function Home() {
                     }
                   })()}
                 </div>
-                {/* CTA Button - Desktop Only */}
-                <div className="pt-6 hidden md:block">
+                {/* CTA Button - All devices */}
+                <div className="pt-6">
                   <div className="relative w-auto">
                     <a href="/upload" aria-label={t("home.hero.ctaAriaLabel")}>
                       <MuiButton
@@ -624,8 +624,7 @@ export default function Home() {
         {/* הספרון שלנו Section */}
         <motion.section
           aria-label={t("home.book.ariaLabel")}
-          className="relative -mt-0 py-12 lg:py-16"
-          style={{ backgroundColor: "#F7F5F2" }}
+          className="relative -mt-0 py-12 lg:py-16 bg-warm-cream"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -776,8 +775,7 @@ export default function Home() {
         <motion.section
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
-          className="relative py-16 lg:py-24"
-          style={{ backgroundColor: "#F9F7EE" }}
+          className="relative py-16 lg:py-24 bg-warm-light"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -1199,7 +1197,7 @@ export default function Home() {
           id="qa"
           aria-labelledby="qa-heading"
           className="relative py-16 lg:py-24"
-          style={{ backgroundColor: "#F9F7EE" }}
+          style={{ backgroundColor: "#c2c8c3" }}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -1334,30 +1332,6 @@ export default function Home() {
       </main>
 
       <Footer />
-
-      {/* Fixed Bottom CTA Button - Mobile Only */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white to-transparent pointer-events-none">
-        <div className="pointer-events-auto">
-          <a href="/upload" className="block" aria-label={t("home.hero.ctaAriaLabel")}>
-            <MuiButton
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{
-                px: 4,
-                py: 1.5,
-                fontFamily: "var(--font-assistant)",
-                fontWeight: 700,
-                fontSize: "1rem",
-                textTransform: "none",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-              }}
-            >
-              {t("home.hero.cta")}
-            </MuiButton>
-          </a>
-        </div>
-      </div>
     </div>
   );
 }

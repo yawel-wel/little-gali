@@ -4,20 +4,35 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/LanguageContext";
 
+const messages = [
+  "משלוחים לכל הארץ",
+  "הוספת כרטיס ברכה אישי בחינם"
+];
+
 export function TopBanner() {
   const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const bannerRef = useRef<HTMLDivElement>(null);
+
+  // Rotate messages every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Hide banner when scrolling down, show when scrolling up
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      // Hide banner when scrolling down past 10px, show when at top or scrolling up
+      if (currentScrollY > 10 && currentScrollY > lastScrollY) {
         setIsVisible(false);
-      } else if (currentScrollY < lastScrollY) {
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 10) {
         setIsVisible(true);
       }
       
@@ -61,11 +76,20 @@ export function TopBanner() {
           exit={{ y: -100, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="fixed top-0 left-0 right-0 z-[60] text-center py-2 px-4"
-          style={{ backgroundColor: "#f8d9c4" }}
+          style={{ backgroundColor: "#693430" }}
         >
-          <p className="text-black font-body text-sm md:text-base">
-            {t("banner.shipping")}
-          </p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={currentMessageIndex}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.5 }}
+              className="text-white font-body text-sm md:text-base"
+            >
+              {messages[currentMessageIndex]}
+            </motion.p>
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
