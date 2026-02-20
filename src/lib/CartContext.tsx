@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useLanguage } from "./LanguageContext";
+import { trackAddToCart, trackInitiateCheckout } from "./meta-pixel-events";
 
 export interface CartItem {
   id: string;
@@ -307,6 +308,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // Always fetch the complete cart to ensure we have style and images from cart-images API
           // This is more reliable than trying to merge partial data
           await fetchCart(data.cart.id);
+          
+          // Track Meta Pixel AddToCart event
+          try {
+            trackAddToCart(
+              "Little Gali Baby Book",
+              bookId || "custom-book",
+              quantity * 149, // Using BOOK_PRICE or fallback
+              quantity
+            );
+          } catch (err) {
+            console.error("Error tracking AddToCart:", err);
+          }
         }
       } else {
         const error = await response.json();
@@ -339,6 +352,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         if (data.cart) {
           await fetchCart(data.cart.id);
+          
+          // Track Meta Pixel AddToCart event for gift card
+          try {
+            // Extract gift card value from optionId (format: gid://shopify/ProductVariant/...)
+            const giftCardValue = 100; // Default fallback
+            trackAddToCart(
+              "Little Gali Gift Card",
+              optionId,
+              giftCardValue,
+              1
+            );
+          } catch (err) {
+            console.error("Error tracking gift card AddToCart:", err);
+          }
         }
       } else {
         const error = await response.json();

@@ -20,6 +20,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
+import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -254,6 +255,15 @@ export default function CartPage() {
   const handleCheckout = () => {
     if (cart?.checkoutUrl) {
       setIsCheckingOut(true);
+      
+      // Track Meta Pixel InitiateCheckout event
+      try {
+        const totalValue = cart.totalAmount ? parseFloat(cart.totalAmount) : 0;
+        trackInitiateCheckout(totalValue, cart.totalQuantity);
+      } catch (err) {
+        console.error("Error tracking InitiateCheckout:", err);
+      }
+      
       // The checkoutUrl in cart state should already have the locale
       // But ensure it's there as a safety measure
       let checkoutUrl = cart.checkoutUrl;

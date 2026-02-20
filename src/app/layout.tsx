@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/lib/LanguageContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MuiThemeProvider } from "@/theme/MuiThemeProvider";
 import { TopBanner } from "@/components/top-banner";
+import { MetaPixelScript } from "@/components/meta-pixel";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -61,6 +62,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || "";
+  
   return (
     <html
       lang="he"
@@ -87,6 +90,8 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Meta Pixel */}
+        {metaPixelId && <MetaPixelScript pixelId={metaPixelId} />}
         <script
           dangerouslySetInnerHTML={{
             __html: `

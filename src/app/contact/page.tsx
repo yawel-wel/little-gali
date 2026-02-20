@@ -8,6 +8,7 @@ import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/LanguageContext";
+import { trackContact } from "@/lib/meta-pixel-events";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
@@ -46,6 +47,14 @@ export default function ContactPage() {
           type: "success",
           message: data.message || t("contact.success"),
         });
+        
+        // Track Meta Pixel Contact event
+        try {
+          trackContact();
+        } catch (err) {
+          console.error("Error tracking Contact:", err);
+        }
+        
         // Reset form
         setFormData({
           name: "",

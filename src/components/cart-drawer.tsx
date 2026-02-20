@@ -16,6 +16,7 @@ import { ShoppingCart, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
+import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
 
 export function CartDrawer() {
   const { cart, isLoading, removeFromCart } = useCart();
@@ -53,6 +54,14 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     if (cart?.checkoutUrl) {
+      // Track Meta Pixel InitiateCheckout event
+      try {
+        const totalValue = cart.totalAmount ? parseFloat(cart.totalAmount) : 0;
+        trackInitiateCheckout(totalValue, cart.totalQuantity);
+      } catch (err) {
+        console.error("Error tracking InitiateCheckout:", err);
+      }
+      
       // The checkoutUrl in cart state should already have the locale
       // But ensure it's there as a safety measure
       let checkoutUrl = cart.checkoutUrl;

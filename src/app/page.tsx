@@ -23,6 +23,7 @@ import { BOOK_PRICE } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import { trackSubscribe, trackViewContent } from "@/lib/meta-pixel-events";
 
 function ComingSoonSection({
   prefersReducedMotion,
@@ -72,6 +73,13 @@ function ComingSoonSection({
           message: data.message || t("home.comingSoon.success"),
         });
         setEmail("");
+        
+        // Track Meta Pixel Subscribe event
+        try {
+          trackSubscribe();
+        } catch (err) {
+          console.error("Error tracking Subscribe:", err);
+        }
       } else {
         setSubmitStatus({
           type: "error",
