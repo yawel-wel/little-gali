@@ -4,6 +4,80 @@ import { createHmac } from "crypto";
 
 export const runtime = "nodejs";
 
+// Track purchase via Meta Conversions API
+async function trackMetaPurchase(orderData: any) {
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const accessToken = process.env.META_CONVERSIONS_API_TOKEN;
+
+  if (!pixelId || !accessToken) {
+    console.warn("Meta Pixel ID or Conversions API token not configured");
+    return;
+  }
+
+  try {
+    const eventTime = Math.floor(Date.now() / 1000);
+    const customerEmail = orderData.customer?.email || orderData.contact_email;
+    const customerPhone = orderData.customer?.phone || orderData.billing_address?.phone;
+    const firstName = orderData.customer?.first_name || orderData.billing_address?.first_name;
+    const lastName = orderData.customer?.last_name || orderData.billing_address?.last_name;
+    
+    // Hash email and phone for privacy
+    const hashData = (data: string) => {
+      if (!data) return undefined;
+      return createHmac("sha256", "")
+        .update(data.toLowerCase().trim())
+        .digest("hex");
+    };
+
+    const eventData = {
+      event_name: "Purchase",
+      event_time: eventTime,
+      action_source: "website",
+      event_source_url: "https://www.littlegali.com",
+      user_data: {
+        em: customerEmail ? hashData(customerEmail) : undefined,
+        ph: customerPhone ? hashData(customerPhone) : undefined,
+        fn: firstName ? hashData(firstName) : undefined,
+        ln: lastName ? hashData(lastName) : undefined,
+        country: orderData.billing_address?.country_code?.toLowerCase(),
+        ct: orderData.billing_address?.city?.toLowerCase(),
+        zp: orderData.billing_address?.zip,
+      },
+      custom_data: {
+        currency: orderData.currency || "ILS",
+        value: parseFloat(orderData.total_price || "0"),
+        content_type: "product",
+        order_id: orderData.name || orderData.id,
+        num_items: orderData.line_items?.length || 0,
+      },
+    };
+
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/${pixelId}/events`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: [eventData],
+          access_token: accessToken,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    
+    if (response.ok) {
+      console.log("Meta Purchase event tracked successfully:", result);
+    } else {
+      console.error("Failed to track Meta Purchase event:", result);
+    }
+  } catch (error) {
+    console.error("Error tracking Meta Purchase event:", error);
+  }
+}
+
 // Initialize Resend only when API key is available
 const getResend = () => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -222,6 +296,10 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Email sent successfully");
+    
+    // Track purchase with Meta Conversions API
+    await trackMetaPurchase(webhookData);
+    
     return NextResponse.json({ status: "success" });
   } catch (error: any) {
     console.error("Error processing webhook:", error);

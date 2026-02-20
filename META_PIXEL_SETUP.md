@@ -4,13 +4,33 @@ This document explains how Meta Pixel tracking has been implemented in the Littl
 
 ## Environment Configuration
 
-The Meta Pixel ID is configured via environment variable. Add the following to your `.env.local` file:
+The Meta Pixel tracking requires two environment variables:
+
+### 1. Meta Pixel ID (Required for client-side tracking)
+Add to your `.env.local` file:
 
 ```bash
 NEXT_PUBLIC_META_PIXEL_ID=your_pixel_id_here
 ```
 
 **Important:** The environment variable must be prefixed with `NEXT_PUBLIC_` to be accessible in the browser.
+
+### 2. Meta Conversions API Token (Required for Purchase tracking)
+Add to your `.env.local` file:
+
+```bash
+META_CONVERSIONS_API_TOKEN=your_access_token_here
+```
+
+This is used for server-side Purchase event tracking via the Conversions API.
+
+**How to get your Conversions API Access Token:**
+1. Go to [Meta Events Manager](https://business.facebook.com/events_manager)
+2. Select your pixel
+3. Click "Settings" in the left menu
+4. Scroll to "Conversions API" section
+5. Click "Generate Access Token"
+6. Copy the token and add it to your `.env.local`
 
 ## Implementation Overview
 
@@ -54,6 +74,11 @@ The Meta Pixel has been integrated at the following key points:
 #### Email Signup (`/src/app/page.tsx`)
 - **Subscribe**: Tracks email newsletter subscriptions
 
+#### Shopify Webhook (`/src/app/api/shopify/webhook/route.ts`)
+- **Purchase**: Tracks completed purchases via Conversions API
+- Includes order value, currency, order ID, and number of items
+- Uses server-side tracking for reliability (works even with ad blockers)
+
 ## Tracked Events
 
 ### Standard Events
@@ -64,11 +89,11 @@ The following Meta Pixel standard events are currently tracked:
 3. **InitiateCheckout** - When user clicks checkout button
 4. **Contact** - When user submits contact form
 5. **Subscribe** - When user signs up for email newsletter
+6. **Purchase** - When an order is completed (tracked via Conversions API in webhook)
 
 ### Future Events
 The following utility functions are available but not yet implemented in the UI:
 
-- **Purchase** - Should be tracked on order confirmation (requires Shopify webhook integration)
 - **ViewContent** - Can be used for specific product/page views
 - **Lead** - For lead generation forms
 - **CompleteRegistration** - For user account creation
@@ -134,10 +159,19 @@ trackViewContent("Product Name", "Category", 149);
 - Check that `window.fbq` is defined before tracking
 - Verify event names match Meta's standard event names
 
+### Purchase Events Not Showing
+- Verify `META_CONVERSIONS_API_TOKEN` is set in `.env.local`
+- Check webhook logs for Meta API errors
+- Ensure the webhook is properly configured in Shopify
+- Go to Events Manager > Test Events to see live Purchase events
+- Note: Purchase events may take a few minutes to appear in Meta's reporting
+
 ### Common Issues
 1. **Environment variable not found**: Make sure to restart Next.js dev server after adding `.env.local`
 2. **Pixel blocked by ad blocker**: Disable ad blockers during testing
 3. **Events appearing in Test Events but not in Overview**: Wait a few minutes for data to aggregate
+4. **Purchase events not tracked**: Verify Conversions API token is valid and has proper permissions
+5. **Webhook not firing**: Check Shopify webhook configuration and verify the webhook secret matches
 
 ## Additional Resources
 
