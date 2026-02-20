@@ -20,8 +20,11 @@ async function trackMetaPurchase(orderData: any) {
     const customerPhone = orderData.customer?.phone || orderData.billing_address?.phone;
     const firstName = orderData.customer?.first_name || orderData.billing_address?.first_name;
     const lastName = orderData.customer?.last_name || orderData.billing_address?.last_name;
+    const city = orderData.billing_address?.city;
+    const country = orderData.billing_address?.country_code;
+    const zip = orderData.billing_address?.zip;
     
-    // Hash email and phone for privacy
+    // Hash user data for privacy (Meta requirement)
     const hashData = (data: string) => {
       if (!data) return undefined;
       return createHmac("sha256", "")
@@ -39,9 +42,9 @@ async function trackMetaPurchase(orderData: any) {
         ph: customerPhone ? hashData(customerPhone) : undefined,
         fn: firstName ? hashData(firstName) : undefined,
         ln: lastName ? hashData(lastName) : undefined,
-        country: orderData.billing_address?.country_code?.toLowerCase(),
-        ct: orderData.billing_address?.city?.toLowerCase(),
-        zp: orderData.billing_address?.zip,
+        country: country ? hashData(country) : undefined,
+        ct: city ? hashData(city) : undefined,
+        zp: zip ? hashData(zip) : undefined,
       },
       custom_data: {
         currency: orderData.currency || "ILS",
