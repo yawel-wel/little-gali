@@ -552,6 +552,14 @@ const hebrewTranslations = {
   "giftCard.feature2": "בחירת 5 תמונות",
   "giftCard.feature3": "בחירת סגנון",
   "giftCard.feature4": "תוקף ללא הגבלה",
+
+  // Cookie Consent
+  "cookieConsent.title": "עוגיות ומעקב",
+  "cookieConsent.description": "אנחנו משתמשים בעוגיות לשיפור חווית הגלישה וניתוח השימוש באתר.",
+  "cookieConsent.accept": "מסכימ/ה",
+  "cookieConsent.decline": "דחה",
+  "cookieConsent.learnMore": "פרטים נוספים",
+  "cookieConsent.ariaLabel": "הודעת עוגיות ומעקב",
 };
 
 const englishTranslations = {
@@ -1033,4 +1041,12 @@ const englishTranslations = {
   "giftCard.feature2": "Choice of 5 photos",
   "giftCard.feature3": "Choice of style",
   "giftCard.feature4": "No expiration date",
+
+  // Cookie Consent
+  "cookieConsent.title": "Cookies & Tracking",
+  "cookieConsent.description": "We use cookies to improve your browsing experience and analyze site usage.",
+  "cookieConsent.accept": "Accept",
+  "cookieConsent.decline": "Decline",
+  "cookieConsent.learnMore": "Learn More",
+  "cookieConsent.ariaLabel": "Cookie and tracking notice",
 };

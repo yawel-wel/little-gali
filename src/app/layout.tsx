@@ -8,7 +8,8 @@ import { LanguageProvider } from "@/lib/LanguageContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MuiThemeProvider } from "@/theme/MuiThemeProvider";
 import { TopBanner } from "@/components/top-banner";
-import { MetaPixelScript } from "@/components/meta-pixel";
+import { CookieConsent } from "@/components/cookie-consent";
+import { ConditionalTrackingScripts } from "@/components/conditional-tracking-scripts";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -75,23 +76,6 @@ export default function RootLayout({
           name="google-site-verification"
           content="Fy9eAB6H8N1DkO006a1eYCRc99aOjEioAiBJDNLRZZ4"
         />
-        {/* Google Analytics */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-7NHYLBNE1J"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-7NHYLBNE1J');
-            `,
-          }}
-        />
-        {/* Meta Pixel */}
-        {metaPixelId && <MetaPixelScript pixelId={metaPixelId} />}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -134,6 +118,8 @@ export default function RootLayout({
               <UploadImagesProvider>
                 <TopBanner />
                 {children}
+                <CookieConsent />
+                <ConditionalTrackingScripts metaPixelId={metaPixelId} />
               </UploadImagesProvider>
             </CartProvider>
           </LanguageProvider>
