@@ -218,30 +218,6 @@ function UploadPageContent() {
     setSelectedImagesCount(images.length);
   }, [images.length]);
 
-  // Preload modal images when component mounts to improve modal open performance
-  useEffect(() => {
-    const modalImages = [
-      "/too-close-example.jpg",
-      "/group-example.jpeg",
-      "/good-example-1.jpg",
-      "/good-example-2.jpg",
-    ];
-
-    // Preload all images and wait for them to fully load
-    Promise.all(
-      modalImages.map((src) => {
-        return new Promise<void>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve(); // Resolve even on error to not block
-          img.src = src;
-        });
-      })
-    ).then(() => {
-      console.log("Modal images preloaded");
-    });
-  }, []);
-
   const handleUploadClick = () => {
     // Show modal only if it hasn't been seen before
     if (!hasSeenModal) {

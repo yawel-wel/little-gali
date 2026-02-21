@@ -103,6 +103,7 @@ const hebrewTranslations = {
 
   // Top Banner
   "banner.shipping": "משלוחים לכל הארץ",
+  "banner.freeCard": "הוספת כרטיס ברכה אישי בחינם",
 
   // Cart
   "cart.title": "עגלת הקניות",
@@ -541,10 +542,6 @@ const hebrewTranslations = {
   "uploadModal.goodExample1": "דוגמה טובה 1",
   "uploadModal.goodExample2": "דוגמה טובה 2",
 
-  // Top Banner
-  "banner.shipping": "משלוחים לכל הארץ",
-  "banner.freeCard": "הוספת כרטיס ברכה אישי בחינם",
-
   // Gift Cards
   "giftCard.title": "גיפט קארד לספרון אישי",
   "giftCard.titleHighlight": "גיפט קארד",
@@ -588,7 +585,8 @@ const englishTranslations = {
   "accessibility.skipToMain": "Skip to main content",
 
   // Top Banner
-  "banner.shipping": "Shipping Nationwide",
+  "banner.shipping": "Free Shipping Nationwide",
+  "banner.freeCard": "Free Personalized Greeting Card",
 
   // Cart
   "cart.title": "Shopping Cart",
@@ -1038,10 +1036,6 @@ const englishTranslations = {
   "uploadModal.groupExample": "Group example",
   "uploadModal.goodExample1": "Good example 1",
   "uploadModal.goodExample2": "Good example 2",
-
-  // Top Banner
-  "banner.shipping": "Free Shipping Nationwide",
-  "banner.freeCard": "Free Personalized Greeting Card",
 
   // Gift Cards
   "giftCard.title": "Gift Card for Personalized Book",
