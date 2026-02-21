@@ -4,17 +4,18 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/LanguageContext";
 
-const messages = [
-  "משלוחים לכל הארץ",
-  "הוספת כרטיס ברכה אישי בחינם"
-];
-
 export function TopBanner() {
   const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const bannerRef = useRef<HTMLDivElement>(null);
+
+  // Get messages from translations
+  const messages = [
+    t("banner.shipping"),
+    t("banner.freeCard")
+  ];
 
   // Rotate messages every 5 seconds
   useEffect(() => {
@@ -23,7 +24,7 @@ export function TopBanner() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [messages.length]);
 
   useEffect(() => {
     const handleScroll = () => {

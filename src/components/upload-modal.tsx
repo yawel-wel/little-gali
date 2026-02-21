@@ -23,10 +23,9 @@ export function UploadModal({
   // Preload images when modal component mounts (even before it's opened)
   useEffect(() => {
     const modalImages = [
-      "/too-close-example.jpg",
-      "/group-example.jpeg",
       "/good-example-1.jpg",
       "/good-example-2.jpg",
+      "/good-example-3.jpg",
     ];
 
     // Preload all images immediately
@@ -40,270 +39,98 @@ export function UploadModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 md:p-4"
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl max-w-[680px] w-full max-h-[90vh] overflow-hidden mx-auto"
+        className="relative bg-white rounded-2xl max-w-[680px] md:max-w-[480px] w-full max-h-[90vh] overflow-y-auto mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className={`absolute top-4 ${
-            locale === "en" ? "right-4" : "left-4"
-          } w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all cursor-pointer`}
+          className={`absolute top-2 md:top-4 ${
+            locale === "en" ? "right-2 md:right-4" : "left-2 md:left-4"
+          } w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all cursor-pointer`}
         >
-          <X className="w-5 h-5 text-gray-600" />
+          <X className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
         </button>
 
         {/* Modal Content */}
-        <div className="px-8 py-6">
+        <div className="px-4 py-4 md:px-4 md:py-5">
           {/* Title */}
-          <h2 className="text-xl font-semibold text-dark-gray mb-6 text-center">
+          <h2 className={`text-lg md:text-xl font-semibold text-dark-gray mb-1.5 md:mb-1.5 text-center ${
+            locale === "en" ? "text-left" : "text-center"
+          }`}>
             {t("uploadModal.title")}
           </h2>
+          
+          {/* Subtitle */}
+          <p className={`text-sm md:text-base text-dark-gray mb-4 md:mb-4 leading-relaxed ${
+            locale === "en" ? "text-left" : "text-center"
+          }`}>
+            {t("uploadModal.subtitle")}
+          </p>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-2 gap-x-12 items-start mt-4 mb-6">
-            {/* Left Column - What to Choose */}
-            <div className="pt-1">
-              <h3
-                className={`text-md font-semibold text-dark-gray mb-2 ${
+          {/* Single Column List */}
+          <div className="max-w-md md:max-w-full mx-auto">
+            <ul className="space-y-2 md:space-y-2 w-full">
+              <li className={`flex items-center gap-2 md:gap-2 ${
+                locale === "en" ? "flex-row" : "flex-row"
+              }`}>
+                <span className="text-[15px] md:text-[18px] leading-none flex-shrink-0">
+                  ✅
+                </span>
+                <p className={`text-dark-gray font-body text-sm md:text-base leading-5 md:leading-6 flex-1 ${
                   locale === "en" ? "text-left" : "text-right"
-                }`}
-              >
-                {t("uploadModal.choose")}
-              </h3>
-              <ul className="space-y-2 w-full">
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    ✅
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-6 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.clearFaces")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    ✅
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-6 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.visibleEyes")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    ✅
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-6 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.goodLighting")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    ✅
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-6 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.oneOrTwo")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    ✅
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-6 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.naturalSmile")}
-                  </p>
-                </li>
-              </ul>
-            </div>
-
-            {/* Right Column - What to Avoid */}
-            <div>
-              <h3
-                className={`text-md font-semibold text-dark-gray mb-2 ${
+                }`}>
+                  {t("uploadModal.facingCamera")}
+                </p>
+              </li>
+              <li className={`flex items-center gap-2 md:gap-2 ${
+                locale === "en" ? "flex-row" : "flex-row"
+              }`}>
+                <span className="text-[15px] md:text-[18px] leading-none flex-shrink-0">
+                  ✅
+                </span>
+                <p className={`text-dark-gray font-body text-sm md:text-base leading-5 md:leading-6 flex-1 ${
                   locale === "en" ? "text-left" : "text-right"
-                }`}
-              >
-                {t("uploadModal.avoid")}
-              </h3>
-              <ul className="space-y-2 w-full">
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    🚫
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-5 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.noBWFilter")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    🚫
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-5 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.notTooClose")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    🚫
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-5 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.notBlurry")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    🚫
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-5 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.noGroup")}
-                  </p>
-                </li>
-                <li
-                  className={`flex items-center gap-2 ${
-                    locale === "en" ? "flex-row justify-start" : "flex-row"
-                  }`}
-                >
-                  <span className="text-[14px] md:text-[18px] leading-none flex-shrink-0">
-                    🚫
-                  </span>
-                  <p
-                    className={`text-dark-gray font-body text-base leading-5 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("uploadModal.noSunglasses")}
-                  </p>
-                </li>
-              </ul>
-            </div>
+                }`}>
+                  {t("uploadModal.eyesVisible")}
+                </p>
+              </li>
+              <li className={`flex items-center gap-2 md:gap-2 ${
+                locale === "en" ? "flex-row" : "flex-row"
+              }`}>
+                <span className="text-[15px] md:text-[18px] leading-none flex-shrink-0">
+                  ✅
+                </span>
+                <p className={`text-dark-gray font-body text-sm md:text-base leading-5 md:leading-6 flex-1 ${
+                  locale === "en" ? "text-left" : "text-right"
+                }`}>
+                  {t("uploadModal.facesNotCut")}
+                </p>
+              </li>
+              <li className={`flex items-center gap-2 md:gap-2 ${
+                locale === "en" ? "flex-row" : "flex-row"
+              }`}>
+                <span className="text-[15px] md:text-[18px] leading-none flex-shrink-0">
+                  ✅
+                </span>
+                <p className={`text-dark-gray font-body text-sm md:text-base leading-5 md:leading-6 flex-1 ${
+                  locale === "en" ? "text-left" : "text-right"
+                }`}>
+                  {t("uploadModal.goodLightingClear")}
+                </p>
+              </li>
+            </ul>
           </div>
 
-          {/* Important Note */}
-          <div className="mt-5 mb-5 flex justify-center">
-            <div
-              className={`bg-[#FFF8E6] text-gray-700 text-sm rounded-lg px-3 py-2 ${
-                locale === "en" ? "pl-4" : "pr-4"
-              } inline-flex items-start gap-2`}
-            >
-              <span className="text-yellow-500 text-lg leading-none">💡</span>
-              <span>
-                <strong>{t("uploadModal.important")}</strong>{" "}
-                {t("uploadModal.importantNote")}
-              </span>
-            </div>
-          </div>
-
-          {/* Image Examples - Mixed (2 X + 2 Check) */}
-          <div className="flex items-center justify-center gap-3 mt-6 mb-2">
-            {/* Red X 1 - Too Close */}
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                <img
-                  src="/too-close-example.jpg"
-                  alt={t("uploadModal.tooCloseExample")}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
-                <X className="w-3 h-3 text-white" />
-              </div>
-            </div>
-
-            {/* Red X 2 - Group */}
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                <img
-                  src="/group-example.jpeg"
-                  alt={t("uploadModal.groupExample")}
-                  className="w-full h-full object-cover"
-                  style={{ objectFit: 'cover' }}
-                  loading="eager"
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
-                <X className="w-3 h-3 text-white" />
-              </div>
-            </div>
-
+          {/* Image Examples - Good Examples Only */}
+          <div className="flex items-center justify-center gap-2 md:gap-2 mt-4 mb-2 md:mt-4 md:mb-2">
             {/* Green Check 1 */}
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img
                   src="/good-example-1.jpg"
                   alt={t("uploadModal.goodExample1")}
@@ -312,14 +139,14 @@ export function UploadModal({
                   loading="eager"
                 />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-                <Check className="w-3 h-3 text-white" />
+              <div className="absolute -bottom-0.5 -right-0.5 md:-bottom-1 md:-right-1 w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
               </div>
             </div>
 
             {/* Green Check 2 */}
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img
                   src="/good-example-2.jpg"
                   alt={t("uploadModal.goodExample2")}
@@ -328,25 +155,41 @@ export function UploadModal({
                   loading="eager"
                 />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-                <Check className="w-3 h-3 text-white" />
+              <div className="absolute -bottom-0.5 -right-0.5 md:-bottom-1 md:-right-1 w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
+              </div>
+            </div>
+
+            {/* Green Check 3 */}
+            <div className="relative">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/good-example-3.jpg"
+                  alt="Good Example 3"
+                  className="w-full h-full object-cover"
+                  style={{ objectFit: 'cover' }}
+                  loading="eager"
+                />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 md:-bottom-1 md:-right-1 w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
               </div>
             </div>
           </div>
 
           {/* CTA Button */}
           {showUploadButton && (
-            <div className="mt-4 flex justify-center">
+            <div className="mt-3 md:mt-3 flex justify-center">
               <Button
                 variant="contained"
                 color="primary"
                 sx={{
                   borderRadius: "12px",
                   textTransform: "none",
-                  fontSize: "0.95rem",
+                  fontSize: { xs: "0.875rem", md: "0.95rem" },
                   fontWeight: 500,
-                  height: 44,
-                  px: 3,
+                  height: { xs: 40, md: 44 },
+                  px: { xs: 2.5, md: 3 },
                   maxWidth: 280,
                   boxShadow: "none",
                 }}
@@ -366,7 +209,7 @@ export function UploadModal({
               >
                 {t("uploadModal.chooseFromDevice")}
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 md:w-5 md:h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -383,8 +226,8 @@ export function UploadModal({
           )}
 
           {/* Privacy Statement */}
-          <div className="text-center mt-2 mb-2">
-            <p className="font-body text-sm text-gray-500 text-center">
+          <div className="text-center mt-1.5 mb-1 md:mt-1.5 md:mb-1">
+            <p className="font-body text-xs md:text-sm text-gray-500 text-center">
               {t("uploadModal.privacy")}
             </p>
           </div>

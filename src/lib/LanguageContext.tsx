@@ -514,7 +514,12 @@ const hebrewTranslations = {
   "styleSelector.modal.gotIt": "הבנתי!",
 
   // Upload Modal
-  "uploadModal.title": "איך לבחור תמונה לספרון?",
+  "uploadModal.title": "איזה תמונה כדאי לבחור",
+  "uploadModal.subtitle": "בחרו תמונה שהפנים של כל האנשים בה נראות בבירור.",
+  "uploadModal.facingCamera": "הפנים פונות למצלמה (לא בפרופיל)",
+  "uploadModal.eyesVisible": "רואים את העיניים בבירור",
+  "uploadModal.facesNotCut": "הפנים שלמות ולא חתוכות",
+  "uploadModal.goodLightingClear": "תאורה טובה וברורה (לא חשוך או מוצל מדי)",
   "uploadModal.choose": "כדאי לבחור",
   "uploadModal.avoid": "כדאי להימנע",
   "uploadModal.clearFaces": "פנים ברורות",
@@ -535,6 +540,10 @@ const hebrewTranslations = {
   "uploadModal.groupExample": "דוגמה קבוצתית",
   "uploadModal.goodExample1": "דוגמה טובה 1",
   "uploadModal.goodExample2": "דוגמה טובה 2",
+
+  // Top Banner
+  "banner.shipping": "משלוחים לכל הארץ",
+  "banner.freeCard": "הוספת כרטיס ברכה אישי בחינם",
 
   // Gift Cards
   "giftCard.title": "גיפט קארד לספרון אישי",
@@ -1001,7 +1010,12 @@ const englishTranslations = {
   "styleSelector.modal.gotIt": "Got it!",
 
   // Upload Modal
-  "uploadModal.title": "How to Choose a Photo for the Book?",
+  "uploadModal.title": "Which Photo Should You Choose?",
+  "uploadModal.subtitle": "Choose a photo where everyone's faces are clearly visible.",
+  "uploadModal.facingCamera": "Faces facing the camera (not in profile)",
+  "uploadModal.eyesVisible": "Eyes are clearly visible",
+  "uploadModal.facesNotCut": "Faces are complete and not cut off",
+  "uploadModal.goodLightingClear": "Good and clear lighting (not too dark or shadowed)",
   "uploadModal.choose": "Recommended to Choose",
   "uploadModal.avoid": "Recommended to Avoid",
   "uploadModal.clearFaces": "Clear faces",
@@ -1024,6 +1038,10 @@ const englishTranslations = {
   "uploadModal.groupExample": "Group example",
   "uploadModal.goodExample1": "Good example 1",
   "uploadModal.goodExample2": "Good example 2",
+
+  // Top Banner
+  "banner.shipping": "Free Shipping Nationwide",
+  "banner.freeCard": "Free Personalized Greeting Card",
 
   // Gift Cards
   "giftCard.title": "Gift Card for Personalized Book",
