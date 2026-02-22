@@ -14,6 +14,7 @@ import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
 import { useLanguage } from "@/lib/LanguageContext";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import Button from "@mui/material/Button";
 import {
   DndContext,
@@ -137,13 +138,9 @@ function MobileImageEditor({
         />
       </div>
 
-      {/* Text + button — fades out while the user is actively dragging or pinching */}
+      {/* Text + button — always visible on mobile; fades on desktop while dragging/pinching */}
       <div
-        className="flex flex-col items-center gap-4 transition-opacity duration-200"
-        style={{
-          opacity: isInteracting ? 0 : 1,
-          pointerEvents: isInteracting ? "none" : "auto",
-        }}
+        className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
       >
         <p
           className="font-body text-center px-6"
@@ -852,6 +849,7 @@ function UploadPageContent() {
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
+                    modifiers={[restrictToHorizontalAxis]}
                   >
                     <SortableContext
                       items={images
