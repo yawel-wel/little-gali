@@ -115,7 +115,7 @@ function SortableImageItem({
         userSelect: "none",
         willChange: isDragging ? "transform" : "auto", // Optimize for dragging
       }}
-      className="relative w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px] lg:w-[140px] lg:h-[140px] flex-shrink-0"
+      className="relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0"
       {...attributes}
       {...listeners}
     >
@@ -617,8 +617,9 @@ function UploadPageContent() {
                       items={images.slice(0, 5).map((_, index) => index.toString())}
                       strategy={horizontalListSortingStrategy}
                     >
+                      <div className="w-full overflow-x-auto md:overflow-visible">
                       <div
-                        className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end"
+                        className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2"
                         style={{
                           perspective: "1000px",
                           transformStyle: "preserve-3d",
@@ -635,6 +636,7 @@ function UploadPageContent() {
                             isSubmitting={isSubmitting}
                           />
                         ))}
+                      </div>
                       </div>
                     </SortableContext>
                   </DndContext>
