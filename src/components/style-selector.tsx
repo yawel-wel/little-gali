@@ -431,11 +431,6 @@ export function StyleSelector({
                 </div>
               </div>
 
-              {/* Bottom Note */}
-              <p className="text-xs sm:text-sm font-body text-medium-gray text-center mb-2">
-                {t("styleSelector.modal.bottomNote")}
-              </p>
-
               {/* Got it Button */}
               <div className="flex justify-center">
                 <button
