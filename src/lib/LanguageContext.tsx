@@ -478,7 +478,10 @@ const hebrewTranslations = {
   "upload.uploadingAndAdding": "מעלה תמונות ומוסיף לעגלה...",
   "upload.updating": "מעדכן...",
   "upload.addToCart": "הוסף לעגלה",
+  "upload.tapToCrop": "לחצו על התמונה בשביל לחתוך אותה",
   "upload.dragToReorder": "הזיזו את התמונות בשביל לבחור את הסדר שיופיע בספרון",
+  "upload.cropInstruction": "גררו את התמונה למיקום הרצוי",
+  "upload.cropDone": "סיימתי",
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
   "upload.photoNote":
@@ -969,7 +972,10 @@ const englishTranslations = {
   "upload.uploadingAndAdding": "Uploading photos and adding to cart...",
   "upload.updating": "Updating...",
   "upload.addToCart": "Add to Cart",
+  "upload.tapToCrop": "Tap an image to crop it",
   "upload.dragToReorder": "Drag the images to choose the order that will appear in the booklet",
+  "upload.cropInstruction": "Drag the image to adjust the crop",
+  "upload.cropDone": "Done",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
   "upload.photoNote":

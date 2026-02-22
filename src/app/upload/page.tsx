@@ -7,6 +7,8 @@ import { UploadModal } from "@/components/upload-modal";
 import { StyleSelector, StyleType } from "@/components/style-selector";
 import { Upload, Info, X, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, Suspense } from "react";
+import Cropper from "react-easy-crop";
+import type { Area } from "react-easy-crop";
 import { useRouter } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
@@ -32,6 +34,136 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+// ─── Mobile Image Editor ──────────────────────────────────────────────────────
+// Uses react-easy-crop for pan/zoom, then crops the image via canvas on save.
+
+// Crop the image to the pixel area described by `pixelCrop`
+async function getCroppedBlob(
+  imageSrc: string,
+  pixelCrop: Area,
+): Promise<Blob | null> {
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.crossOrigin = "anonymous";
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = imageSrc;
+  });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.drawImage(
+    img,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height,
+  );
+
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+}
+
+type CropState = { crop: { x: number; y: number }; zoom: number };
+
+function MobileImageEditor({
+  imageUrl,
+  initialCrop,
+  initialZoom,
+  onSave,
+}: {
+  imageUrl: string;
+  initialCrop?: { x: number; y: number };
+  initialZoom?: number;
+  onSave: (croppedUrl: string, cropState: CropState) => void;
+}) {
+  const { t } = useLanguage();
+  const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
+  const [zoom, setZoom] = useState(initialZoom ?? 1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [isInteracting, setIsInteracting] = useState(false);
+
+  // Portrait ratio matching the thumbnail frames (72×84 ≈ 6:7)
+  const aspect = 72 / 84;
+
+  const onCropComplete = useCallback((_: Area, pixels: Area) => {
+    setCroppedAreaPixels(pixels);
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!croppedAreaPixels) return;
+    const blob = await getCroppedBlob(imageUrl, croppedAreaPixels);
+    if (blob) onSave(URL.createObjectURL(blob), { crop, zoom });
+  }, [imageUrl, croppedAreaPixels, onSave, crop, zoom]);
+
+  // Prevent body scroll while editor is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8"
+      style={{ backgroundColor: "#F9F7EE" }}
+    >
+      {/* Cropper — constrained box so the full image is visible around the frame */}
+      <div
+        className="relative w-[85vw] md:w-[380px] flex-shrink-0"
+        style={{ aspectRatio: "72 / 84" }}
+      >
+        <Cropper
+          image={imageUrl}
+          crop={crop}
+          zoom={zoom}
+          aspect={aspect}
+          onCropChange={setCrop}
+          onZoomChange={setZoom}
+          onCropComplete={onCropComplete}
+          onInteractionStart={() => setIsInteracting(true)}
+          onInteractionEnd={() => setIsInteracting(false)}
+          style={{
+            cropAreaStyle: { border: "3px solid rgba(255,255,255,0.85)" },
+          }}
+        />
+      </div>
+
+      {/* Text + button — fades out while the user is actively dragging or pinching */}
+      <div
+        className="flex flex-col items-center gap-4 transition-opacity duration-200"
+        style={{
+          opacity: isInteracting ? 0 : 1,
+          pointerEvents: isInteracting ? "none" : "auto",
+        }}
+      >
+        <p
+          className="font-body text-center px-6"
+          style={{ color: "#374151", fontSize: "1rem" }}
+        >
+          {t("upload.cropInstruction")}
+        </p>
+        <button
+          onClick={handleSave}
+          className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg"
+        >
+          {t("upload.cropDone")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Sortable Image Item ──────────────────────────────────────────────────────
+
 interface SortableImageItemProps {
   id: string;
   url: string;
@@ -39,6 +171,7 @@ interface SortableImageItemProps {
   locale: string;
   onRemove: (index: number) => void;
   isSubmitting: boolean;
+  onTap: (index: number) => void;
 }
 
 function SortableImageItem({
@@ -48,6 +181,7 @@ function SortableImageItem({
   locale,
   onRemove,
   isSubmitting,
+  onTap,
 }: SortableImageItemProps) {
   const {
     attributes,
@@ -56,7 +190,7 @@ function SortableImageItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id,
     animateLayoutChanges: () => false, // Disable layout animation on drop
   });
@@ -67,17 +201,39 @@ function SortableImageItem({
     const checkDesktop = () => {
       setIsDesktop(window.matchMedia("(min-width: 768px)").matches);
     };
-    
+
     checkDesktop();
     const mediaQuery = window.matchMedia("(min-width: 768px)");
     mediaQuery.addEventListener("change", checkDesktop);
-    
+
     return () => mediaQuery.removeEventListener("change", checkDesktop);
   }, []);
 
+  // Track whether a drag actually started so we can ignore click-after-drag
+  const wasDragging = useRef(false);
+
+  useEffect(() => {
+    if (isDragging) {
+      wasDragging.current = true;
+    }
+  }, [isDragging]);
+
+  useEffect(() => {
+    if (!isDragging && wasDragging.current) {
+      // Give the browser time to fire any synthetic click before resetting
+      const t = setTimeout(() => {
+        wasDragging.current = false;
+      }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [isDragging]);
+
   const dragTransform = CSS.Transform.toString(transform);
-  const isDraggingTransform = dragTransform && dragTransform !== "none" && dragTransform !== "translate3d(0, 0, 0)";
-  
+  const isDraggingTransform =
+    dragTransform &&
+    dragTransform !== "none" &&
+    dragTransform !== "translate3d(0, 0, 0)";
+
   const style = {
     transform: dragTransform,
     transition: "none", // Always disable transitions to prevent flicker on all items
@@ -97,8 +253,8 @@ function SortableImageItem({
   const combinedTransform = isDraggingTransform
     ? dragTransform
     : isDesktop
-    ? accordionTransform
-    : undefined;
+      ? accordionTransform
+      : undefined;
 
   return (
     <div
@@ -118,6 +274,9 @@ function SortableImageItem({
       className="relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0"
       {...attributes}
       {...listeners}
+      onClick={() => {
+        if (!wasDragging.current) onTap(index);
+      }}
     >
       <img
         src={url}
@@ -145,13 +304,15 @@ function SortableImageItem({
         }}
         className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
         disabled={isSubmitting}
-        style={{ pointerEvents: 'auto' }}
+        style={{ pointerEvents: "auto" }}
       >
         <X className="w-3 h-3" />
       </button>
     </div>
   );
 }
+
+// ─── Upload Page ──────────────────────────────────────────────────────────────
 
 function UploadPageContent() {
   const router = useRouter();
@@ -171,13 +332,23 @@ function UploadPageContent() {
     message: string;
   }>({ type: null, message: "" });
   const [uploadingImages, setUploadingImages] = useState<Set<number>>(
-    new Set()
+    new Set(),
   );
   const [selectedStyle, setSelectedStyle] = useState<StyleType>("cartoon");
   const selectedStyleRef = useRef<StyleType>("cartoon");
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Store Cloudinary URLs separately - don't update display, only use for cart
   const cloudinaryUrls = useRef<Map<number, string>>(new Map()); // Maps index -> Cloudinary URL
+  // Keep the original (unedited) image URL per index so the full image is always
+  // available when the user re-opens the crop editor.
+  const originalUrls = useRef<Map<number, string>>(new Map());
+  // Remember where the user left the crop (pan + zoom) so it's restored next time.
+  const cropStates = useRef<Map<number, CropState>>(new Map());
+
+  // Mobile image editor state
+  const [editingImageIndex, setEditingImageIndex] = useState<number | null>(
+    null,
+  );
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -205,7 +376,9 @@ function UploadPageContent() {
     setHasSeenModal(false);
     setSubmitStatus({ type: null, message: "" });
     setIsSubmitting(false);
-    cloudinaryUrls.current.clear(); // Clear Cloudinary URLs map
+    cloudinaryUrls.current.clear();
+    originalUrls.current.clear();
+    cropStates.current.clear();
 
     // Clear file input
     if (fileInputRef.current) {
@@ -251,7 +424,7 @@ function UploadPageContent() {
   // Upload a single image to Cloudinary
   const uploadSingleImage = async (
     blobUrl: string,
-    index: number
+    index: number,
   ): Promise<string> => {
     try {
       // Compress the image (using optimized defaults from utils)
@@ -292,13 +465,13 @@ function UploadPageContent() {
   };
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = event.target.files;
     if (files) {
       // Filter only image files
       const imageFiles = Array.from(files).filter((file) =>
-        file.type.startsWith("image/")
+        file.type.startsWith("image/"),
       );
 
       // Create blob URLs for preview and add to existing images
@@ -313,6 +486,13 @@ function UploadPageContent() {
         newImages.slice(5).forEach((url) => URL.revokeObjectURL(url));
       }
 
+      // Record the original (uncropped) URL for each new image
+      const startIndex = images.length;
+      blobUrls.forEach((url, i) => {
+        const idx = startIndex + i;
+        if (idx < 5) originalUrls.current.set(idx, url);
+      });
+
       // Update images with blob URLs for immediate preview
       // Don't upload yet - wait until user clicks "Add to Cart"
       setImages(limitedImages);
@@ -321,43 +501,84 @@ function UploadPageContent() {
   };
 
   const handleRemoveImage = (index: number) => {
-    // Revoke the URL to prevent memory leaks (only for blob URLs)
-    if (images[index] && images[index].startsWith("blob:")) {
-      URL.revokeObjectURL(images[index]);
+    const displayUrl = images[index];
+    const origUrl = originalUrls.current.get(index);
+    // Revoke original blob URL
+    if (origUrl && origUrl.startsWith("blob:")) URL.revokeObjectURL(origUrl);
+    // Revoke display URL only if it differs from the original (i.e. it's a crop blob)
+    if (
+      displayUrl &&
+      displayUrl.startsWith("blob:") &&
+      displayUrl !== origUrl
+    ) {
+      URL.revokeObjectURL(displayUrl);
     }
+
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
     setSelectedImagesCount(newImages.length);
-    // Remove Cloudinary URL from map and shift remaining indices
-    cloudinaryUrls.current.delete(index);
-    // Shift all Cloudinary URLs after this index down by 1
-    const newCloudinaryUrls = new Map<number, string>();
-    cloudinaryUrls.current.forEach((url, i) => {
-      if (i < index) {
-        newCloudinaryUrls.set(i, url);
-      } else if (i > index) {
-        newCloudinaryUrls.set(i - 1, url);
-      }
-    });
-    cloudinaryUrls.current = newCloudinaryUrls;
+
+    // Helper to shift a Map<number,T> after removing `index`
+    const shiftMap = <T,>(map: Map<number, T>) => {
+      const next = new Map<number, T>();
+      map.forEach((v, i) => {
+        if (i < index) next.set(i, v);
+        else if (i > index) next.set(i - 1, v);
+      });
+      return next;
+    };
+
+    cloudinaryUrls.current = shiftMap(cloudinaryUrls.current);
+    originalUrls.current = shiftMap(originalUrls.current);
+    cropStates.current = shiftMap(cropStates.current);
   };
 
   const handleStartOver = () => {
-    // Revoke all blob URLs (only blob URLs need to be revoked)
+    // Revoke display blob URLs
     images.forEach((url) => {
-      if (url.startsWith("blob:")) {
-        URL.revokeObjectURL(url);
+      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+    });
+    // Revoke original blob URLs that differ from display URLs
+    originalUrls.current.forEach((origUrl, i) => {
+      if (origUrl.startsWith("blob:") && origUrl !== images[i]) {
+        URL.revokeObjectURL(origUrl);
       }
     });
     clearImages();
     setSelectedImagesCount(0);
-    setUploadingImages(new Set()); // Clear uploading state
-    setSelectedStyle("cartoon"); // Reset to default style
-    cloudinaryUrls.current.clear(); // Clear Cloudinary URLs map
+    setUploadingImages(new Set());
+    setSelectedStyle("cartoon");
+    cloudinaryUrls.current.clear();
+    originalUrls.current.clear();
+    cropStates.current.clear();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  // Open the mobile editor for a specific image
+  const handleImageTap = useCallback((index: number) => {
+    setEditingImageIndex(index);
+  }, []);
+
+  // Save the cropped image back into the images array
+  const handleSaveCrop = useCallback(
+    (croppedUrl: string, cropState: CropState) => {
+      if (editingImageIndex === null) return;
+      const newImages = [...images];
+      const oldDisplayUrl = newImages[editingImageIndex];
+      const origUrl = originalUrls.current.get(editingImageIndex);
+      // Only revoke the old display URL if it is NOT the original (originals are kept)
+      if (oldDisplayUrl.startsWith("blob:") && oldDisplayUrl !== origUrl) {
+        URL.revokeObjectURL(oldDisplayUrl);
+      }
+      newImages[editingImageIndex] = croppedUrl;
+      setImages(newImages);
+      cropStates.current.set(editingImageIndex, cropState);
+      setEditingImageIndex(null);
+    },
+    [editingImageIndex, images, setImages],
+  );
 
   // Drag and drop sensors
   // Use PointerSensor for mouse (with distance) and TouchSensor for touch (with delay)
@@ -375,7 +596,7 @@ function UploadPageContent() {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Handle drag end to reorder images
@@ -393,7 +614,7 @@ function UploadPageContent() {
       // Reorder Cloudinary URLs map
       const newCloudinaryUrls = new Map<number, string>();
       const oldCloudinaryUrls = new Map(cloudinaryUrls.current);
-      
+
       // Create a temporary array to track the reordering
       const tempUrls: (string | undefined)[] = Array(images.length);
       oldCloudinaryUrls.forEach((url, i) => {
@@ -402,15 +623,31 @@ function UploadPageContent() {
 
       // Reorder the temp array
       const reorderedTemp = arrayMove(tempUrls, oldIndex, newIndex);
-      
+
       // Rebuild the map with new indices
       reorderedTemp.forEach((url, i) => {
         if (url) {
           newCloudinaryUrls.set(i, url);
         }
       });
-      
+
       cloudinaryUrls.current = newCloudinaryUrls;
+
+      // Reorder originalUrls and cropStates the same way
+      const reorderMap = <T,>(map: Map<number, T>) => {
+        const tempArr: (T | undefined)[] = Array(images.length);
+        map.forEach((v, i) => {
+          tempArr[i] = v;
+        });
+        const reordered = arrayMove(tempArr, oldIndex, newIndex);
+        const next = new Map<number, T>();
+        reordered.forEach((v, i) => {
+          if (v !== undefined) next.set(i, v);
+        });
+        return next;
+      };
+      originalUrls.current = reorderMap(originalUrls.current);
+      cropStates.current = reorderMap(cropStates.current);
     }
   };
 
@@ -435,7 +672,7 @@ function UploadPageContent() {
       // Upload all 5 images simultaneously to Cloudinary
       // Compress all images in parallel
       const compressedImages = await Promise.all(
-        images.map((url) => compressImage(url))
+        images.map((url) => compressImage(url)),
       );
 
       // Upload all compressed images to Cloudinary simultaneously
@@ -474,7 +711,7 @@ function UploadPageContent() {
       // Validate all URLs are Cloudinary URLs
       const invalidUrls = imageUrls.filter(
         (url) =>
-          !url || (!url.startsWith("http://") && !url.startsWith("https://"))
+          !url || (!url.startsWith("http://") && !url.startsWith("https://")),
       );
       if (invalidUrls.length > 0) {
         console.error("Invalid URLs in imageUrls:", invalidUrls);
@@ -498,14 +735,14 @@ function UploadPageContent() {
         "selectedStyleRef.current:",
         selectedStyleRef.current,
         "styleToAdd:",
-        styleToAdd
+        styleToAdd,
       );
       const addPromise = addToCart(
         imageUrls,
         1,
         undefined,
         undefined,
-        styleToAdd
+        styleToAdd,
       );
 
       // Navigate immediately to cart (optimistic UX)
@@ -536,7 +773,10 @@ function UploadPageContent() {
     >
       <Header />
 
-      <main className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
+      <main
+        className="flex-1"
+        style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
+      >
         <section
           className="relative py-10 lg:py-16 pt-6 md:pt-6"
           style={{ backgroundColor: "#F3EEE8" }}
@@ -614,29 +854,32 @@ function UploadPageContent() {
                     onDragEnd={handleDragEnd}
                   >
                     <SortableContext
-                      items={images.slice(0, 5).map((_, index) => index.toString())}
+                      items={images
+                        .slice(0, 5)
+                        .map((_, index) => index.toString())}
                       strategy={horizontalListSortingStrategy}
                     >
                       <div className="w-full overflow-x-auto md:overflow-visible">
-                      <div
-                        className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2"
-                        style={{
-                          perspective: "1000px",
-                          transformStyle: "preserve-3d",
-                        }}
-                      >
-                        {images.slice(0, 5).map((url, index) => (
-                          <SortableImageItem
-                            key={url} // Use URL as key to prevent re-renders on reorder
-                            id={index.toString()}
-                            url={url}
-                            index={index}
-                            locale={locale}
-                            onRemove={handleRemoveImage}
-                            isSubmitting={isSubmitting}
-                          />
-                        ))}
-                      </div>
+                        <div
+                          className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2"
+                          style={{
+                            perspective: "1000px",
+                            transformStyle: "preserve-3d",
+                          }}
+                        >
+                          {images.slice(0, 5).map((url, index) => (
+                            <SortableImageItem
+                              key={url} // Use URL as key to prevent re-renders on reorder
+                              id={index.toString()}
+                              url={url}
+                              index={index}
+                              locale={locale}
+                              onRemove={handleRemoveImage}
+                              isSubmitting={isSubmitting}
+                              onTap={handleImageTap}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </SortableContext>
                   </DndContext>
@@ -644,12 +887,13 @@ function UploadPageContent() {
                   {/* Action Buttons */}
                   {selectedImagesCount >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      <p
-                        className="text-sm font-body text-dark-gray text-center"
+                      <div
+                        className="flex flex-col gap-1 text-sm font-body text-dark-gray text-center"
                         style={{ marginTop: "28px" }}
                       >
-                        {t("upload.dragToReorder")}
-                      </p>
+                        <p>{t("upload.tapToCrop")}</p>
+                        <p>{t("upload.dragToReorder")}</p>
+                      </div>
                       <Button
                         variant="contained"
                         color="primary"
@@ -767,6 +1011,19 @@ function UploadPageContent() {
         showUploadButton={isFromUploadButton}
         onUploadClick={handleModalUploadClick}
       />
+
+      {/* Image crop editor – fullscreen overlay (mobile + desktop) */}
+      {editingImageIndex !== null && (
+        <MobileImageEditor
+          imageUrl={
+            originalUrls.current.get(editingImageIndex) ??
+            images[editingImageIndex]
+          }
+          initialCrop={cropStates.current.get(editingImageIndex)?.crop}
+          initialZoom={cropStates.current.get(editingImageIndex)?.zoom}
+          onSave={handleSaveCrop}
+        />
+      )}
 
       <Footer />
     </div>
