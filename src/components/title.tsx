@@ -103,7 +103,7 @@ export function Title({
       className={`font-heading ${color} leading-tight ${sizeClasses[size]} ${className}`}
     >
       {beforeText}
-      <span className="relative inline-block">
+      <span className="relative inline-block z-0">
         <span className="relative z-10">{highlightText}</span>
         <UnderlineComponent
           className="absolute bottom-0 left-0"

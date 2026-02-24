@@ -7,7 +7,7 @@ import MuiButton from "@mui/material/Button";
 import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 
-const COMMENT_COUNT = 43;
+const COMMENT_COUNT = 42;
 const INITIAL_MOBILE_COUNT = 12;
 const DESKTOP_INITIAL_ROWS = 4;
 
@@ -89,24 +89,6 @@ function getNumCols(width: number): number {
   return 2;
 }
 
-/**
- * Delay for revealed items so both columns of the same visual row
- * fade in at the same time (true "one row at a time" effect).
- *
- * CSS columns with EXTRA_COUNT items fills:
- *   col1 = revealed indices 0 … col1Size-1
- *   col2 = revealed indices col1Size … EXTRA_COUNT-1
- *
- * Items at the same row index in col1 and col2 share the same delay.
- */
-function getRevealDelay(revealedIndex: number, extraCount: number, numRevealCols: number): number {
-  const col1Size = Math.ceil(extraCount / numRevealCols);
-  const row =
-    revealedIndex < col1Size
-      ? revealedIndex
-      : revealedIndex % col1Size;
-  return row * 0.15;
-}
 
 export function CustomerCommentsSection() {
   const { t } = useLanguage();
@@ -235,22 +217,21 @@ export function CustomerCommentsSection() {
            * Items fade in one visual row at a time.
            */}
           {showAll && initialCount < COMMENT_COUNT && (
-            <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
+              className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3"
+            >
               {Array.from({ length: COMMENT_COUNT - initialCount }, (_, j) => {
                 const i = initialCount + j;
                 const num = i + 1;
-                const extraCount = COMMENT_COUNT - initialCount;
-                const revealCols = isMobile === true ? 2 : numCols;
                 const rotate = OFFSETS[i % OFFSETS.length].rotate;
-                const delay = prefersReducedMotion ? 0 : getRevealDelay(j, extraCount, revealCols);
 
                 return (
-                  <motion.div
+                  <div
                     key={num}
-                    style={{ rotate }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay }}
+                    style={{ transform: `rotate(${rotate}deg)` }}
                     className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 mb-3 break-inside-avoid"
                   >
                     <Image
@@ -261,10 +242,10 @@ export function CustomerCommentsSection() {
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                       style={{ width: "100%", height: "auto", display: "block" }}
                     />
-                  </motion.div>
+                  </div>
                 );
               })}
-            </div>
+            </motion.div>
           )}
         </div>
 
