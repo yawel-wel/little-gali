@@ -159,7 +159,7 @@ export function Footer() {
       </div>
 
       {/* Bottom Section - Dark Gray Bar */}
-      <div className="py-4" style={{ backgroundColor: "#535453" }}>
+      <div className="py-4" style={{ backgroundColor: "#424744" }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center font-body text-white/80 text-sm">
             {t("footer.copyright")}

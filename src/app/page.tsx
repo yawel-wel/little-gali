@@ -11,6 +11,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
+import { CustomerCommentsSection } from "@/components/customer-comments-section";
 import { GiftCardSection } from "@/components/gift-card-section";
 import { Input } from "@/components/ui/input";
 import {
@@ -632,7 +633,7 @@ export default function Home() {
         {/* הספרון שלנו Section */}
         <motion.section
           aria-label={t("home.book.ariaLabel")}
-          className="relative -mt-0 py-12 lg:py-16 bg-warm-cream"
+          className="relative -mt-0 py-12 lg:py-16 bg-white"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -776,8 +777,11 @@ export default function Home() {
           </div>
         </motion.section>
 
+        {/* Customer Comments Section */}
+        <CustomerCommentsSection />
+
         {/* Testimonials Section */}
-        <TestimonialsSection />
+        {/* <TestimonialsSection /> */}
 
         {/* How It Works Section */}
         <motion.section
@@ -1204,8 +1208,7 @@ export default function Home() {
         <motion.section
           id="qa"
           aria-labelledby="qa-heading"
-          className="relative py-16 lg:py-24"
-          style={{ backgroundColor: "#c2c8c3" }}
+          className="relative py-16 lg:py-24 bg-[#F3EEE8]"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
