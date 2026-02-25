@@ -438,6 +438,8 @@ export default function Home() {
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const heroImages = ["/hero-image-1.jpeg", "/hero-image-2.jpg", "/hero-image-3.jpg", "/hero-image-4.jpg"];
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
   // Check if mobile - starts as null to avoid hydration mismatch
   useEffect(() => {
@@ -469,6 +471,14 @@ export default function Home() {
     document.documentElement.style.overflow = 'auto';
   }, []);
 
+  // Cycle hero images every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="overflow-x-hidden bg-warm-light">
       {/* Skip to main content link for keyboard navigation */}
@@ -483,28 +493,32 @@ export default function Home() {
       <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
         <section aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
-          {/* Background Image - positioned top-right */}
+          {/* Background Images - cycling slideshow */}
           <div className="absolute inset-0">
-            <motion.div 
-              className="w-full h-full relative"
-              initial={{ scale: 1 }}
-              animate={{ scale: isMobile ? 1.20 : 1.05 }}
-              transition={{ 
-                duration: 8, 
-                ease: "easeOut"
-              }}
-            >
-              <Image
-                src="/hero-image.jpeg"
-                alt="Baby book example"
-                fill
-                priority
-                className="object-cover sm:object-[center_65%]"
-                sizes="100vw"
-              />
-              {/* Lighter gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10" />
-            </motion.div>
+            <AnimatePresence>
+              <motion.div
+                key={currentHeroIndex}
+                className="absolute inset-0"
+                initial={{ opacity: 0, scale: 1 }}
+                animate={{ opacity: 1, scale: isMobile === true ? 1.20 : 1.05 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  opacity: { duration: 0.8, ease: "easeInOut" },
+                  scale: { duration: 4, ease: "easeOut" },
+                }}
+              >
+                <Image
+                  src={heroImages[currentHeroIndex]}
+                  alt="Baby book example"
+                  fill
+                  priority={currentHeroIndex === 0}
+                  className="object-cover sm:object-[center_65%]"
+                  sizes="100vw"
+                />
+                {/* Lighter gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10" />
+              </motion.div>
+            </AnimatePresence>
           </div>
           {/* Content Overlay - center-aligned */}
           <div className="absolute inset-0 z-10 flex items-start justify-center pt-16 md:pt-24">
