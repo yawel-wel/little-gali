@@ -212,11 +212,7 @@ function SortableImageItem({
   useEffect(() => {
     if (isDragging) {
       wasDragging.current = true;
-    }
-  }, [isDragging]);
-
-  useEffect(() => {
-    if (!isDragging && wasDragging.current) {
+    } else if (wasDragging.current) {
       // Give the browser time to fire any synthetic click before resetting
       const t = setTimeout(() => {
         wasDragging.current = false;
@@ -320,9 +316,7 @@ function UploadPageContent() {
   const images = contextImages;
   const { t, locale } = useLanguage();
   const [showModal, setShowModal] = useState(false);
-  const [hasSeenModal, setHasSeenModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
-  const [selectedImagesCount, setSelectedImagesCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
@@ -367,10 +361,8 @@ function UploadPageContent() {
 
     // Reset all local state
     setUploadingImages(new Set());
-    setSelectedImagesCount(0);
     setSelectedStyle("cartoon");
     selectedStyleRef.current = "cartoon";
-    setHasSeenModal(false);
     setSubmitStatus({ type: null, message: "" });
     setIsSubmitting(false);
     cloudinaryUrls.current.clear();
@@ -383,28 +375,13 @@ function UploadPageContent() {
     }
   }, []); // Only run on mount
 
-  // Sync selectedImagesCount with images.length
-  useEffect(() => {
-    setSelectedImagesCount(images.length);
-  }, [images.length]);
-
   const handleUploadClick = () => {
-    // Show modal only if it hasn't been seen before
-    if (!hasSeenModal) {
-      setIsFromUploadButton(true);
-      setShowModal(true);
-      setHasSeenModal(true);
-    } else {
-      // If modal was already seen, directly trigger file input
-      fileInputRef.current?.click();
-    }
+    fileInputRef.current?.click();
   };
 
   const handleInfoClick = () => {
-    // Always show when clicking on the info text
     setIsFromUploadButton(false);
     setShowModal(true);
-    setHasSeenModal(true);
   };
 
   const handleCloseModal = () => {
@@ -493,7 +470,6 @@ function UploadPageContent() {
       // Update images with blob URLs for immediate preview
       // Don't upload yet - wait until user clicks "Add to Cart"
       setImages(limitedImages);
-      setSelectedImagesCount(limitedImages.length);
     }
   };
 
@@ -513,7 +489,6 @@ function UploadPageContent() {
 
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
-    setSelectedImagesCount(newImages.length);
 
     // Helper to shift a Map<number,T> after removing `index`
     const shiftMap = <T,>(map: Map<number, T>) => {
@@ -542,7 +517,6 @@ function UploadPageContent() {
       }
     });
     clearImages();
-    setSelectedImagesCount(0);
     setUploadingImages(new Set());
     setSelectedStyle("cartoon");
     cloudinaryUrls.current.clear();
@@ -814,8 +788,8 @@ function UploadPageContent() {
                       locale === "en" ? "text-center" : "text-right"
                     }`}
                   >
-                    <span className="text-primary-orange">
-                      {selectedImagesCount}
+                    <span style={{ color: "#693430" }}>
+                      {images.length}
                     </span>{" "}
                     {t("upload.imagesCount")}
                   </span>
@@ -823,7 +797,7 @@ function UploadPageContent() {
               </div>
 
               {/* Style Selector - Show when all 5 images are uploaded */}
-              {selectedImagesCount === 5 && (
+              {images.length === 5 && (
                 <div className="flex justify-center mt-6 mb-6 -mx-4 sm:mx-0 px-4 sm:px-0">
                   <StyleSelector
                     selectedStyle={selectedStyle}
@@ -883,7 +857,7 @@ function UploadPageContent() {
                   </DndContext>
 
                   {/* Action Buttons */}
-                  {selectedImagesCount >= 5 && (
+                  {images.length >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       <div
                         className="flex flex-col gap-1 text-sm font-body text-dark-gray text-center"
@@ -969,14 +943,14 @@ function UploadPageContent() {
               )}
 
               {/* Image Upload Area - Only show when less than 5 images */}
-              {selectedImagesCount < 5 && (
+              {images.length < 5 && (
                 <>
                   <div className="text-center">
                     <div
                       className="w-40 h-40 md:w-48 md:h-48 mx-auto rounded-full bg-white border-2 border-gray-300 flex items-center justify-center hover:border-primary-orange transition-all duration-200 cursor-pointer"
                       onClick={handleUploadClick}
                     >
-                      <Upload className="w-10 h-10 md:w-12 md:h-12 text-primary-orange" />
+                      <Upload className="w-10 h-10 md:w-12 md:h-12" style={{ color: "#693430" }} />
                     </div>
                   </div>
 
@@ -986,7 +960,8 @@ function UploadPageContent() {
                       {t("upload.photoNote")}
                     </p>
                     <div
-                      className="inline-flex items-center gap-2 text-primary-orange cursor-pointer hover:opacity-80 transition-opacity"
+                      className="inline-flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{ color: "#693430" }}
                       onClick={handleInfoClick}
                     >
                       <Info className="w-5 h-5" />
