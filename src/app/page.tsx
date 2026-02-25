@@ -6,6 +6,8 @@ import {
   motion,
   AnimatePresence,
   useReducedMotion,
+  useMotionValue,
+  animate,
 } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -25,6 +27,17 @@ import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { trackSubscribe, trackViewContent } from "@/lib/meta-pixel-events";
+
+const dotVariants = {
+  inactive: {
+    width: "0.5rem",
+    transition: { duration: 0.3, ease: "easeInOut" },
+  },
+  active: {
+    width: ["0.4rem", "0.2rem", "1.5rem", "1.25rem"],
+    transition: { duration: 0.45, ease: "easeOut", times: [0, 0.1, 0.65, 1] },
+  },
+};
 
 function ComingSoonSection({
   prefersReducedMotion,
@@ -445,23 +458,52 @@ export default function Home() {
     { src: "/our-book-color.jpg", label: "צד צבעוני" },
   ];
   const [bookImageIndex, setBookImageIndex] = useState(0);
-  const bookTouchStartX = useRef<number | null>(null);
-  const handleBookTouchStart = (e: React.TouchEvent) => {
-    bookTouchStartX.current = e.touches[0].clientX;
-  };
-  const handleBookTouchEnd = (e: React.TouchEvent) => {
-    if (bookTouchStartX.current === null) return;
-    const diff = e.changedTouches[0].clientX - bookTouchStartX.current;
+  const bookCarouselRef = useRef<HTMLDivElement>(null);
+  const bookX = useMotionValue(0);
+  const [bookStep, setBookStep] = useState(0);
+
+  // Compute and keep the carousel step (80% of container width) up to date
+  useEffect(() => {
+    const update = () => {
+      if (bookCarouselRef.current) {
+        setBookStep(bookCarouselRef.current.offsetWidth * 0.8);
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // Animate bookX whenever the index changes (from labels, dots, or drag)
+  useEffect(() => {
+    if (bookStep === 0) return;
+    const targetX = locale === "he" ? bookImageIndex * bookStep : -bookImageIndex * bookStep;
+    animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
+  }, [bookImageIndex, locale, bookStep]);
+
+  const handleBookDragEnd = (_: any, info: any) => {
+    const step = bookCarouselRef.current?.offsetWidth * 0.8 ?? bookStep;
+    const threshold = step * 0.25;
+    const { offset, velocity } = info;
+    let newIndex = bookImageIndex;
     if (locale === "he") {
-      // RTL: swipe right to reveal the image peeking from the left
-      if (diff > 40) setBookImageIndex(1);
-      else if (diff < -40) setBookImageIndex(0);
+      // RTL: drag right (positive) reveals color at +step
+      if (offset.x > threshold || velocity.x > 300) {
+        newIndex = Math.min(bookImageIndex + 1, bookImages.length - 1);
+      } else if (offset.x < -threshold || velocity.x < -300) {
+        newIndex = Math.max(bookImageIndex - 1, 0);
+      }
     } else {
-      // LTR: swipe right to see next image
-      if (diff > 40) setBookImageIndex(1);
-      else if (diff < -40) setBookImageIndex(0);
+      // LTR: drag left (negative) reveals color at -step
+      if (offset.x < -threshold || velocity.x < -300) {
+        newIndex = Math.min(bookImageIndex + 1, bookImages.length - 1);
+      } else if (offset.x > threshold || velocity.x > 300) {
+        newIndex = Math.max(bookImageIndex - 1, 0);
+      }
     }
-    bookTouchStartX.current = null;
+    setBookImageIndex(newIndex);
+    const targetX = locale === "he" ? newIndex * step : -newIndex * step;
+    animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   };
 
   // Check if mobile - starts as null to avoid hydration mismatch
@@ -805,19 +847,19 @@ export default function Home() {
                     </div>
                     {/* Image carousel — active image fills ~88%, other peeks from the side */}
                     <div
+                      ref={bookCarouselRef}
                       className="overflow-hidden rounded-lg aspect-square select-none"
-                      onTouchStart={handleBookTouchStart}
-                      onTouchEnd={handleBookTouchEnd}
                     >
                       <motion.div
                         className="flex h-full"
-                        style={{ width: "180%", gap: "2.22%" }}
-                        animate={{
-                          x: locale === "he"
-                            ? (bookImageIndex === 0 ? "0%" : "44.44%")
-                            : (bookImageIndex === 0 ? "0%" : "-44.44%"),
+                        style={{ width: "180%", gap: "2.22%", x: bookX }}
+                        drag="x"
+                        dragConstraints={{
+                          left: locale === "he" ? 0 : -bookStep,
+                          right: locale === "he" ? bookStep : 0,
                         }}
-                        transition={{ duration: 0.4, ease: easeOwlet }}
+                        dragElastic={0.08}
+                        onDragEnd={handleBookDragEnd}
                       >
                         {bookImages.map((img, i) => (
                           <div
@@ -842,21 +884,23 @@ export default function Home() {
                     {/* Dot indicators — explicit left/right placement independent of RTL flex */}
                     <div className="flex justify-center gap-2 mt-3" style={{ direction: "ltr" }}>
                       {/* Left dot — always the visually left image */}
-                      <button
+                      <motion.button
                         onClick={() => setBookImageIndex(locale === "he" ? 1 : 0)}
-                        className="block shrink-0 h-2 rounded-full transition-all duration-300 lg:cursor-pointer lg:hover:opacity-70"
+                        className="block shrink-0 h-2 rounded-full lg:cursor-pointer lg:hover:opacity-70"
+                        variants={dotVariants}
+                        animate={bookImageIndex === (locale === "he" ? 1 : 0) ? "active" : "inactive"}
                         style={{
-                          width: bookImageIndex === (locale === "he" ? 1 : 0) ? "1.25rem" : "0.5rem",
                           backgroundColor: bookImageIndex === (locale === "he" ? 1 : 0) ? "#693430" : "#9ca3af",
                         }}
                         aria-label={bookImages[locale === "he" ? 1 : 0].label}
                       />
                       {/* Right dot — always the visually right image */}
-                      <button
+                      <motion.button
                         onClick={() => setBookImageIndex(locale === "he" ? 0 : 1)}
-                        className="block shrink-0 h-2 rounded-full transition-all duration-300 lg:cursor-pointer lg:hover:opacity-70"
+                        className="block shrink-0 h-2 rounded-full lg:cursor-pointer lg:hover:opacity-70"
+                        variants={dotVariants}
+                        animate={bookImageIndex === (locale === "he" ? 0 : 1) ? "active" : "inactive"}
                         style={{
-                          width: bookImageIndex === (locale === "he" ? 0 : 1) ? "1.25rem" : "0.5rem",
                           backgroundColor: bookImageIndex === (locale === "he" ? 0 : 1) ? "#693430" : "#9ca3af",
                         }}
                         aria-label={bookImages[locale === "he" ? 0 : 1].label}
