@@ -482,7 +482,7 @@ export default function Home() {
   }, [bookImageIndex, locale, bookStep]);
 
   const handleBookDragEnd = (_: any, info: any) => {
-    const step = bookCarouselRef.current?.offsetWidth * 0.8 ?? bookStep;
+    const step = (bookCarouselRef.current?.offsetWidth ?? bookStep / 0.8) * 0.8;
     const threshold = step * 0.25;
     const { offset, velocity } = info;
     let newIndex = bookImageIndex;
@@ -558,32 +558,34 @@ export default function Home() {
       <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
         <section aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
-          {/* Background Images - cycling slideshow */}
+          {/* Background Images - all rendered in DOM so they preload; opacity controls which is visible */}
           <div className="absolute inset-0">
-            <AnimatePresence>
+            {heroImages.map((src, i) => (
               <motion.div
-                key={currentHeroIndex}
+                key={i}
                 className="absolute inset-0"
-                initial={{ opacity: 0, scale: 1 }}
-                animate={{ opacity: 1, scale: isMobile === true ? 1.20 : 1.05 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: i === 0 ? 1 : 0, scale: 1 }}
+                animate={{
+                  opacity: i === currentHeroIndex ? 1 : 0,
+                  scale: i === currentHeroIndex ? (isMobile === true ? 1.20 : 1.05) : 1,
+                }}
                 transition={{
                   opacity: { duration: 0.8, ease: "easeInOut" },
                   scale: { duration: 4, ease: "easeOut" },
                 }}
               >
                 <Image
-                  src={heroImages[currentHeroIndex]}
+                  src={src}
                   alt="Baby book example"
                   fill
-                  priority={currentHeroIndex === 0}
+                  {...(i === 0 ? { priority: true } : { loading: "eager" })}
                   className="object-cover sm:object-[center_65%]"
                   sizes="100vw"
                 />
                 {/* Lighter gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10" />
               </motion.div>
-            </AnimatePresence>
+            ))}
           </div>
           {/* Content Overlay - center-aligned */}
           <div className="absolute inset-0 z-10 flex items-start justify-center pt-16 md:pt-24">
