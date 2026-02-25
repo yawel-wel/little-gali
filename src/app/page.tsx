@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -440,6 +440,29 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const heroImages = ["/hero-image-1.jpeg", "/hero-image-2.jpg", "/hero-image-3.jpg", "/hero-image-4.jpg"];
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const bookImages = [
+    { src: "/our-book-bw.jpg", label: "צד שחור לבן" },
+    { src: "/our-book-color.jpg", label: "צד צבעוני" },
+  ];
+  const [bookImageIndex, setBookImageIndex] = useState(0);
+  const bookTouchStartX = useRef<number | null>(null);
+  const handleBookTouchStart = (e: React.TouchEvent) => {
+    bookTouchStartX.current = e.touches[0].clientX;
+  };
+  const handleBookTouchEnd = (e: React.TouchEvent) => {
+    if (bookTouchStartX.current === null) return;
+    const diff = e.changedTouches[0].clientX - bookTouchStartX.current;
+    if (locale === "he") {
+      // RTL: swipe right to reveal the image peeking from the left
+      if (diff > 40) setBookImageIndex(1);
+      else if (diff < -40) setBookImageIndex(0);
+    } else {
+      // LTR: swipe right to see next image
+      if (diff > 40) setBookImageIndex(1);
+      else if (diff < -40) setBookImageIndex(0);
+    }
+    bookTouchStartX.current = null;
+  };
 
   // Check if mobile - starts as null to avoid hydration mismatch
   useEffect(() => {
@@ -688,7 +711,7 @@ export default function Home() {
 
                   {/* Description Text */}
                   <div
-                    className={`space-y-3 ${
+                    className={`-mt-3 space-y-3 ${
                       locale === "en"
                         ? "text-center lg:text-left"
                         : "text-center lg:text-right"
@@ -740,7 +763,7 @@ export default function Home() {
                   </div>
 
                   {/* CTA Button */}
-                  <div className="flex justify-center lg:justify-start pt-2">
+                  <div className="flex justify-center lg:justify-start -mt-2">
                     <div>
                       <a href="/upload" aria-label={t("home.book.ctaAriaLabel")}>
                         <MuiButton
@@ -762,27 +785,82 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Right Column - Single Image */}
+                {/* Right Column - Two Images with Toggle */}
                 <div className="order-2 lg:order-2">
                   <div className="w-full">
-                    <div className="aspect-square rounded-lg overflow-hidden">
-                      <motion.div 
-                        className="w-full h-full relative"
-                        initial={prefersReducedMotion || isMobile === true ? undefined : { scale: 1.08, opacity: 0 }}
-                        animate={isMobile === false && !prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
-                        whileInView={isMobile === false && !prefersReducedMotion ? { scale: 1, opacity: 1 } : undefined}
-                        transition={{ duration: 0.8, ease: easeOwlet }}
-                        viewport={{ once: true, amount: 0.3 }}
+                    {/* Label Tabs */}
+                    <div className="flex gap-2 mb-3 justify-center">
+                      {bookImages.map((img, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setBookImageIndex(i)}
+                          className="text-sm font-body-bold px-4 py-1.5 rounded-full transition-colors bg-gray-100 text-gray-900 lg:cursor-pointer lg:hover:opacity-70"
+                          style={{
+                            border: bookImageIndex === i ? "2px solid #693430" : "2px solid transparent",
+                          }}
+                        >
+                          {img.label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Image carousel — active image fills ~88%, other peeks from the side */}
+                    <div
+                      className="overflow-hidden rounded-lg aspect-square select-none"
+                      onTouchStart={handleBookTouchStart}
+                      onTouchEnd={handleBookTouchEnd}
+                    >
+                      <motion.div
+                        className="flex h-full"
+                        style={{ width: "180%", gap: "2.22%" }}
+                        animate={{
+                          x: locale === "he"
+                            ? (bookImageIndex === 0 ? "0%" : "44.44%")
+                            : (bookImageIndex === 0 ? "0%" : "-44.44%"),
+                        }}
+                        transition={{ duration: 0.4, ease: easeOwlet }}
                       >
-                      <Image
-                        src="/our-book.jpg"
-                        alt={t("home.book.imageAlt")}
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
+                        {bookImages.map((img, i) => (
+                          <div
+                            key={i}
+                            className="relative h-full flex-shrink-0 cursor-pointer"
+                            style={{ width: "48.89%" }}
+                            onClick={() => setBookImageIndex(i)}
+                          >
+                            <Image
+                              src={img.src}
+                              alt={img.label}
+                              fill
+                              className="object-cover"
+                              priority
+                              sizes="(max-width: 768px) 80vw, 45vw"
+                            />
+                          </div>
+                        ))}
                       </motion.div>
+                    </div>
+
+                    {/* Dot indicators — explicit left/right placement independent of RTL flex */}
+                    <div className="flex justify-center gap-2 mt-3" style={{ direction: "ltr" }}>
+                      {/* Left dot — always the visually left image */}
+                      <button
+                        onClick={() => setBookImageIndex(locale === "he" ? 1 : 0)}
+                        className="block shrink-0 h-2 rounded-full transition-all duration-300 lg:cursor-pointer lg:hover:opacity-70"
+                        style={{
+                          width: bookImageIndex === (locale === "he" ? 1 : 0) ? "1.25rem" : "0.5rem",
+                          backgroundColor: bookImageIndex === (locale === "he" ? 1 : 0) ? "#693430" : "#9ca3af",
+                        }}
+                        aria-label={bookImages[locale === "he" ? 1 : 0].label}
+                      />
+                      {/* Right dot — always the visually right image */}
+                      <button
+                        onClick={() => setBookImageIndex(locale === "he" ? 0 : 1)}
+                        className="block shrink-0 h-2 rounded-full transition-all duration-300 lg:cursor-pointer lg:hover:opacity-70"
+                        style={{
+                          width: bookImageIndex === (locale === "he" ? 0 : 1) ? "1.25rem" : "0.5rem",
+                          backgroundColor: bookImageIndex === (locale === "he" ? 0 : 1) ? "#693430" : "#9ca3af",
+                        }}
+                        aria-label={bookImages[locale === "he" ? 0 : 1].label}
+                      />
                     </div>
                   </div>
                 </div>

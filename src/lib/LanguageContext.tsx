@@ -311,10 +311,10 @@ const hebrewTranslations = {
   "home.hero.ctaAriaLabel": "עבור לעמוד יצירת ספרון",
   "home.book.title": "ספרון הנייר שלנו",
   "home.book.titleHighlight": "הנייר",
-  "home.book.subtitle": "ספרון אישי לתינוק – עם תמונות המשפחה שלכם",
+  "home.book.subtitle": "ספרון לתינוק - מהתמונות שאתם בוחרים",
   "home.book.description":
     "ספרון דו־צדדי עם תמונות מעובדות ב־AI שנוצרות מהתמונות המשפחתיות שלכם.\nצד אחד בשחור־לבן לגירוי ראייה לתינוקות בני 0–3 חודשים, וצד שני צבעוני, להמשך ההתפתחות.\nמושלם לזמן בטן, לשידת ההחתלה או למתנה אישית במיוחד.",
-  "home.book.price": "מחיר לספר",
+  "home.book.price": "מחיר לספרון",
   "home.book.secondBook": "ספר שני ב-₪99 בלבד",
   "home.book.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
   "home.book.cta": "צרו עכשיו את הספרון האישי שלכם",
