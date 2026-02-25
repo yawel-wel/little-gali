@@ -67,6 +67,7 @@ export function Header() {
     { nameKey: "nav.giftCard", href: "/#gift-card" },
     { nameKey: "nav.qa", href: "/qa" },
     { nameKey: "nav.inspiration", href: "/inspiration" },
+    { nameKey: "nav.fabricBook", href: "/#fabric-book-signup" },
     { nameKey: "nav.contact", href: "/contact" },
   ].map((item) => ({
     ...item,

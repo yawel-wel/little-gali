@@ -112,6 +112,7 @@ function ComingSoonSection({
 
   return (
     <motion.section
+      id="fabric-book-signup"
       className="relative py-16 lg:py-24"
       style={{ backgroundColor: "#F9F7EE" }}
       initial={
@@ -789,15 +790,16 @@ export default function Home() {
                     </div>
                     <div className="flex items-center gap-2 font-body text-medium-gray">
                       <svg
-                        className="w-4 h-4 text-green-600"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
+                        className="w-4 h-4 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#693430"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M7.5 12.5l3 3 5.5-6" />
                       </svg>
                       <span>{t("home.book.secondBook")}</span>
                     </div>

@@ -73,9 +73,10 @@ export function TopBanner() {
       {isVisible && (
         <motion.div
           ref={bannerRef}
-          initial={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+          initial={{ y: "-100%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "-100%", opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
           className="fixed top-0 left-0 right-0 z-[60] text-center py-2 px-4"
           style={{ backgroundColor: "#693430" }}
         >

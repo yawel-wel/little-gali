@@ -7,7 +7,7 @@
 // Base brand colors (single source of truth)
 export const brandColors = {
   // Main brand / CTA color (warm beige/tan)
-  primary: "#e1b093",
+  primary: "#e1a27d",
   
   // Secondary/accent (rich burgundy)
   accent: "#693430",
@@ -52,7 +52,7 @@ export const muiPalette: PaletteOptions = {
     main: brandColors.primary,
     light: brandColors.background.cream,
     // Darker tan for primary dark
-    dark: "#B89275",
+    dark: "#c4784f",
     contrastText: "#FFFFFF",
   },
   secondary: {

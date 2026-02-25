@@ -1,5 +1,5 @@
 import { createTheme } from "@mui/material/styles";
-import { muiPalette } from "./colors";
+import { muiPalette, brandColors } from "./colors";
 
 // Global MUI theme for Little Gali.
 // This pulls its colors from `brandColors` via `muiPalette`,
@@ -15,7 +15,12 @@ export const muiTheme = createTheme({
           boxShadow: "none",
           "&:hover": {
             boxShadow: "none",
-            opacity: 0.7,
+            opacity: 0.85,
+          },
+        },
+        containedPrimary: {
+          "&:hover": {
+            backgroundColor: brandColors.primary,
           },
         },
       },
