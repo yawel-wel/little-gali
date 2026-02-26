@@ -305,16 +305,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         if (data.cart) {
-          // Always fetch the complete cart to ensure we have style and images from cart-images API
-          // This is more reliable than trying to merge partial data
-          await fetchCart(data.cart.id);
-          
+          // Build cart state directly from the API response — no second fetch needed.
+          // The create/add routes already return full cart data including imageUrls and style.
+          // For existing lines (add-to-cart case), merge imageUrls/style from current cart state
+          // since the add route only populates them for the newly added line.
+          const cartItems: CartItem[] = data.cart.items.map((item: any) => {
+            const existingItem = cart?.items.find((i) => i.lineId === item.lineId);
+            const isNewItem = (item.imageUrls?.length ?? 0) > 0;
+            return {
+              ...item,
+              imageUrls: isNewItem ? item.imageUrls : (existingItem?.imageUrls ?? []),
+              // For the newly added item use the style passed to addToCart directly —
+              // safeguard against API routes not returning it correctly.
+              style: isNewItem ? (style ?? "cartoon") : (item.style ?? existingItem?.style),
+              isGiftCard: item.isGiftCard ?? existingItem?.isGiftCard,
+              giftCardAmount: item.giftCardAmount ?? existingItem?.giftCardAmount,
+            };
+          });
+
+          setCart({
+            id: data.cart.id,
+            checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
+            totalQuantity: data.cart.totalQuantity,
+            totalAmount: data.cart.totalAmount,
+            currencyCode: data.cart.currencyCode,
+            items: cartItems,
+          });
+          localStorage.setItem("shopify_cart_id", data.cart.id);
+          try {
+            if (typeof window !== "undefined") {
+              sessionStorage.removeItem("adding_to_cart");
+            }
+          } catch {}
+
           // Track Meta Pixel AddToCart event
           try {
             trackAddToCart(
               "Little Gali Baby Book",
               bookId || "custom-book",
-              quantity * 149, // Using BOOK_PRICE or fallback
+              quantity * 149,
               quantity
             );
           } catch (err) {
