@@ -58,11 +58,11 @@ const OFFSETS: { rotate: number }[] = [
 ];
 
 /**
- * Mobile row-by-row delay for the initial drop animation.
- * Right column drops first, then left, row by row.
+ * Mobile stagger: left column fills top-to-bottom, then right column.
+ * 0.09s between items so it feels responsive but not rushed.
  */
 function getMobileDelay(i: number, total: number): number {
-  const STEP = 0.08;
+  const STEP = 0.09;
   const halfN = Math.ceil(total / 2);
   const col = i < halfN ? 0 : 1;
   const row = col === 0 ? i : i - halfN;
@@ -70,13 +70,11 @@ function getMobileDelay(i: number, total: number): number {
 }
 
 /**
- * Desktop row-by-row delay.
- * CSS columns fills column-by-column, so item i sits at row (i % colSize)
- * where colSize = ceil(total / numCols). All items sharing the same row
- * across different columns receive the same delay → they drop in together.
+ * Desktop stagger: all cards in the same visual row appear together.
+ * 0.12s between rows gives a calm, elegant cascade.
  */
 function getDesktopDelay(i: number, numCols: number, total: number): number {
-  const STEP = 0.1;
+  const STEP = 0.12;
   const colSize = Math.ceil(total / numCols);
   const row = i % colSize;
   return row * STEP;
@@ -89,6 +87,12 @@ function getNumCols(width: number): number {
   return 2;
 }
 
+// Desktop-only hover: subtle scale + richer shadow, no bounce
+const desktopHover = {
+  scale: 1.02,
+  boxShadow: "0 10px 32px rgba(0,0,0,0.18)",
+  transition: { duration: 0.25, ease: "easeOut" },
+};
 
 export function CustomerCommentsSection() {
   const { t } = useLanguage();
@@ -123,10 +127,12 @@ export function CustomerCommentsSection() {
     if (isInView) setInitialAnimated(true);
   }, [isInView]);
 
-  // On mobile show only initial 12; on desktop show only 4 rows.
   const desktopInitialCount = Math.min(DESKTOP_INITIAL_ROWS * numCols, COMMENT_COUNT);
   const initialCount = isMobile === true ? INITIAL_MOBILE_COUNT : desktopInitialCount;
   const showButton = !showAll && initialCount < COMMENT_COUNT;
+
+  // Slide-up distance: slightly softer on mobile
+  const slideY = isMobile === true ? 15 : 20;
 
   return (
     <section
@@ -150,9 +156,8 @@ export function CustomerCommentsSection() {
         <div className="max-w-6xl mx-auto">
           {/*
            * Container 1 — always-visible items (12 on mobile, 4 rows on desktop).
-           * These use a spring drop animation triggered by the grid entering view.
-           * This container is NEVER modified when "show more" is clicked, so
-           * existing items are completely isolated from the reveal render.
+           * Fade + slide-up on scroll-in, row-by-row stagger.
+           * Once locked, these items are immune to any future re-renders.
            */}
           <div
             ref={gridRef}
@@ -161,27 +166,23 @@ export function CustomerCommentsSection() {
             {Array.from({ length: initialCount }, (_, i) => {
               const num = i + 1;
               const rotate = OFFSETS[i % OFFSETS.length].rotate;
-
-              // Once the initial animation has played, lock with initial={false}
-              // so these items are immune to any future re-renders.
               const locked = initialAnimated;
 
               const initial = prefersReducedMotion || locked
                 ? false
-                : { opacity: 0, y: -70 };
+                : { opacity: 0, y: slideY };
 
               const animate = prefersReducedMotion
                 ? undefined
                 : locked || isInView
                 ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: -70 };
+                : { opacity: 0, y: slideY };
 
               const transition = locked
                 ? { duration: 0 }
                 : {
-                    type: "spring" as const,
-                    stiffness: 260,
-                    damping: 22,
+                    duration: 0.7,
+                    ease: "easeOut" as const,
                     delay:
                       isMobile === true
                         ? getMobileDelay(i, INITIAL_MOBILE_COUNT)
@@ -195,7 +196,8 @@ export function CustomerCommentsSection() {
                   initial={initial}
                   animate={animate}
                   transition={transition}
-                  className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 mb-3 break-inside-avoid"
+                  whileHover={isMobile ? undefined : desktopHover}
+                  className="rounded-xl overflow-hidden shadow-md mb-3 break-inside-avoid"
                 >
                   <Image
                     src={`/comment-${num}.jpeg`}
@@ -212,27 +214,34 @@ export function CustomerCommentsSection() {
 
           {/*
            * Container 2 — revealed items (mounts when showAll).
-           * A brand-new container that never existed in the DOM before,
-           * so mounting it cannot affect Container 1 in any way.
-           * Items fade in one visual row at a time.
+           * Same fade + slide-up style, staggered row-by-row.
+           * Only these new cards animate — Container 1 is untouched.
            */}
           {showAll && initialCount < COMMENT_COUNT && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
-              className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3"
-            >
+            <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3">
               {Array.from({ length: COMMENT_COUNT - initialCount }, (_, j) => {
                 const i = initialCount + j;
                 const num = i + 1;
                 const rotate = OFFSETS[i % OFFSETS.length].rotate;
+                const revealedCount = COMMENT_COUNT - initialCount;
+
+                const delay = isMobile === true
+                  ? getMobileDelay(j, revealedCount)
+                  : getDesktopDelay(j, numCols, revealedCount);
 
                 return (
-                  <div
+                  <motion.div
                     key={num}
-                    style={{ transform: `rotate(${rotate}deg)` }}
-                    className="rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 mb-3 break-inside-avoid"
+                    style={{ rotate }}
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: slideY }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={
+                      prefersReducedMotion
+                        ? { duration: 0 }
+                        : { duration: 0.7, ease: "easeOut", delay }
+                    }
+                    whileHover={isMobile ? undefined : desktopHover}
+                    className="rounded-xl overflow-hidden shadow-md mb-3 break-inside-avoid"
                   >
                     <Image
                       src={`/comment-${num}.jpeg`}
@@ -242,14 +251,14 @@ export function CustomerCommentsSection() {
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                       style={{ width: "100%", height: "auto", display: "block" }}
                     />
-                  </div>
+                  </motion.div>
                 );
               })}
-            </motion.div>
+            </div>
           )}
         </div>
 
-        {/* Show more button — mobile only */}
+        {/* Show more button */}
         {showButton && (
           <div className="flex justify-center mt-8">
             <MuiButton
