@@ -206,6 +206,19 @@ function SortableImageItem({
     return () => mediaQuery.removeEventListener("change", checkDesktop);
   }, []);
 
+  // Preload style example images so they're ready when the style selector appears
+  useEffect(() => {
+    [
+      "/style-example-cartoon.png",
+      "/style-example-pencil.png",
+      "/style-example-pencil2.png",
+      "/style-example-watercolor.png",
+    ].forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
   // Track whether a drag actually started so we can ignore click-after-drag
   const wasDragging = useRef(false);
 
