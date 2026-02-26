@@ -749,7 +749,7 @@ function UploadPageContent() {
         style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
       >
         <section
-          className="relative py-10 lg:py-16 pt-6 md:pt-6"
+          className="relative pb-10 lg:pb-16 pt-6 lg:pt-10"
           style={{ backgroundColor: "#F3EEE8" }}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-0 md:pt-0">

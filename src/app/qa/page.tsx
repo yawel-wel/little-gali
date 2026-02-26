@@ -25,7 +25,7 @@ export default function QAPage() {
       <main className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Q&A Section */}
         <motion.section
-          className="relative py-16 lg:py-24 pt-24 md:pt-20"
+          className="relative pb-16 lg:pb-24 pt-8 lg:pt-10"
           style={{ backgroundColor: "#F3EEE8" }}
           initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}

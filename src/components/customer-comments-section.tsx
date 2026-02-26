@@ -136,12 +136,12 @@ export function CustomerCommentsSection() {
 
   return (
     <section
-      className="pt-8 pb-16 lg:pt-10 lg:pb-24 bg-warm-cream"
+      className="pb-16 lg:pb-24 bg-warm-cream"
       aria-labelledby="customer-comments-heading"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
-        <div className="text-center mb-10 lg:mb-16">
+        <div className="text-center mb-10 lg:mb-16 pt-8 lg:pt-10">
           <Title
             as="h2"
             id="customer-comments-heading"

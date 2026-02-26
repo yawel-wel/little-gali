@@ -43,7 +43,7 @@ export function GiftCardSection({
   return (
     <motion.section
       id="gift-card"
-      className="relative py-16 lg:py-24 bg-white"
+      className="relative pb-16 lg:pb-24 bg-white"
       initial={
         prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
       }
@@ -68,7 +68,7 @@ export function GiftCardSection({
         >
           {/* Title */}
           <motion.div
-            className="mb-8 text-center"
+            className="mb-8 text-center pt-8 lg:pt-10"
             variants={{
               hidden: { opacity: 0, y: 20 },
               show: {

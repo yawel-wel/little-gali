@@ -113,7 +113,7 @@ function ComingSoonSection({
   return (
     <motion.section
       id="fabric-book-signup"
-      className="relative py-16 lg:py-24"
+      className="relative pb-16 lg:pb-24"
       style={{ backgroundColor: "#F9F7EE" }}
       initial={
         prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
@@ -139,7 +139,7 @@ function ComingSoonSection({
         >
           {/* Main Heading - Largest, Most Prominent */}
           <motion.div
-            className="mb-8"
+            className="mb-8 pt-8 lg:pt-10"
             variants={{
               hidden: { opacity: 0, y: 20 },
               show: {
@@ -715,7 +715,7 @@ export default function Home() {
         {/* הספרון שלנו Section */}
         <motion.section
           aria-label={t("home.book.ariaLabel")}
-          className="relative -mt-0 py-12 lg:py-16 bg-white"
+          className="relative -mt-0 pt-8 lg:pt-0 pb-12 lg:pb-16 bg-white"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -927,7 +927,7 @@ export default function Home() {
         <motion.section
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
-          className="relative py-16 lg:py-24 bg-warm-light"
+          className="relative pb-16 lg:pb-24 bg-warm-light"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -936,7 +936,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
-            <div className="text-center mb-8 lg:mb-16">
+            <div className="text-center mb-8 lg:mb-16 pt-8 lg:pt-10">
               <Title
                 as="h2"
                 id="how-it-works-heading"
@@ -1102,7 +1102,7 @@ export default function Home() {
         {/* Choose Your Path Section */}
         <motion.section
           aria-label={t("home.special.ariaLabel")}
-          className="relative bg-[#F3EEE8] py-16 lg:py-24"
+          className="relative bg-[#F3EEE8] pb-16 lg:pb-24"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -1111,7 +1111,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-12 pt-8 lg:pt-10">
               <Title
                 highlightText={t("home.special.titleHighlight")}
                 className="max-w-3xl mx-auto"
@@ -1265,7 +1265,7 @@ export default function Home() {
         <motion.section
           id="about"
           aria-labelledby="about-heading"
-          className={`relative bg-white ${locale === "en" ? "py-16 md:py-20" : "pb-6"}`}
+          className={`relative bg-white ${locale === "en" ? "pb-16 md:pb-20" : "pb-6"}`}
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -1348,7 +1348,7 @@ export default function Home() {
         <motion.section
           id="qa"
           aria-labelledby="qa-heading"
-          className="relative py-16 lg:py-24 bg-[#F3EEE8]"
+          className="relative pb-16 lg:pb-24 bg-[#F3EEE8]"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
@@ -1357,7 +1357,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
-            <div className="text-center mb-10 md:mb-16">
+            <div className="text-center mb-10 md:mb-16 pt-8 lg:pt-10">
               <Title
                 as="h2"
                 id="qa-heading"
