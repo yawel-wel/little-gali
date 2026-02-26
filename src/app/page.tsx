@@ -835,7 +835,7 @@ export default function Home() {
                 <div className="order-2 lg:order-2">
                   <div className="w-full">
                     {/* Label Tabs */}
-                    <div className="flex gap-2 mb-3 justify-center">
+                    <div className="flex gap-2 mb-3 justify-center lg:pt-[52px]">
                       {bookImages.map((img, i) => (
                         <button
                           key={i}
@@ -960,7 +960,7 @@ export default function Home() {
               variants={{
                 hidden: {},
                 show: {
-                  transition: { staggerChildren: 0.15 },
+                  transition: { staggerChildren: 0.15, staggerDirection: -1 },
                 },
               }}
             >
