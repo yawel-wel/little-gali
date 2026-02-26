@@ -79,11 +79,13 @@ function MobileImageEditor({
   initialCrop,
   initialZoom,
   onSave,
+  onCancel,
 }: {
   imageUrl: string;
   initialCrop?: { x: number; y: number };
   initialZoom?: number;
   onSave: (croppedUrl: string, cropState: CropState) => void;
+  onCancel: () => void;
 }) {
   const { t } = useLanguage();
   const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
@@ -117,6 +119,15 @@ function MobileImageEditor({
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8"
       style={{ backgroundColor: "#F9F7EE" }}
     >
+      {/* X button — top-right corner */}
+      <button
+        onClick={onCancel}
+        className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
+        aria-label="ביטול חיתוך"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
       {/* Cropper — constrained box so the full image is visible around the frame */}
       <div
         className="relative w-[85vw] md:w-[380px] flex-shrink-0"
@@ -150,7 +161,7 @@ function MobileImageEditor({
         </p>
         <button
           onClick={handleSave}
-          className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg"
+          className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
         >
           {t("upload.cropDone")}
         </button>
@@ -1008,6 +1019,7 @@ function UploadPageContent() {
           initialCrop={cropStates.current.get(editingImageIndex)?.crop}
           initialZoom={cropStates.current.get(editingImageIndex)?.zoom}
           onSave={handleSaveCrop}
+          onCancel={() => setEditingImageIndex(null)}
         />
       )}
 
