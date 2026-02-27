@@ -163,7 +163,7 @@ export function CartDrawer() {
                         <X className="w-4 h-4" />
                       </button>
                       {/* Images Section */}
-                      {item.imageUrls && item.imageUrls.length > 0 && (
+                      {isOpen && item.imageUrls && item.imageUrls.length > 0 && (
                         <div className="mb-3">
                           <div
                             className="flex gap-1.5 overflow-x-auto pb-1.5 hide-scrollbar"

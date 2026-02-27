@@ -48,9 +48,9 @@ export function GalleryCarouselSection() {
                 src={`/gallery-image-${num}.jpeg`}
                 alt=""
                 fill
-                className="object-cover"
+                priority={num < 8}
+                className="object-cover bg-neutral-100"
                 sizes="(max-width: 480px) 70vw, (max-width: 768px) 45vw, (max-width: 1024px) 31vw, (max-width: 1280px) 24vw, 20vw"
-                priority={num <= 2}
               />
             </div>
           </SwiperSlide>

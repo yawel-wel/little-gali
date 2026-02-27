@@ -878,7 +878,6 @@ export default function Home() {
                               alt={img.label}
                               fill
                               className="object-cover"
-                              priority
                               sizes="(max-width: 768px) 80vw, 45vw"
                             />
                           </div>
