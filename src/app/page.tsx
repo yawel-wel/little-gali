@@ -15,6 +15,7 @@ import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { CustomerCommentsSection } from "@/components/customer-comments-section";
 import { GiftCardSection } from "@/components/gift-card-section";
+import { GalleryCarouselSection } from "@/components/gallery-carousel-section";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -916,6 +917,9 @@ export default function Home() {
             </div>
           </div>
         </motion.section>
+
+        {/* Gallery Carousel Section */}
+        <GalleryCarouselSection />
 
         {/* Customer Comments Section */}
         <CustomerCommentsSection />
