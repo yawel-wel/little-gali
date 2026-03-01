@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
-import MuiButton from "@mui/material/Button";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -36,85 +35,55 @@ function ImageSkeleton() {
 
 type StyleType = "cartoon" | "pencil" | "watercolor";
 
-interface StyleExample {
-  input: string;
-  output: string;
-  inputAlt: string;
-  outputAlt: string;
-}
+// Original images (shared across all styles - stay the same)
+const originalImages = [
+  { src: "/original-image-1.jpg", alt: "Original photo 1" },
+  { src: "/original-image-2.jpg", alt: "Original photo 2" },
+  { src: "/original-image-3.jpg", alt: "Original photo 3" },
+  { src: "/original-image-4.jpg", alt: "Original photo 4" },
+  { src: "/original-image-5.jpg", alt: "Original photo 5" },
+  { src: "/original-image-6.jpg", alt: "Original photo 6" },
+  { src: "/original-image-7.jpg", alt: "Original photo 7" },
+];
 
-// Define style examples - using actual images from /public (now 3 per style)
-const styleExamples: Record<StyleType, StyleExample[]> = {
+// Output images (per style - these change when style changes)
+const outputImages: Record<StyleType, Array<{ src: string; alt: string }>> = {
   cartoon: [
-    {
-      input: "/hadar-and-ofir-original-image.jpg",
-      output: "/cartoon-output-image-1.png",
-      inputAlt: "Original brother and sister photo",
-      outputAlt: "Cartoon style result for brother and sister",
-    },
-    {
-      input: "/group-friends-original-image.jpg",
-      output: "/cartoon-output-image-2.png",
-      inputAlt: "Original group of friends photo",
-      outputAlt: "Cartoon style result for group of friends",
-    },
-    {
-      input: "/gal-and-gali-original-image.jpg",
-      output: "/cartoon-output-image-3.png",
-      inputAlt: "Original women and baby photo",
-      outputAlt: "Cartoon style result for women and baby",
-    },
+    { src: "/cartoon-output-image-1.png", alt: "Cartoon style result" },
+    { src: "/cartoon-output-image-2.png", alt: "Cartoon style result" },
+    { src: "/cartoon-output-image-3.png", alt: "Cartoon style result" },
+    { src: "/cartoon-output-image-4.png", alt: "Cartoon style result" },
+    { src: "/cartoon-output-image-5.png", alt: "Cartoon style result" },
+    { src: "/cartoon-output-image-6.png", alt: "Cartoon style result" },
+    { src: "/cartoon-output-image-7.png", alt: "Cartoon style result" },
   ],
   pencil: [
-    {
-      input: "/gal-and-gali-original-image.jpg",
-      output: "/pencils-output-image-1.png",
-      inputAlt: "Original women and baby photo",
-      outputAlt: "Pencil style result for women and baby",
-    },
-    {
-      input: "/islam-and-gali-original-image.jpg",
-      output: "/pencils-output-image-2.png",
-      inputAlt: "Original family photo",
-      outputAlt: "Pencil style result",
-    },
-    {
-      input: "/karen-yael-roni-original-image.jpg",
-      output: "/pencils-output-image-3.png",
-      inputAlt: "Original friends photo",
-      outputAlt: "Pencil style result for friends",
-    },
+    { src: "/pencils-output-image-1.png", alt: "Pencil style result" },
+    { src: "/pencils-output-image-2.png", alt: "Pencil style result" },
+    { src: "/pencils-output-image-3.png", alt: "Pencil style result" },
+    { src: "/pencils-output-image-4.png", alt: "Pencil style result" },
+    { src: "/pencils-output-image-5.png", alt: "Pencil style result" },
+    { src: "/pencils-output-image-6.png", alt: "Pencil style result" },
+    { src: "/pencils-output-image-7.png", alt: "Pencil style result" },
   ],
   watercolor: [
-    {
-      input: "/maya-original-image.jpg",
-      output: "/watercolor-output-image-1.png",
-      inputAlt: "Original little gali photo",
-      outputAlt: "Watercolor style result for little girl",
-    },
-    {
-      input: "/gal-and-gali-original-image.jpg",
-      output: "/watercolor-output-image-2.png",
-      inputAlt: "Original women and baby photo",
-      outputAlt: "Watercolor style result for women and baby",
-    },
-    {
-      input: "/papi-and-tali-and-gali-original-image.jpg",
-      output: "/watercolor-output-image-3.png",
-      inputAlt: "Original grandparent and baby photo",
-      outputAlt: "Watercolor style result for grandparent and baby",
-    },
+    { src: "/watercolor-output-image-1.png", alt: "Watercolor style result" },
+    { src: "/watercolor-output-image-2.png", alt: "Watercolor style result" },
+    { src: "/watercolor-output-image-3.png", alt: "Watercolor style result" },
+    { src: "/watercolor-output-image-4.png", alt: "Watercolor style result" },
+    { src: "/watercolor-output-image-5.png", alt: "Watercolor style result" },
+    { src: "/watercolor-output-image-6.png", alt: "Watercolor style result" },
+    { src: "/watercolor-output-image-7.png", alt: "Watercolor style result" },
   ],
 };
 
 export function StyleExamplesSection() {
   const { t, locale } = useLanguage();
-  const prefersReducedMotion = useReducedMotion();
   const [activeStyle, setActiveStyle] = useState<StyleType>("cartoon");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [loadedOutputImages, setLoadedOutputImages] = useState<Set<string>>(new Set());
+  const [loadedOriginalImages, setLoadedOriginalImages] = useState<Set<string>>(new Set());
   const [isChangingStyle, setIsChangingStyle] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImages, setModalImages] = useState<{ input: string; output: string; inputAlt: string; outputAlt: string } | null>(null);
@@ -125,69 +94,57 @@ export function StyleExamplesSection() {
     { key: "watercolor", label: t("home.styleExamples.watercolor") },
   ];
 
-  const currentExamples = styleExamples[activeStyle];
+  const currentOutputImages = outputImages[activeStyle];
 
-  // Check if mobile
+  // Preload original images once on mount
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    const handleResize = () => checkMobile();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    originalImages.forEach((img) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = img.src;
+      document.head.appendChild(link);
+    });
   }, []);
 
-  // Preload images for current style - use Next.js Image optimization
+  // Preload output images when style changes
   useEffect(() => {
-    // Don't mark images as loaded when changing styles
     setIsChangingStyle(true);
     
-    const preloadImages = async () => {
-      currentExamples.forEach((example) => {
-        // Create link elements for preloading with Next.js optimization
-        const inputLink = document.createElement('link');
-        inputLink.rel = 'preload';
-        inputLink.as = 'image';
-        inputLink.href = example.input;
-        document.head.appendChild(inputLink);
-
-        const outputLink = document.createElement('link');
-        outputLink.rel = 'preload';
-        outputLink.as = 'image';
-        outputLink.href = example.output;
-        document.head.appendChild(outputLink);
-      });
-    };
-
-    preloadImages();
+    currentOutputImages.forEach((img) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = img.src;
+      document.head.appendChild(link);
+    });
     
-    // Allow skeleton to show briefly
     setTimeout(() => {
       setIsChangingStyle(false);
     }, 100);
-  }, [currentExamples]);
+  }, [currentOutputImages]);
 
-  // Reset to first slide when changing styles
-  useEffect(() => {
-    setCurrentIndex(0);
-    if (swiperInstance) {
-      swiperInstance.slideToLoop(0, 0); // 0ms transition for instant reset
-    }
-  }, [activeStyle, swiperInstance]);
-
-  const handleImageLoad = (src: string) => {
-    setLoadedImages((prev) => new Set(prev).add(src));
+  const handleOutputImageLoad = (src: string) => {
+    setLoadedOutputImages((prev) => new Set(prev).add(src));
   };
 
-  const openModal = (example: StyleExample) => {
-    setModalImages(example);
+  const handleOriginalImageLoad = (src: string) => {
+    setLoadedOriginalImages((prev) => new Set(prev).add(src));
+  };
+
+  const openModal = (index: number) => {
+    setModalImages({
+      input: originalImages[index].src,
+      output: currentOutputImages[index].src,
+      inputAlt: originalImages[index].alt,
+      outputAlt: currentOutputImages[index].alt,
+    });
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    setTimeout(() => setModalImages(null), 300); // Wait for animation to finish
+    setTimeout(() => setModalImages(null), 300);
   };
 
   // Close modal on escape key
@@ -200,7 +157,7 @@ export function StyleExamplesSection() {
     
     if (modalOpen) {
       document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden"; // Prevent background scroll
+      document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
@@ -215,25 +172,14 @@ export function StyleExamplesSection() {
     <motion.section
       aria-label={t("home.styleExamples.ariaLabel")}
       className="relative bg-[#F9F7EE] pb-16 lg:pb-24"
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
-      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: easeOwlet }}
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
-        <motion.div
-          className="text-center mb-8 lg:mb-12 pt-8 lg:pt-10"
-          initial={prefersReducedMotion ? false : "hidden"}
-          whileInView={prefersReducedMotion ? undefined : "show"}
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{
-            hidden: {},
-            show: {
-              transition: { staggerChildren: 0.15 },
-            },
-          }}
-        >
+        <div className="text-center mb-8 lg:mb-12 pt-8 lg:pt-10">
           <Title
             as="h2"
             highlightText={t("home.styleExamples.titleHighlight")}
@@ -242,20 +188,12 @@ export function StyleExamplesSection() {
           >
             {t("home.styleExamples.title")}
           </Title>
-          <motion.p
-            className={`text-base lg:text-lg font-body text-medium-gray max-w-3xl mx-auto ${
-              locale === "en" ? "text-center" : "text-center"
-            }`}
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-            }}
-          >
+          <p className="text-base lg:text-lg font-body text-medium-gray max-w-3xl mx-auto">
             {t("home.styleExamples.subtitle")}
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
-        {/* Style Tabs - Single row on mobile */}
+        {/* Style Tabs */}
         <div className="flex flex-row justify-center items-center gap-2 sm:gap-3 mb-8 lg:mb-12">
           {styles.map((style) => (
             <motion.button
@@ -266,209 +204,102 @@ export function StyleExamplesSection() {
                   ? "bg-primary-orange text-white shadow-lg"
                   : "bg-white text-dark-gray hover:bg-gray-50 border-2 border-gray-200"
               }`}
-              whileHover={
-                prefersReducedMotion
-                  ? undefined
-                  : { scale: 1.05, transition: { duration: 0.2 } }
-              }
-              whileTap={
-                prefersReducedMotion ? undefined : { scale: 0.98 }
-              }
+              whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              whileTap={{ scale: 0.98 }}
             >
               {style.label}
             </motion.button>
           ))}
         </div>
 
-        {/* Examples */}
-        <div className="max-w-5xl mx-auto mb-6 lg:mb-8">
-          {/* Mobile: Carousel with Swiper */}
-          {isMobile !== false && (
-            <motion.div
-              key={activeStyle}
-              initial={prefersReducedMotion ? false : { opacity: 0 }}
-              animate={prefersReducedMotion ? undefined : { opacity: 1 }}
-              transition={{ duration: 0.3, ease: easeOwlet }}
-              className="md:hidden"
+        {/* Carousel with Overlapping Images */}
+        <div className="w-full mb-6">
+          <div className="w-full max-w-5xl mx-auto px-4">
+            <Swiper
+              slidesPerView={2}
+              spaceBetween={16}
+              loop={true}
+              loopedSlides={7}
+              onSwiper={setSwiperInstance}
+              onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
+              dir={locale === "he" ? "rtl" : "ltr"}
+              breakpoints={{
+                768: {
+                  slidesPerView: 4,
+                  spaceBetween: 24,
+                },
+              }}
             >
-              <Swiper
-                slidesPerView={1}
-                // spaceBetween={16}
-                // centeredSlides={true}
-                loop={true}
-                // navigation
-                // loopAdditionalSlides={2}
-                onSwiper={setSwiperInstance}
-                onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
-                // pagination={{
-                //   clickable: true,
-                // }}
-                // dir={locale === "he" ? "rtl" : "ltr"}
-                // className="pb-2"
-              >
-                  {currentExamples.map((example, index) => (
-                    <SwiperSlide key={`${activeStyle}-mobile-${index}`}>
-                      <div 
-                        className="bg-white rounded-2xl p-4 shadow-md mx-2 cursor-pointer hover:shadow-lg transition-shadow"
-                        onClick={() => openModal(example)}
-                      >
-                        <div className="grid grid-cols-2 gap-3">
-                        {/* Before */}
-                        <div>
-                          <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
-                            {(!loadedImages.has(example.input) || isChangingStyle) && <ImageSkeleton />}
-                            <Image
-                              src={example.input}
-                              alt={example.inputAlt}
-                              fill
-                              priority={index === 0}
-                              quality={85}
-                              className={`object-cover transition-opacity duration-300 ${
-                                loadedImages.has(example.input) && !isChangingStyle ? "opacity-100" : "opacity-0"
-                              }`}
-                              sizes="(max-width: 768px) 40vw, 20vw"
-                              onLoad={() => handleImageLoad(example.input)}
-                            />
-                          </div>
-                          <p className="text-xs font-body text-medium-gray text-center">
-                            {t("home.styleExamples.before")}
-                          </p>
-                        </div>
-
-                        {/* After */}
-                        <div>
-                          <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
-                            {(!loadedImages.has(example.output) || isChangingStyle) && <ImageSkeleton />}
-                            <Image
-                              src={example.output}
-                              alt={example.outputAlt}
-                              fill
-                              priority={index === 0}
-                              quality={85}
-                              className={`object-cover transition-opacity duration-300 ${
-                                loadedImages.has(example.output) && !isChangingStyle ? "opacity-100" : "opacity-0"
-                              }`}
-                              sizes="(max-width: 768px) 40vw, 20vw"
-                              onLoad={() => handleImageLoad(example.output)}
-                            />
-                          </div>
-                          <p className="text-xs font-body text-medium-gray text-center">
-                            {t("home.styleExamples.after")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-
-              {/* Dot indicators */}
-              <div className="flex justify-center gap-2 mt-4" style={{ direction: "ltr" }}>
-                {currentExamples.map((_, index) => {
-                  const visualIndex = locale === "he" ? currentExamples.length - 1 - index : index;
-                  return (
-                    <motion.button
-                      key={index}
-                      onClick={() => {
-                        if (swiperInstance) {
-                          swiperInstance.slideToLoop(visualIndex);
-                        }
-                      }}
-                      className="block shrink-0 h-2 rounded-full cursor-pointer hover:opacity-70"
-                      variants={dotVariants}
-                      animate={currentIndex === visualIndex ? "active" : "inactive"}
-                      style={{
-                        backgroundColor: currentIndex === visualIndex ? "#693430" : "#9ca3af",
-                      }}
-                      aria-label={`Example ${visualIndex + 1}`}
-                    />
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Desktop: 3 in a row */}
-          {isMobile !== true && (
-            <motion.div
-              key={activeStyle}
-              initial={prefersReducedMotion ? false : { opacity: 0 }}
-              animate={prefersReducedMotion ? undefined : { opacity: 1 }}
-              transition={{ duration: 0.3, ease: easeOwlet }}
-              className="hidden md:grid md:grid-cols-3 gap-4 lg:gap-6 max-w-6xl mx-auto"
-            >
-              {currentExamples.map((example, index) => (
-                <motion.div
-                  key={`${activeStyle}-desktop-${index}`}
-                  className="bg-white rounded-2xl p-4 lg:p-5 shadow-md cursor-pointer hover:shadow-xl transition-all"
-                  onClick={() => openModal(example)}
-                  initial={
-                    prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }
-                  }
-                  animate={
-                    prefersReducedMotion
-                      ? undefined
-                      : { opacity: 1, scale: 1 }
-                  }
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.1,
-                    ease: easeOwlet,
-                  }}
-                  whileHover={
-                    prefersReducedMotion ? undefined : { scale: 1.02 }
-                  }
-                >
-                  {/* Before/After Images */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Before */}
-                    <div>
-                      <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
-                        {(!loadedImages.has(example.input) || isChangingStyle) && <ImageSkeleton />}
+            {originalImages.map((originalImg, index) => {
+              const outputImg = currentOutputImages[index];
+              return (
+                <SwiperSlide key={index}>
+                  <div
+                    className="relative cursor-pointer group flex flex-col gap-3"
+                    onClick={() => openModal(index)}
+                  >
+                    {/* Original image (top) - smaller */}
+                    <div className="w-1/2 aspect-square mx-auto">
+                      <div className="relative w-full h-full rounded-lg overflow-hidden bg-white shadow-md border-2 border-white">
                         <Image
-                          src={example.input}
-                          alt={example.inputAlt}
+                          src={originalImg.src}
+                          alt={originalImg.alt}
                           fill
-                          priority
+                          priority={index < 4}
                           quality={85}
-                          className={`object-cover transition-opacity duration-300 ${
-                            loadedImages.has(example.input) && !isChangingStyle ? "opacity-100" : "opacity-0"
-                          }`}
-                          sizes="(max-width: 1024px) 25vw, 15vw"
-                          onLoad={() => handleImageLoad(example.input)}
+                          className="object-cover transition-all duration-300 group-hover:scale-105"
+                          sizes="(max-width: 768px) 22vw, 10vw"
+                          onLoad={() => handleOriginalImageLoad(originalImg.src)}
                         />
                       </div>
-                      <p className="text-xs lg:text-sm font-body text-medium-gray text-center">
-                        {t("home.styleExamples.before")}
-                      </p>
                     </div>
 
-                    {/* After */}
-                    <div>
-                      <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
-                        {(!loadedImages.has(example.output) || isChangingStyle) && <ImageSkeleton />}
-                        <Image
-                          src={example.output}
-                          alt={example.outputAlt}
-                          fill
-                          priority
-                          quality={85}
-                          className={`object-cover transition-opacity duration-300 ${
-                            loadedImages.has(example.output) && !isChangingStyle ? "opacity-100" : "opacity-0"
-                          }`}
-                          sizes="(max-width: 1024px) 25vw, 15vw"
-                          onLoad={() => handleImageLoad(example.output)}
-                        />
-                      </div>
-                      <p className="text-xs lg:text-sm font-body text-medium-gray text-center">
-                        {t("home.styleExamples.after")}
-                      </p>
+                    {/* Output image (bottom) - full size */}
+                    <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-200">
+                      {(!loadedOutputImages.has(outputImg.src) || isChangingStyle) && <ImageSkeleton />}
+                      <Image
+                        src={outputImg.src}
+                        alt={outputImg.alt}
+                        fill
+                        priority={index < 4}
+                        quality={85}
+                        className={`object-cover transition-all duration-300 ${
+                          loadedOutputImages.has(outputImg.src) && !isChangingStyle ? "opacity-100" : "opacity-0"
+                        } group-hover:scale-105`}
+                        sizes="(max-width: 768px) 45vw, 20vw"
+                        onLoad={() => handleOutputImageLoad(outputImg.src)}
+                      />
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+          </div>
+
+          {/* Dot indicators */}
+          <div className="flex justify-center gap-2 mt-6" style={{ direction: "ltr" }}>
+            {originalImages.map((_, index) => {
+              const visualIndex = locale === "he" ? originalImages.length - 1 - index : index;
+              return (
+                <motion.button
+                  key={index}
+                  onClick={() => {
+                    if (swiperInstance) {
+                      swiperInstance.slideToLoop(visualIndex);
+                    }
+                  }}
+                  className="block shrink-0 h-2 rounded-full cursor-pointer hover:opacity-70"
+                  variants={dotVariants}
+                  animate={currentIndex === visualIndex ? "active" : "inactive"}
+                  style={{
+                    backgroundColor: currentIndex === visualIndex ? "#693430" : "#9ca3af",
+                  }}
+                  aria-label={`Example ${visualIndex + 1}`}
+                />
+              );
+            })}
+          </div>
         </div>
 
         {/* Modal */}
@@ -509,11 +340,10 @@ export function StyleExamplesSection() {
                 </svg>
               </button>
 
-              {/* Modal Content - Mobile: smaller images */}
+              {/* Modal Content */}
               <div className="mt-12 sm:mt-14 md:mt-16">
                 {/* Mobile Layout */}
                 <div className="md:hidden space-y-3 max-w-[256px] mx-auto">
-                  {/* Original (smaller) */}
                   <div className="flex flex-col items-center">
                     <div className="relative w-2/5 aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
                       <Image
@@ -530,7 +360,6 @@ export function StyleExamplesSection() {
                     </p>
                   </div>
 
-                  {/* Output (also smaller now) */}
                   <div className="flex flex-col items-center">
                     <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
                       <Image
@@ -548,9 +377,8 @@ export function StyleExamplesSection() {
                   </div>
                 </div>
 
-                {/* Desktop Layout - Equal sizes */}
+                {/* Desktop Layout */}
                 <div className="hidden md:grid md:grid-cols-2 gap-4 lg:gap-6">
-                  {/* Before */}
                   <div>
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
                       <Image
@@ -567,7 +395,6 @@ export function StyleExamplesSection() {
                     </p>
                   </div>
 
-                  {/* After */}
                   <div>
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
                       <Image
@@ -592,4 +419,3 @@ export function StyleExamplesSection() {
     </motion.section>
   );
 }
-

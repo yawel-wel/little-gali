@@ -432,7 +432,7 @@ const hebrewTranslations = {
   // Style Examples Section
   "home.styleExamples.title": "הסגנונות שלנו",
   "home.styleExamples.titleHighlight": "שלנו",
-  "home.styleExamples.subtitle": "כל ספרון כולל צד שחור-לבן (אוטומטי) וצד צבעוני בסגנון לבחירתכם",
+  "home.styleExamples.subtitle": "כל ספרון כולל צד שחור-לבן וצד צבעוני בסגנון לבחירתכם",
   "home.styleExamples.description": "הצד השחור-לבן נוצר אוטומטית לגירוי ראייה. אתם בוחרים את הסגנון לצד הצבעוני:",
   "home.styleExamples.cartoon": "קריקטורה",
   "home.styleExamples.pencil": "עפרונות",
@@ -968,7 +968,7 @@ const englishTranslations = {
   // Style Examples Section
   "home.styleExamples.title": "Our Styles",
   "home.styleExamples.titleHighlight": "Styles",
-  "home.styleExamples.subtitle": "Every book includes a black & white side (automatic) and a colorful side in your chosen style",
+  "home.styleExamples.subtitle": "Every book includes a black & white side and a colorful side in your chosen style",
   "home.styleExamples.description": "The black & white side is created automatically for visual stimulation. You choose the style for the colorful side:",
   "home.styleExamples.cartoon": "Cartoon",
   "home.styleExamples.pencil": "Pencil",
