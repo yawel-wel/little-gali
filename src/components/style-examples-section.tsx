@@ -79,7 +79,7 @@ const outputImages: Record<StyleType, Array<{ src: string; alt: string }>> = {
 
 export function StyleExamplesSection() {
   const { t, locale } = useLanguage();
-  const [activeStyle, setActiveStyle] = useState<StyleType>("cartoon");
+  const [activeStyle, setActiveStyle] = useState<StyleType>("pencil");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const [loadedOutputImages, setLoadedOutputImages] = useState<Set<string>>(new Set());
@@ -89,9 +89,9 @@ export function StyleExamplesSection() {
   const [modalImages, setModalImages] = useState<{ input: string; output: string; inputAlt: string; outputAlt: string } | null>(null);
 
   const styles: { key: StyleType; label: string }[] = [
-    { key: "cartoon", label: t("home.styleExamples.cartoon") },
     { key: "pencil", label: t("home.styleExamples.pencil") },
     { key: "watercolor", label: t("home.styleExamples.watercolor") },
+    { key: "cartoon", label: t("home.styleExamples.cartoon") },
   ];
 
   const currentOutputImages = outputImages[activeStyle];
@@ -344,7 +344,10 @@ export function StyleExamplesSection() {
                 {/* Mobile Layout */}
                 <div className="md:hidden space-y-3 max-w-[256px] mx-auto">
                   <div className="flex flex-col items-center">
-                    <div className="relative w-2/5 aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
+                    <p className="text-sm font-body-bold text-medium-gray mb-2">
+                      {t("home.styleExamples.before")}
+                    </p>
+                    <div className="relative w-2/5 aspect-square rounded-lg overflow-hidden bg-gray-200">
                       <Image
                         src={modalImages.input}
                         alt={modalImages.inputAlt}
@@ -354,13 +357,13 @@ export function StyleExamplesSection() {
                         quality={90}
                       />
                     </div>
-                    <p className="text-xs font-body-bold text-medium-gray">
-                      {t("home.styleExamples.before")}
-                    </p>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-2 bg-gray-200">
+                    <p className="text-sm font-body-bold text-dark-gray mb-2">
+                      {t("home.styleExamples.after")}
+                    </p>
+                    <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-200">
                       <Image
                         src={modalImages.output}
                         alt={modalImages.outputAlt}
@@ -370,9 +373,6 @@ export function StyleExamplesSection() {
                         quality={90}
                       />
                     </div>
-                    <p className="text-sm font-body-bold text-dark-gray">
-                      {t("home.styleExamples.after")}
-                    </p>
                   </div>
                 </div>
 
