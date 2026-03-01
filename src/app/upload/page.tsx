@@ -349,8 +349,8 @@ function UploadPageContent() {
   const [uploadingImages, setUploadingImages] = useState<Set<number>>(
     new Set(),
   );
-  const [selectedStyle, setSelectedStyle] = useState<StyleType>("cartoon");
-  const selectedStyleRef = useRef<StyleType>("cartoon");
+  const [selectedStyle, setSelectedStyle] = useState<StyleType>("pencil");
+  const selectedStyleRef = useRef<StyleType>("pencil");
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Store Cloudinary URLs separately - don't update display, only use for cart
   const cloudinaryUrls = useRef<Map<number, string>>(new Map()); // Maps index -> Cloudinary URL
@@ -385,8 +385,8 @@ function UploadPageContent() {
 
     // Reset all local state
     setUploadingImages(new Set());
-    setSelectedStyle("cartoon");
-    selectedStyleRef.current = "cartoon";
+    setSelectedStyle("pencil");
+    selectedStyleRef.current = "pencil";
     setSubmitStatus({ type: null, message: "" });
     setIsSubmitting(false);
     cloudinaryUrls.current.clear();
@@ -542,7 +542,7 @@ function UploadPageContent() {
     });
     clearImages();
     setUploadingImages(new Set());
-    setSelectedStyle("cartoon");
+    setSelectedStyle("pencil");
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
@@ -723,7 +723,7 @@ function UploadPageContent() {
 
       // Fire-and-forget to enable optimistic navigation; cart page will reflect when ready
       // Use ref to ensure we get the current value, not a stale closure
-      const styleToAdd = selectedStyleRef.current || selectedStyle || "cartoon";
+      const styleToAdd = selectedStyleRef.current || selectedStyle || "pencil";
       console.log(
         "Adding to cart - selectedStyle state:",
         selectedStyle,
@@ -820,13 +820,36 @@ function UploadPageContent() {
                 </div>
               </div>
 
-              {/* Style Selector - Show when all 5 images are uploaded */}
-              {images.length === 5 && (
-                <div className="flex justify-center mt-6 mb-6 -mx-4 sm:mx-0 px-4 sm:px-0">
-                  <StyleSelector
-                    selectedStyle={selectedStyle}
-                    onStyleChange={setSelectedStyle}
-                  />
+              {/* Section 1 Title - Image Selection */}
+              {images.length > 0 && (
+                <div className="text-center mt-6">
+                  <h3 className="text-lg font-body-bold text-dark-gray flex items-center justify-center gap-2">
+                    <span 
+                      className="inline-flex items-center justify-center w-5 h-5 rounded-full text-xs text-white font-body-bold"
+                      style={{ backgroundColor: "#e1b093" }}
+                    >
+                      1
+                    </span>
+                    {locale === "he" ? "בחירת תמונות" : "Select Images"}
+                  </h3>
+                  {/* Helper texts under title - only show when 5 images */}
+                  {images.length >= 5 && (
+                    <div className="flex flex-col gap-1 text-sm font-body text-dark-gray text-center mt-3">
+                      <p>{t("upload.tapToCrop")}</p>
+                      <p>{t("upload.dragToReorder")}</p>
+                      {/* Info link to show image selection tips */}
+                      <div className="mt-2">
+                        <button
+                          onClick={handleInfoClick}
+                          className="inline-flex items-center gap-1.5 text-sm font-body-bold cursor-pointer hover:opacity-80 transition-opacity"
+                          style={{ color: "#693430" }}
+                        >
+                          <Info className="w-4 h-4" />
+                          <span>{t("upload.photoTip")}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -883,13 +906,14 @@ function UploadPageContent() {
                   {/* Action Buttons */}
                   {images.length >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      <div
-                        className="flex flex-col gap-1 text-sm font-body text-dark-gray text-center"
-                        style={{ marginTop: "28px" }}
-                      >
-                        <p>{t("upload.tapToCrop")}</p>
-                        <p>{t("upload.dragToReorder")}</p>
+                      {/* Style Selector - Show after images are arranged */}
+                      <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
+                        <StyleSelector
+                          selectedStyle={selectedStyle}
+                          onStyleChange={setSelectedStyle}
+                        />
                       </div>
+
                       <Button
                         variant="contained"
                         color="primary"

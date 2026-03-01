@@ -535,6 +535,8 @@ const hebrewTranslations = {
   // Style Selector
   "styleSelector.title": "בחרו את הסגנון שלכם:",
   "styleSelector.subtitle": "הסגנון ישפיע על הצד הצבעוני של התמונה",
+  "styleSelector.learnMore": "לחצי בשביל לראות דוגמאות לכל סגנון",
+  "styleSelector.closeExamples": "סגור דוגמאות",
   "styleSelector.cartoon": "קריקטורה",
   "styleSelector.pencil": "עיפרון",
   "styleSelector.watercolor": "צבעי מים",
@@ -1075,6 +1077,8 @@ const englishTranslations = {
   "styleSelector.title": "Choose Your Style:",
   "styleSelector.subtitle":
     "The style will affect the colorful side of the image",
+  "styleSelector.learnMore": "Click to see examples of each style",
+  "styleSelector.closeExamples": "Close Examples",
   "styleSelector.cartoon": "Cartoon",
   "styleSelector.pencil": "Pencil",
   "styleSelector.watercolor": "Watercolor",

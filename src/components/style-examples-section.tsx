@@ -219,7 +219,6 @@ export function StyleExamplesSection() {
               slidesPerView={2}
               spaceBetween={16}
               loop={true}
-              loopedSlides={7}
               onSwiper={setSwiperInstance}
               onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
               dir={locale === "he" ? "rtl" : "ltr"}
