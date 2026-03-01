@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Processing Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+        }
+        img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #ff5722;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Image Processing API Test</h1>
+    <p>This page tests the <code>/api/test-process</code> endpoint to verify image processing works.</p>
+    
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="testBtn" onclick="testProcessing()">Test Processing</button>
+    
+    <div class="container">
+        <div class="column">
+            <h2>Original Image</h2>
+            <img id="originalImg" style="display:none;">
+        </div>
+        <div class="column">
+            <h2>Processed Image (should have RED BORDER)</h2>
+            <img id="processedImg" style="display:none;">
+        </div>
+    </div>
+    
+    <h2>Console Log</h2>
+    <div class="log" id="log"></div>
+
+    <script>
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logEl.textContent += `[${time}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+
+        async function testProcessing() {
+            const fileInput = document.getElementById('fileInput');
+            const testBtn = document.getElementById('testBtn');
+            const originalImg = document.getElementById('originalImg');
+            const processedImg = document.getElementById('processedImg');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select an image first!');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            log(`📁 Selected file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+            
+            // Show original image
+            const originalUrl = URL.createObjectURL(file);
+            originalImg.src = originalUrl;
+            originalImg.style.display = 'block';
+            log('✅ Original image displayed');
+            
+            // Disable button during processing
+            testBtn.disabled = true;
+            testBtn.textContent = 'Processing...';
+            
+            try {
+                log('🚀 Sending request to /api/test-process...');
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                const response = await fetch('/api/test-process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                log(`📥 Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`❌ Error response: ${errorText}`);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                log(`✅ Response received! Has processedImage: ${!!data.processedImage}`);
+                
+                if (data.processedImage) {
+                    log(`📊 Data URL length: ${data.processedImage.length} characters`);
+                    log(`🎨 First 50 chars: ${data.processedImage.substring(0, 50)}...`);
+                    
+                    processedImg.src = data.processedImage;
+                    processedImg.style.display = 'block';
+                    log('✅ Processed image displayed with RED BORDER!');
+                    
+                    // Compare if images are different
+                    if (data.processedImage !== originalUrl) {
+                        log('✅ CONFIRMED: Processed image is different from original!');
+                    }
+                } else {
+                    log('❌ No processedImage in response');
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                console.error(error);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Test Processing';
+            }
+        }
+        
+        log('🎯 Test page loaded. Select an image and click "Test Processing"');
+    </script>
+</body>
+</html>

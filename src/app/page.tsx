@@ -16,6 +16,7 @@ import { TestimonialsSection } from "@/components/testimonials-section";
 import { CustomerCommentsSection } from "@/components/customer-comments-section";
 import { GiftCardSection } from "@/components/gift-card-section";
 import { GalleryCarouselSection } from "@/components/gallery-carousel-section";
+import { StyleExamplesSection } from "@/components/style-examples-section";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -1101,6 +1102,9 @@ export default function Home() {
             </motion.div>
           </div>
         </motion.section>
+
+        {/* Style Examples Section */}
+        <StyleExamplesSection />
 
         {/* Choose Your Path Section */}
         <motion.section
