@@ -80,12 +80,16 @@ function MobileImageEditor({
   initialZoom,
   onSave,
   onCancel,
+  currentIndex,
+  totalImages,
 }: {
   imageUrl: string;
   initialCrop?: { x: number; y: number };
   initialZoom?: number;
   onSave: (croppedUrl: string, cropState: CropState) => void;
   onCancel: () => void;
+  currentIndex?: number;
+  totalImages?: number;
 }) {
   const { t } = useLanguage();
   const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
@@ -127,6 +131,15 @@ function MobileImageEditor({
       >
         <X className="w-6 h-6" />
       </button>
+
+      {/* Progress indicator — top center */}
+      {currentIndex !== undefined && totalImages !== undefined && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+          <span className="font-body-bold text-dark-gray text-lg">
+            {currentIndex + 1}/{totalImages}
+          </span>
+        </div>
+      )}
 
       {/* Cropper — constrained box so the full image is visible around the frame */}
       <div
@@ -203,20 +216,6 @@ function SortableImageItem({
     animateLayoutChanges: () => false, // Disable layout animation on drop
   });
 
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const checkDesktop = () => {
-      setIsDesktop(window.matchMedia("(min-width: 768px)").matches);
-    };
-
-    checkDesktop();
-    const mediaQuery = window.matchMedia("(min-width: 768px)");
-    mediaQuery.addEventListener("change", checkDesktop);
-
-    return () => mediaQuery.removeEventListener("change", checkDesktop);
-  }, []);
-
   // Preload style example images so they're ready when the style selector appears
   useEffect(() => {
     [
@@ -257,29 +256,11 @@ function SortableImageItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // 3D accordion book effect using rotateY - only on desktop
-  // Alternate fold direction per index
-  const isEven = index % 2 === 0;
-  const foldAngle = isEven ? "-25deg" : "25deg";
-  const origin = isEven ? "center left" : "center right";
-
-  // Combine accordion rotation with drag transform
-  // When dragging, only show drag transform; otherwise show accordion effect on desktop only
-  // On mobile, show normal images without rotation
-  const accordionTransform = `perspective(800px) rotateY(${foldAngle})`;
-  const combinedTransform = isDraggingTransform
-    ? dragTransform
-    : isDesktop
-      ? accordionTransform
-      : undefined;
-
   return (
     <div
       ref={setNodeRef}
       style={{
         ...style,
-        transform: combinedTransform,
-        transformOrigin: isDesktop ? origin : undefined,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
         cursor: isDragging ? "grabbing" : "grab",
         touchAction: "none", // Prevent default touch behaviors on mobile
@@ -365,6 +346,11 @@ function UploadPageContent() {
     null,
   );
 
+  // Sequential cropping state
+  const [pendingCropImages, setPendingCropImages] = useState<string[]>([]);
+  const [currentCropIndex, setCurrentCropIndex] = useState<number>(0);
+  const [isInCroppingFlow, setIsInCroppingFlow] = useState<boolean>(false);
+
   // Keep ref in sync with state
   useEffect(() => {
     selectedStyleRef.current = selectedStyle;
@@ -392,6 +378,10 @@ function UploadPageContent() {
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
+    setPendingCropImages([]);
+    setCurrentCropIndex(0);
+    setIsInCroppingFlow(false);
+    setEditingImageIndex(null);
 
     // Clear file input
     if (fileInputRef.current) {
@@ -467,33 +457,32 @@ function UploadPageContent() {
   ) => {
     const files = event.target.files;
     if (files) {
-      // Filter only image files
+      // Filter only image files and limit to 5
       const imageFiles = Array.from(files).filter((file) =>
         file.type.startsWith("image/"),
       );
 
-      // Create blob URLs for preview and add to existing images
-      const blobUrls = imageFiles.map((file) => URL.createObjectURL(file));
-      const newImages = [...images, ...blobUrls];
-
-      // Only keep first 5 images
-      const limitedImages = newImages.slice(0, 5);
-
-      // Revoke URLs for images beyond the 5th if any
-      if (newImages.length > 5) {
-        newImages.slice(5).forEach((url) => URL.revokeObjectURL(url));
+      // Calculate how many more images we can add
+      const currentCount = images.length;
+      const availableSlots = 5 - currentCount;
+      
+      if (availableSlots <= 0) {
+        return; // Already have 5 images
       }
 
-      // Record the original (uncropped) URL for each new image
-      const startIndex = images.length;
-      blobUrls.forEach((url, i) => {
-        const idx = startIndex + i;
-        if (idx < 5) originalUrls.current.set(idx, url);
-      });
+      // Take only as many as we have slots for
+      const filesToProcess = imageFiles.slice(0, availableSlots);
 
-      // Update images with blob URLs for immediate preview
-      // Don't upload yet - wait until user clicks "Add to Cart"
-      setImages(limitedImages);
+      // Create blob URLs for the new images
+      const blobUrls = filesToProcess.map((file) => URL.createObjectURL(file));
+
+      // Store these URLs as pending for cropping
+      setPendingCropImages(blobUrls);
+      setCurrentCropIndex(0);
+      setIsInCroppingFlow(true);
+
+      // Auto-open the cropping modal for the first image
+      setEditingImageIndex(-1); // Use -1 to indicate we're in the sequential flow
     }
   };
 
@@ -540,12 +529,22 @@ function UploadPageContent() {
         URL.revokeObjectURL(origUrl);
       }
     });
+    // Revoke pending crop images
+    pendingCropImages.forEach((url) => {
+      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+    });
+    
     clearImages();
     setUploadingImages(new Set());
     setSelectedStyle("pencil");
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
+    setPendingCropImages([]);
+    setCurrentCropIndex(0);
+    setIsInCroppingFlow(false);
+    setEditingImageIndex(null);
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -559,21 +558,77 @@ function UploadPageContent() {
   // Save the cropped image back into the images array
   const handleSaveCrop = useCallback(
     (croppedUrl: string, cropState: CropState) => {
-      if (editingImageIndex === null) return;
-      const newImages = [...images];
-      const oldDisplayUrl = newImages[editingImageIndex];
-      const origUrl = originalUrls.current.get(editingImageIndex);
-      // Only revoke the old display URL if it is NOT the original (originals are kept)
-      if (oldDisplayUrl.startsWith("blob:") && oldDisplayUrl !== origUrl) {
-        URL.revokeObjectURL(oldDisplayUrl);
+      if (isInCroppingFlow) {
+        // Sequential cropping flow: add the cropped image to the gallery
+        const newImages = [...images, croppedUrl];
+        setImages(newImages);
+        
+        const newIndex = images.length;
+        // Store the original uncropped URL
+        const originalUrl = pendingCropImages[currentCropIndex];
+        originalUrls.current.set(newIndex, originalUrl);
+        cropStates.current.set(newIndex, cropState);
+        
+        // Move to next image in queue
+        if (currentCropIndex < pendingCropImages.length - 1) {
+          setCurrentCropIndex(currentCropIndex + 1);
+          // Keep modal open for next image
+        } else {
+          // Finished cropping all images - reset file input
+          setPendingCropImages([]);
+          setCurrentCropIndex(0);
+          setIsInCroppingFlow(false);
+          setEditingImageIndex(null);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+      } else if (editingImageIndex !== null && editingImageIndex >= 0) {
+        // Re-cropping existing image
+        const newImages = [...images];
+        const oldDisplayUrl = newImages[editingImageIndex];
+        const origUrl = originalUrls.current.get(editingImageIndex);
+        // Only revoke the old display URL if it is NOT the original (originals are kept)
+        if (oldDisplayUrl.startsWith("blob:") && oldDisplayUrl !== origUrl) {
+          URL.revokeObjectURL(oldDisplayUrl);
+        }
+        newImages[editingImageIndex] = croppedUrl;
+        setImages(newImages);
+        cropStates.current.set(editingImageIndex, cropState);
+        setEditingImageIndex(null);
       }
-      newImages[editingImageIndex] = croppedUrl;
-      setImages(newImages);
-      cropStates.current.set(editingImageIndex, cropState);
-      setEditingImageIndex(null);
     },
-    [editingImageIndex, images, setImages],
+    [isInCroppingFlow, currentCropIndex, pendingCropImages, images, editingImageIndex, setImages],
   );
+
+  // Handle cancel/skip during cropping
+  const handleCancelCrop = useCallback(() => {
+    if (isInCroppingFlow) {
+      // Skip this image - revoke its URL and move to next
+      const skippedUrl = pendingCropImages[currentCropIndex];
+      if (skippedUrl && skippedUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(skippedUrl);
+      }
+      
+      // Move to next image in queue
+      if (currentCropIndex < pendingCropImages.length - 1) {
+        setCurrentCropIndex(currentCropIndex + 1);
+        // Keep modal open for next image
+      } else {
+        // Finished with all images - reset file input
+        setPendingCropImages([]);
+        setCurrentCropIndex(0);
+        setIsInCroppingFlow(false);
+        setEditingImageIndex(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    } else {
+      // Just close the modal when re-editing
+      setEditingImageIndex(null);
+    }
+  }, [isInCroppingFlow, currentCropIndex, pendingCropImages]);
 
   // Drag and drop sensors
   // Use PointerSensor for mouse (with distance) and TouchSensor for touch (with delay)
@@ -879,13 +934,7 @@ function UploadPageContent() {
                       strategy={horizontalListSortingStrategy}
                     >
                       <div className="w-full overflow-x-auto md:overflow-visible">
-                        <div
-                          className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2"
-                          style={{
-                            perspective: "1000px",
-                            transformStyle: "preserve-3d",
-                          }}
-                        >
+                        <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2">
                           {images.slice(0, 5).map((url, index) => (
                             <SortableImageItem
                               key={url} // Use URL as key to prevent re-renders on reorder
@@ -1034,16 +1083,33 @@ function UploadPageContent() {
       />
 
       {/* Image crop editor – fullscreen overlay (mobile + desktop) */}
-      {editingImageIndex !== null && (
+      {(editingImageIndex !== null || isInCroppingFlow) && (
         <MobileImageEditor
           imageUrl={
-            originalUrls.current.get(editingImageIndex) ??
-            images[editingImageIndex]
+            isInCroppingFlow
+              ? pendingCropImages[currentCropIndex]
+              : editingImageIndex !== null && editingImageIndex >= 0
+                ? (originalUrls.current.get(editingImageIndex) ?? images[editingImageIndex])
+                : ""
           }
-          initialCrop={cropStates.current.get(editingImageIndex)?.crop}
-          initialZoom={cropStates.current.get(editingImageIndex)?.zoom}
+          initialCrop={
+            isInCroppingFlow
+              ? undefined
+              : editingImageIndex !== null && editingImageIndex >= 0
+                ? cropStates.current.get(editingImageIndex)?.crop
+                : undefined
+          }
+          initialZoom={
+            isInCroppingFlow
+              ? undefined
+              : editingImageIndex !== null && editingImageIndex >= 0
+                ? cropStates.current.get(editingImageIndex)?.zoom
+                : undefined
+          }
           onSave={handleSaveCrop}
-          onCancel={() => setEditingImageIndex(null)}
+          onCancel={handleCancelCrop}
+          currentIndex={isInCroppingFlow ? currentCropIndex : undefined}
+          totalImages={isInCroppingFlow ? pendingCropImages.length : undefined}
         />
       )}
 
