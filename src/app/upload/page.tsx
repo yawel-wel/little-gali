@@ -80,6 +80,7 @@ function MobileImageEditor({
   initialZoom,
   onSave,
   onCancel,
+  onChangeImage,
   currentIndex,
   totalImages,
 }: {
@@ -88,6 +89,7 @@ function MobileImageEditor({
   initialZoom?: number;
   onSave: (croppedUrl: string, cropState: CropState) => void;
   onCancel: () => void;
+  onChangeImage?: () => void;
   currentIndex?: number;
   totalImages?: number;
 }) {
@@ -172,12 +174,22 @@ function MobileImageEditor({
         >
           {t("upload.cropInstruction")}
         </p>
-        <button
-          onClick={handleSave}
-          className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
-        >
-          {t("upload.cropDone")}
-        </button>
+        <div className="flex flex-col gap-3 items-center">
+          <button
+            onClick={handleSave}
+            className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
+          >
+            {t("upload.cropDone")}
+          </button>
+          {onChangeImage && (
+            <button
+              onClick={onChangeImage}
+              className="bg-white text-dark-gray font-body-bold rounded-xl px-8 py-2.5 text-base cursor-pointer lg:hover:bg-gray-50 transition-colors border-2 border-gray-300"
+            >
+              {t("upload.changeImage")}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -333,6 +345,7 @@ function UploadPageContent() {
   const [selectedStyle, setSelectedStyle] = useState<StyleType>("pencil");
   const selectedStyleRef = useRef<StyleType>("pencil");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const replaceImageInputRef = useRef<HTMLInputElement>(null);
   // Store Cloudinary URLs separately - don't update display, only use for cart
   const cloudinaryUrls = useRef<Map<number, string>>(new Map()); // Maps index -> Cloudinary URL
   // Keep the original (unedited) image URL per index so the full image is always
@@ -630,6 +643,44 @@ function UploadPageContent() {
     }
   }, [isInCroppingFlow, currentCropIndex, pendingCropImages]);
 
+  // Handle replacing current image during cropping
+  const handleChangeImage = useCallback(() => {
+    if (isInCroppingFlow && replaceImageInputRef.current) {
+      replaceImageInputRef.current.click();
+    }
+  }, [isInCroppingFlow]);
+
+  // Handle file selection for replacing an image
+  const handleReplaceImageChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (files && files.length > 0 && isInCroppingFlow) {
+        const file = files[0];
+        if (file.type.startsWith("image/")) {
+          // Revoke the old blob URL
+          const oldUrl = pendingCropImages[currentCropIndex];
+          if (oldUrl && oldUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(oldUrl);
+          }
+
+          // Create new blob URL
+          const newBlobUrl = URL.createObjectURL(file);
+
+          // Replace the image in the pending array
+          const newPendingImages = [...pendingCropImages];
+          newPendingImages[currentCropIndex] = newBlobUrl;
+          setPendingCropImages(newPendingImages);
+
+          // Clear the file input so the same file can be selected again if needed
+          if (replaceImageInputRef.current) {
+            replaceImageInputRef.current.value = "";
+          }
+        }
+      }
+    },
+    [isInCroppingFlow, currentCropIndex, pendingCropImages]
+  );
+
   // Drag and drop sensors
   // Use PointerSensor for mouse (with distance) and TouchSensor for touch (with delay)
   const sensors = useSensors(
@@ -918,6 +969,15 @@ function UploadPageContent() {
                 className="hidden"
               />
 
+              {/* Hidden File Input for Replacing Images */}
+              <input
+                ref={replaceImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleReplaceImageChange}
+                className="hidden"
+              />
+
               {/* Selected Images Display */}
               {images.length > 0 && (
                 <div className="space-y-4">
@@ -1108,6 +1168,7 @@ function UploadPageContent() {
           }
           onSave={handleSaveCrop}
           onCancel={handleCancelCrop}
+          onChangeImage={isInCroppingFlow ? handleChangeImage : undefined}
           currentIndex={isInCroppingFlow ? currentCropIndex : undefined}
           totalImages={isInCroppingFlow ? pendingCropImages.length : undefined}
         />

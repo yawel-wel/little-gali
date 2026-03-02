@@ -527,6 +527,7 @@ const hebrewTranslations = {
   "upload.dragToReorder": "הזיזו את התמונות בשביל לבחור את הסדר שיופיע בספרון",
   "upload.cropInstruction": "גררו את התמונה למיקום הרצוי",
   "upload.cropDone": "סיימתי",
+  "upload.changeImage": "החלף תמונה",
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
   "upload.photoNote":
@@ -1068,6 +1069,7 @@ const englishTranslations = {
   "upload.dragToReorder": "Drag the images to choose the order that will appear in the booklet",
   "upload.cropInstruction": "Drag the image to adjust the crop",
   "upload.cropDone": "Done",
+  "upload.changeImage": "Change Image",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
   "upload.photoNote":
