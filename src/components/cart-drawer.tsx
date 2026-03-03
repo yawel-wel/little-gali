@@ -162,8 +162,8 @@ export function CartDrawer() {
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {/* Images Section */}
-                      {isOpen && item.imageUrls && item.imageUrls.length > 0 && (
+                      {/* Images Section — show B&W if available (AI flow), else colored */}
+                      {isOpen && (item.bwImageUrls?.length === 5 || item.imageUrls?.length > 0) && (
                         <div className="mb-3">
                           <div
                             className="flex gap-1.5 overflow-x-auto pb-1.5 hide-scrollbar"
@@ -172,7 +172,7 @@ export function CartDrawer() {
                               WebkitOverflowScrolling: "touch",
                             }}
                           >
-                            {item.imageUrls.slice(0, 5).map((url, imgIndex) => (
+                            {(item.bwImageUrls?.length === 5 ? item.bwImageUrls : item.imageUrls).slice(0, 5).map((url, imgIndex) => (
                               <div
                                 key={imgIndex}
                                 className="flex-shrink-0"

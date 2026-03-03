@@ -8,6 +8,7 @@ export interface CartItem {
   id: string;
   quantity: number;
   imageUrls: string[];
+  bwImageUrls?: string[]; // B&W generated images (shown in cart thumbnails)
   title?: string;
   lineId?: string;
   style?: "cartoon" | "pencil" | "watercolor";
@@ -32,7 +33,8 @@ interface CartContextType {
     quantity?: number,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor"
+    style?: "cartoon" | "pencil" | "watercolor",
+    bwImageUrls?: string[]
   ) => Promise<void>;
   addGiftCardToCart: (optionId: string) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
@@ -178,6 +180,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   }
                 }
               }
+
+              // Extract B&W image URLs from Shopify attributes (AI flow only)
+              let bwImageUrls: string[] | undefined;
+              if (line.attributes) {
+                const shopifyBwUrls: string[] = [];
+                for (let i = 1; i <= 5; i++) {
+                  const bwAttr = line.attributes.find(
+                    (attr: any) => attr.key === `_bw_image_${i}`
+                  );
+                  if (bwAttr?.value) shopifyBwUrls.push(bwAttr.value);
+                }
+                if (shopifyBwUrls.length === 5) bwImageUrls = shopifyBwUrls;
+              }
               
               // Check if this is a gift card
               let isGiftCard = false;
@@ -221,6 +236,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 quantity: line.quantity,
                 title: line.title,
                 imageUrls: isGiftCard ? [] : imageUrls,
+                bwImageUrls: isGiftCard ? undefined : bwImageUrls,
                 style: isGiftCard ? undefined : style,
                 isGiftCard,
                 giftCardAmount,
@@ -261,7 +277,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number = 1,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor"
+    style?: "cartoon" | "pencil" | "watercolor",
+    bwImageUrls?: string[]
   ) => {
     setIsLoading(true);
     try {
@@ -277,6 +294,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             cartId: cart.id,
             imageUrls,
+            bwImageUrls,
             quantity,
             bookId,
             phoneNumber,
@@ -293,6 +311,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           },
           body: JSON.stringify({
             imageUrls,
+            bwImageUrls,
             quantity,
             bookId,
             phoneNumber,
@@ -315,6 +334,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             return {
               ...item,
               imageUrls: isNewItem ? item.imageUrls : (existingItem?.imageUrls ?? []),
+              bwImageUrls: isNewItem ? (bwImageUrls ?? item.bwImageUrls) : existingItem?.bwImageUrls,
               // For the newly added item use the style passed to addToCart directly —
               // safeguard against API routes not returning it correctly.
               style: isNewItem ? (style ?? "cartoon") : (item.style ?? existingItem?.style),

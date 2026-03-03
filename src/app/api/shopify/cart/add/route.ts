@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     const {
       cartId,
       imageUrls,
+      bwImageUrls,
       quantity = 1,
       bookId,
       phoneNumber,
@@ -16,6 +17,7 @@ export async function POST(request: NextRequest) {
     } = body as {
       cartId: string;
       imageUrls: string[];
+      bwImageUrls?: string[];
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
@@ -33,6 +35,14 @@ export async function POST(request: NextRequest) {
     if (!cartId || !imageUrls || imageUrls.length !== 5) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate bwImageUrls if provided
+    if (bwImageUrls && bwImageUrls.length !== 5) {
+      return NextResponse.json(
+        { error: "bwImageUrls must contain exactly 5 URLs" },
         { status: 400 }
       );
     }
@@ -126,12 +136,22 @@ export async function POST(request: NextRequest) {
           attributes: [
             // Ensure this line stays distinct (prevents quantity merge)
             { key: "_uid", value: lineUid },
-            // Line item attributes with underscore prefix are hidden from checkout
+            // Colored images (hidden from checkout)
             { key: "_image_1", value: urls[0] },
             { key: "_image_2", value: urls[1] },
             { key: "_image_3", value: urls[2] },
             { key: "_image_4", value: urls[3] },
             { key: "_image_5", value: urls[4] },
+            // B&W images (hidden from checkout) — only present in AI flow
+            ...(bwImageUrls
+              ? [
+                  { key: "_bw_image_1", value: bwImageUrls[0] },
+                  { key: "_bw_image_2", value: bwImageUrls[1] },
+                  { key: "_bw_image_3", value: bwImageUrls[2] },
+                  { key: "_bw_image_4", value: bwImageUrls[3] },
+                  { key: "_bw_image_5", value: bwImageUrls[4] },
+                ]
+              : []),
             // Always include style attribute (default to "cartoon" if not provided)
             // Ensure style is valid before saving
             ...(style && (style === "cartoon" || style === "pencil" || style === "watercolor")
