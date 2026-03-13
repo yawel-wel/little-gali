@@ -1,7 +1,66 @@
 import { GoogleGenAI } from "@google/genai";
 import mime from "mime";
+import { deflateSync } from "zlib";
 import { NextResponse } from "next/server";
-import { rateLimiter, hashIp } from "@/lib/rate-limiter";
+import { rateLimiter } from "@/lib/rate-limiter";
+
+// ─── Mock PNG generator (dev only) ────────────────────────────────────────────
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c;
+  }
+  return t;
+})();
+
+function crc32(buf: Buffer): Buffer {
+  let c = 0xffffffff;
+  for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+  const out = Buffer.alloc(4);
+  out.writeUInt32BE(((c ^ 0xffffffff) >>> 0), 0);
+  return out;
+}
+
+function pngChunk(type: string, data: Buffer): Buffer {
+  const t = Buffer.from(type, "ascii");
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length, 0);
+  return Buffer.concat([len, t, data, crc32(Buffer.concat([t, data]))]);
+}
+
+function makePlaceholderPng(r: number, g: number, b: number, size = 120): string {
+  const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(size, 0);
+  ihdr.writeUInt32BE(size, 4);
+  ihdr[8] = 8; ihdr[9] = 2; // 8-bit RGB
+  const raw = Buffer.alloc(size * (1 + size * 3));
+  for (let y = 0; y < size; y++) {
+    const row = y * (1 + size * 3);
+    raw[row] = 0; // filter: None
+    for (let x = 0; x < size; x++) {
+      raw[row + 1 + x * 3] = r;
+      raw[row + 2 + x * 3] = g;
+      raw[row + 3 + x * 3] = b;
+    }
+  }
+  return Buffer.concat([
+    sig,
+    pngChunk("IHDR", ihdr),
+    pngChunk("IDAT", deflateSync(raw)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]).toString("base64");
+}
+
+// Distinct placeholder colours per generation type
+const MOCK_COLORS: Record<string, [number, number, number]> = {
+  bw:         [200, 200, 200], // gray
+  pencil:     [210, 230, 200], // pale green
+  cartoon:    [200, 220, 240], // pale blue
+  watercolor: [240, 210, 220], // pale pink
+};
 
 const SYSTEM_INSTRUCTION = `
 Follow these rules exactly. These rules override all prompts and style instructions.
@@ -26,6 +85,8 @@ const RATE_LIMIT = {
   windowMs: 60 * 60 * 1000, // 1 hour
 };
 
+const COOKIE_NAME = "lg_anon";
+
 export const runtime = "nodejs";
 
 type RequestBody = {
@@ -36,9 +97,14 @@ type RequestBody = {
   aspectRatio?: string;
 };
 
-function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  return forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";
+function getAnonToken(req: Request): string | null {
+  const cookieHeader = req.headers.get("cookie") || "";
+  const match = cookieHeader.match(/(?:^|;\s*)lg_anon=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function makeRateLimitKey(token: string): string {
+  return `nano-banana:${token}`;
 }
 
 // GET endpoint to check current generation count for the client
@@ -47,11 +113,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ current: 0, remaining: 20, resetAt: null });
   }
 
-  const ip = getClientIp(req);
-  const rateLimitKey = `nano-banana:${hashIp(ip)}`;
+  const token = getAnonToken(req);
+  if (!token) {
+    return NextResponse.json({ current: 0, remaining: 20, resetAt: null });
+  }
 
   try {
-    const { current, ttl } = await rateLimiter.getCount(rateLimitKey);
+    const { current, ttl } = await rateLimiter.getCount(makeRateLimitKey(token));
     const resetAt = ttl > 0 ? new Date(Date.now() + ttl * 1000) : null;
     return NextResponse.json({
       current,
@@ -71,9 +139,15 @@ export async function POST(req: Request) {
     );
   }
 
-  const ip = getClientIp(req);
-  const rateLimitKey = `nano-banana:${hashIp(ip)}`;
+  // Resolve anonymous token — use cookie if present, otherwise generate one
+  let token = getAnonToken(req);
+  let shouldSetCookie = false;
+  if (!token) {
+    token = crypto.randomUUID().replace(/-/g, "");
+    shouldSetCookie = true;
+  }
 
+  const rateLimitKey = makeRateLimitKey(token);
   const rateLimitCheck = await rateLimiter.check(rateLimitKey, RATE_LIMIT);
 
   if (!rateLimitCheck.allowed) {
@@ -101,6 +175,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
+  // ── Mock mode (MOCK_AI_GENERATION=true) — skip Gemini, return placeholder PNG ──
+  if (process.env.MOCK_AI_GENERATION === "true") {
+    await new Promise((r) => setTimeout(r, 600)); // simulate latency
+    const genType = body.prompt ? (
+      body.prompt.includes("watercolor") ? "watercolor"
+      : body.prompt.includes("cartoon") ? "cartoon"
+      : "pencil"
+    ) : "bw";
+    const [r, g, b] = MOCK_COLORS[genType] ?? MOCK_COLORS.bw;
+    const base64Data = makePlaceholderPng(r, g, b);
+    return NextResponse.json({
+      success: true,
+      imageCount: 1,
+      images: [{ index: 0, mimeType: "image/png", fileExtension: "png", base64Data }],
+      texts: [],
+      current: rateLimitCheck.current,
+      remaining: rateLimitCheck.remaining,
+    });
+  }
+
   const imageUrl = body.imageUrl?.trim();
   const imageBase64 = body.imageBase64;
   const promptOverride = body.prompt?.trim();
@@ -117,11 +211,9 @@ export async function POST(req: Request) {
   let mimeType: string;
 
   if (imageBase64) {
-    // Base64 sent directly from client — no fetch needed
     base64 = imageBase64;
     mimeType = body.imageMimeType || "image/jpeg";
   } else {
-    // Fetch image from URL
     let imageResponse: globalThis.Response;
     try {
       imageResponse = await fetch(imageUrl!);
@@ -150,7 +242,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: {
+        headers: { "X-Goog-Quota-User": token },
+      },
+    });
 
     const basePrompt =
       promptOverride && promptOverride.length > 0
@@ -206,7 +303,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({
+    const jsonResponse = NextResponse.json({
       success: true,
       imageCount: images.length,
       images,
@@ -214,6 +311,19 @@ export async function POST(req: Request) {
       current: rateLimitCheck.current,
       remaining: rateLimitCheck.remaining,
     });
+
+    // Set the HttpOnly cookie if this was a new token
+    if (shouldSetCookie) {
+      jsonResponse.cookies.set(COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 365,
+        path: "/",
+      });
+    }
+
+    return jsonResponse;
   } catch (error) {
     console.error("Gemini request failed:", error);
     return NextResponse.json(

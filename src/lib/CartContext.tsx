@@ -34,7 +34,8 @@ interface CartContextType {
     bookId?: string,
     phoneNumber?: string,
     style?: "cartoon" | "pencil" | "watercolor",
-    bwImageUrls?: string[]
+    bwImageUrls?: string[],
+    anonToken?: string
   ) => Promise<void>;
   addGiftCardToCart: (optionId: string) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
@@ -278,7 +279,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     bookId?: string,
     phoneNumber?: string,
     style?: "cartoon" | "pencil" | "watercolor",
-    bwImageUrls?: string[]
+    bwImageUrls?: string[],
+    anonToken?: string
   ) => {
     setIsLoading(true);
     try {
@@ -300,6 +302,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             locale,
+            anonToken,
           }),
         });
       } else {
@@ -317,6 +320,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             locale,
+            anonToken,
           }),
         });
       }

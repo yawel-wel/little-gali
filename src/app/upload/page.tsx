@@ -99,11 +99,14 @@ async function blobUrlToBase64(
 // ─── Helper: upload single base64 image to Cloudinary ─────────────────────────
 async function uploadBase64ToCloudinary(
   base64: string,
-  mimeType: string
+  mimeType: string,
+  token?: string | null
 ): Promise<string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["X-Anon-Token"] = token;
   const res = await fetch("/api/upload-images", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({ base64, mimeType }),
   });
   if (!res.ok) {
@@ -494,10 +497,32 @@ function UploadPageContent() {
   // Whether any AI cart upload is in progress
   const [isCartUploading, setIsCartUploading] = useState(false);
 
-  // Keep ref in sync with state
+  // Anonymous user token (HttpOnly cookie value returned by /api/anon-token)
+  const [anonToken, setAnonToken] = useState<string | null>(null);
+  const anonTokenRef = useRef<string | null>(null);
+
+  // Background upload promises: key = "original_0", "bw_1", "pencil_2", etc.
+  const bgUploads = useRef<Map<string, Promise<string>>>(new Map());
+
+  // Keep refs in sync with state
   useEffect(() => {
     selectedStyleRef.current = selectedStyle;
   }, [selectedStyle]);
+
+  useEffect(() => {
+    anonTokenRef.current = anonToken;
+  }, [anonToken]);
+
+  // Fetch anonymous token on mount (sets HttpOnly cookie + returns value for client use)
+  useEffect(() => {
+    fetch("/api/anon-token")
+      .then((r) => r.json())
+      .then(({ token }) => {
+        setAnonToken(token);
+        anonTokenRef.current = token;
+      })
+      .catch(() => {});
+  }, []);
 
   // Reset everything when component mounts - always start fresh
   useEffect(() => {
@@ -521,6 +546,7 @@ function UploadPageContent() {
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
+    bgUploads.current.clear();
     setPendingCropImages([]);
     setCurrentCropIndex(0);
     setIsInCroppingFlow(false);
@@ -692,6 +718,7 @@ function UploadPageContent() {
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
+    bgUploads.current.clear();
     setPendingCropImages([]);
     setCurrentCropIndex(0);
     setIsInCroppingFlow(false);
@@ -776,6 +803,15 @@ function UploadPageContent() {
             i === index ? dataUrl : s
           ),
         }));
+
+        // Start background Cloudinary upload immediately — will be ready by cart time
+        const uploadKey = `${type}_${index}`;
+        if (!bgUploads.current.has(uploadKey)) {
+          bgUploads.current.set(
+            uploadKey,
+            uploadBase64ToCloudinary(img.base64Data, img.mimeType, anonTokenRef.current)
+          );
+        }
       } catch {
         setGeneratedImages((prev) => ({
           ...prev,
@@ -823,6 +859,22 @@ function UploadPageContent() {
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
+          // Start background Cloudinary uploads for all originals immediately
+          newImages.forEach((blobUrl, i) => {
+            const key = `original_${i}`;
+            if (!bgUploads.current.has(key)) {
+              const promise = compressImage(blobUrl).then((compressed) =>
+                new Promise<string>((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+                  reader.readAsDataURL(compressed);
+                }).then((b64) =>
+                  uploadBase64ToCloudinary(b64, (compressed as File).type || "image/jpeg", anonTokenRef.current)
+                )
+              );
+              bgUploads.current.set(key, promise);
+            }
+          });
         }
       } else if (editingImageIndex !== null && editingImageIndex >= 0) {
         // Re-cropping existing image
@@ -837,6 +889,8 @@ function UploadPageContent() {
         setImages(newImages);
         cropStates.current.set(editingImageIndex, cropState);
         setEditingImageIndex(null);
+        // Invalidate the background upload for this slot so it re-uploads at cart time
+        bgUploads.current.delete(`original_${editingImageIndex}`);
 
         // In AI flow: after switching/re-cropping a slot, regenerate B&W for it
         if (AI_PREVIEW_ENABLED && switchingSlotIndex.current === editingImageIndex) {
@@ -1157,44 +1211,52 @@ function UploadPageContent() {
         setIsCartUploading(true);
         setUploadingImages(new Set([0, 1, 2, 3, 4]));
 
-        // Upload all 15 images to Cloudinary in parallel:
-        // 5 original user images + 5 B&W generated + 5 colored generated
+        // Helper: reuse an in-progress/completed background upload, or start a fresh one
+        const getUpload = async (key: string, fallback: () => Promise<string>): Promise<string> => {
+          const existing = bgUploads.current.get(key);
+          if (existing) {
+            try { return await existing; } catch { /* fall through to retry */ }
+          }
+          const p = fallback();
+          bgUploads.current.set(key, p);
+          return p;
+        };
+
+        // Resolve all 15 uploads — most will already be done in the background
         const [originalUploadResults, bwUploadResults, coloredUploadResults] =
           await Promise.all([
-            // Original user images (compress first)
             Promise.all(
-              images.map(async (blobUrl) => {
-                const compressed = await compressImage(blobUrl);
-                const fd = new FormData();
-                fd.append("images", compressed);
-                const res = await fetch("/api/upload-images", {
-                  method: "POST",
-                  body: fd,
-                });
-                if (!res.ok) throw new Error("Failed to upload original image");
-                const d = await res.json();
-                return d.imageUrls[0] as string;
-              })
+              images.map((blobUrl, i) =>
+                getUpload(`original_${i}`, async () => {
+                  const compressed = await compressImage(blobUrl);
+                  const b64 = await new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+                    reader.readAsDataURL(compressed);
+                  });
+                  return uploadBase64ToCloudinary(b64, (compressed as File).type || "image/jpeg", anonTokenRef.current);
+                })
+              )
             ),
-            // B&W generated images
             Promise.all(
-              bwSlots.map(async (slot) => {
-                const dataUrl = slot as string;
-                const [, rest] = dataUrl.split(",");
-                const mimeType =
-                  dataUrl.match(/data:([^;]+);/)?.[1] ?? "image/png";
-                return uploadBase64ToCloudinary(rest, mimeType);
-              })
+              bwSlots.map((slot, i) =>
+                getUpload(`bw_${i}`, () => {
+                  const dataUrl = slot as string;
+                  const [, rest] = dataUrl.split(",");
+                  const mimeType = dataUrl.match(/data:([^;]+);/)?.[1] ?? "image/png";
+                  return uploadBase64ToCloudinary(rest, mimeType, anonTokenRef.current);
+                })
+              )
             ),
-            // Colored generated images
             Promise.all(
-              coloredSlots.map(async (slot) => {
-                const dataUrl = slot as string;
-                const [, rest] = dataUrl.split(",");
-                const mimeType =
-                  dataUrl.match(/data:([^;]+);/)?.[1] ?? "image/png";
-                return uploadBase64ToCloudinary(rest, mimeType);
-              })
+              coloredSlots.map((slot, i) =>
+                getUpload(`${style}_${i}`, () => {
+                  const dataUrl = slot as string;
+                  const [, rest] = dataUrl.split(",");
+                  const mimeType = dataUrl.match(/data:([^;]+);/)?.[1] ?? "image/png";
+                  return uploadBase64ToCloudinary(rest, mimeType, anonTokenRef.current);
+                })
+              )
             ),
           ]);
 
@@ -1218,7 +1280,8 @@ function UploadPageContent() {
           undefined,
           undefined,
           style,
-          bwUploadResults
+          bwUploadResults,
+          anonToken ?? undefined
         );
         router.push("/cart");
         addPromise.catch((e) => console.error("Add to cart failed:", e));

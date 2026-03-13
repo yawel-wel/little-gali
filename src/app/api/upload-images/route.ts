@@ -6,7 +6,8 @@ async function uploadToCloudinary(
   file: File | Buffer,
   mimeType: string,
   cloudName: string,
-  uploadPreset: string
+  uploadPreset: string,
+  folder: string = "little-gali"
 ): Promise<string> {
   const formData = new FormData();
 
@@ -19,7 +20,7 @@ async function uploadToCloudinary(
   }
 
   formData.append("upload_preset", uploadPreset);
-  formData.append("folder", "little-gali");
+  formData.append("folder", folder);
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -50,6 +51,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Per-user folder: little-gali/users/{token} if token present, else little-gali
+    const anonToken = request.headers.get("x-anon-token");
+    const folder = anonToken
+      ? `little-gali/users/${anonToken}`
+      : "little-gali";
+
     const contentType = request.headers.get("content-type") ?? "";
 
     // Path 1: base64 JSON payload (for generated images)
@@ -68,7 +75,7 @@ export async function POST(request: NextRequest) {
       }
 
       const buffer = Buffer.from(base64, "base64");
-      const url = await uploadToCloudinary(buffer, mimeType, cloudName, uploadPreset);
+      const url = await uploadToCloudinary(buffer, mimeType, cloudName, uploadPreset, folder);
 
       return NextResponse.json({ success: true, imageUrls: [url] });
     }
@@ -85,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     const uploadPromises = files.map((file) =>
-      uploadToCloudinary(file, file.type, cloudName, uploadPreset)
+      uploadToCloudinary(file, file.type, cloudName, uploadPreset, folder)
     );
 
     const imageUrls = await Promise.all(uploadPromises);

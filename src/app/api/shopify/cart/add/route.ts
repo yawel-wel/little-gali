@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       phoneNumber,
       style,
       locale,
+      anonToken,
     } = body as {
       cartId: string;
       imageUrls: string[];
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest) {
       phoneNumber?: string;
       style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
+      anonToken?: string;
     };
 
     console.log(
@@ -190,6 +192,10 @@ export async function POST(request: NextRequest) {
                     value: phoneNumber,
                   },
                 ]
+              : []),
+            // Anonymous user token for tracing uploads (hidden from checkout)
+            ...(anonToken
+              ? [{ key: "_anon_token", value: anonToken }]
               : []),
           ],
         },

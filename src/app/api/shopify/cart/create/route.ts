@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
       phoneNumber,
       style,
       locale,
+      anonToken,
     } = body as {
       imageUrls: string[];
       bwImageUrls?: string[];
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
       phoneNumber?: string;
       style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
+      anonToken?: string;
     };
 
     if (!imageUrls || imageUrls.length !== 5) {
@@ -158,6 +160,10 @@ export async function POST(request: NextRequest) {
                 key: "style",
                 value: style || "cartoon",
               },
+              // Anonymous user token for tracing uploads (hidden from checkout)
+              ...(anonToken
+                ? [{ key: "_anon_token", value: anonToken }]
+                : []),
             ],
           },
         ],
