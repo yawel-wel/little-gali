@@ -7,9 +7,7 @@ export const DISCOUNTED_BOOK_PRICE = 99;
 
 // Gift Card Configuration
 export const GIFT_CARD_OPTIONS = [
-  { id: 'one_no_shipping', price: 145, labelKey: 'giftCard.option1' },
   { id: 'one_with_shipping', price: 175, labelKey: 'giftCard.option2' },
-  { id: 'two_no_shipping', price: 244, labelKey: 'giftCard.option3' },
   { id: 'two_with_shipping', price: 274, labelKey: 'giftCard.option4' },
 ] as const;
 

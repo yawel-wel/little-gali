@@ -22,7 +22,7 @@ export function GiftCardSection({
   const { addGiftCardToCart } = useCart();
   
   const [selectedOption, setSelectedOption] = useState<string>(
-    GIFT_CARD_OPTIONS[1].id // Pre-select second option (₪175)
+    GIFT_CARD_OPTIONS[0].id // Pre-select ₪175
   );
   const [isAdding, setIsAdding] = useState(false);
 
@@ -145,7 +145,7 @@ export function GiftCardSection({
               </h3>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
               {GIFT_CARD_OPTIONS.map((option) => (
                 <button
                   key={option.id}
