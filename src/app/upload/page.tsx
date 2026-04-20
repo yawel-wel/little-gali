@@ -5,7 +5,7 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { StyleSelector, StyleType } from "@/components/style-selector";
-import { Upload, Info, X, Loader2 } from "lucide-react";
+import { Upload, Info, X, Loader2, RefreshCw, ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
@@ -34,6 +34,103 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+// ─── Feature flag ─────────────────────────────────────────────────────────────
+const AI_PREVIEW_ENABLED =
+  process.env.NEXT_PUBLIC_AI_PREVIEW_ENABLED === "true";
+
+// ─── AI generation prompts ────────────────────────────────────────────────────
+const STYLE_PROMPTS: Record<StyleType, string> = {
+  cartoon: `Convert the given photo into a colored cartoon illustration on a white background.
+Use vibrant pen strokes and keep the main subject's proportions and features accurate and recognizable.
+Outline all shapes gently using colored or black lines.
+Replace the background with clean white.
+Avoid shadows, textures, gradients, or photographic details.
+The result should look like it was drawn by hand with colored markers — playful, clean, and emotionally warm.`,
+  pencil: `Convert the given photo into a colored pencil sketch illustration on a white background.
+Use soft, pastel-like pencil strokes with light texture visible, but keep the main subject's proportions and features accurate and recognizable.
+Outline all shapes gently using colored lines — no black outlines.
+Replace the background with clean white.
+Avoid harsh shadows, gradients, or photographic details.
+The result should look like it was drawn by hand with colored pencils — playful, clean, and emotionally warm.
+Do not fade the bottom part of the person into the background.`,
+  watercolor: `Convert the given photo into an ink outlines with visible hand-drawn wobble, and vibrant watercolor-style fills with soft color bleeding on a white background.
+
+Keep all proportions, facial features, and expressions accurate and recognizable.
+
+Ensure the background is pure white and clean, with no shading or gradients.
+
+Avoid photographic details or heavy shadows.
+
+The result should look like a hand-painted watercolor character illustration - warm, vibrant, and full of charm.
+
+Make sure to remove the background and replace it with white.`,
+};
+
+// ─── AI generation types ──────────────────────────────────────────────────────
+type GenSlot = string | "loading" | "error" | null;
+type GenType = "bw" | StyleType;
+
+type GeneratedImages = {
+  bw: GenSlot[];
+  cartoon: GenSlot[];
+  pencil: GenSlot[];
+  watercolor: GenSlot[];
+};
+
+// ─── Helper: blob URL → base64 ────────────────────────────────────────────────
+async function blobUrlToBase64(
+  blobUrl: string
+): Promise<{ base64: string; mimeType: string }> {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+  const mimeType = blob.type || "image/jpeg";
+  const base64 = await new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      resolve(dataUrl.split(",")[1]);
+    };
+    reader.readAsDataURL(blob);
+  });
+  return { base64, mimeType };
+}
+
+// ─── Helper: upload single base64 image to Cloudinary ─────────────────────────
+async function uploadBase64ToCloudinary(
+  base64: string,
+  mimeType: string,
+  token?: string | null
+): Promise<string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["X-Anon-Token"] = token;
+  const res = await fetch("/api/upload-images", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ base64, mimeType }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Failed to upload image");
+  }
+  const data = await res.json();
+  return data.imageUrls[0];
+}
+
+// ─── Skeleton loader component ────────────────────────────────────────────────
+function ImageSkeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`bg-gray-200 rounded-lg overflow-hidden ${className}`}
+      style={{
+        background:
+          "linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%)",
+        backgroundSize: "200% 100%",
+        animation: "shimmer 1.5s ease-in-out infinite",
+      }}
+    />
+  );
+}
 
 // ─── Mobile Image Editor ──────────────────────────────────────────────────────
 // Uses react-easy-crop for pan/zoom, then crops the image via canvas on save.
@@ -205,6 +302,7 @@ interface SortableImageItemProps {
   onRemove: (index: number) => void;
   isSubmitting: boolean;
   onTap: (index: number) => void;
+  onSwitch?: (index: number) => void; // AI mode: replace X with switch button
 }
 
 function SortableImageItem({
@@ -215,6 +313,7 @@ function SortableImageItem({
   onRemove,
   isSubmitting,
   onTap,
+  onSwitch,
 }: SortableImageItemProps) {
   const {
     attributes,
@@ -300,24 +399,41 @@ function SortableImageItem({
         decoding="async"
         draggable={false}
       />
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          onRemove(index);
-        }}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-        }}
-        onTouchStart={(e) => {
-          e.stopPropagation();
-        }}
-        className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
-        disabled={isSubmitting}
-        style={{ pointerEvents: "auto" }}
-      >
-        <X className="w-3 h-3" />
-      </button>
+      {onSwitch ? (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onSwitch(index);
+          }}
+          onMouseDown={(e) => { e.stopPropagation(); }}
+          onTouchStart={(e) => { e.stopPropagation(); }}
+          className="absolute -top-1 -left-1 bg-white hover:bg-gray-100 text-dark-gray rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer border border-gray-200"
+          style={{ pointerEvents: "auto" }}
+          title={locale === "en" ? "Switch image" : "החלף תמונה"}
+        >
+          <RefreshCw className="w-3 h-3" />
+        </button>
+      ) : (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onRemove(index);
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
+          className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
+          disabled={isSubmitting}
+          style={{ pointerEvents: "auto" }}
+        >
+          <X className="w-3 h-3" />
+        </button>
+      )}
     </div>
   );
 }
@@ -342,8 +458,8 @@ function UploadPageContent() {
   const [uploadingImages, setUploadingImages] = useState<Set<number>>(
     new Set(),
   );
-  const [selectedStyle, setSelectedStyle] = useState<StyleType>("pencil");
-  const selectedStyleRef = useRef<StyleType>("pencil");
+  const [selectedStyle, setSelectedStyle] = useState<StyleType | null>("pencil");
+  const selectedStyleRef = useRef<StyleType | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const replaceImageInputRef = useRef<HTMLInputElement>(null);
   // Store Cloudinary URLs separately - don't update display, only use for cart
@@ -364,10 +480,49 @@ function UploadPageContent() {
   const [currentCropIndex, setCurrentCropIndex] = useState<number>(0);
   const [isInCroppingFlow, setIsInCroppingFlow] = useState<boolean>(false);
 
-  // Keep ref in sync with state
+  // ── AI Preview state ────────────────────────────────────────────────────────
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImages>({
+    bw: Array(5).fill(null),
+    cartoon: Array(5).fill(null),
+    pencil: Array(5).fill(null),
+    watercolor: Array(5).fill(null),
+  });
+  const [imageErrors, setImageErrors] = useState<Map<string, string>>(
+    new Map()
+  );
+  const [generationCount, setGenerationCount] = useState(0);
+  // Input ref for "Switch Image" after generation
+  const switchImageInputRef = useRef<HTMLInputElement>(null);
+  const switchingSlotIndex = useRef<number | null>(null);
+  // Whether any AI cart upload is in progress
+  const [isCartUploading, setIsCartUploading] = useState(false);
+
+  // Anonymous user token (HttpOnly cookie value returned by /api/anon-token)
+  const [anonToken, setAnonToken] = useState<string | null>(null);
+  const anonTokenRef = useRef<string | null>(null);
+
+  // Background upload promises: key = "original_0", "bw_1", "pencil_2", etc.
+  const bgUploads = useRef<Map<string, Promise<string>>>(new Map());
+
+  // Keep refs in sync with state
   useEffect(() => {
     selectedStyleRef.current = selectedStyle;
   }, [selectedStyle]);
+
+  useEffect(() => {
+    anonTokenRef.current = anonToken;
+  }, [anonToken]);
+
+  // Fetch anonymous token on mount (sets HttpOnly cookie + returns value for client use)
+  useEffect(() => {
+    fetch("/api/anon-token")
+      .then((r) => r.json())
+      .then(({ token }) => {
+        setAnonToken(token);
+        anonTokenRef.current = token;
+      })
+      .catch(() => {});
+  }, []);
 
   // Reset everything when component mounts - always start fresh
   useEffect(() => {
@@ -391,10 +546,19 @@ function UploadPageContent() {
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
+    bgUploads.current.clear();
     setPendingCropImages([]);
     setCurrentCropIndex(0);
     setIsInCroppingFlow(false);
     setEditingImageIndex(null);
+    // Reset AI state
+    setGeneratedImages({
+      bw: Array(5).fill(null),
+      cartoon: Array(5).fill(null),
+      pencil: Array(5).fill(null),
+      watercolor: Array(5).fill(null),
+    });
+    setImageErrors(new Map());
 
     // Clear file input
     if (fileInputRef.current) {
@@ -550,14 +714,23 @@ function UploadPageContent() {
     clearImages();
     setUploadingImages(new Set());
     setSelectedStyle("pencil");
+    selectedStyleRef.current = "pencil";
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
     cropStates.current.clear();
+    bgUploads.current.clear();
     setPendingCropImages([]);
     setCurrentCropIndex(0);
     setIsInCroppingFlow(false);
     setEditingImageIndex(null);
-    
+    setGeneratedImages({
+      bw: Array(5).fill(null),
+      cartoon: Array(5).fill(null),
+      pencil: Array(5).fill(null),
+      watercolor: Array(5).fill(null),
+    });
+    setImageErrors(new Map());
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -567,6 +740,97 @@ function UploadPageContent() {
   const handleImageTap = useCallback((index: number) => {
     setEditingImageIndex(index);
   }, []);
+
+  // ── AI generation functions ──────────────────────────────────────────────────
+
+  const generateSingleImage = useCallback(
+    async (blobUrl: string, type: GenType, index: number) => {
+      // Mark slot as loading
+      setGeneratedImages((prev) => ({
+        ...prev,
+        [type]: prev[type].map((s: GenSlot, i: number) =>
+          i === index ? "loading" : s
+        ),
+      }));
+      setImageErrors((prev) => {
+        const next = new Map(prev);
+        next.delete(`${type}_${index}`);
+        return next;
+      });
+
+      try {
+        const { base64, mimeType } = await blobUrlToBase64(blobUrl);
+        const body: Record<string, string> = {
+          imageBase64: base64,
+          imageMimeType: mimeType,
+          aspectRatio: "1:1",
+        };
+        if (type !== "bw") body.prompt = STYLE_PROMPTS[type as StyleType];
+
+        const res = await fetch("/api/nano-banana", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+
+        if (data.current !== undefined) setGenerationCount(data.current);
+
+        if (!res.ok || !data.success || !data.images?.[0]) {
+          setGeneratedImages((prev) => ({
+            ...prev,
+            [type]: prev[type].map((s: GenSlot, i: number) =>
+              i === index ? "error" : s
+            ),
+          }));
+          setImageErrors((prev) => {
+            const next = new Map(prev);
+            next.set(
+              `${type}_${index}`,
+              data.error || (locale === "he" ? "שגיאה ביצירה" : "Generation failed")
+            );
+            return next;
+          });
+          return;
+        }
+
+        const img = data.images[0];
+        const dataUrl = `data:${img.mimeType};base64,${img.base64Data}`;
+
+        setGeneratedImages((prev) => ({
+          ...prev,
+          [type]: prev[type].map((s: GenSlot, i: number) =>
+            i === index ? dataUrl : s
+          ),
+        }));
+
+        // Start background Cloudinary upload immediately — will be ready by cart time
+        const uploadKey = `${type}_${index}`;
+        if (!bgUploads.current.has(uploadKey)) {
+          bgUploads.current.set(
+            uploadKey,
+            uploadBase64ToCloudinary(img.base64Data, img.mimeType, anonTokenRef.current)
+          );
+        }
+      } catch {
+        setGeneratedImages((prev) => ({
+          ...prev,
+          [type]: prev[type].map((s: GenSlot, i: number) =>
+            i === index ? "error" : s
+          ),
+        }));
+        setImageErrors((prev) => {
+          const next = new Map(prev);
+          next.set(
+            `${type}_${index}`,
+            locale === "he" ? "שגיאת רשת. נסה שנית." : "Network error. Please try again."
+          );
+          return next;
+        });
+      }
+    },
+    [locale]
+  );
 
   // Save the cropped image back into the images array
   const handleSaveCrop = useCallback(
@@ -595,6 +859,22 @@ function UploadPageContent() {
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
+          // Start background Cloudinary uploads for all originals immediately
+          newImages.forEach((blobUrl, i) => {
+            const key = `original_${i}`;
+            if (!bgUploads.current.has(key)) {
+              const promise = compressImage(blobUrl).then((compressed) =>
+                new Promise<string>((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+                  reader.readAsDataURL(compressed);
+                }).then((b64) =>
+                  uploadBase64ToCloudinary(b64, (compressed as File).type || "image/jpeg", anonTokenRef.current)
+                )
+              );
+              bgUploads.current.set(key, promise);
+            }
+          });
         }
       } else if (editingImageIndex !== null && editingImageIndex >= 0) {
         // Re-cropping existing image
@@ -609,9 +889,17 @@ function UploadPageContent() {
         setImages(newImages);
         cropStates.current.set(editingImageIndex, cropState);
         setEditingImageIndex(null);
+        // Invalidate the background upload for this slot so it re-uploads at cart time
+        bgUploads.current.delete(`original_${editingImageIndex}`);
+
+        // In AI flow: after switching/re-cropping a slot, regenerate B&W for it
+        if (AI_PREVIEW_ENABLED && switchingSlotIndex.current === editingImageIndex) {
+          switchingSlotIndex.current = null;
+          generateSingleImage(croppedUrl, "bw", editingImageIndex);
+        }
       }
     },
-    [isInCroppingFlow, currentCropIndex, pendingCropImages, images, editingImageIndex, setImages],
+    [isInCroppingFlow, currentCropIndex, pendingCropImages, images, editingImageIndex, setImages, generateSingleImage],
   );
 
   // Handle cancel/skip during cropping
@@ -679,6 +967,123 @@ function UploadPageContent() {
       }
     },
     [isInCroppingFlow, currentCropIndex, pendingCropImages]
+  );
+
+  // Derived: is any image currently generating?
+  const isAnyGenerating = Object.values(generatedImages)
+    .flat()
+    .some((s) => s === "loading");
+
+  // Derived: is generation hard-blocked (limit reached)?
+  const isGenLimitReached = generationCount >= 20;
+
+  // Derived: show warning banner
+  const genWarningRemaining =
+    generationCount >= 15 && generationCount < 20
+      ? 20 - generationCount
+      : null;
+
+  // Derived: has B&W generation been triggered? (any slot is non-null)
+  const bwHasStarted = AI_PREVIEW_ENABLED && generatedImages.bw.some((s: GenSlot) => s !== null);
+
+  // Derived: is the currently selected style generating?
+  const isCurrentStyleGenerating = selectedStyle
+    ? generatedImages[selectedStyle].some((s: GenSlot) => s === "loading")
+    : false;
+
+  // Fetch current generation count on mount (AI flow only)
+  useEffect(() => {
+    if (!AI_PREVIEW_ENABLED) return;
+    fetch("/api/nano-banana")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.current !== undefined) setGenerationCount(d.current);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Trigger B&W generation for all 5 images (called by the generate button)
+  const handleGenerateBW = useCallback(() => {
+    images.forEach((url, i) => generateSingleImage(url, "bw", i));
+  }, [images, generateSingleImage]);
+
+  // Handle style selection with caching
+  const handleAIStyleSelect = useCallback(
+    (style: StyleType) => {
+      setSelectedStyle(style);
+      selectedStyleRef.current = style;
+
+      const cached = generatedImages[style];
+      const missingIndices = cached
+        .map((slot: GenSlot, i: number) =>
+          slot === null || slot === "error" ? i : null
+        )
+        .filter((i): i is number => i !== null);
+
+      missingIndices.forEach((i) =>
+        generateSingleImage(images[i], style, i)
+      );
+    },
+    [generatedImages, images, generateSingleImage]
+  );
+
+  // Handle "Switch Image" button click on a generated image slot
+  const handleSwitchImageClick = useCallback((index: number) => {
+    switchingSlotIndex.current = index;
+    switchImageInputRef.current?.click();
+  }, []);
+
+  // Handle file selection for switching a generated image
+  const handleSwitchImageFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      if (!file.type.startsWith("image/")) return;
+
+      const slotIndex = switchingSlotIndex.current;
+      if (slotIndex === null) return;
+
+      const newBlobUrl = URL.createObjectURL(file);
+      // Revoke old blob URL if applicable
+      const oldOrigUrl = originalUrls.current.get(slotIndex);
+      if (oldOrigUrl?.startsWith("blob:")) URL.revokeObjectURL(oldOrigUrl);
+
+      // Store as original + open crop editor for this slot
+      originalUrls.current.set(slotIndex, newBlobUrl);
+
+      // Update displayed image immediately
+      const newImages = [...images];
+      newImages[slotIndex] = newBlobUrl;
+      setImages(newImages);
+
+      // Open crop editor for this slot
+      setEditingImageIndex(slotIndex);
+
+      // Clear all generated slots for this index
+      setGeneratedImages((prev) => ({
+        bw: prev.bw.map((s: GenSlot, i: number) => (i === slotIndex ? null : s)),
+        cartoon: prev.cartoon.map((s: GenSlot, i: number) =>
+          i === slotIndex ? null : s
+        ),
+        pencil: prev.pencil.map((s: GenSlot, i: number) =>
+          i === slotIndex ? null : s
+        ),
+        watercolor: prev.watercolor.map((s: GenSlot, i: number) =>
+          i === slotIndex ? null : s
+        ),
+      }));
+
+      // Unselect style so user must re-choose after the new image is processed
+      setSelectedStyle(null);
+      selectedStyleRef.current = null;
+
+      // Clear the input
+      if (switchImageInputRef.current) {
+        switchImageInputRef.current.value = "";
+      }
+    },
+    [images, setImages]
   );
 
   // Drag and drop sensors
@@ -767,16 +1172,131 @@ function UploadPageContent() {
         return;
       }
 
+      // ── AI Preview flow ──────────────────────────────────────────────────
+      if (AI_PREVIEW_ENABLED) {
+        const style = selectedStyleRef.current || selectedStyle;
+        if (!style) {
+          setSubmitStatus({
+            type: "error",
+            message:
+              locale === "he"
+                ? "אנא בחר סגנון צבעוני"
+                : "Please select a color style",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        const bwSlots = generatedImages.bw;
+        const coloredSlots = generatedImages[style];
+        const allBwReady = bwSlots.every(
+          (s) => typeof s === "string" && s !== "loading" && s !== "error"
+        );
+        const allColoredReady = coloredSlots.every(
+          (s) => typeof s === "string" && s !== "loading" && s !== "error"
+        );
+
+        if (!allBwReady || !allColoredReady) {
+          setSubmitStatus({
+            type: "error",
+            message:
+              locale === "he"
+                ? "אנא המתן לסיום יצירת כל התמונות"
+                : "Please wait for all images to finish generating",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        setIsCartUploading(true);
+        setUploadingImages(new Set([0, 1, 2, 3, 4]));
+
+        // Helper: reuse an in-progress/completed background upload, or start a fresh one
+        const getUpload = async (key: string, fallback: () => Promise<string>): Promise<string> => {
+          const existing = bgUploads.current.get(key);
+          if (existing) {
+            try { return await existing; } catch { /* fall through to retry */ }
+          }
+          const p = fallback();
+          bgUploads.current.set(key, p);
+          return p;
+        };
+
+        // Resolve all 15 uploads — most will already be done in the background
+        const [originalUploadResults, bwUploadResults, coloredUploadResults] =
+          await Promise.all([
+            Promise.all(
+              images.map((blobUrl, i) =>
+                getUpload(`original_${i}`, async () => {
+                  const compressed = await compressImage(blobUrl);
+                  const b64 = await new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+                    reader.readAsDataURL(compressed);
+                  });
+                  return uploadBase64ToCloudinary(b64, (compressed as File).type || "image/jpeg", anonTokenRef.current);
+                })
+              )
+            ),
+            Promise.all(
+              bwSlots.map((slot, i) =>
+                getUpload(`bw_${i}`, () => {
+                  const dataUrl = slot as string;
+                  const [, rest] = dataUrl.split(",");
+                  const mimeType = dataUrl.match(/data:([^;]+);/)?.[1] ?? "image/png";
+                  return uploadBase64ToCloudinary(rest, mimeType, anonTokenRef.current);
+                })
+              )
+            ),
+            Promise.all(
+              coloredSlots.map((slot, i) =>
+                getUpload(`${style}_${i}`, () => {
+                  const dataUrl = slot as string;
+                  const [, rest] = dataUrl.split(",");
+                  const mimeType = dataUrl.match(/data:([^;]+);/)?.[1] ?? "image/png";
+                  return uploadBase64ToCloudinary(rest, mimeType, anonTokenRef.current);
+                })
+              )
+            ),
+          ]);
+
+        setUploadingImages(new Set());
+        setIsCartUploading(false);
+
+        // Store original Cloudinary URLs
+        originalUploadResults.forEach((url, i) => {
+          cloudinaryUrls.current.set(i, url);
+        });
+
+        try {
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("adding_to_cart", "1");
+          }
+        } catch {}
+
+        const addPromise = addToCart(
+          coloredUploadResults,
+          1,
+          undefined,
+          undefined,
+          style,
+          bwUploadResults,
+          anonToken ?? undefined
+        );
+        router.push("/cart");
+        addPromise.catch((e) => console.error("Add to cart failed:", e));
+        return;
+      }
+
+      // ── Legacy flow ──────────────────────────────────────────────────────
       // Mark all images as uploading for UI feedback
       setUploadingImages(new Set([0, 1, 2, 3, 4]));
 
       // Upload all 5 images simultaneously to Cloudinary
-      // Compress all images in parallel
       const compressedImages = await Promise.all(
         images.map((url) => compressImage(url)),
       );
 
-      // Upload all compressed images to Cloudinary simultaneously
       const uploadFormData = new FormData();
       compressedImages.forEach((file) => {
         uploadFormData.append("images", file);
@@ -801,64 +1321,34 @@ function UploadPageContent() {
         throw new Error("Invalid response from upload API");
       }
 
-      // Store Cloudinary URLs in the map for potential future use
-      imageUrls.forEach((url, index) => {
+      imageUrls.forEach((url: string, index: number) => {
         cloudinaryUrls.current.set(index, url);
       });
-
-      // Clear uploading state
       setUploadingImages(new Set());
 
-      // Validate all URLs are Cloudinary URLs
       const invalidUrls = imageUrls.filter(
-        (url) =>
+        (url: string) =>
           !url || (!url.startsWith("http://") && !url.startsWith("https://")),
       );
       if (invalidUrls.length > 0) {
-        console.error("Invalid URLs in imageUrls:", invalidUrls);
         throw new Error("Some images were not uploaded correctly");
       }
 
-      console.log("Uploaded images, adding to cart:", imageUrls);
-      // Mark optimistic adding to avoid empty-state flash
       try {
         if (typeof window !== "undefined") {
           sessionStorage.setItem("adding_to_cart", "1");
         }
       } catch {}
 
-      // Fire-and-forget to enable optimistic navigation; cart page will reflect when ready
-      // Use ref to ensure we get the current value, not a stale closure
-      const styleToAdd = selectedStyleRef.current || selectedStyle || "pencil";
-      console.log(
-        "Adding to cart - selectedStyle state:",
-        selectedStyle,
-        "selectedStyleRef.current:",
-        selectedStyleRef.current,
-        "styleToAdd:",
-        styleToAdd,
-      );
-      const addPromise = addToCart(
-        imageUrls,
-        1,
-        undefined,
-        undefined,
-        styleToAdd,
-      );
-
-      // Navigate immediately to cart (optimistic UX)
+      const styleToAdd =
+        selectedStyleRef.current || selectedStyle || ("pencil" as StyleType);
+      const addPromise = addToCart(imageUrls, 1, undefined, undefined, styleToAdd);
       router.push("/cart");
-
-      // Optionally avoid unhandled rejection warnings
-      addPromise.catch((e) => {
-        console.error("Add to cart failed:", e);
-      });
-
-      // Don't clear images/state immediately - let navigation happen first
-      // The images will be cleared when the component unmounts or on next visit
+      addPromise.catch((e) => console.error("Add to cart failed:", e));
     } catch (error) {
       console.error("Submit error:", error);
-      setUploadingImages(new Set()); // Clear uploading state on error
+      setUploadingImages(new Set());
+      setIsCartUploading(false);
       setSubmitStatus({
         type: "error",
         message: t("upload.serverError"),
@@ -978,6 +1468,15 @@ function UploadPageContent() {
                 className="hidden"
               />
 
+              {/* Hidden File Input for Switching Generated Image Slot */}
+              <input
+                ref={switchImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleSwitchImageFileChange}
+                className="hidden"
+              />
+
               {/* Selected Images Display */}
               {images.length > 0 && (
                 <div className="space-y-4">
@@ -1004,7 +1503,8 @@ function UploadPageContent() {
                               locale={locale}
                               onRemove={handleRemoveImage}
                               isSubmitting={isSubmitting}
-                              onTap={handleImageTap}
+                              onTap={bwHasStarted ? () => {} : handleImageTap}
+                              onSwitch={bwHasStarted ? handleSwitchImageClick : undefined}
                             />
                           ))}
                         </div>
@@ -1012,14 +1512,17 @@ function UploadPageContent() {
                     </SortableContext>
                   </DndContext>
 
-                  {/* Action Buttons */}
-                  {images.length >= 5 && (
+                  {/* Action Buttons / Preview */}
+                  {images.length >= 5 && !AI_PREVIEW_ENABLED && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       {/* Style Selector - Show after images are arranged */}
                       <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
                         <StyleSelector
                           selectedStyle={selectedStyle}
-                          onStyleChange={setSelectedStyle}
+                          onStyleChange={(s) => {
+                            setSelectedStyle(s);
+                            selectedStyleRef.current = s;
+                          }}
                         />
                       </div>
 
@@ -1027,7 +1530,7 @@ function UploadPageContent() {
                         variant="contained"
                         color="primary"
                         onClick={handleAddToCart}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !selectedStyle}
                         className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         sx={{
                           borderRadius: "12px",
@@ -1096,6 +1599,339 @@ function UploadPageContent() {
                       )}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* ── AI Preview Sections ─────────────────────────────────────── */}
+              {AI_PREVIEW_ENABLED && images.length >= 5 && (
+                <div className="flex flex-col gap-10 w-full mt-4">
+                  {/* Shimmer CSS */}
+                  <style>{`@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
+
+                  {/* Generate B&W button */}
+                  <div className="flex justify-center">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleGenerateBW}
+                      disabled={bwHasStarted}
+                      sx={{
+                        borderRadius: "12px",
+                        textTransform: "none",
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        py: { xs: 1.5, sm: 2 },
+                        px: 5,
+                        boxShadow: "none",
+                      }}
+                    >
+                      {locale === "he" ? "צור תצוגה מקדימה" : "Generate Preview"}
+                    </Button>
+                  </div>
+
+                  {/* Sections 2-4: only after button clicked */}
+                  {bwHasStarted && (<>
+                  <div className="flex flex-col gap-4">
+                    <h3 className="text-lg font-body-bold text-dark-gray flex items-center justify-center gap-2">
+                      <span
+                        className="inline-flex items-center justify-center w-5 h-5 rounded-full text-xs text-white font-body-bold"
+                        style={{ backgroundColor: "#e1b093" }}
+                      >
+                        2
+                      </span>
+                      {locale === "he"
+                        ? "תמונות בשחור לבן"
+                        : "Black & White Preview"}
+                    </h3>
+                    <div className="flex flex-row gap-2 sm:gap-3 justify-center flex-wrap">
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const slot = generatedImages.bw[i];
+                        const errKey = `bw_${i}`;
+                        const errMsg = imageErrors.get(errKey);
+                        const isLoading = slot === "loading";
+                        const isError = slot === "error";
+                        const isReady =
+                          typeof slot === "string" &&
+                          slot !== "loading" &&
+                          slot !== "error";
+                        const btnDisabled =
+                          isAnyGenerating || isGenLimitReached;
+                        return (
+                          <div key={i} className="flex flex-col items-center gap-1">
+                            <div className="relative w-[80px] h-[93px] sm:w-[100px] sm:h-[117px] rounded-lg overflow-hidden bg-gray-100">
+                              {isLoading && (
+                                <ImageSkeleton className="absolute inset-0" />
+                              )}
+                              {isError && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-red-50 rounded-lg">
+                                  <ImageIcon className="w-6 h-6 text-red-400" />
+                                </div>
+                              )}
+                              {isReady && (
+                                <img
+                                  src={slot}
+                                  alt={`B&W ${i + 1}`}
+                                  className="w-full h-full object-cover"
+                                  draggable={false}
+                                  onContextMenu={(e) => e.preventDefault()}
+                                  style={{ userSelect: "none" }}
+                                />
+                              )}
+                            </div>
+                            {errMsg && (
+                              <p className="text-xs text-red-500 text-center max-w-[90px]">
+                                {errMsg}
+                              </p>
+                            )}
+                            {/* Regenerate button */}
+                            <button
+                              onClick={() =>
+                                generateSingleImage(images[i], "bw", i)
+                              }
+                              disabled={btnDisabled}
+                              className="flex items-center gap-1 text-xs text-dark-gray font-body hover:opacity-70 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title={
+                                locale === "he"
+                                  ? "יצור מחדש"
+                                  : "Regenerate"
+                              }
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              <span>
+                                {locale === "he" ? "יצור מחדש" : "Regenerate"}
+                              </span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 3: Choose Style */}
+                  <div className="flex flex-col items-center gap-4 -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <StyleSelector
+                      selectedStyle={selectedStyle}
+                      onStyleChange={(s) => {
+                        setSelectedStyle(s);
+                        selectedStyleRef.current = s;
+                      }}
+                      disabled={isAnyGenerating || isGenLimitReached}
+                    />
+                    {/* Generate button */}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => selectedStyle && handleAIStyleSelect(selectedStyle)}
+                      disabled={isCurrentStyleGenerating || isGenLimitReached}
+                      sx={{ borderRadius: "12px", textTransform: "none", fontSize: "1rem", fontWeight: 700, py: { xs: 1.5, sm: 2 }, px: 5, boxShadow: "none" }}
+                    >
+                      {isCurrentStyleGenerating
+                        ? (locale === "he" ? "מייצר תמונות..." : "Generating images...")
+                        : (locale === "he"
+                          ? `צור ${t(`styleSelector.${selectedStyle ?? "pencil"}`)}`
+                          : `Generate ${t(`styleSelector.${selectedStyle ?? "pencil"}`)}`)
+                      }
+                    </Button>
+                  </div>
+
+                  {/* Section 4: Colored Preview (only after style selected) */}
+                  {selectedStyle && (
+                    <div className="flex flex-col gap-4">
+                      <h3 className="text-lg font-body-bold text-dark-gray flex items-center justify-center gap-2">
+                        <span
+                          className="inline-flex items-center justify-center w-5 h-5 rounded-full text-xs text-white font-body-bold"
+                          style={{ backgroundColor: "#e1b093" }}
+                        >
+                          4
+                        </span>
+                        {locale === "he"
+                          ? "תצוגה מקדימה צבעונית"
+                          : "Colored Preview"}
+                      </h3>
+                      <div className="flex flex-row gap-2 sm:gap-3 justify-center flex-wrap">
+                        {Array.from({ length: 5 }).map((_, i) => {
+                          const slot = generatedImages[selectedStyle][i];
+                          const errKey = `${selectedStyle}_${i}`;
+                          const errMsg = imageErrors.get(errKey);
+                          const isLoading = slot === "loading";
+                          const isError = slot === "error";
+                          const isReady =
+                            typeof slot === "string" &&
+                            slot !== "loading" &&
+                            slot !== "error";
+                          const btnDisabled =
+                            isAnyGenerating || isGenLimitReached;
+                          return (
+                            <div key={i} className="flex flex-col items-center gap-1">
+                              <div className="relative w-[80px] h-[93px] sm:w-[100px] sm:h-[117px] rounded-lg overflow-hidden bg-gray-100">
+                                {isLoading && (
+                                  <ImageSkeleton className="absolute inset-0" />
+                                )}
+                                {isError && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-red-50 rounded-lg">
+                                    <ImageIcon className="w-6 h-6 text-red-400" />
+                                  </div>
+                                )}
+                                {isReady && (
+                                  <img
+                                    src={slot}
+                                    alt={`${selectedStyle} ${i + 1}`}
+                                    className="w-full h-full object-cover"
+                                    draggable={false}
+                                    onContextMenu={(e) => e.preventDefault()}
+                                    style={{ userSelect: "none" }}
+                                  />
+                                )}
+                              </div>
+                              {errMsg && (
+                                <p className="text-xs text-red-500 text-center max-w-[90px]">
+                                  {errMsg}
+                                </p>
+                              )}
+                              {/* Regenerate button */}
+                              <button
+                                onClick={() =>
+                                  generateSingleImage(
+                                    images[i],
+                                    selectedStyle,
+                                    i
+                                  )
+                                }
+                                disabled={btnDisabled}
+                                className="flex items-center gap-1 text-xs text-dark-gray font-body hover:opacity-70 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                title={
+                                  locale === "he" ? "יצור מחדש" : "Regenerate"
+                                }
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                <span>
+                                  {locale === "he"
+                                    ? "יצור מחדש"
+                                    : "Regenerate"}
+                                </span>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Generation warning / hard limit banners */}
+                  {genWarningRemaining !== null && (
+                    <div className="w-full p-3 rounded-lg text-center font-body text-sm bg-orange-50 border border-orange-200 text-orange-700">
+                      {locale === "he"
+                        ? `נותרו רק ${genWarningRemaining} יצירות לשעה הקרובה`
+                        : `Only ${genWarningRemaining} generation${genWarningRemaining === 1 ? "" : "s"} left for this hour`}
+                    </div>
+                  )}
+                  {isGenLimitReached && (
+                    <div className="w-full p-3 rounded-lg text-center font-body text-sm bg-red-50 border border-red-200 text-red-700">
+                      {locale === "he"
+                        ? "הגעת למגבלת היצירה. נסה שוב בעוד שעה."
+                        : "You've reached the generation limit. Please try again in an hour."}
+                    </div>
+                  )}
+
+                  {/* Add to Cart + Start Over */}
+                  <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleAddToCart}
+                      disabled={
+                        isSubmitting ||
+                        isCartUploading ||
+                        isAnyGenerating ||
+                        !selectedStyle ||
+                        !generatedImages.bw.every(
+                          (s) =>
+                            typeof s === "string" &&
+                            s !== "loading" &&
+                            s !== "error"
+                        ) ||
+                        !selectedStyle ||
+                        !generatedImages[selectedStyle ?? "cartoon"].every(
+                          (s) =>
+                            typeof s === "string" &&
+                            s !== "loading" &&
+                            s !== "error"
+                        )
+                      }
+                      className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      sx={{
+                        borderRadius: "12px",
+                        textTransform: "none",
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        py: { xs: 1.5, sm: 2 },
+                        boxShadow: "none",
+                      }}
+                    >
+                      {isSubmitting || isCartUploading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                          {locale === "he"
+                            ? "מכין את הספר..."
+                            : "Preparing your book..."}
+                        </>
+                      ) : (
+                        t("upload.addToCart")
+                      )}
+                    </Button>
+
+                    {/* Status message */}
+                    {submitStatus.type && (
+                      <div
+                        className={`w-full p-4 rounded-lg text-center font-body-bold text-sm ${
+                          submitStatus.type === "success"
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : "bg-red-50 text-red-700 border border-red-200"
+                        }`}
+                      >
+                        {submitStatus.message}
+                      </div>
+                    )}
+
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={handleStartOver}
+                      className="w-full cursor-pointer flex items-center justify-center gap-2"
+                      sx={{
+                        borderRadius: "12px",
+                        textTransform: "none",
+                        fontSize: "0.95rem",
+                        fontWeight: 700,
+                        py: { xs: 1.5, sm: 2 },
+                        borderColor: "#D1D5DB",
+                        color: "#374151",
+                        backgroundColor: "#FFFFFF",
+                        "&:hover": {
+                          backgroundColor: "#F9FAFB",
+                          borderColor: "#D1D5DB",
+                        },
+                      }}
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      <span className="font-body-bold text-base">
+                        {t("upload.startOver")}
+                      </span>
+                    </Button>
+                  </div>
+                  </>)}
                 </div>
               )}
 
