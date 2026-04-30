@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import MuiButton from "@mui/material/Button";
 import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -27,15 +26,10 @@ export function CookieConsent() {
     }
   }, []);
 
-  const handleAccept = () => {
+  const handleClose = () => {
     localStorage.setItem(CONSENT_COOKIE_NAME, "accepted");
     setShowBanner(false);
     loadTrackingScripts();
-  };
-
-  const handleDecline = () => {
-    localStorage.setItem(CONSENT_COOKIE_NAME, "declined");
-    setShowBanner(false);
   };
 
   const loadTrackingScripts = () => {
@@ -57,67 +51,46 @@ export function CookieConsent() {
           aria-live="polite"
         >
           <div className="bg-white rounded-xl shadow-2xl border-2 border-gray-200 px-5 py-4">
-            <div className="flex flex-col gap-3">
-              {/* Text Content */}
-              <div className="text-center md:text-right">
-                <p className="font-body text-dark-gray text-sm leading-relaxed">
-                  {t("cookieConsent.description")}
-                  {" "}
+            <div
+              className="flex items-start gap-3"
+              dir={locale === "he" ? "rtl" : "ltr"}
+            >
+              <div className="flex-1 min-w-0 text-center md:text-right">
+                <p className="font-body-bold text-dark-gray text-sm leading-relaxed">
+                  {t("cookieConsent.line1")}
+                </p>
+                <p className="font-body-bold text-dark-gray text-sm leading-relaxed mt-1">
+                  {t("cookieConsent.line2BeforeLink")}
                   <Link
                     href="/privacy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary-orange hover:underline font-body-bold whitespace-nowrap"
+                    className="text-dark-gray underline underline-offset-2 decoration-current font-body-bold hover:opacity-80"
                   >
-                    {t("cookieConsent.learnMore")}
+                    {t("cookieConsent.policyLink")}
                   </Link>
                 </p>
               </div>
-
-              {/* Buttons */}
-              <div className="flex gap-2 justify-center md:justify-end">
-                <MuiButton
-                  variant="contained"
-                  onClick={handleAccept}
-                  size="small"
-                  sx={{
-                    px: 2.5,
-                    py: 0.75,
-                    fontFamily: "var(--font-assistant)",
-                    fontWeight: 700,
-                    fontSize: "0.85rem",
-                    textTransform: "none",
-                    backgroundColor: "#e1b093",
-                    color: "#FFFFFF",
-                    "&:hover": {
-                      backgroundColor: "#B89275",
-                    },
-                  }}
+              <button
+                type="button"
+                onClick={handleClose}
+                className="shrink-0 -mt-0.5 -me-1 p-1.5 rounded-md text-dark-gray cursor-pointer hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-orange"
+                aria-label={t("cookieConsent.close")}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
                 >
-                  {t("cookieConsent.accept")}
-                </MuiButton>
-                <MuiButton
-                  variant="outlined"
-                  onClick={handleDecline}
-                  size="small"
-                  sx={{
-                    px: 2.5,
-                    py: 0.75,
-                    fontFamily: "var(--font-assistant)",
-                    fontWeight: 600,
-                    fontSize: "0.85rem",
-                    textTransform: "none",
-                    borderColor: "#e1b093",
-                    color: "#e1b093",
-                    "&:hover": {
-                      borderColor: "#B89275",
-                      backgroundColor: "rgba(225, 176, 147, 0.04)",
-                    },
-                  }}
-                >
-                  {t("cookieConsent.decline")}
-                </MuiButton>
-              </div>
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
             </div>
           </div>
         </motion.div>

@@ -612,10 +612,12 @@ const hebrewTranslations = {
 
   // Cookie Consent
   "cookieConsent.title": "עוגיות ומעקב",
-  "cookieConsent.description": "אנחנו משתמשים בעוגיות לשיפור חווית הגלישה וניתוח השימוש באתר.",
-  "cookieConsent.accept": "מסכימ/ה",
-  "cookieConsent.decline": "דחה",
-  "cookieConsent.learnMore": "פרטים נוספים",
+  "cookieConsent.line1":
+    "אנו משתמשים בקבצי קוקיז לשיפור חווית הגלישה.",
+  "cookieConsent.line2BeforeLink":
+    "המשך שימוש באתר מהווה הסכמה בהתאם ",
+  "cookieConsent.policyLink": "למדיניות",
+  "cookieConsent.close": "סגור הודעת עוגיות",
   "cookieConsent.ariaLabel": "הודעת עוגיות ומעקב",
 };
 
@@ -1158,9 +1160,11 @@ const englishTranslations = {
 
   // Cookie Consent
   "cookieConsent.title": "Cookies & Tracking",
-  "cookieConsent.description": "We use cookies to improve your browsing experience and analyze site usage.",
-  "cookieConsent.accept": "Accept",
-  "cookieConsent.decline": "Decline",
-  "cookieConsent.learnMore": "Learn More",
+  "cookieConsent.line1":
+    "We use cookies to improve your browsing experience.",
+  "cookieConsent.line2BeforeLink":
+    "Continued use of the site constitutes consent in accordance with ",
+  "cookieConsent.policyLink": "the policy",
+  "cookieConsent.close": "Close cookie notice",
   "cookieConsent.ariaLabel": "Cookie and tracking notice",
 };
