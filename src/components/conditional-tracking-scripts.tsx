@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 
 interface ConditionalTrackingScriptsProps {
@@ -9,26 +9,8 @@ interface ConditionalTrackingScriptsProps {
 
 export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingScriptsProps) {
   useEffect(() => {
-    const consent = localStorage.getItem("little-gali-cookie-consent");
-    
-    if (consent === "accepted") {
-      // Initialize Google Analytics
-      if (typeof window !== "undefined" && (window as any).gtag) {
-        (window as any).gtag("js", new Date());
-        (window as any).gtag("config", "G-7NHYLBNE1J");
-      }
-
-      // Initialize Meta Pixel
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("init", metaPixelId);
-        (window as any).fbq("track", "PageView");
-      }
-    }
-
-    // Listen for consent acceptance
     const handleConsentAccepted = () => {
-      // Reload the page to load tracking scripts
-      window.location.reload();
+      setHasConsent(true);
     };
 
     window.addEventListener("cookieConsentAccepted", handleConsentAccepted);
@@ -37,13 +19,13 @@ export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingS
     };
   }, [metaPixelId]);
 
-  // Check if consent is given
-  const consent = typeof window !== "undefined" 
-    ? localStorage.getItem("little-gali-cookie-consent")
-    : null;
+  const [hasConsent, setHasConsent] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("little-gali-cookie-consent") === "accepted";
+  });
 
   // Only load scripts if consent is given
-  if (consent !== "accepted") {
+  if (!hasConsent) {
     return null;
   }
 
