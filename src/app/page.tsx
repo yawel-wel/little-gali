@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   motion,
   AnimatePresence,
@@ -1458,7 +1459,15 @@ export default function Home() {
                       locale === "en" ? "text-left" : "text-right"
                     }`}
                   >
-                    {t("qa.answer9")}
+                    <span>
+                      {t("qa.answer9.beforeLink")}
+                      <Link
+                        href="/contact"
+                        className="underline underline-offset-2 decoration-current hover:opacity-80"
+                      >
+                        {t("qa.answer9.linkText")}
+                      </Link>
+                    </span>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

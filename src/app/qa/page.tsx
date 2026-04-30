@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
@@ -331,7 +332,15 @@ export default function QAPage() {
                         locale === "en" ? "text-left" : "text-right"
                       }`}
                     >
-                      {t("qa.answer9")}
+                      <span>
+                        {t("qa.answer9.beforeLink")}
+                        <Link
+                          href="/contact"
+                          className="underline underline-offset-2 decoration-current hover:opacity-80"
+                        >
+                          {t("qa.answer9.linkText")}
+                        </Link>
+                      </span>
                     </AccordionContent>
                   </AccordionItem>
                 </motion.div>

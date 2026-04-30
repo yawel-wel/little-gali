@@ -450,7 +450,8 @@ const hebrewTranslations = {
   "home.testimonials.title": "מה אומרים עלינו",
   "home.testimonials.titleHighlight": "עלינו",
   "qa.question1": "ממה הספרון עשוי?",
-  "qa.answer1": "הספרון עשוי מנייר איכותי ועבה שנעבר למינציה. הספרון יציב וניתן להעמיד אותו בקלות.",
+  "qa.answer1":
+    "הספרון עשוי מנייר איכותי ועבה שעבר למינציה ומודפס בבית דפוס. הספרון יציב וניתן להעמיד אותו בקלות.",
   "qa.question2": "כמה תמונות צריך לבחור?",
   "qa.answer2":
     "5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד השני בצבעוני.",
@@ -469,10 +470,11 @@ const hebrewTranslations = {
   "qa.answer7": "אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם מים.",
   "qa.question8": "כמה זמן לוקח להכין את הספרון?",
   "qa.answer8":
-    "תהליך ההכנה לוקח עד 14 ימי עבודה מרגע קבלת התמונות. אנו נעדכן אתכם כשהספרון מוכן לאיסוף או למשלוח.",
+    "אנו תמיד משתדלים לספק את הספרונים בזמן הקצר ביותר אך יש לקחת בחשבון שזמן ההכנה יכול לקחת עד 14 ימי עסקים, זאת מאחר ותהליך הכנת התמונות והדפסתן בבית דפוס יכולים לקחת זמן.",
   "qa.question9": "מה אם אני לא מרוצה מהספרון?",
-  "qa.answer9":
-    "המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם קיבלתם את הספרון ומשהו בו לא עבד לכם כמו שציפיתם, מוזמנים לפנות אליי.",
+  "qa.answer9.beforeLink":
+    "המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם קיבלתם את הספרון ומשהו בו לא עבד לכם כמו שציפיתם, מוזמנים לפנות ",
+  "qa.answer9.linkText": "אלינו",
   "qa.notFound": "לא מצאתם את התשובה שחיפשתם?",
   "qa.contact": "צרו איתנו קשר",
 
@@ -992,7 +994,7 @@ const englishTranslations = {
   "home.testimonials.titleHighlight": "Say",
   "qa.question1": "What is the book made of?",
   "qa.answer1":
-    "The book is made of high-quality, thick paper that has been laminated. The book is stable and can be easily stood up.",
+    "The book is made from high-quality, thick laminated paper and printed at a professional print house. It’s sturdy and can easily stand on its own.",
   "qa.question2": "How many photos should I choose?",
   "qa.answer2":
     "Only 5 photos. The same photos appear on one side in black and white and on the other side in color.",
@@ -1013,10 +1015,11 @@ const englishTranslations = {
     "You can gently wipe with a damp cloth. Avoid direct contact with water.",
   "qa.question8": "How long does it take to prepare the book?",
   "qa.answer8":
-    "The preparation process takes up to 14 business days from the moment we receive the photos. We will notify you when the book is ready for pickup or shipping.",
+    "We always do our best to deliver as quickly as possible, but please note production can take up to 14 business days, since image processing and printing at a professional print house can take time.",
   "qa.question9": "What if I'm not satisfied with the book?",
-  "qa.answer9":
-    "Our goal is for you to love and be satisfied with your book. If you received the book and something didn't work for you as you expected, feel free to reach out to me.",
+  "qa.answer9.beforeLink":
+    "Our goal is for you to love and be happy with your book. If you received it and something didn’t turn out as you expected, feel free to ",
+  "qa.answer9.linkText": "contact us",
   "qa.notFound": "Didn't find the answer you were looking for?",
   "qa.contact": "Contact Us",
 
