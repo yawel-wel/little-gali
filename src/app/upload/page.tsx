@@ -168,12 +168,17 @@ function MobileImageEditor({
       <div
         className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
       >
-        <p
-          className="font-body text-center px-6"
-          style={{ color: "#374151", fontSize: "1rem" }}
-        >
-          {t("upload.cropInstruction")}
-        </p>
+        <div className="flex flex-col items-center gap-1.5 px-6 max-w-md">
+          <p
+            className="font-body text-center text-base"
+            style={{ color: "#374151" }}
+          >
+            {t("upload.cropInstruction")}
+          </p>
+          <p className="font-body text-center text-xs sm:text-[0.8125rem] text-gray-500 leading-snug">
+            {t("upload.cropInstructionTip")}
+          </p>
+        </div>
         <div className="flex flex-col gap-3 items-center">
           <button
             onClick={handleSave}
@@ -183,8 +188,9 @@ function MobileImageEditor({
           </button>
           {onChangeImage && (
             <button
+              type="button"
               onClick={onChangeImage}
-              className="bg-white text-dark-gray font-body-bold rounded-xl px-8 py-2.5 text-base cursor-pointer lg:hover:bg-gray-50 transition-colors border-2 border-gray-300"
+              className="font-body-bold text-dark-gray text-base bg-transparent border-0 cursor-pointer py-2 px-1 hover:opacity-70 transition-opacity"
             >
               {t("upload.changeImage")}
             </button>

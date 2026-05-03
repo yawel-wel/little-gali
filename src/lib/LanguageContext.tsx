@@ -527,7 +527,9 @@ const hebrewTranslations = {
   "upload.addToCart": "הוסף לעגלה",
   "upload.tapToCrop": "לחצו על התמונה בשביל לחתוך אותה",
   "upload.dragToReorder": "הזיזו את התמונות בשביל לבחור את הסדר שיופיע בספרון",
-  "upload.cropInstruction": "גררו את התמונה למיקום הרצוי",
+  "upload.cropInstruction": "גררו את התמונה כדי לשנות את הגודל והמיקום",
+  "upload.cropInstructionTip":
+    "המלצה שלנו: הגדילו את הדמויות כך שימלאו כמה שיותר מהתמונה כי הרקע יוסר בתוצאה הסופית",
   "upload.cropDone": "סיימתי",
   "upload.changeImage": "החלף תמונה",
   "upload.startOver": "התחל מחדש",
@@ -1072,7 +1074,10 @@ const englishTranslations = {
   "upload.addToCart": "Add to Cart",
   "upload.tapToCrop": "Tap an image to crop it",
   "upload.dragToReorder": "Drag the images to choose the order that will appear in the booklet",
-  "upload.cropInstruction": "Drag the image to adjust the crop",
+  "upload.cropInstruction":
+    "Drag the image to adjust size and position.",
+  "upload.cropInstructionTip":
+    "Our recommendation: zoom in so the subjects fill as much of the frame as possible, because the background will be removed in the final result.",
   "upload.cropDone": "Done",
   "upload.changeImage": "Change Image",
   "upload.startOver": "Start Over",
