@@ -180,10 +180,10 @@ function TermsPageContent() {
                   <p className="mt-2">
                     📧{" "}
                     <a
-                      href="mailto:yaelromashkano@gmail.com"
+                      href="mailto:support@littlegali.com"
                       className="text-primary-orange hover:text-primary-orange/80 underline"
                     >
-                      yaelromashkano@gmail.com
+                      support@littlegali.com
                     </a>
                   </p>
                 </div>

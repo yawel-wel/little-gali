@@ -152,10 +152,10 @@ export default function PrivacyPage() {
                       <p className="mt-3">
                         כדי לממש את הזכויות האלה, אנא צור איתנו קשר בכתובת{" "}
                         <a
-                          href="mailto:yaelromashkano@gmail.com"
+                          href="mailto:support@littlegali.com"
                           className="text-primary-orange hover:underline"
                         >
-                          yaelromashkano@gmail.com
+                          support@littlegali.com
                         </a>
                       </p>
                     </section>
@@ -182,10 +182,10 @@ export default function PrivacyPage() {
                       <p className="mt-2">
                         <strong>אימייל:</strong>{" "}
                         <a
-                          href="mailto:yaelromashkano@gmail.com"
+                          href="mailto:support@littlegali.com"
                           className="text-primary-orange hover:underline"
                         >
-                          yaelromashkano@gmail.com
+                          support@littlegali.com
                         </a>
                       </p>
                       <p className="mt-1">
@@ -319,10 +319,10 @@ export default function PrivacyPage() {
                       <p className="mt-3">
                         To exercise these rights, please contact us at{" "}
                         <a
-                          href="mailto:yaelromashkano@gmail.com"
+                          href="mailto:support@littlegali.com"
                           className="text-primary-orange hover:underline"
                         >
-                          yaelromashkano@gmail.com
+                          support@littlegali.com
                         </a>
                       </p>
                     </section>
@@ -349,10 +349,10 @@ export default function PrivacyPage() {
                   <p className="mt-2">
                         <strong>Email:</strong>{" "}
                     <a
-                          href="mailto:yaelromashkano@gmail.com"
+                          href="mailto:support@littlegali.com"
                           className="text-primary-orange hover:underline"
                     >
-                          yaelromashkano@gmail.com
+                          support@littlegali.com
                     </a>
                   </p>
                       <p className="mt-1">
