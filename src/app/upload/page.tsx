@@ -6,7 +6,14 @@ import { Title } from "@/components/title";
 import { UploadModal } from "@/components/upload-modal";
 import { StyleSelector, StyleType } from "@/components/style-selector";
 import { Upload, Info, X, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect, useCallback, Suspense } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  Suspense,
+} from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { useRouter } from "next/navigation";
@@ -78,6 +85,8 @@ function MobileImageEditor({
   imageUrl,
   initialCrop,
   initialZoom,
+  isSmartCropLoading,
+  initialSmartCropPixels,
   onSave,
   onCancel,
   onChangeImage,
@@ -87,13 +96,17 @@ function MobileImageEditor({
   imageUrl: string;
   initialCrop?: { x: number; y: number };
   initialZoom?: number;
+  /** When true, only the crop frame + loader are shown (no Cropper yet) to avoid zoom/pan jumps. */
+  isSmartCropLoading?: boolean;
+  /** Passed to react-easy-crop on first paint after loading; omitted when undefined. */
+  initialSmartCropPixels?: Area;
   onSave: (croppedUrl: string, cropState: CropState) => void;
   onCancel: () => void;
   onChangeImage?: () => void;
   currentIndex?: number;
   totalImages?: number;
 }) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
   const [zoom, setZoom] = useState(initialZoom ?? 1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -120,6 +133,47 @@ function MobileImageEditor({
     };
   }, []);
 
+  const cropFrame = (
+    <div
+      className="relative w-[85vw] md:w-[380px] flex-shrink-0 overflow-hidden rounded-lg bg-[#ebe6dc]"
+      style={{ aspectRatio: "72 / 84" }}
+    >
+      {isSmartCropLoading ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
+          <Loader2
+            className="w-10 h-10 animate-spin text-primary-orange"
+            aria-hidden
+          />
+          <p
+            className="font-body text-center text-sm sm:text-base text-dark-gray"
+            style={{ color: "#374151" }}
+          >
+            {t("upload.analyzingPhoto")}
+          </p>
+        </div>
+      ) : (
+        <Cropper
+          key={imageUrl}
+          image={imageUrl}
+          crop={crop}
+          zoom={zoom}
+          aspect={aspect}
+          onCropChange={setCrop}
+          onZoomChange={setZoom}
+          onCropComplete={onCropComplete}
+          onInteractionStart={() => setIsInteracting(true)}
+          onInteractionEnd={() => setIsInteracting(false)}
+          {...(initialSmartCropPixels
+            ? { initialCroppedAreaPixels: initialSmartCropPixels }
+            : {})}
+          style={{
+            cropAreaStyle: { border: "3px solid rgba(255,255,255,0.85)" },
+          }}
+        />
+      )}
+    </div>
+  );
+
   return (
     <div
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8"
@@ -129,7 +183,7 @@ function MobileImageEditor({
       <button
         onClick={onCancel}
         className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
-        aria-label="ביטול חיתוך"
+        aria-label={locale === "he" ? "ביטול חיתוך" : "Cancel cropping"}
       >
         <X className="w-6 h-6" />
       </button>
@@ -143,30 +197,15 @@ function MobileImageEditor({
         </div>
       )}
 
-      {/* Cropper — constrained box so the full image is visible around the frame */}
-      <div
-        className="relative w-[85vw] md:w-[380px] flex-shrink-0"
-        style={{ aspectRatio: "72 / 84" }}
-      >
-        <Cropper
-          image={imageUrl}
-          crop={crop}
-          zoom={zoom}
-          aspect={aspect}
-          onCropChange={setCrop}
-          onZoomChange={setZoom}
-          onCropComplete={onCropComplete}
-          onInteractionStart={() => setIsInteracting(true)}
-          onInteractionEnd={() => setIsInteracting(false)}
-          style={{
-            cropAreaStyle: { border: "3px solid rgba(255,255,255,0.85)" },
-          }}
-        />
-      </div>
+      {cropFrame}
 
-      {/* Text + button — always visible on mobile; fades on desktop while dragging/pinching */}
+      {/* Text + button — hidden while smart-crop loads; fades on desktop while dragging/pinching */}
       <div
-        className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
+        className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${
+          isSmartCropLoading
+            ? "invisible h-0 overflow-hidden pointer-events-none"
+            : ""
+        } ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
       >
         <div className="flex flex-col items-center gap-1.5 px-6 max-w-md">
           <p
@@ -369,6 +408,62 @@ function UploadPageContent() {
   const [pendingCropImages, setPendingCropImages] = useState<string[]>([]);
   const [currentCropIndex, setCurrentCropIndex] = useState<number>(0);
   const [isInCroppingFlow, setIsInCroppingFlow] = useState<boolean>(false);
+  const [smartCropLoading, setSmartCropLoading] = useState(false);
+  const [smartCropArea, setSmartCropArea] = useState<Area | undefined>(
+    undefined,
+  );
+
+  const pendingBlobForVision =
+    isInCroppingFlow && pendingCropImages[currentCropIndex]
+      ? pendingCropImages[currentCropIndex]
+      : null;
+
+  // Turn on loading before paint so we never flash the Cropper without a suggestion
+  // (smartCropLoading defaults to false, so the first paint would otherwise match production).
+  useLayoutEffect(() => {
+    if (!pendingBlobForVision) {
+      setSmartCropLoading(false);
+      setSmartCropArea(undefined);
+      return;
+    }
+    setSmartCropLoading(true);
+    setSmartCropArea(undefined);
+  }, [pendingBlobForVision]);
+
+  useEffect(() => {
+    if (!pendingBlobForVision) {
+      return;
+    }
+
+    const ac = new AbortController();
+
+    (async () => {
+      try {
+        const blob = await fetch(pendingBlobForVision).then((r) => r.blob());
+        const fd = new FormData();
+        fd.append("image", blob, "photo.jpg");
+        const res = await fetch("/api/suggest-crop", {
+          method: "POST",
+          body: fd,
+          signal: ac.signal,
+        });
+        const data = await res.json();
+        if (ac.signal.aborted) return;
+        if (data.fallback || !data.croppedAreaPixels) {
+          setSmartCropArea(undefined);
+        } else {
+          setSmartCropArea(data.croppedAreaPixels);
+        }
+      } catch (e) {
+        if ((e as Error).name === "AbortError") return;
+        if (!ac.signal.aborted) setSmartCropArea(undefined);
+      } finally {
+        if (!ac.signal.aborted) setSmartCropLoading(false);
+      }
+    })();
+
+    return () => ac.abort();
+  }, [pendingBlobForVision]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -1151,6 +1246,11 @@ function UploadPageContent() {
       {/* Image crop editor – fullscreen overlay (mobile + desktop) */}
       {(editingImageIndex !== null || isInCroppingFlow) && (
         <MobileImageEditor
+          key={
+            isInCroppingFlow
+              ? `crop-pending-${currentCropIndex}-${pendingCropImages[currentCropIndex] ?? ""}`
+              : `crop-edit-${editingImageIndex ?? "x"}`
+          }
           imageUrl={
             isInCroppingFlow
               ? pendingCropImages[currentCropIndex]
@@ -1171,6 +1271,10 @@ function UploadPageContent() {
               : editingImageIndex !== null && editingImageIndex >= 0
                 ? cropStates.current.get(editingImageIndex)?.zoom
                 : undefined
+          }
+          isSmartCropLoading={Boolean(isInCroppingFlow && smartCropLoading)}
+          initialSmartCropPixels={
+            isInCroppingFlow ? smartCropArea : undefined
           }
           onSave={handleSaveCrop}
           onCancel={handleCancelCrop}

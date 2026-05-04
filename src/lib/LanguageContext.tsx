@@ -531,6 +531,7 @@ const hebrewTranslations = {
   "upload.cropInstructionTip":
     "המלצה שלנו: הגדילו את הדמויות כך שימלאו כמה שיותר מהתמונה כי הרקע יוסר בתוצאה הסופית",
   "upload.cropDone": "סיימתי",
+  "upload.analyzingPhoto": "מציעים חיתוך חכם…",
   "upload.changeImage": "החלף תמונה",
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
@@ -1079,6 +1080,7 @@ const englishTranslations = {
   "upload.cropInstructionTip":
     "Our recommendation: zoom in so the subjects fill as much of the frame as possible, because the background will be removed in the final result.",
   "upload.cropDone": "Done",
+  "upload.analyzingPhoto": "Suggesting a smart crop…",
   "upload.changeImage": "Change Image",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
