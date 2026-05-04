@@ -9,6 +9,37 @@ export function rectArea(r: PixelRect): number {
   return r.width * r.height;
 }
 
+/** Intersection area of two axis-aligned rectangles (pixel coords). */
+export function intersectionAreaRects(a: PixelRect, b: PixelRect): number {
+  const x0 = Math.max(a.x, b.x);
+  const y0 = Math.max(a.y, b.y);
+  const x1 = Math.min(a.x + a.width, b.x + b.width);
+  const y1 = Math.min(a.y + a.height, b.y + b.height);
+  if (x1 <= x0 || y1 <= y0) return 0;
+  return (x1 - x0) * (y1 - y0);
+}
+
+/**
+ * Min fraction of each face box that must lie inside the crop for that face to count as "ok".
+ * Below this (e.g. portrait crop cuts off part of a face) triggers a user warning.
+ */
+export const FACE_MIN_FRACTION_INSIDE_CROP = 0.85;
+
+/** True if any detected face is mostly outside the current crop rectangle. */
+export function anyFaceClippedByCrop(
+  faceBoxes: PixelRect[],
+  crop: PixelRect,
+  minInsideRatio: number = FACE_MIN_FRACTION_INSIDE_CROP,
+): boolean {
+  for (const face of faceBoxes) {
+    const fa = rectArea(face);
+    if (fa <= 0) continue;
+    const inter = intersectionAreaRects(face, crop);
+    if (inter / fa < minInsideRatio) return true;
+  }
+  return false;
+}
+
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n));
 }

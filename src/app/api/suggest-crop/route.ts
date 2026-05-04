@@ -215,6 +215,24 @@ function mapAreaToOriginalImage(
   };
 }
 
+function mapFaceRectsToOriginal(
+  faceRects: PixelRect[],
+  visionW: number,
+  visionH: number,
+  origW: number,
+  origH: number,
+): Area[] {
+  return faceRects.map((r) =>
+    mapAreaToOriginalImage(
+      { x: r.x, y: r.y, width: r.width, height: r.height },
+      visionW,
+      visionH,
+      origW,
+      origH,
+    ),
+  );
+}
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.GOOGLE_CLOUD_VISION_API_KEY;
   if (!apiKey) {
@@ -299,7 +317,12 @@ export async function POST(request: NextRequest) {
     const first = visionJson.responses?.[0];
     if (first?.error?.message) {
       console.error("Vision API response error:", first.error.message);
-      return NextResponse.json({ ok: true, fallback: true, reason: "vision_response_error" });
+      return NextResponse.json({
+        ok: true,
+        fallback: true,
+        reason: "vision_response_error",
+        faceBoxes: [],
+      });
     }
 
     const faces = first?.faceAnnotations ?? [];
@@ -307,6 +330,14 @@ export async function POST(request: NextRequest) {
 
     const { faceRects, personRects, petRects, faceHeightSum } =
       collectSeparatedRects(visionW, visionH, faces, objects);
+
+    const faceBoxes = mapFaceRectsToOriginal(
+      faceRects,
+      visionW,
+      visionH,
+      origW,
+      origH,
+    );
 
     const union = buildSubjectRegion(
       visionH,
@@ -317,13 +348,23 @@ export async function POST(request: NextRequest) {
     );
 
     if (!union) {
-      return NextResponse.json({ ok: true, fallback: true, reason: "no_subjects" });
+      return NextResponse.json({
+        ok: true,
+        fallback: true,
+        reason: "no_subjects",
+        faceBoxes,
+      });
     }
 
     if (
       subjectCoversNearlyFullImage(union, visionW, visionH, FULL_IMAGE_SUBJECT_RATIO)
     ) {
-      return NextResponse.json({ ok: true, fallback: true, reason: "subject_full_frame" });
+      return NextResponse.json({
+        ok: true,
+        fallback: true,
+        reason: "subject_full_frame",
+        faceBoxes,
+      });
     }
 
     const cropVision = cropAreaPixelsForSubject(
@@ -349,6 +390,7 @@ export async function POST(request: NextRequest) {
         ok: true,
         fallback: true,
         reason: "suggested_crop_too_wide",
+        faceBoxes,
       });
     }
 
@@ -356,6 +398,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       fallback: false,
       croppedAreaPixels,
+      faceBoxes,
     });
   } catch (e) {
     console.error("suggest-crop error:", e);

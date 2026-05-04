@@ -21,6 +21,7 @@ import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
 import { useLanguage } from "@/lib/LanguageContext";
+import { anyFaceClippedByCrop } from "@/lib/smartCropGeometry";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import Button from "@mui/material/Button";
 import {
@@ -87,6 +88,7 @@ function MobileImageEditor({
   initialZoom,
   isSmartCropLoading,
   initialSmartCropPixels,
+  referenceFaceBoxes,
   onSave,
   onCancel,
   onChangeImage,
@@ -100,6 +102,8 @@ function MobileImageEditor({
   isSmartCropLoading?: boolean;
   /** Passed to react-easy-crop on first paint after loading; omitted when undefined. */
   initialSmartCropPixels?: Area;
+  /** Face boxes in original image pixels from /api/suggest-crop (may be empty). */
+  referenceFaceBoxes?: Area[];
   onSave: (croppedUrl: string, cropState: CropState) => void;
   onCancel: () => void;
   onChangeImage?: () => void;
@@ -111,6 +115,10 @@ function MobileImageEditor({
   const [zoom, setZoom] = useState(initialZoom ?? 1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isInteracting, setIsInteracting] = useState(false);
+  /** After a face-cutoff warning, second Done tap saves. Cleared when user gestures. */
+  const [awaitingSecondDoneAfterFaceWarning, setAwaitingSecondDoneAfterFaceWarning] =
+    useState(false);
+  const [faceClipWarning, setFaceClipWarning] = useState(false);
 
   // Portrait ratio matching the thumbnail frames (72×84 ≈ 6:7)
   const aspect = 72 / 84;
@@ -119,11 +127,42 @@ function MobileImageEditor({
     setCroppedAreaPixels(pixels);
   }, []);
 
+  const clearFaceClipWarning = useCallback(() => {
+    setFaceClipWarning(false);
+    setAwaitingSecondDoneAfterFaceWarning(false);
+  }, []);
+
   const handleSave = useCallback(async () => {
     if (!croppedAreaPixels) return;
+
+    const faces = referenceFaceBoxes ?? [];
+    const clipped =
+      faces.length > 0 &&
+      anyFaceClippedByCrop(faces, croppedAreaPixels);
+
+    if (clipped && !awaitingSecondDoneAfterFaceWarning) {
+      setFaceClipWarning(true);
+      setAwaitingSecondDoneAfterFaceWarning(true);
+      return;
+    }
+
+    setFaceClipWarning(false);
+    setAwaitingSecondDoneAfterFaceWarning(false);
     const blob = await getCroppedBlob(imageUrl, croppedAreaPixels);
     if (blob) onSave(URL.createObjectURL(blob), { crop, zoom });
-  }, [imageUrl, croppedAreaPixels, onSave, crop, zoom]);
+  }, [
+    imageUrl,
+    croppedAreaPixels,
+    onSave,
+    crop,
+    zoom,
+    referenceFaceBoxes,
+    awaitingSecondDoneAfterFaceWarning,
+  ]);
+
+  useEffect(() => {
+    clearFaceClipWarning();
+  }, [imageUrl, clearFaceClipWarning]);
 
   // Prevent body scroll while editor is open
   useEffect(() => {
@@ -161,7 +200,10 @@ function MobileImageEditor({
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
-          onInteractionStart={() => setIsInteracting(true)}
+          onInteractionStart={() => {
+            setIsInteracting(true);
+            clearFaceClipWarning();
+          }}
           onInteractionEnd={() => setIsInteracting(false)}
           {...(initialSmartCropPixels
             ? { initialCroppedAreaPixels: initialSmartCropPixels }
@@ -217,6 +259,21 @@ function MobileImageEditor({
           <p className="font-body text-center text-xs sm:text-[0.8125rem] text-gray-500 leading-snug">
             {t("upload.cropInstructionTip")}
           </p>
+          {faceClipWarning && (
+            <div className="flex flex-col gap-1.5 max-w-md">
+              <p
+                className="font-body text-center text-sm rounded-lg px-3 py-2 bg-amber-50 text-amber-900 border border-amber-200/80"
+                role="status"
+              >
+                {t("upload.cropFaceClipWarning")}
+              </p>
+              {awaitingSecondDoneAfterFaceWarning && (
+                <p className="font-body text-center text-xs text-gray-600">
+                  {t("upload.cropFaceClipTapDoneAgain")}
+                </p>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-3 items-center">
           <button
@@ -412,11 +469,23 @@ function UploadPageContent() {
   const [smartCropArea, setSmartCropArea] = useState<Area | undefined>(
     undefined,
   );
+  const [editorFaceBoxes, setEditorFaceBoxes] = useState<Area[]>([]);
 
   const pendingBlobForVision =
     isInCroppingFlow && pendingCropImages[currentCropIndex]
       ? pendingCropImages[currentCropIndex]
       : null;
+
+  const editCropImageUrl =
+    !isInCroppingFlow &&
+    editingImageIndex !== null &&
+    editingImageIndex >= 0
+      ? originalUrls.current.get(editingImageIndex) ??
+        images[editingImageIndex] ??
+        null
+      : null;
+
+  const suggestCropTargetUrl = pendingBlobForVision ?? editCropImageUrl;
 
   // Turn on loading before paint so we never flash the Cropper without a suggestion
   // (smartCropLoading defaults to false, so the first paint would otherwise match production).
@@ -431,15 +500,17 @@ function UploadPageContent() {
   }, [pendingBlobForVision]);
 
   useEffect(() => {
-    if (!pendingBlobForVision) {
+    if (!suggestCropTargetUrl) {
+      setEditorFaceBoxes([]);
       return;
     }
 
     const ac = new AbortController();
+    setEditorFaceBoxes([]);
 
     (async () => {
       try {
-        const blob = await fetch(pendingBlobForVision).then((r) => r.blob());
+        const blob = await fetch(suggestCropTargetUrl).then((r) => r.blob());
         const fd = new FormData();
         fd.append("image", blob, "photo.jpg");
         const res = await fetch("/api/suggest-crop", {
@@ -449,21 +520,29 @@ function UploadPageContent() {
         });
         const data = await res.json();
         if (ac.signal.aborted) return;
-        if (data.fallback || !data.croppedAreaPixels) {
-          setSmartCropArea(undefined);
-        } else {
-          setSmartCropArea(data.croppedAreaPixels);
+        setEditorFaceBoxes(Array.isArray(data.faceBoxes) ? data.faceBoxes : []);
+        if (isInCroppingFlow) {
+          if (data.fallback || !data.croppedAreaPixels) {
+            setSmartCropArea(undefined);
+          } else {
+            setSmartCropArea(data.croppedAreaPixels);
+          }
         }
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
-        if (!ac.signal.aborted) setSmartCropArea(undefined);
+        if (!ac.signal.aborted) {
+          setEditorFaceBoxes([]);
+          if (isInCroppingFlow) setSmartCropArea(undefined);
+        }
       } finally {
-        if (!ac.signal.aborted) setSmartCropLoading(false);
+        if (!ac.signal.aborted && isInCroppingFlow) {
+          setSmartCropLoading(false);
+        }
       }
     })();
 
     return () => ac.abort();
-  }, [pendingBlobForVision]);
+  }, [suggestCropTargetUrl, isInCroppingFlow]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -1276,6 +1355,7 @@ function UploadPageContent() {
           initialSmartCropPixels={
             isInCroppingFlow ? smartCropArea : undefined
           }
+          referenceFaceBoxes={editorFaceBoxes}
           onSave={handleSaveCrop}
           onCancel={handleCancelCrop}
           onChangeImage={isInCroppingFlow ? handleChangeImage : undefined}

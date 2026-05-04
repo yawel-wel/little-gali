@@ -532,6 +532,10 @@ const hebrewTranslations = {
     "המלצה שלנו: הגדילו את הדמויות כך שימלאו כמה שיותר מהתמונה כי הרקע יוסר בתוצאה הסופית",
   "upload.cropDone": "סיימתי",
   "upload.analyzingPhoto": "מציעים חיתוך חכם…",
+  "upload.cropFaceClipWarning":
+    "נראה שחלק מפני האנשים בתמונה נחתכים בחיתוך. כדאי להזיז או להקטין את התמונה כדי שכולם ייכנסו למסגרת.",
+  "upload.cropFaceClipTapDoneAgain":
+    "אם זה מכוון, לחצו שוב על ״סיימתי״ כדי להמשיך.",
   "upload.changeImage": "החלף תמונה",
   "upload.startOver": "התחל מחדש",
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
@@ -1081,6 +1085,10 @@ const englishTranslations = {
     "Our recommendation: zoom in so the subjects fill as much of the frame as possible, because the background will be removed in the final result.",
   "upload.cropDone": "Done",
   "upload.analyzingPhoto": "Suggesting a smart crop…",
+  "upload.cropFaceClipWarning":
+    "It looks like part of someone’s face may be cut off by this crop. Try moving or zooming so everyone fits in the frame.",
+  "upload.cropFaceClipTapDoneAgain":
+    "If this is intentional, tap “Done” again to continue.",
   "upload.changeImage": "Change Image",
   "upload.startOver": "Start Over",
   "upload.photoTip": "What kind of photo should I upload?",
