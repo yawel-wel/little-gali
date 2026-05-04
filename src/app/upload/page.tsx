@@ -209,7 +209,15 @@ function MobileImageEditor({
             ? { initialCroppedAreaPixels: initialSmartCropPixels }
             : {})}
           style={{
-            cropAreaStyle: { border: "3px solid rgba(255,255,255,0.85)" },
+            cropAreaStyle: {
+              border: "3px solid rgba(255,255,255,0.85)",
+              // Idle: opaque mask (#ebe6dc matches frame) hides cropped-out regions like Mixtiles default.
+              // While dragging/pinching: lighter veil so dimmed overflow remains visible.
+              color: isInteracting
+                ? "rgba(249, 247, 238, 0.82)"
+                : "#ebe6dc",
+              transition: "color 0.2s ease",
+            },
           }}
         />
       )}
@@ -218,7 +226,7 @@ function MobileImageEditor({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center px-4 pt-14 pb-8"
       style={{ backgroundColor: "#F9F7EE" }}
     >
       {/* X button — top-right corner */}
@@ -230,67 +238,68 @@ function MobileImageEditor({
         <X className="w-6 h-6" />
       </button>
 
-      {/* Progress indicator — top center */}
-      {currentIndex !== undefined && totalImages !== undefined && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-          <span className="font-body-bold text-dark-gray text-lg">
-            {currentIndex + 1}/{totalImages}
-          </span>
-        </div>
-      )}
-
-      {cropFrame}
-
-      {/* Text + button — hidden while smart-crop loads; fades on desktop while dragging/pinching */}
-      <div
-        className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${
-          isSmartCropLoading
-            ? "invisible h-0 overflow-hidden pointer-events-none"
-            : ""
-        } ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
-      >
-        <div className="flex flex-col items-center gap-1.5 px-6 max-w-md">
-          <p
-            className="font-body text-center text-base"
-            style={{ color: "#374151" }}
-          >
-            {t("upload.cropInstruction")}
-          </p>
-          <p className="font-body text-center text-xs sm:text-[0.8125rem] text-gray-500 leading-snug">
-            {t("upload.cropInstructionTip")}
-          </p>
-          {faceClipWarning && (
-            <div className="flex flex-col gap-1.5 max-w-md">
-              <p
-                className="font-body text-center text-sm rounded-lg px-3 py-2 bg-amber-50 text-amber-900 border border-amber-200/80"
-                role="status"
-              >
-                {t("upload.cropFaceClipWarning")}
-              </p>
-              {awaitingSecondDoneAfterFaceWarning && (
-                <p className="font-body text-center text-xs text-gray-600">
-                  {t("upload.cropFaceClipTapDoneAgain")}
-                </p>
-              )}
-            </div>
+      <div className="flex flex-col items-center w-full max-w-lg gap-8">
+        <div className="flex flex-col items-center gap-4 w-full">
+          {currentIndex !== undefined && totalImages !== undefined && (
+            <span className="font-body-bold text-dark-gray text-lg">
+              {currentIndex + 1}/{totalImages}
+            </span>
           )}
+          {cropFrame}
         </div>
-        <div className="flex flex-col gap-3 items-center">
-          <button
-            onClick={handleSave}
-            className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
-          >
-            {t("upload.cropDone")}
-          </button>
-          {onChangeImage && (
-            <button
-              type="button"
-              onClick={onChangeImage}
-              className="font-body-bold text-dark-gray text-base bg-transparent border-0 cursor-pointer py-2 px-1 hover:opacity-70 transition-opacity"
+
+        {/* Text + button — faded while smart-crop loads (space reserved); fades on desktop while dragging/pinching */}
+        <div
+          className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${
+            isSmartCropLoading
+              ? "opacity-0 pointer-events-none select-none"
+              : ""
+          } ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
+          aria-hidden={isSmartCropLoading || undefined}
+        >
+          <div className="flex flex-col items-center gap-1.5 px-6 max-w-md">
+            <p
+              className="font-body text-center text-base"
+              style={{ color: "#374151" }}
             >
-              {t("upload.changeImage")}
+              {t("upload.cropInstruction")}
+            </p>
+            <p className="font-body text-center text-xs sm:text-[0.8125rem] text-gray-500 leading-snug">
+              {t("upload.cropInstructionTip")}
+            </p>
+            {faceClipWarning && (
+              <div className="flex flex-col gap-1.5 max-w-md">
+                <p
+                  className="font-body text-center text-sm rounded-lg px-3 py-2 bg-amber-50 text-amber-900 border border-amber-200/80"
+                  role="status"
+                >
+                  {t("upload.cropFaceClipWarning")}
+                </p>
+                {awaitingSecondDoneAfterFaceWarning && (
+                  <p className="font-body text-center text-xs text-gray-600">
+                    {t("upload.cropFaceClipTapDoneAgain")}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-1 items-center">
+            <button
+              onClick={handleSave}
+              className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
+            >
+              {t("upload.cropDone")}
             </button>
-          )}
+            {onChangeImage && (
+              <button
+                type="button"
+                onClick={onChangeImage}
+                className="font-body-bold text-dark-gray text-base bg-transparent border-0 cursor-pointer py-1 px-1 hover:opacity-70 transition-opacity"
+              >
+                {t("upload.changeImage")}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
