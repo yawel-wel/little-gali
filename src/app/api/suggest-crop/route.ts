@@ -253,15 +253,20 @@ export async function POST(request: NextRequest) {
     }
 
     const inputBuffer = Buffer.from(await file.arrayBuffer());
-    const meta = await sharp(inputBuffer).metadata();
-    const origW = meta.width ?? 0;
-    const origH = meta.height ?? 0;
+    // Apply EXIF orientation once and use this bitmap's dimensions as the canonical
+    // "original" space for mapping Vision results. Browser <img> uses the same oriented
+    // pixel grid (naturalWidth/height), which pre-rotate metadata width/height can mismatch.
+    const oriented = await sharp(inputBuffer)
+      .rotate()
+      .toBuffer({ resolveWithObject: true });
+
+    const origW = oriented.info.width;
+    const origH = oriented.info.height;
     if (origW < 32 || origH < 32) {
       return NextResponse.json({ ok: true, fallback: true, reason: "too_small" });
     }
 
-    const resized = await sharp(inputBuffer)
-      .rotate()
+    const resized = await sharp(oriented.data)
       .resize({
         width: VISION_MAX_EDGE,
         height: VISION_MAX_EDGE,

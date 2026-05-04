@@ -127,6 +127,11 @@ function MobileImageEditor({
     setCroppedAreaPixels(pixels);
   }, []);
 
+  /** react-easy-crop calls this (not always onCropComplete) when crop x/y updates, e.g. after initialCroppedAreaPixels. */
+  const onCropAreaChange = useCallback((_: Area, pixels: Area) => {
+    setCroppedAreaPixels(pixels);
+  }, []);
+
   const clearFaceClipWarning = useCallback(() => {
     setFaceClipWarning(false);
     setAwaitingSecondDoneAfterFaceWarning(false);
@@ -162,6 +167,7 @@ function MobileImageEditor({
 
   useEffect(() => {
     clearFaceClipWarning();
+    setCroppedAreaPixels(null);
   }, [imageUrl, clearFaceClipWarning]);
 
   // Prevent body scroll while editor is open
@@ -200,6 +206,7 @@ function MobileImageEditor({
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
+          onCropAreaChange={onCropAreaChange}
           onInteractionStart={() => {
             setIsInteracting(true);
             clearFaceClipWarning();
