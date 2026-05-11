@@ -13,6 +13,9 @@ export async function POST(request: NextRequest) {
       phoneNumber,
       style,
       locale,
+      originalUrls,
+      generatedBwUrls,
+      previewSessionId,
     } = body as {
       cartId: string;
       imageUrls: string[];
@@ -21,6 +24,9 @@ export async function POST(request: NextRequest) {
       phoneNumber?: string;
       style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
+      originalUrls?: string[];
+      generatedBwUrls?: string[];
+      previewSessionId?: string;
     };
 
     console.log(
@@ -270,6 +276,9 @@ export async function POST(request: NextRequest) {
               lineId: lineId,
               imageUrls: urls,
               style: styleToStore,
+              originalUrls,
+              generatedBwUrls,
+              previewSessionId,
             }),
           }
         );

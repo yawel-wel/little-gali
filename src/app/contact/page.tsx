@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -12,9 +13,11 @@ import { trackContact } from "@/lib/meta-pixel-events";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
-export default function ContactPage() {
+function ContactPageContent() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
+  const searchParams = useSearchParams();
+  const previewSessionId = searchParams.get("previewSessionId");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,6 +28,55 @@ export default function ContactPage() {
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
+
+  useEffect(() => {
+    if (!previewSessionId) return;
+
+    const loadPreviewContext = async () => {
+      try {
+        const response = await fetch(`/api/preview-session/${previewSessionId}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        const session = data.session;
+        if (!session) return;
+
+        const lines = [
+          `מזהה תצוגה מקדימה: ${session.id}`,
+          "",
+          "תמונות מקור:",
+          ...session.slots.map(
+            (slot: { index: number; originalUrl: string }) =>
+              `${slot.index + 1}. ${slot.originalUrl}`,
+          ),
+          "",
+          "תוצאות שחור-לבן שנבחרו:",
+          ...session.slots.map(
+            (slot: {
+              index: number;
+              activeCandidateId?: string;
+              candidates: Array<{ id: string; previewUrl?: string }>;
+            }) => {
+              const active = slot.candidates.find(
+                (candidate) => candidate.id === slot.activeCandidateId,
+              );
+              return `${slot.index + 1}. ${active?.previewUrl || "לא זמין"}`;
+            },
+          ),
+          "",
+          "הודעה:",
+        ];
+
+        setFormData((current) => ({
+          ...current,
+          message: current.message || lines.join("\n"),
+        }));
+      } catch {
+        // Ignore prefill failures and let the user type manually.
+      }
+    };
+
+    loadPreviewContext();
+  }, [previewSessionId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +89,10 @@ export default function ContactPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          previewSessionId: previewSessionId || undefined,
+        }),
       });
 
       const data = await response.json();
@@ -282,5 +337,13 @@ export default function ContactPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactPageContent />
+    </Suspense>
   );
 }

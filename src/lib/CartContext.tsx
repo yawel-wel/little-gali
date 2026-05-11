@@ -8,11 +8,20 @@ export interface CartItem {
   id: string;
   quantity: number;
   imageUrls: string[];
+  originalUrls?: string[];
+  generatedBwUrls?: string[];
+  previewSessionId?: string;
   title?: string;
   lineId?: string;
   style?: "cartoon" | "pencil" | "watercolor";
   isGiftCard?: boolean;
   giftCardAmount?: number;
+}
+
+export interface BookFulfillmentImages {
+  originalUrls: string[];
+  generatedBwUrls: string[];
+  previewSessionId: string;
 }
 
 export interface Cart {
@@ -32,7 +41,8 @@ interface CartContextType {
     quantity?: number,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor"
+    style?: "cartoon" | "pencil" | "watercolor",
+    fulfillment?: BookFulfillmentImages
   ) => Promise<void>;
   addGiftCardToCart: (optionId: string) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
@@ -114,7 +124,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             lId: string,
             attempts = 3,
             delayMs = 200
-          ): Promise<{ imageUrls: string[]; style?: "cartoon" | "pencil" | "watercolor" }> => {
+          ): Promise<{
+            imageUrls: string[];
+            originalUrls?: string[];
+            generatedBwUrls?: string[];
+            previewSessionId?: string;
+            style?: "cartoon" | "pencil" | "watercolor";
+          }> => {
             for (let i = 0; i < attempts; i++) {
               try {
                 const res = await fetch(
@@ -128,6 +144,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   ) {
                     return {
                       imageUrls: json.imageUrls,
+                      originalUrls: json.originalUrls,
+                      generatedBwUrls: json.generatedBwUrls,
+                      previewSessionId: json.previewSessionId,
                       style: json.style,
                     };
                   }
@@ -221,6 +240,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 quantity: line.quantity,
                 title: line.title,
                 imageUrls: isGiftCard ? [] : imageUrls,
+                originalUrls: isGiftCard ? undefined : lineData.originalUrls,
+                generatedBwUrls: isGiftCard ? undefined : lineData.generatedBwUrls,
+                previewSessionId: isGiftCard ? undefined : lineData.previewSessionId,
                 style: isGiftCard ? undefined : style,
                 isGiftCard,
                 giftCardAmount,
@@ -261,7 +283,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number = 1,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor"
+    style?: "cartoon" | "pencil" | "watercolor",
+    fulfillment?: BookFulfillmentImages
   ) => {
     setIsLoading(true);
     try {
@@ -282,6 +305,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             locale,
+            originalUrls: fulfillment?.originalUrls,
+            generatedBwUrls: fulfillment?.generatedBwUrls,
+            previewSessionId: fulfillment?.previewSessionId,
           }),
         });
       } else {
@@ -298,6 +324,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             locale,
+            originalUrls: fulfillment?.originalUrls,
+            generatedBwUrls: fulfillment?.generatedBwUrls,
+            previewSessionId: fulfillment?.previewSessionId,
           }),
         });
       }

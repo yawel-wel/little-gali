@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { buildPreviewContactHtml } from "@/lib/preview-session/contact-context";
+import { requirePreviewSession } from "@/lib/preview-session/auth";
 
 // Initialize Resend only when API key is available
 const getResend = () => {
@@ -25,7 +27,12 @@ function escapeHtml(text: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, message } = body;
+    const { name, email, message, previewSessionId } = body as {
+      name?: string;
+      email?: string;
+      message?: string;
+      previewSessionId?: string;
+    };
 
     // Validate input
     if (!name || !email || !message) {
@@ -39,6 +46,14 @@ export async function POST(request: NextRequest) {
         { error: "כתובת אימייל לא תקינה" },
         { status: 400 }
       );
+    }
+
+    let previewHtml = "";
+    if (previewSessionId) {
+      const auth = await requirePreviewSession(previewSessionId);
+      if (!(auth instanceof NextResponse)) {
+        previewHtml = buildPreviewContactHtml(auth.session);
+      }
     }
 
     // Send email using Resend
@@ -58,6 +73,7 @@ export async function POST(request: NextRequest) {
             <p style="white-space: pre-wrap; margin-top: 10px;">${escapeHtml(
               message
             )}</p>
+            ${previewHtml}
           </div>
         </div>
       `,

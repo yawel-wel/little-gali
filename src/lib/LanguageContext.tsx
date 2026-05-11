@@ -541,6 +541,29 @@ const hebrewTranslations = {
   "upload.photoTip": "איזו תמונה כדאי להעלות?",
   "upload.photoNote":
     "אין צורך בתמונה מושלמת, אנחנו נדאג שהפנים, ההבעה והחום האנושי שבתמונה יבואו לידי ביטוי.",
+  "upload.continueToPreview": "המשיכו לתצוגה מקדימה",
+  "upload.startingPreview": "מכינים את התצוגה המקדימה...",
+
+  // Preview flow
+  "preview.loadingTitle": "יוצרים תמונות קסומות",
+  "preview.loadingLine1": "מסירים רקעים ומחדדים קווים...",
+  "preview.loadingLine2": "שומרים על הבעות ועל הפרופורציות...",
+  "preview.loadingLine3": "עוד רגע ותראו את התוצאה...",
+  "preview.title": "הצד השחור-לבן של הספרון",
+  "preview.subtitle": "בדקו את התוצאה, החליפו עד 3 תמונות או צרו קשר אם משהו לא מסתדר.",
+  "preview.changesLeft": "שינויים שנותרו",
+  "preview.regenerate": "צרו גרסה חדשה",
+  "preview.replaceImage": "החליפו תמונה",
+  "preview.previousVersions": "גרסאות קודמות",
+  "preview.approveBw": "מאשרים את הצד השחור-לבן",
+  "preview.contactPrompt": "לא מרוצים מהתוצאה?",
+  "preview.contactButton": "צרו איתנו קשר",
+  "preview.styleTitle": "בחרו סגנון לצד הצבעוני",
+  "preview.colorSurprise": "את הצד הצבעוני נשמור בתור הפתעה",
+  "preview.continueToCart": "המשיכו לעגלה",
+  "preview.slotBusy": "מייצרים תמונה...",
+  "preview.sessionError": "לא הצלחנו לטעון את התצוגה המקדימה. נסו שוב.",
+  "preview.addingToCart": "מוסיפים לעגלה...",
 
   // Style Selector
   "styleSelector.title": "בחרו את הסגנון שלכם:",
@@ -1094,6 +1117,29 @@ const englishTranslations = {
   "upload.photoTip": "What kind of photo should I upload?",
   "upload.photoNote":
     "No need for a perfect photo, we'll make sure the faces, expressions, and human warmth in the photo come through.",
+  "upload.continueToPreview": "Continue to preview",
+  "upload.startingPreview": "Preparing your preview...",
+
+  // Preview flow
+  "preview.loadingTitle": "Creating magical images",
+  "preview.loadingLine1": "Removing backgrounds and sharpening lines...",
+  "preview.loadingLine2": "Keeping expressions and proportions...",
+  "preview.loadingLine3": "Almost there...",
+  "preview.title": "The black-and-white side of your book",
+  "preview.subtitle": "Review the result, change up to 3 images, or contact us if something feels off.",
+  "preview.changesLeft": "Changes left",
+  "preview.regenerate": "Generate again",
+  "preview.replaceImage": "Replace photo",
+  "preview.previousVersions": "Previous versions",
+  "preview.approveBw": "Approve black & white",
+  "preview.contactPrompt": "Not happy with the result?",
+  "preview.contactButton": "Contact us",
+  "preview.styleTitle": "Choose a style for the colorful side",
+  "preview.colorSurprise": "We'll keep the colorful side as a surprise",
+  "preview.continueToCart": "Continue to cart",
+  "preview.slotBusy": "Generating image...",
+  "preview.sessionError": "We couldn't load your preview. Please try again.",
+  "preview.addingToCart": "Adding to cart...",
 
   // Style Selector
   "styleSelector.title": "Choose Your Style:",

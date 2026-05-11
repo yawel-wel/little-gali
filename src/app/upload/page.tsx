@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { compressImage } from "@/lib/utils";
+import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
 import { anyFaceClippedByCrop } from "@/lib/smartCropGeometry";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
@@ -948,6 +949,71 @@ function UploadPageContent() {
     }
   };
 
+  const previewEnabled = isAiPreviewEnabled();
+
+  const handleContinueToPreview = async () => {
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      if (!images || images.length !== 5) {
+        setSubmitStatus({
+          type: "error",
+          message: t("upload.selectExactly5"),
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      setUploadingImages(new Set([0, 1, 2, 3, 4]));
+      const compressedImages = await Promise.all(
+        images.map((url) => compressImage(url)),
+      );
+      const uploadFormData = new FormData();
+      compressedImages.forEach((file) => {
+        uploadFormData.append("images", file);
+      });
+
+      const uploadResponse = await fetch("/api/upload-images", {
+        method: "POST",
+        body: uploadFormData,
+      });
+      if (!uploadResponse.ok) {
+        const uploadError = await uploadResponse.json();
+        setUploadingImages(new Set());
+        throw new Error(uploadError.error || "Failed to upload images");
+      }
+
+      const uploadData = await uploadResponse.json();
+      const originalUrls = uploadData.imageUrls;
+      if (!originalUrls || originalUrls.length !== 5) {
+        setUploadingImages(new Set());
+        throw new Error("Invalid response from upload API");
+      }
+
+      setUploadingImages(new Set());
+      const previewResponse = await fetch("/api/preview-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ originalUrls }),
+      });
+      const previewData = await previewResponse.json();
+      if (!previewResponse.ok) {
+        throw new Error(previewData.error || t("upload.serverError"));
+      }
+
+      router.push(`/preview/${previewData.session.id}`);
+    } catch (error) {
+      console.error("Preview start error:", error);
+      setUploadingImages(new Set());
+      setSubmitStatus({
+        type: "error",
+        message: t("upload.serverError"),
+      });
+      setIsSubmitting(false);
+    }
+  };
+
   const handleAddToCart = async () => {
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
@@ -1211,18 +1277,21 @@ function UploadPageContent() {
                   {/* Action Buttons */}
                   {images.length >= 5 && (
                     <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      {/* Style Selector - Show after images are arranged */}
-                      <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
-                        <StyleSelector
-                          selectedStyle={selectedStyle}
-                          onStyleChange={setSelectedStyle}
-                        />
-                      </div>
+                      {!previewEnabled && (
+                        <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
+                          <StyleSelector
+                            selectedStyle={selectedStyle}
+                            onStyleChange={setSelectedStyle}
+                          />
+                        </div>
+                      )}
 
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleAddToCart}
+                        onClick={
+                          previewEnabled ? handleContinueToPreview : handleAddToCart
+                        }
                         disabled={isSubmitting}
                         className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         sx={{
@@ -1237,6 +1306,8 @@ function UploadPageContent() {
                       >
                         {isSubmitting ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : previewEnabled ? (
+                          t("upload.continueToPreview")
                         ) : (
                           t("upload.addToCart")
                         )}
