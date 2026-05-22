@@ -1,19 +1,111 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as Sentry from "@sentry/nextjs";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { StyleSelector, type StyleType } from "@/components/style-selector";
+import { MobileImageEditor } from "@/components/mobile-image-editor";
+import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
+import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
+import {
+  PreviewSlotVersionsStrip,
+  buildPreviewVersionEntries,
+} from "@/components/preview-slot-versions-strip";
+import { PreviewSlotFadeImage } from "@/components/preview-slot-fade-image";
+import {
+  PreviewBookLightbox,
+  type PreviewBookLightboxSlide,
+} from "@/components/preview-book-lightbox";
+import {
+  PreviewSortableSlots,
+  type PreviewDragActivator,
+} from "@/components/preview-sortable-slots";
+import {
+  BOOK_SLOT_INDEX,
+  getColorCandidateForStyleFromPublicSlot,
+} from "@/lib/preview-session/color-by-style";
+import {
+  displayPosition,
+  sortSlotsByDisplayOrder,
+} from "@/lib/preview-session/display-order";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
-import { compressImage } from "@/lib/utils";
+import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
+import { logPreviewColorStyleSelected } from "@/lib/preview-session/generation-log";
+import { buildPreviewGenerationStats } from "@/lib/preview-session/generation-stats";
+import {
+  GenerationRateLimitError,
+  getGenerationRateLimitMessage,
+  isGenerationRateLimitErrorNode,
+  throwIfGenerationRateLimited,
+} from "@/lib/preview-session/handle-generation-response";
 import type { PreviewSessionPublicView } from "@/lib/preview-session/types";
+import type { Area } from "react-easy-crop";
 import Button from "@mui/material/Button";
-import { Loader2 } from "lucide-react";
+import { Expand, Loader2, MoreHorizontal, X } from "lucide-react";
 
-type PreviewStep = "bw" | "style";
+type PreviewBookSide = "bw" | "color";
+type CompareOutputImage = {
+  id: string;
+  url: string;
+  alt: string;
+  aspectRatio?: number;
+};
+type CompareImageModal = {
+  originalUrl: string;
+  originalAlt: string;
+  outputs: CompareOutputImage[];
+  activeOutputId: string;
+};
+type CropTarget = {
+  candidateId: string;
+  bookSide: PreviewBookSide;
+  imageUrl: string;
+};
+type InitialPreviewLoadingScreenProps = {
+  imageUrls: string[];
+  isExiting: boolean;
+  isComplete: boolean;
+  loadingLine: string;
+  slowText: string;
+  standardText: string;
+  title: string;
+};
+
+const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
+const COLOR_STRIP_PREFETCH_STORAGE_PREFIX = "lg-color-strip-prefetch";
+
+function colorStripPrefetchStorageKey(sessionId: string): string {
+  return `${COLOR_STRIP_PREFETCH_STORAGE_PREFIX}:${sessionId}`;
+}
+
+function hasColorStripPrefetchCompleted(sessionId: string): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return (
+    sessionStorage.getItem(colorStripPrefetchStorageKey(sessionId)) === "1"
+  );
+}
+
+function markColorStripPrefetchCompleted(sessionId: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  sessionStorage.setItem(colorStripPrefetchStorageKey(sessionId), "1");
+}
 
 function createIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -22,63 +114,507 @@ function createIdempotencyKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function sessionUpdatedAtMs(session: PreviewSessionPublicView): number {
+  const ms = Date.parse(session.updatedAt);
+  return Number.isNaN(ms) ? 0 : ms;
+}
+
+/** Skip polled GET snapshots older than the last mutation we applied (KV read-after-write lag). */
+function isStalePolledSession(
+  incoming: PreviewSessionPublicView,
+  lastAppliedMs: number,
+): boolean {
+  if (lastAppliedMs <= 0) {
+    return false;
+  }
+  const incomingMs = sessionUpdatedAtMs(incoming);
+  return incomingMs > 0 && incomingMs < lastAppliedMs;
+}
+
+function getColorVersionsForStyle(
+  slot: PreviewSessionPublicView["slots"][number],
+  style: StyleType,
+): PreviewSessionPublicView["slots"][number]["candidates"] {
+  return (slot.colorCandidates ?? []).filter(
+    (candidate) =>
+      candidate.kind === "color" && (candidate.style ?? "pencil") === style,
+  );
+}
+
+function allSlotsHaveColorForStylePublic(
+  session: PreviewSessionPublicView,
+  style: StyleType,
+): boolean {
+  return session.slots.every((slot) =>
+    slotHasColorPreviewForStylePublic(slot, style),
+  );
+}
+
+function slotHasColorForStylePublic(
+  slot: PreviewSessionPublicView["slots"][number],
+  style: StyleType,
+): boolean {
+  const candidate = getColorCandidateForStyleFromPublicSlot(slot, style);
+  return Boolean(candidate?.previewUrl || candidate?.error);
+}
+
+function slotHasColorPreviewForStylePublic(
+  slot: PreviewSessionPublicView["slots"][number],
+  style: StyleType,
+): boolean {
+  return Boolean(
+    getColorCandidateForStyleFromPublicSlot(slot, style)?.previewUrl,
+  );
+}
+
+function frozenStripThumbnailsReady(
+  session: PreviewSessionPublicView | null,
+): boolean {
+  const frozen = session?.frozenStyleStripThumbnails;
+  return Boolean(
+    frozen?.cartoon?.previewUrl && frozen?.watercolor?.previewUrl,
+  );
+}
+
+function stripThumbnailsReady(
+  session: PreviewSessionPublicView | null,
+  bookSlot: PreviewSessionPublicView["slots"][number] | undefined,
+): boolean {
+  if (frozenStripThumbnailsReady(session)) {
+    return true;
+  }
+  if (!bookSlot) {
+    return true;
+  }
+  return (
+    slotHasColorPreviewForStylePublic(bookSlot, "cartoon") &&
+    slotHasColorPreviewForStylePublic(bookSlot, "watercolor")
+  );
+}
+
+function PreviewSlotLightboxActivator({
+  dragActivator,
+  disabled,
+  onOpenLightbox,
+  className,
+  style,
+  children,
+}: {
+  dragActivator: PreviewDragActivator;
+  disabled: boolean;
+  onOpenLightbox: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  const [pressPending, setPressPending] = useState(false);
+  const { reorderEnabled, listeners, attributes, ref, isDragging } =
+    dragActivator;
+
+  useEffect(() => {
+    if (isDragging) {
+      setPressPending(false);
+    }
+  }, [isDragging]);
+
+  const l = reorderEnabled ? listeners : undefined;
+
+  return (
+    <button
+      type="button"
+      ref={(el) => {
+        ref(el);
+      }}
+      disabled={disabled}
+      onClick={onOpenLightbox}
+      className={cn(
+        className,
+        reorderEnabled &&
+          "touch-manipulation select-none [-webkit-touch-callout:none]",
+        reorderEnabled &&
+          pressPending &&
+          "ring-2 ring-inset ring-primary-orange/40",
+      )}
+      style={style}
+      {...(reorderEnabled ? attributes : {})}
+      {...(l ?? {})}
+      onPointerDown={(e) => {
+        l?.onPointerDown?.(e);
+        if (reorderEnabled) {
+          setPressPending(true);
+        }
+      }}
+      onPointerUp={(e) => {
+        l?.onPointerUp?.(e);
+        setPressPending(false);
+      }}
+      onPointerCancel={(e) => {
+        l?.onPointerCancel?.(e);
+        setPressPending(false);
+      }}
+      onPointerLeave={(e) => {
+        l?.onPointerLeave?.(e);
+        setPressPending(false);
+      }}
+      onTouchStart={(e) => {
+        l?.onTouchStart?.(e);
+        if (reorderEnabled) {
+          setPressPending(true);
+        }
+      }}
+      onTouchEnd={(e) => {
+        l?.onTouchEnd?.(e);
+        setPressPending(false);
+      }}
+      onTouchCancel={(e) => {
+        l?.onTouchCancel?.(e);
+        setPressPending(false);
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function InitialPreviewLoadingScreen({
+  imageUrls,
+  isExiting,
+  isComplete,
+  loadingLine,
+  slowText,
+  standardText,
+  title,
+}: InitialPreviewLoadingScreenProps) {
+  const [isTakingLonger, setIsTakingLonger] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setIsTakingLonger(true), 90000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return (
+    <section
+      className={cn(
+        "flex min-h-[calc(100vh-72px-var(--banner-height,0px))] items-center justify-center px-4 py-10 text-center opacity-100 transition-opacity duration-[400ms] ease-out",
+        isExiting && "opacity-0",
+      )}
+      aria-busy={!isComplete}
+    >
+      <div className="flex w-full max-w-2xl flex-col items-center">
+        {imageUrls.length > 0 && (
+          <div className="mb-7 flex justify-center" dir="ltr">
+            {imageUrls.slice(0, 5).map((url, index) => (
+              <div
+                key={`${url}-${index}`}
+                className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
+                style={{
+                  animationDelay: `${index * 140}ms`,
+                  marginLeft: index === 0 ? 0 : -18,
+                  zIndex: imageUrls.length - index,
+                }}
+              >
+                <img
+                  src={url}
+                  alt=""
+                  className={cn(
+                    SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                    "h-full w-full object-cover",
+                  )}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <h1 className="max-w-xl font-heading text-[2.35rem] leading-[1.12] text-accent-burgundy md:text-5xl">
+          {title}
+        </h1>
+
+        <div className="mt-8 h-1.5 w-48 overflow-hidden rounded-full bg-[#EAD9D4] shadow-inner md:w-56">
+          <div
+            className={cn(
+              "h-full origin-left rounded-full bg-primary-orange",
+              isComplete
+                ? "preview-initial-progress-complete"
+                : "preview-initial-progress",
+            )}
+          />
+        </div>
+
+        <div className="mt-8 flex min-h-8 items-center justify-center">
+          <p
+            key={loadingLine}
+            className="preview-loading-subtitle-fade font-body-bold text-xl text-dark-gray md:text-2xl"
+          >
+            {loadingLine}
+          </p>
+        </div>
+
+        <div className="mt-7 flex min-h-10 items-center justify-center">
+          <p className="font-body text-base text-dark-gray/50">
+            {isTakingLonger ? slowText : standardText}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function PreviewPage() {
   const params = useParams<{ sessionId: string }>();
   const sessionId = params.sessionId;
   const router = useRouter();
-  const { t, locale } = useLanguage();
+  const { t } = useLanguage();
   const { addToCart } = useCart();
+  const [localInitialPhotoUrls] = useState<string[]>(() => {
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    try {
+      const raw = sessionStorage.getItem(
+        `${PREVIEW_LOADING_IMAGES_STORAGE_PREFIX}:${sessionId}`,
+      );
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed)
+        ? parsed.filter((url): url is string => typeof url === "string" && !!url)
+        : [];
+    } catch {
+      return [];
+    }
+  });
   const [session, setSession] = useState<PreviewSessionPublicView | null>(null);
-  const [step, setStep] = useState<PreviewStep>("bw");
+  const [bookSide, setBookSide] = useState<PreviewBookSide>("bw");
+  const [displayedBookSide, setDisplayedBookSide] =
+    useState<PreviewBookSide>("bw");
+  const [isTabCardsVisible, setIsTabCardsVisible] = useState(true);
   const [selectedStyle, setSelectedStyle] = useState<StyleType>("pencil");
-  const [error, setError] = useState<string | null>(null);
+  const [activeColorStyle, setActiveColorStyle] = useState<StyleType>("pencil");
+  const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
+    () => new Set(),
+  );
+  const [isColorStripPrefetching, setIsColorStripPrefetching] = useState(false);
+  const [slotsPendingColorRegen, setSlotsPendingColorRegen] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const stripThumbPrefetchRunningRef = useRef(false);
+  const pendingColorRegenProcessingRef = useRef(false);
+  const mutationInProgressRef = useRef(false);
+  const [error, setError] = useState<ReactNode | null>(null);
+
+  const setGenerationError = useCallback(
+    (err: unknown, fallback = t("preview.sessionError")) => {
+      if (err instanceof GenerationRateLimitError) {
+        setError(getGenerationRateLimitMessage(t));
+        return;
+      }
+      setError(err instanceof Error ? err.message : fallback);
+    },
+    [t],
+  );
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [failureDetail, setFailureDetail] = useState("");
+  const [failureStatus, setFailureStatus] = useState<number | undefined>();
+  const failureReportedRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [busySlotIndexes, setBusySlotIndexes] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const [failedPreviewUrls, setFailedPreviewUrls] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [bookLightboxOpen, setBookLightboxOpen] = useState(false);
+  const [bookLightboxIndex, setBookLightboxIndex] = useState(0);
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
+  const [keepInitialLoadingVisible, setKeepInitialLoadingVisible] =
+    useState(false);
+  const [keepColorLoadingVisible, setKeepColorLoadingVisible] =
+    useState(false);
+  const [openSlotActionsIndex, setOpenSlotActionsIndex] = useState<number | null>(
+    null,
+  );
+  const [showActionsPulse, setShowActionsPulse] = useState(false);
+  const [compareImageModal, setCompareImageModal] =
+    useState<CompareImageModal | null>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
   const replaceSlotRef = useRef<number | null>(null);
+  const replaceSourceUrlRef = useRef<string | null>(null);
+  const [replaceCropImageUrl, setReplaceCropImageUrl] = useState<string | null>(
+    null,
+  );
+  const [replaceSmartCropLoading, setReplaceSmartCropLoading] = useState(false);
+  const [replaceSmartCropArea, setReplaceSmartCropArea] = useState<
+    Area | undefined
+  >(undefined);
+  const [replaceEditorFaceBoxes, setReplaceEditorFaceBoxes] = useState<Area[]>(
+    [],
+  );
+  const [cropTarget, setCropTarget] = useState<CropTarget | null>(null);
+  const [cropSaving, setCropSaving] = useState(false);
+  const [cropError, setCropError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tabFadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAppliedUpdatedAtRef = useRef(0);
 
-  const loadingLines = useMemo(
+  const applySession = useCallback((next: PreviewSessionPublicView) => {
+    const ms = sessionUpdatedAtMs(next);
+    if (ms > 0) {
+      lastAppliedUpdatedAtRef.current = Math.max(
+        lastAppliedUpdatedAtRef.current,
+        ms,
+      );
+    }
+    setSession(next);
+  }, []);
+
+  const bwLoadingLines = useMemo(
     () => [
-      t("preview.loadingLine1"),
-      t("preview.loadingLine2"),
-      t("preview.loadingLine3"),
+      t("preview.bwLoadingLine1"),
+      t("preview.bwLoadingLine2"),
+      t("preview.bwLoadingLine3"),
+      t("preview.bwLoadingLine4"),
+      t("preview.bwLoadingLine5"),
     ],
     [t],
+  );
+
+  const colorLoadingLines = useMemo(
+    () => [
+      t("preview.colorLoadingLine1"),
+      t("preview.colorLoadingLine2"),
+      t("preview.colorLoadingLine3"),
+      t("preview.colorLoadingLine4"),
+      t("preview.colorLoadingLine5"),
+    ],
+    [t],
+  );
+
+  const markLoadFailure = useCallback(
+    (detail: string, status?: number) => {
+      setLoadFailed(true);
+      setFailureDetail(detail);
+      setFailureStatus(status);
+    },
+    [],
   );
 
   const refreshSession = useCallback(async () => {
     const response = await fetch(`/api/preview-session/${sessionId}`);
     if (!response.ok) {
-      throw new Error(t("preview.sessionError"));
+      if (response.status === 403) {
+        throw Object.assign(new Error(t("preview.sessionUnauthorized")), {
+          status: response.status,
+        });
+      }
+      if (response.status === 404) {
+        throw Object.assign(new Error(t("preview.sessionNotFound")), {
+          status: response.status,
+        });
+      }
+      const data = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | null;
+      throw Object.assign(
+        new Error(data?.error || t("preview.sessionError")),
+        { status: response.status },
+      );
     }
     const data = (await response.json()) as { session: PreviewSessionPublicView };
-    setSession(data.session);
-    if (
-      data.session.phase === "bw_approved" ||
-      data.session.phase === "style_selected"
-    ) {
-      setStep("style");
+    if (data.session.initializationError) {
+      applySession(data.session);
+      markLoadFailure(data.session.initializationError);
+      return data.session;
     }
-    if (data.session.selectedColorStyle) {
-      setSelectedStyle(data.session.selectedColorStyle);
+    if (isStalePolledSession(data.session, lastAppliedUpdatedAtRef.current)) {
+      return data.session;
     }
+    if (mutationInProgressRef.current) {
+      return data.session;
+    }
+    setLoadFailed(false);
+    setFailureDetail("");
+    setFailureStatus(undefined);
+    applySession(data.session);
     return data.session;
-  }, [sessionId, t]);
+  }, [applySession, markLoadFailure, sessionId, t]);
 
   useEffect(() => {
-    refreshSession().catch((err: Error) => setError(err.message));
-  }, [refreshSession]);
+    refreshSession().catch((err: Error & { status?: number }) => {
+      Sentry.setUser({ id: sessionId });
+      Sentry.setTag("sessionId", sessionId);
+      Sentry.captureException(err, {
+        tags: { sessionId, event: "preview_load_failed" },
+        extra: { sessionId },
+      });
+      Sentry.metrics.count("preview_load_failed", 1, {
+        attributes: { sessionId },
+      });
+      markLoadFailure(err.message, err.status);
+    });
+  }, [markLoadFailure, refreshSession, sessionId]);
+
+  useEffect(() => {
+    if (!loadFailed || failureReportedRef.current) return;
+    failureReportedRef.current = true;
+
+    void fetch("/api/preview-session/report-failure", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId,
+        detail: failureDetail,
+        status: failureStatus,
+      }),
+    }).catch((reportError) => {
+      console.error("Failed to report preview failure:", reportError);
+    });
+  }, [failureDetail, failureStatus, loadFailed, sessionId]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setLoadingLineIndex((current) => (current + 1) % loadingLines.length);
-    }, 2800);
+      setLoadingLineIndex((current) => (current + 1) % 5);
+    }, 3500);
     return () => clearInterval(interval);
-  }, [loadingLines.length]);
+  }, []);
 
   useEffect(() => {
-    const shouldPoll = session?.slots.some((slot) => slot.inFlight);
+    const pulseSeenKey = "little-gali-preview-actions-pulse-seen";
+    if (localStorage.getItem(pulseSeenKey)) {
+      return;
+    }
+
+    localStorage.setItem(pulseSeenKey, "1");
+    setShowActionsPulse(true);
+    const timeout = setTimeout(() => setShowActionsPulse(false), 2800);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (openSlotActionsIndex === null) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest("[data-preview-actions-menu]")
+      ) {
+        return;
+      }
+
+      setOpenSlotActionsIndex(null);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [openSlotActionsIndex]);
+
+  useEffect(() => {
+    const shouldPoll =
+      session?.generationStatus === "running" ||
+      session?.slots.some((slot) => slot.inFlight || slot.colorInFlight);
     if (!shouldPoll) {
       if (pollRef.current) {
         clearInterval(pollRef.current);
@@ -89,6 +625,9 @@ export default function PreviewPage() {
 
     if (!pollRef.current) {
       pollRef.current = setInterval(() => {
+        if (pendingColorRegenProcessingRef.current) {
+          return;
+        }
         refreshSession().catch(() => undefined);
       }, 2500);
     }
@@ -102,15 +641,427 @@ export default function PreviewPage() {
   }, [session, refreshSession]);
 
   const isInitialLoading =
-    !session ||
-    session.slots.some(
-      (slot) =>
-        slot.inFlight ||
-        !slot.candidates.some((candidate) => candidate.previewUrl || candidate.error),
+    !loadFailed &&
+    (!session ||
+      session.slots.some(
+        (slot) =>
+          !slot.candidates.some(
+            (candidate) => candidate.previewUrl || candidate.error,
+          ),
+      ));
+
+  useEffect(() => {
+    if (isInitialLoading) {
+      setKeepInitialLoadingVisible(true);
+      return;
+    }
+
+    if (!keepInitialLoadingVisible) {
+      return;
+    }
+
+    const timeout = setTimeout(() => setKeepInitialLoadingVisible(false), 400);
+    return () => clearTimeout(timeout);
+  }, [isInitialLoading, keepInitialLoadingVisible]);
+
+  const showInitialLoadingScreen =
+    isInitialLoading || keepInitialLoadingVisible;
+  const isInitialLoadingExiting =
+    !isInitialLoading && keepInitialLoadingVisible;
+
+  const isColorGenerating =
+    !loadFailed &&
+    session !== null &&
+    (session.phase === "bw_approved" || session.phase === "style_selected") &&
+    session.generationStatus === "running";
+
+  useEffect(() => {
+    if (isColorGenerating) {
+      setKeepColorLoadingVisible(true);
+      return;
+    }
+    if (!keepColorLoadingVisible) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setKeepColorLoadingVisible(false);
+      setBookSide("color");
+      setDisplayedBookSide("color");
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [isColorGenerating, keepColorLoadingVisible]);
+
+  const showColorLoadingScreen =
+    !showInitialLoadingScreen && (isColorGenerating || keepColorLoadingVisible);
+  const isColorLoadingExiting = !isColorGenerating && keepColorLoadingVisible;
+
+  const isColorPhase =
+    session !== null &&
+    (session.phase === "bw_approved" ||
+      session.phase === "style_selected" ||
+      session.phase === "cart_added");
+  const sessionInitialPhotoUrls =
+    session?.slots
+      .map((slot) => slot.originalUrl)
+      .filter((url): url is string => Boolean(url))
+      .slice(0, 5) ?? [];
+  const initialLoadingPhotoUrls =
+    sessionInitialPhotoUrls.length > 0
+      ? sessionInitialPhotoUrls
+      : localInitialPhotoUrls;
+
+  useEffect(() => {
+    if (showInitialLoadingScreen || localInitialPhotoUrls.length === 0) {
+      return;
+    }
+
+    sessionStorage.removeItem(
+      `${PREVIEW_LOADING_IMAGES_STORAGE_PREFIX}:${sessionId}`,
     );
+  }, [localInitialPhotoUrls.length, sessionId, showInitialLoadingScreen]);
+
+  const bookSlotForColor = session?.slots.find(
+    (slot) => slot.index === BOOK_SLOT_INDEX,
+  );
+  const stripThumbnailsAreReady = stripThumbnailsReady(session, bookSlotForColor);
+
+  const isAwaitingStripAssetsOnColorSide = (side: PreviewBookSide) =>
+    side === "color" &&
+    Boolean(session) &&
+    !stripThumbnailsAreReady &&
+    (isColorStripPrefetching ||
+      Boolean(bookSlotForColor?.colorInFlight) ||
+      !hasColorStripPrefetchCompleted(sessionId));
+
+  const isInitialColorPipelineRunning =
+    session?.generationStatus === "running";
+
+  const isDisplayedColorSideLoading =
+    displayedBookSide === "color" &&
+    Boolean(session) &&
+    (isInitialColorPipelineRunning || isAwaitingStripAssetsOnColorSide("color"));
+
+  const styleStripLoadingSet = useMemo(() => {
+    const loading = new Set(styleStripLoading);
+    if (!session) {
+      return loading;
+    }
+    const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
+    if (
+      bookSlot &&
+      !slotHasColorPreviewForStylePublic(bookSlot, "pencil") &&
+      (session.generationStatus === "running" || bookSlot.colorInFlight)
+    ) {
+      loading.add("pencil");
+    }
+    return loading;
+  }, [session, styleStripLoading]);
+
+  const bookLightboxSlides = useMemo<PreviewBookLightboxSlide[]>(() => {
+    if (!session) {
+      return [];
+    }
+
+    return sortSlotsByDisplayOrder(session.slots, session.displayOrder).flatMap(
+      (slot) => {
+        const active = slot.candidates.find(
+          (candidate) => candidate.id === slot.activeCandidateId,
+        );
+        const colorCandidate =
+          displayedBookSide === "color"
+            ? getColorCandidateForStyleFromPublicSlot(slot, activeColorStyle)
+            : undefined;
+        const imageUrl =
+          displayedBookSide === "bw"
+            ? active?.previewUrl
+            : colorCandidate?.previewUrl;
+        const page = displayPosition(slot.index, session.displayOrder);
+
+        if (!imageUrl) {
+          return [];
+        }
+
+        return [
+          {
+            pageNumber: page,
+            imageUrl,
+            alt:
+              displayedBookSide === "bw"
+                ? `${t("preview.tabBw")} ${page}`
+                : `${t("preview.tabColor")} ${page}`,
+          },
+        ];
+      },
+    );
+  }, [activeColorStyle, displayedBookSide, session, t]);
+
+  const previewVersionEntries = useMemo(() => {
+    if (!session) {
+      return [];
+    }
+    return buildPreviewVersionEntries({
+      session,
+      displayedBookSide,
+      activeColorStyle,
+      getColorVersionsForStyle,
+    });
+  }, [session, displayedBookSide, activeColorStyle]);
+
+  const isSlotColorBusyForVersions = useCallback(
+    (slotIndex: number) => {
+      if (!session) {
+        return false;
+      }
+      const slot = session.slots.find((item) => item.index === slotIndex);
+      if (!slot) {
+        return false;
+      }
+      const pending =
+        (session.pendingColorRegenSlotIndexes?.includes(slotIndex) ?? false) ||
+        slotsPendingColorRegen.has(slotIndex);
+      return (
+        slot.colorInFlight ||
+        pending ||
+        (displayedBookSide === "color" && busySlotIndexes.has(slotIndex))
+      );
+    },
+    [busySlotIndexes, displayedBookSide, session, slotsPendingColorRegen],
+  );
+
+  useEffect(() => {
+    setBookLightboxOpen(false);
+  }, [bookSide]);
+
+  useEffect(() => {
+    return () => {
+      if (tabFadeTimeoutRef.current) {
+        clearTimeout(tabFadeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+
+  const fetchColorStylePreview = useCallback(
+    async (style: StyleType, slotIndexes: number[]) => {
+      const response = await fetch(
+        `/api/preview-session/${sessionId}/generate-color`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ style, slotIndexes }),
+        },
+      );
+      const data = (await response.json()) as {
+        session?: PreviewSessionPublicView;
+        error?: string;
+      };
+      if (!response.ok) {
+        throwIfGenerationRateLimited(response, data);
+        throw new Error(data.error || t("preview.sessionError"));
+      }
+      applySession(data.session as PreviewSessionPublicView);
+      return data.session as PreviewSessionPublicView;
+    },
+    [applySession, sessionId, t],
+  );
+
+  const fetchSlotAllStylesColor = useCallback(
+    async (slotIndex: number) => {
+      const response = await fetch(
+        `/api/preview-session/${sessionId}/generate-color`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slotIndexes: [slotIndex],
+            allStylesForSlot: true,
+          }),
+        },
+      );
+      const data = (await response.json()) as {
+        session?: PreviewSessionPublicView;
+        error?: string;
+      };
+      if (!response.ok) {
+        throwIfGenerationRateLimited(response, data);
+        throw new Error(data.error || t("preview.sessionError"));
+      }
+      applySession(data.session as PreviewSessionPublicView);
+      setSlotsPendingColorRegen((current) => {
+        const next = new Set(current);
+        next.delete(slotIndex);
+        return next;
+      });
+      return data.session as PreviewSessionPublicView;
+    },
+    [applySession, sessionId, t],
+  );
+
+  const processPendingColorRegenSlots = useCallback(
+    async (targetSession: PreviewSessionPublicView) => {
+      const pending = targetSession.pendingColorRegenSlotIndexes ?? [];
+      if (pending.length === 0 || pendingColorRegenProcessingRef.current) {
+        return;
+      }
+
+      pendingColorRegenProcessingRef.current = true;
+      setSlotsPendingColorRegen((current) => {
+        const next = new Set(current);
+        for (const slotIndex of pending) {
+          next.add(slotIndex);
+        }
+        return next;
+      });
+      setError(null);
+
+      try {
+        for (const slotIndex of pending) {
+          await fetchSlotAllStylesColor(slotIndex);
+        }
+      } catch (err) {
+        setGenerationError(err);
+      } finally {
+        pendingColorRegenProcessingRef.current = false;
+      }
+    },
+    [fetchSlotAllStylesColor, setGenerationError],
+  );
+
+  useEffect(() => {
+    if (bookSide === "color" && session) {
+      void processPendingColorRegenSlots(session);
+    }
+  }, [bookSide, session, processPendingColorRegenSlots]);
+
+  const prefetchStripThumbnailsIfNeeded = useCallback(async () => {
+    if (!session) {
+      return;
+    }
+
+    if (frozenStripThumbnailsReady(session)) {
+      markColorStripPrefetchCompleted(sessionId);
+      return;
+    }
+
+    const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
+    if (!bookSlot) {
+      return;
+    }
+
+    if (stripThumbnailsReady(session, bookSlot)) {
+      markColorStripPrefetchCompleted(sessionId);
+      return;
+    }
+
+    if (
+      hasColorStripPrefetchCompleted(sessionId) ||
+      stripThumbPrefetchRunningRef.current
+    ) {
+      return;
+    }
+
+    const stylesToPrefetch = (["cartoon", "watercolor"] as const).filter(
+      (style) => !slotHasColorPreviewForStylePublic(bookSlot, style),
+    );
+
+    if (stylesToPrefetch.length === 0) {
+      markColorStripPrefetchCompleted(sessionId);
+      return;
+    }
+
+    setIsColorStripPrefetching(true);
+    stripThumbPrefetchRunningRef.current = true;
+    try {
+      await Promise.all(
+        stylesToPrefetch.map((style) =>
+          fetchColorStylePreview(style, [BOOK_SLOT_INDEX]).catch(() => undefined),
+        ),
+      );
+    } finally {
+      stripThumbPrefetchRunningRef.current = false;
+      setIsColorStripPrefetching(false);
+      markColorStripPrefetchCompleted(sessionId);
+    }
+  }, [fetchColorStylePreview, session, sessionId]);
+
+  const handleSelectColorStyle = useCallback(
+    (style: StyleType) => {
+      if (!session || style === activeColorStyle) {
+        return;
+      }
+
+      const previousStyle = activeColorStyle;
+      const allSlotsCached = allSlotsHaveColorForStylePublic(session, style);
+      logPreviewColorStyleSelected({
+        sessionId,
+        style,
+        previousStyle,
+        allSlotsCached,
+      });
+
+      setSelectedStyle(style);
+      setActiveColorStyle(style);
+      setError(null);
+
+      if (!allSlotsCached) {
+        setStyleStripLoading((current) => {
+          const next = new Set(current);
+          next.add(style);
+          return next;
+        });
+        fetchColorStylePreview(style, [0, 1, 2, 3, 4])
+          .catch((err) => setGenerationError(err))
+          .finally(() => {
+            setStyleStripLoading((current) => {
+              const next = new Set(current);
+              next.delete(style);
+              return next;
+            });
+          });
+      }
+    },
+    [activeColorStyle, fetchColorStylePreview, session, sessionId, setGenerationError],
+  );
+
+  const getColorStyleLabel = useCallback(
+    (style: StyleType) => {
+      if (style === "pencil") {
+        return t("styleSelector.pencil");
+      }
+      if (style === "cartoon") {
+        return t("styleSelector.cartoon");
+      }
+      return t("styleSelector.watercolor");
+    },
+    [t],
+  );
+
+  useEffect(() => {
+    if (bookLightboxOpen && bookLightboxSlides.length === 0) {
+      setBookLightboxOpen(false);
+    }
+  }, [bookLightboxOpen, bookLightboxSlides.length]);
+
+  const handleContinueWithoutPreview = () => {
+    router.push("/upload?withoutPreview=1");
+  };
+
+  const markSlotBusy = (slotIndex: number) => {
+    setBusySlotIndexes((current) => new Set(current).add(slotIndex));
+  };
+
+  const clearSlotBusy = (slotIndex: number) => {
+    setBusySlotIndexes((current) => {
+      const next = new Set(current);
+      next.delete(slotIndex);
+      return next;
+    });
+  };
 
   const handleRegenerate = async (slotIndex: number) => {
     if (!session?.canRegenerate) return;
+    markSlotBusy(slotIndex);
+    mutationInProgressRef.current = true;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -125,17 +1076,134 @@ export default function PreviewPage() {
           }),
         },
       );
-      const data = await response.json();
+      const data = (await response.json()) as {
+        session?: PreviewSessionPublicView;
+        error?: string;
+      };
       if (!response.ok) {
+        throwIfGenerationRateLimited(response, data);
         throw new Error(data.error || t("preview.sessionError"));
       }
-      setSession(data.session);
+      const updatedSession = data.session as PreviewSessionPublicView;
+      applySession(updatedSession);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("preview.sessionError"));
+      setGenerationError(err);
     } finally {
+      clearSlotBusy(slotIndex);
+      mutationInProgressRef.current = false;
       setIsSubmitting(false);
     }
   };
+
+  const handleRegenerateColor = async (slotIndex: number) => {
+    if (!session) return;
+    markSlotBusy(slotIndex);
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/preview-session/${sessionId}/regenerate-color`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slotIndex, style: activeColorStyle }),
+        },
+      );
+      const data = (await response.json()) as {
+        session?: PreviewSessionPublicView;
+        error?: string;
+      };
+      if (!response.ok) {
+        throwIfGenerationRateLimited(response, data);
+        throw new Error(data.error || t("preview.sessionError"));
+      }
+      applySession(data.session as PreviewSessionPublicView);
+    } catch (err) {
+      setGenerationError(err);
+    } finally {
+      clearSlotBusy(slotIndex);
+      setIsSubmitting(false);
+    }
+  };
+
+  const clearReplaceCropState = useCallback(() => {
+    if (replaceSourceUrlRef.current?.startsWith("blob:")) {
+      URL.revokeObjectURL(replaceSourceUrlRef.current);
+    }
+    replaceSourceUrlRef.current = null;
+    setReplaceCropImageUrl(null);
+    setReplaceSmartCropLoading(false);
+    setReplaceSmartCropArea(undefined);
+    setReplaceEditorFaceBoxes([]);
+    replaceSlotRef.current = null;
+  }, []);
+
+  const dismissReplaceCropEditor = useCallback(() => {
+    if (replaceSourceUrlRef.current?.startsWith("blob:")) {
+      URL.revokeObjectURL(replaceSourceUrlRef.current);
+    }
+    replaceSourceUrlRef.current = null;
+    setReplaceCropImageUrl(null);
+    setReplaceSmartCropLoading(false);
+    setReplaceSmartCropArea(undefined);
+    setReplaceEditorFaceBoxes([]);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!replaceCropImageUrl) {
+      setReplaceSmartCropLoading(false);
+      setReplaceSmartCropArea(undefined);
+      return;
+    }
+    setReplaceSmartCropLoading(true);
+    setReplaceSmartCropArea(undefined);
+  }, [replaceCropImageUrl]);
+
+  useEffect(() => {
+    if (!replaceCropImageUrl) {
+      setReplaceEditorFaceBoxes([]);
+      return;
+    }
+
+    const ac = new AbortController();
+    setReplaceEditorFaceBoxes([]);
+
+    (async () => {
+      try {
+        const blob = await fetch(replaceCropImageUrl).then((response) =>
+          response.blob(),
+        );
+        const formData = new FormData();
+        formData.append("image", blob, "photo.jpg");
+        const response = await fetch("/api/suggest-crop", {
+          method: "POST",
+          body: formData,
+          signal: ac.signal,
+        });
+        const data = await response.json();
+        if (ac.signal.aborted) return;
+        setReplaceEditorFaceBoxes(
+          Array.isArray(data.faceBoxes) ? data.faceBoxes : [],
+        );
+        const pixels = data.croppedAreaPixels as Area | undefined;
+        const hasValidSuggestion =
+          !data.fallback && pixels && pixels.width > 0 && pixels.height > 0;
+        setReplaceSmartCropArea(hasValidSuggestion ? pixels : undefined);
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+        if (!ac.signal.aborted) {
+          setReplaceEditorFaceBoxes([]);
+          setReplaceSmartCropArea(undefined);
+        }
+      } finally {
+        if (!ac.signal.aborted) {
+          setReplaceSmartCropLoading(false);
+        }
+      }
+    })();
+
+    return () => ac.abort();
+  }, [replaceCropImageUrl]);
 
   const handleReplaceClick = (slotIndex: number) => {
     replaceSlotRef.current = slotIndex;
@@ -150,46 +1218,151 @@ export default function PreviewPage() {
     event.target.value = "";
     if (!file || slotIndex === null || !session?.canReplace) return;
 
+    setError(null);
+    try {
+      const prepared = await prepareImageForCrop(file);
+      const objectUrl = URL.createObjectURL(prepared);
+      if (replaceSourceUrlRef.current?.startsWith("blob:")) {
+        URL.revokeObjectURL(replaceSourceUrlRef.current);
+      }
+      replaceSourceUrlRef.current = objectUrl;
+      setReplaceCropImageUrl(objectUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("upload.serverError"));
+      replaceSlotRef.current = null;
+    }
+  };
+
+  const handleReplaceCropCancel = () => {
+    clearReplaceCropState();
+  };
+
+  const handleReplaceCropSave = async (croppedUrl: string) => {
+    const slotIndex = replaceSlotRef.current;
+    if (slotIndex === null || !session?.canReplace) {
+      if (croppedUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(croppedUrl);
+      }
+      clearReplaceCropState();
+      return;
+    }
+
+    dismissReplaceCropEditor();
+    markSlotBusy(slotIndex);
+    mutationInProgressRef.current = true;
     setIsSubmitting(true);
     setError(null);
     try {
-      const compressed = await compressImage(URL.createObjectURL(file));
+      const compressed = await compressImage(croppedUrl);
+      if (croppedUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(croppedUrl);
+      }
       const formData = new FormData();
-      formData.append("images", compressed);
-      const uploadResponse = await fetch("/api/upload-images", {
+      formData.append("slotIndex", String(slotIndex));
+      formData.append("idempotencyKey", createIdempotencyKey());
+      formData.append("image", compressed);
+      const response = await fetch(`/api/preview-session/${sessionId}/replace`, {
         method: "POST",
         body: formData,
       });
-      if (!uploadResponse.ok) {
-        throw new Error(t("upload.serverError"));
-      }
-      const uploadData = await uploadResponse.json();
-      const originalUrl = uploadData.imageUrls?.[0];
-      if (!originalUrl) {
-        throw new Error(t("upload.serverError"));
-      }
-
-      const response = await fetch(`/api/preview-session/${sessionId}/replace`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slotIndex,
-          originalUrl,
-          idempotencyKey: createIdempotencyKey(),
-        }),
-      });
-      const data = await response.json();
+      const data = (await response.json()) as {
+        session?: PreviewSessionPublicView;
+        error?: string;
+      };
       if (!response.ok) {
+        throwIfGenerationRateLimited(response, data);
         throw new Error(data.error || t("preview.sessionError"));
       }
-      setSession(data.session);
+      const updatedSession = data.session as PreviewSessionPublicView;
+      applySession(updatedSession);
+      setFailedPreviewUrls((current) => {
+        const next = new Set(current);
+        const previousSlot = session.slots.find((item) => item.index === slotIndex);
+        if (previousSlot) {
+          for (const candidate of previousSlot.candidates) {
+            if (candidate.previewUrl) {
+              next.delete(candidate.previewUrl);
+            }
+          }
+          for (const candidate of previousSlot.colorCandidates ?? []) {
+            if (candidate.previewUrl) {
+              next.delete(candidate.previewUrl);
+            }
+          }
+        }
+        return next;
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("preview.sessionError"));
+      setGenerationError(err);
     } finally {
+      clearSlotBusy(slotIndex);
+      mutationInProgressRef.current = false;
       setIsSubmitting(false);
       replaceSlotRef.current = null;
     }
   };
+
+  const openCropForCandidate = useCallback(
+    (candidateId: string, bookSide: PreviewBookSide, imageUrl: string) => {
+      setOpenSlotActionsIndex(null);
+      setCropError(null);
+      setCropTarget({ candidateId, bookSide, imageUrl });
+    },
+    [],
+  );
+
+  const closeCropModal = useCallback(() => {
+    if (cropSaving) {
+      return;
+    }
+    setCropTarget(null);
+    setCropError(null);
+  }, [cropSaving]);
+
+  const handleCropSave = useCallback(
+    async (croppedUrl: string) => {
+      if (!cropTarget) {
+        return;
+      }
+
+      setCropSaving(true);
+      setCropError(null);
+      try {
+        const compressed = await compressImage(croppedUrl);
+        if (croppedUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(croppedUrl);
+        }
+
+        const formData = new FormData();
+        formData.append("candidateId", cropTarget.candidateId);
+        formData.append("bookSide", cropTarget.bookSide);
+        formData.append("image", compressed);
+        formData.append("idempotencyKey", createIdempotencyKey());
+
+        const response = await fetch(
+          `/api/preview-session/${sessionId}/crop`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          setCropError(t("preview.cropError"));
+          return;
+        }
+
+        applySession(data.session);
+        setCropTarget(null);
+        setCropError(null);
+      } catch {
+        setCropError(t("preview.cropError"));
+      } finally {
+        setCropSaving(false);
+      }
+    },
+    [applySession, cropTarget, sessionId, t],
+  );
 
   const handleSelectCandidate = async (
     slotIndex: number,
@@ -207,7 +1380,7 @@ export default function PreviewPage() {
       if (!response.ok) {
         throw new Error(data.error || t("preview.sessionError"));
       }
-      setSession(data.session);
+      applySession(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("preview.sessionError"));
     } finally {
@@ -227,14 +1400,42 @@ export default function PreviewPage() {
       if (!response.ok) {
         throw new Error(data.error || t("preview.sessionError"));
       }
-      setSession(data.session);
-      setStep("style");
+      applySession(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("preview.sessionError"));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleDisplayOrderChange = useCallback(
+    async (displayOrder: number[]) => {
+      if (!session) return;
+
+      applySession({ ...session, displayOrder });
+
+      try {
+        const response = await fetch(
+          `/api/preview-session/${sessionId}/reorder`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ displayOrder }),
+          },
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || t("preview.sessionError"));
+        }
+        applySession(data.session);
+      } catch (err) {
+        console.error("Failed to save page order:", err);
+        setError(err instanceof Error ? err.message : t("preview.sessionError"));
+        void refreshSession();
+      }
+    },
+    [applySession, refreshSession, session, sessionId, t],
+  );
 
   const handleContinueToCart = async () => {
     if (!session) return;
@@ -255,8 +1456,12 @@ export default function PreviewPage() {
       }
 
       const latest = styleData.session as PreviewSessionPublicView;
-      const originalUrls = latest.slots.map((slot) => slot.originalUrl);
-      const generatedBwUrls = latest.slots.map((slot) => {
+      const orderedSlots = sortSlotsByDisplayOrder(
+        latest.slots,
+        latest.displayOrder,
+      );
+      const originalUrls = orderedSlots.map((slot) => slot.originalUrl);
+      const generatedBwUrls = orderedSlots.map((slot) => {
         const active = slot.candidates.find(
           (candidate) => candidate.id === slot.activeCandidateId,
         );
@@ -270,6 +1475,7 @@ export default function PreviewPage() {
         originalUrls,
         generatedBwUrls,
         previewSessionId: sessionId,
+        generationStats: buildPreviewGenerationStats(latest),
       });
       router.push("/cart");
     } catch (err) {
@@ -278,6 +1484,58 @@ export default function PreviewPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleSelectBookSide = (nextSide: PreviewBookSide) => {
+    if (nextSide === bookSide) {
+      return;
+    }
+
+    if (tabFadeTimeoutRef.current) {
+      clearTimeout(tabFadeTimeoutRef.current);
+      tabFadeTimeoutRef.current = null;
+    }
+
+    setBookSide(nextSide);
+    setOpenSlotActionsIndex(null);
+    setBookLightboxOpen(false);
+
+    if (nextSide === "color" && session) {
+      const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
+      if (
+        bookSlot &&
+        !stripThumbnailsReady(session, bookSlot) &&
+        !hasColorStripPrefetchCompleted(sessionId)
+      ) {
+        setIsColorStripPrefetching(true);
+      }
+      void prefetchStripThumbnailsIfNeeded();
+      void processPendingColorRegenSlots(session);
+    }
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      setDisplayedBookSide(nextSide);
+      setIsTabCardsVisible(true);
+      return;
+    }
+
+    setIsTabCardsVisible(false);
+    tabFadeTimeoutRef.current = setTimeout(() => {
+      setDisplayedBookSide(nextSide);
+      setIsTabCardsVisible(true);
+      tabFadeTimeoutRef.current = null;
+    }, 200);
+  };
+
+  const activeCompareModalOutput =
+    compareImageModal?.outputs.find(
+      (output) => output.id === compareImageModal.activeOutputId,
+    ) ?? compareImageModal?.outputs[0];
+  const compareModalAspectRatio =
+    activeCompareModalOutput?.aspectRatio ?? 72 / 84;
 
   return (
     <div
@@ -289,185 +1547,618 @@ export default function PreviewPage() {
         className="flex-1"
         style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
       >
-        <section className="py-10 md:py-14">
-          <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <Title
-              highlightText={
-                step === "bw" ? t("preview.title") : t("preview.styleTitle")
-              }
-              size="xl"
-              roundedUnderline
-              className="text-center text-2xl font-bold md:text-4xl"
-            >
-              {step === "bw" ? t("preview.title") : t("preview.styleTitle")}
-            </Title>
+        {showInitialLoadingScreen ? (
+          <InitialPreviewLoadingScreen
+            imageUrls={initialLoadingPhotoUrls}
+            isExiting={isInitialLoadingExiting}
+            isComplete={!isInitialLoading}
+            loadingLine={bwLoadingLines[loadingLineIndex % 5]}
+            slowText={t("preview.loadingSlow")}
+            standardText={t("preview.loadingDuration")}
+            title={t("preview.bwLoadingTitle")}
+          />
+        ) : showColorLoadingScreen ? (
+          <InitialPreviewLoadingScreen
+            imageUrls={initialLoadingPhotoUrls}
+            isExiting={isColorLoadingExiting}
+            isComplete={!isColorGenerating}
+            loadingLine={colorLoadingLines[loadingLineIndex % 5]}
+            slowText={t("preview.loadingSlow")}
+            standardText={t("preview.loadingDuration")}
+            title={t("preview.colorLoadingTitle")}
+          />
+        ) : (
+          <section className="pt-5 pb-10 md:py-14">
+            <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+              <Title
+                highlightText={
+                  isColorPhase
+                    ? t("preview.colorPhaseTitle")
+                    : t("preview.bwPhaseTitle")
+                }
+                size="xl"
+                roundedUnderline
+                className="text-center text-2xl font-bold md:text-4xl"
+              >
+                {isColorPhase
+                  ? t("preview.colorPhaseTitle")
+                  : t("preview.bwPhaseTitle")}
+              </Title>
 
-            {error && (
-              <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-center font-body-bold text-red-700">
+            {error && !loadFailed && (
+              <div
+                className={cn(
+                  "mt-6 rounded-lg border p-4 text-center font-body text-dark-gray",
+                  isGenerationRateLimitErrorNode(error)
+                    ? "border-gray-200 bg-[#F9F7EE]"
+                    : "border-red-200 bg-red-50 font-body-bold text-red-700",
+                )}
+              >
                 {error}
               </div>
             )}
 
-            {isInitialLoading ? (
+            {loadFailed ? (
               <div className="mt-16 flex flex-col items-center justify-center gap-4 text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-primary-orange" />
-                <p className="font-body-bold text-xl text-dark-gray">
-                  {t("preview.loadingTitle")}
-                </p>
-                <p className="font-body text-dark-gray">
-                  {loadingLines[loadingLineIndex]}
-                </p>
-              </div>
-            ) : step === "bw" && session ? (
-              <div className="mt-8 space-y-8">
-                <p
-                  className={`font-body text-dark-gray ${
-                    locale === "en" ? "text-center" : "text-right"
-                  }`}
-                >
-                  {t("preview.subtitle")}
-                </p>
-                <p className="text-center font-body-bold text-dark-gray">
-                  {t("preview.changesLeft")}: {session.changeCreditsRemaining}/3
-                </p>
-
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {session.slots.map((slot) => {
-                    const active = slot.candidates.find(
-                      (candidate) => candidate.id === slot.activeCandidateId,
-                    );
-                    return (
-                      <div
-                        key={slot.index}
-                        className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
-                      >
-                        <div
-                          className="relative mb-4 overflow-hidden rounded-xl bg-[#ebe6dc]"
-                          style={{ aspectRatio: "72 / 84" }}
-                        >
-                          {slot.inFlight ? (
-                            <div className="flex h-full flex-col items-center justify-center gap-2">
-                              <Loader2 className="h-8 w-8 animate-spin text-primary-orange" />
-                              <p className="font-body text-sm text-dark-gray">
-                                {t("preview.slotBusy")}
-                              </p>
-                            </div>
-                          ) : active?.previewUrl ? (
-                            <img
-                              src={active.previewUrl}
-                              alt={`${t("preview.title")} ${slot.index + 1}`}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
-                              {active?.error?.message || t("preview.sessionError")}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            variant="outlined"
-                            disabled={!session.canRegenerate || slot.inFlight || isSubmitting}
-                            onClick={() => handleRegenerate(slot.index)}
-                          >
-                            {slot.inFlight ? t("preview.slotBusy") : t("preview.regenerate")}
-                          </Button>
-                          <Button
-                            variant="text"
-                            disabled={!session.canReplace || slot.inFlight || isSubmitting}
-                            onClick={() => handleReplaceClick(slot.index)}
-                          >
-                            {t("preview.replaceImage")}
-                          </Button>
-                        </div>
-
-                        {slot.candidates.length > 1 && (
-                          <div className="mt-4">
-                            <p className="mb-2 font-body-bold text-sm text-dark-gray">
-                              {t("preview.previousVersions")}
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {slot.candidates.map((candidate) => (
-                                <button
-                                  key={candidate.id}
-                                  type="button"
-                                  disabled={!candidate.previewUrl || Boolean(candidate.error)}
-                                  onClick={() =>
-                                    handleSelectCandidate(slot.index, candidate.id)
-                                  }
-                                  className={`overflow-hidden rounded-md border-2 ${
-                                    candidate.id === slot.activeCandidateId
-                                      ? "border-primary-orange"
-                                      : "border-transparent"
-                                  }`}
-                                >
-                                  {candidate.previewUrl ? (
-                                    <img
-                                      src={candidate.previewUrl}
-                                      alt=""
-                                      className="h-16 w-14 object-cover"
-                                    />
-                                  ) : (
-                                    <div className="flex h-16 w-14 items-center justify-center bg-gray-100 px-1 text-[10px]">
-                                      {candidate.error?.code === "safety" ? "!" : "?"}
-                                    </div>
-                                  )}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="w-full max-w-xl whitespace-pre-line rounded-lg border border-red-200 bg-red-50 p-4 font-body-bold text-red-700">
+                  {t("preview.loadFailed")}
                 </div>
-
-                <div className="flex flex-col items-center gap-3">
-                  <p className="font-body text-dark-gray">
-                    {t("preview.contactPrompt")}
-                  </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
                   <Button
-                    variant="outlined"
-                    onClick={() =>
-                      router.push(`/contact?previewSessionId=${sessionId}`)
-                    }
-                  >
-                    {t("preview.contactButton")}
-                  </Button>
-                  <Button
-                    variant="contained"
+                    variant="text"
                     color="primary"
-                    disabled={!session.canApproveBw || isSubmitting}
-                    onClick={handleApproveBw}
+                    onClick={handleContinueWithoutPreview}
+                    sx={{ color: "primary.dark" }}
                   >
-                    {t("preview.approveBw")}
+                    {t("preview.continueWithoutPreview")}
                   </Button>
                 </div>
               </div>
             ) : session ? (
-              <div className="mt-8 space-y-8">
-                <p className="text-center font-body text-lg text-dark-gray">
-                  {t("preview.colorSurprise")}
-                </p>
-                <div className="flex justify-center">
-                  <StyleSelector
-                    selectedStyle={selectedStyle}
-                    onStyleChange={setSelectedStyle}
-                  />
+              <div className="mt-2 md:mt-4">
+                {!isColorPhase && (
+                  <p className="mx-auto max-w-xl whitespace-pre-line text-center font-body text-sm leading-tight text-dark-gray md:text-base">
+                    {t("preview.bwPhaseDescription")}
+                  </p>
+                )}
+                <div className="mt-4 text-center md:mt-5">
+                  {session.changeCreditsRemaining > 0 ? (
+                    <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-[11px] font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
+                      {t("preview.changesRemainingBadge").replace(
+                        "{count}",
+                        String(session.changeCreditsRemaining),
+                      )}
+                    </span>
+                  ) : (
+                    <div className="space-y-1 font-body text-sm text-dark-gray">
+                      <p>{t("preview.changesExhaustedLine1")}</p>
+                      <p>{t("preview.changesExhaustedLine2")}</p>
+                      <p>{t("preview.changesExhaustedLine3")}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-center">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={isSubmitting}
-                    onClick={handleContinueToCart}
+
+                <div className="mx-auto mt-2 w-full max-w-5xl md:mt-3">
+                  {isColorPhase && (
+                  <div
+                    className="flex justify-center gap-8 border-b border-gray-200 sm:gap-10"
+                    role="tablist"
+                    aria-label={t("preview.colorPhaseTitle")}
                   >
-                    {isSubmitting
-                      ? t("preview.addingToCart")
-                      : t("preview.continueToCart")}
-                  </Button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={bookSide === "bw"}
+                      onClick={() => handleSelectBookSide("bw")}
+                      className={cn(
+                        "relative -mb-px cursor-pointer px-1 pb-3 pt-1 font-body-bold text-sm transition-colors lg:hover:text-accent-burgundy",
+                        bookSide === "bw"
+                          ? "border-b-[3px] border-accent-burgundy text-dark-gray"
+                          : "border-b-[3px] border-transparent text-dark-gray/70 hover:text-dark-gray",
+                      )}
+                    >
+                      {t("preview.tabBw")}
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={bookSide === "color"}
+                      onClick={() => handleSelectBookSide("color")}
+                      className={cn(
+                        "relative -mb-px cursor-pointer px-1 pb-3 pt-1 font-body-bold text-sm transition-colors lg:hover:text-accent-burgundy",
+                        bookSide === "color"
+                          ? "border-b-[3px] border-accent-burgundy text-dark-gray"
+                          : "border-b-[3px] border-transparent text-dark-gray/70 hover:text-dark-gray",
+                      )}
+                    >
+                      {t("preview.tabColor")}
+                    </button>
+                  </div>
+                  )}
+
+                  <div
+                    className={cn(
+                      "bg-warm-light px-6 py-6 opacity-100 transition-opacity duration-200 ease-linear motion-reduce:transition-none md:px-6",
+                      !isTabCardsVisible && "pointer-events-none opacity-0",
+                    )}
+                  >
+                    {isDisplayedColorSideLoading ? (
+                      <div className="flex min-h-[18rem] flex-col items-center justify-center gap-4 text-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-primary-orange" />
+                        <p className="font-body-bold text-lg text-dark-gray">
+                          {t("preview.colorLoadingTitle")}
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="mb-3 flex justify-end" dir="ltr">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBookLightboxIndex(0);
+                              setBookLightboxOpen(true);
+                            }}
+                            disabled={bookLightboxSlides.length === 0}
+                            className={cn(
+                              "inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#5b534d]/92 px-3.5 py-1.5 font-body text-sm text-white shadow-sm transition-colors hover:bg-[#443d38] disabled:cursor-not-allowed disabled:opacity-45",
+                            )}
+                          >
+                            <Expand className="h-4 w-4" strokeWidth={2.25} />
+                            <span>{t("preview.zoom")}</span>
+                          </button>
+                        </div>
+                        <div className="relative">
+                        <div className="overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar">
+                          <div className="flex w-max items-start gap-3 md:gap-3.5 lg:mx-auto lg:gap-3">
+                      <PreviewSortableSlots
+                        slots={session.slots}
+                        displayOrder={session.displayOrder}
+                        disabled={
+                          isSubmitting ||
+                          session.slots.some(
+                            (slot) => slot.inFlight || slot.colorInFlight,
+                          )
+                        }
+                        onReorder={handleDisplayOrderChange}
+                        renderSlot={(slot, { displayPosition: pageNum, dragActivator }) => {
+                        const active = slot.candidates.find(
+                          (candidate) => candidate.id === slot.activeCandidateId,
+                        );
+                        const isSlotBusy =
+                          slot.inFlight || busySlotIndexes.has(slot.index);
+                        const activeColorCandidate =
+                          getColorCandidateForStyleFromPublicSlot(
+                            slot,
+                            activeColorStyle,
+                          );
+                        const colorVersions = getColorVersionsForStyle(
+                          slot,
+                          activeColorStyle,
+                        );
+                        const isSlotPendingColorRegen =
+                          (session.pendingColorRegenSlotIndexes?.includes(
+                            slot.index,
+                          ) ??
+                            false) || slotsPendingColorRegen.has(slot.index);
+                        const isColorSlotBusy =
+                          slot.colorInFlight ||
+                          isSlotPendingColorRegen ||
+                          (displayedBookSide === "color" &&
+                            busySlotIndexes.has(slot.index));
+                        const isVisibleSideBusy =
+                          displayedBookSide === "bw"
+                            ? isSlotBusy
+                            : isColorSlotBusy;
+                        const showColorBwInterim =
+                          displayedBookSide === "color" &&
+                          isSlotPendingColorRegen &&
+                          !activeColorCandidate?.previewUrl &&
+                          Boolean(active?.previewUrl);
+                        const currentPreviewUrl =
+                          displayedBookSide === "bw"
+                            ? active?.previewUrl
+                            : showColorBwInterim
+                              ? active?.previewUrl
+                              : isSlotPendingColorRegen
+                                ? undefined
+                                : activeColorCandidate?.previewUrl;
+                        const previewUrlFailed = Boolean(
+                          currentPreviewUrl &&
+                            failedPreviewUrls.has(currentPreviewUrl),
+                        );
+                        const lightboxIndex = bookLightboxSlides.findIndex(
+                          (slide) => slide.pageNumber === pageNum,
+                        );
+                        const openSlotLightbox = () => {
+                          if (!currentPreviewUrl || lightboxIndex < 0) {
+                            return;
+                          }
+                          setBookLightboxIndex(lightboxIndex);
+                          setBookLightboxOpen(true);
+                        };
+                        const compareOutputs =
+                          displayedBookSide === "bw"
+                            ? slot.candidates.flatMap(
+                                (candidate): CompareOutputImage[] =>
+                                  candidate.previewUrl
+                                    ? [
+                                        {
+                                          id: candidate.id,
+                                          url: candidate.previewUrl,
+                                          alt: `${t("preview.generatedImage")} ${pageNum}`,
+                                        },
+                                      ]
+                                    : [],
+                              )
+                            : colorVersions.flatMap(
+                                (candidate): CompareOutputImage[] =>
+                                  candidate.previewUrl
+                                    ? [
+                                        {
+                                          id: candidate.id,
+                                          url: candidate.previewUrl,
+                                          alt: `${t("preview.generatedImage")} ${pageNum}`,
+                                        },
+                                      ]
+                                    : [],
+                              );
+                        const activeCompareOutput =
+                          displayedBookSide === "bw"
+                            ? (compareOutputs.find(
+                                (output) => output.id === slot.activeCandidateId,
+                              ) ?? compareOutputs[0])
+                            : (compareOutputs.find(
+                                (output) => output.id === activeColorCandidate?.id,
+                              ) ?? compareOutputs[0]);
+                        const openCompareModal = () => {
+                          if (!activeCompareOutput) {
+                            return;
+                          }
+
+                          setCompareImageModal({
+                            originalUrl: slot.originalUrl,
+                            originalAlt: `${t("preview.originalPhoto")} ${pageNum}`,
+                            outputs: compareOutputs,
+                            activeOutputId: activeCompareOutput.id,
+                          });
+                        };
+                        const cropCandidateId =
+                          displayedBookSide === "bw"
+                            ? active?.id
+                            : activeColorCandidate?.id;
+                        const canCropImage =
+                          Boolean(currentPreviewUrl && cropCandidateId) &&
+                          !isVisibleSideBusy &&
+                          !isSubmitting &&
+                          !cropSaving;
+                        const openCropModal = () => {
+                          if (!cropCandidateId || !currentPreviewUrl) {
+                            return;
+                          }
+                          openCropForCandidate(
+                            cropCandidateId,
+                            displayedBookSide,
+                            currentPreviewUrl,
+                          );
+                        };
+                        return (
+                            <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                              <div className="relative w-full shrink-0">
+                              <PreviewSlotLightboxActivator
+                                dragActivator={dragActivator}
+                                disabled={!currentPreviewUrl}
+                                onOpenLightbox={openSlotLightbox}
+                                className={cn(
+                                  "relative block w-full overflow-hidden rounded-none bg-[#ebe6dc]",
+                                  currentPreviewUrl
+                                    ? "cursor-pointer transition-opacity lg:hover:opacity-90"
+                                    : "cursor-default",
+                                )}
+                                style={{ aspectRatio: "72 / 84" }}
+                              >
+                                {displayedBookSide === "bw" ? (
+                                  isSlotBusy ? (
+                                    <div className="flex h-full flex-col items-center justify-center gap-2">
+                                      <Loader2 className="h-8 w-8 animate-spin text-primary-orange" />
+                                      <p className="font-body text-sm text-dark-gray">
+                                        {t("preview.slotBusy")}
+                                      </p>
+                                    </div>
+                                  ) : active?.previewUrl ? (
+                                    <PreviewSlotFadeImage
+                                      key={`${slot.index}-${slot.activeCandidateId}`}
+                                      src={active.previewUrl}
+                                      alt={`${t("preview.title")} ${pageNum}`}
+                                    />
+                                  ) : (
+                                    <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
+                                      {active?.error?.message || t("preview.sessionError")}
+                                    </div>
+                                  )
+                                ) : isColorSlotBusy ? (
+                                  <div className="flex h-full flex-col items-center justify-center gap-2">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary-orange" />
+                                    <p className="font-body text-sm text-dark-gray">
+                                      {t("preview.slotBusy")}
+                                    </p>
+                                  </div>
+                                ) : showColorBwInterim && active?.previewUrl ? (
+                                  <PreviewSlotFadeImage
+                                    key={`${slot.index}-bw-interim-${slot.activeCandidateId}`}
+                                    src={active.previewUrl}
+                                    alt={`${t("preview.tabBw")} ${pageNum}`}
+                                  />
+                                ) : activeColorCandidate?.previewUrl &&
+                                  !previewUrlFailed &&
+                                  !isSlotPendingColorRegen ? (
+                                  <PreviewSlotFadeImage
+                                    key={`${slot.index}-color-${activeColorCandidate.id}`}
+                                    src={activeColorCandidate.previewUrl}
+                                    alt={`${t("preview.tabColor")} ${pageNum}`}
+                                    onLoadError={(url) => {
+                                      setFailedPreviewUrls((current) => {
+                                        const next = new Set(current);
+                                        next.add(url);
+                                        return next;
+                                      });
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
+                                    {activeColorCandidate?.error?.message ||
+                                      (previewUrlFailed
+                                        ? t("preview.imageLoadFailed")
+                                        : t("preview.sessionError"))}
+                                  </div>
+                                )}
+                              </PreviewSlotLightboxActivator>
+                              {currentPreviewUrl && !previewUrlFailed ? (
+                                <div
+                                  className="pointer-events-none absolute right-1 top-1 z-30"
+                                  data-preview-actions-menu
+                                >
+                                  <div className="relative pointer-events-auto" dir="ltr">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setOpenSlotActionsIndex((current) =>
+                                        current === slot.index ? null : slot.index,
+                                      )
+                                    }
+                                    className={cn(
+                                      "group flex h-8 w-8 cursor-pointer items-center justify-center rounded-full",
+                                      showActionsPulse && "preview-more-pulse",
+                                    )}
+                                    aria-label={t("preview.imageActions")}
+                                    aria-expanded={openSlotActionsIndex === slot.index}
+                                  >
+                                    <span className="relative flex h-6 w-8 items-center justify-center overflow-hidden rounded-full bg-white/60 text-[#693430]/65 shadow-[0_1px_4px_rgba(0,0,0,0.08)] backdrop-blur-[4px]">
+                                      <span className="absolute inset-0 bg-[#693430] opacity-0 transition-opacity duration-150 ease-in group-hover:opacity-10 group-active:opacity-10" />
+                                      <MoreHorizontal
+                                        className="relative h-4 w-4"
+                                        strokeWidth={2.4}
+                                      />
+                                    </span>
+                                  </button>
+                                  {openSlotActionsIndex === slot.index && (
+                                    <>
+                                      <div
+                                        className="fixed inset-0 z-50 flex items-end bg-black/20 p-3 sm:hidden"
+                                        onClick={() => setOpenSlotActionsIndex(null)}
+                                      >
+                                        <div
+                                          className="w-full rounded-2xl border border-gray-200 bg-[#F9F7EE] p-3 shadow-xl"
+                                          onClick={(event) => event.stopPropagation()}
+                                        >
+                                          <div className="flex flex-col gap-1">
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                (displayedBookSide === "bw" ? !session.canRegenerate : !session.canRegenerateColor) ||
+                                                isVisibleSideBusy ||
+                                                isSubmitting
+                                              }
+                                              onClick={() => {
+                                                setOpenSlotActionsIndex(null);
+                                                if (displayedBookSide === "bw") {
+                                                  void handleRegenerate(slot.index);
+                                                  return;
+                                                }
+                                                void handleRegenerateColor(slot.index);
+                                              }}
+                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.regenerate")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                !session.canReplace ||
+                                                isSlotBusy ||
+                                                isSubmitting
+                                              }
+                                              onClick={() => {
+                                                setOpenSlotActionsIndex(null);
+                                                handleReplaceClick(slot.index);
+                                              }}
+                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.replaceImage")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={!activeCompareOutput}
+                                              onClick={() => {
+                                                setOpenSlotActionsIndex(null);
+                                                openCompareModal();
+                                              }}
+                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.originalImage")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={!canCropImage}
+                                              onClick={() => {
+                                                openCropModal();
+                                              }}
+                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.cropImage")}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="absolute right-0 top-full z-40 mt-2 hidden w-44 rounded-2xl border border-gray-200 bg-[#F9F7EE] p-2 shadow-xl sm:block">
+                                        <button
+                                          type="button"
+                                          disabled={
+                                            (displayedBookSide === "bw" ? !session.canRegenerate : !session.canRegenerateColor) ||
+                                            isVisibleSideBusy ||
+                                            isSubmitting
+                                          }
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            if (displayedBookSide === "bw") {
+                                              void handleRegenerate(slot.index);
+                                              return;
+                                            }
+                                            void handleRegenerateColor(slot.index);
+                                          }}
+                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.regenerate")}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={
+                                            !session.canReplace ||
+                                            isSlotBusy ||
+                                            isSubmitting
+                                          }
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            handleReplaceClick(slot.index);
+                                          }}
+                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.replaceImage")}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={!activeCompareOutput}
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            openCompareModal();
+                                          }}
+                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.originalImage")}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={!canCropImage}
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            openCropModal();
+                                          }}
+                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.cropImage")}
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                  </div>
+                                </div>
+                              ) : null}
+                              </div>
+
+                          </div>
+                        );
+                      }}
+                      />
+                      {session ? (
+                        <PreviewSlotVersionsStrip
+                          entries={previewVersionEntries}
+                          displayedBookSide={displayedBookSide}
+                          isSlotColorBusy={isSlotColorBusyForVersions}
+                          isSubmitting={isSubmitting}
+                          onSelectCandidate={(slotIndex, candidateId) => {
+                            void handleSelectCandidate(slotIndex, candidateId);
+                          }}
+                          title={t("preview.previousVersions")}
+                        />
+                      ) : null}
+                          </div>
+                        </div>
+                      </div>
+                        {displayedBookSide === "color" && session ? (
+                          <div className="flex justify-center">
+                            <PreviewColorStyleStrip
+                              session={session}
+                              frozenThumbnails={session.frozenStyleStripThumbnails}
+                              activeStyle={activeColorStyle}
+                              loadingStyles={styleStripLoadingSet}
+                              onSelectStyle={(style) => {
+                                void handleSelectColorStyle(style);
+                              }}
+                              getStyleLabel={getColorStyleLabel}
+                              title={t("preview.colorStyleStrip.title")}
+                              disabled={isSubmitting}
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+
+                  </div>
                 </div>
+
+                {isColorPhase ? (
+                  <div className="mt-8 flex flex-col items-center gap-4">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled={!session.canAddToCart || isSubmitting}
+                      onClick={handleContinueToCart}
+                    >
+                      {isSubmitting
+                        ? t("preview.addingToCart")
+                        : t("preview.addToCart")}
+                    </Button>
+                    <p className="text-center font-body text-sm text-dark-gray">
+                      {t("preview.contactPrompt")}{" "}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(`/contact?previewSessionId=${sessionId}`)
+                        }
+                        className="cursor-pointer border-0 bg-transparent p-0 font-body-bold text-accent-burgundy underline underline-offset-2 transition-opacity hover:opacity-75"
+                      >
+                        {t("preview.contactButton")}
+                      </button>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-8 flex flex-col items-center gap-3">
+                    <p className="text-center font-body text-sm text-dark-gray">
+                      {t("preview.bwApproveAbove")}
+                    </p>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled={!session.canApproveBw || isSubmitting}
+                      onClick={handleApproveBw}
+                    >
+                      {t("preview.approveBwButton")}
+                    </Button>
+                    <p className="text-center font-body text-sm text-dark-gray/70">
+                      {t("preview.bwApproveBelow")}
+                    </p>
+                  </div>
+                )}
               </div>
             ) : null}
 
@@ -480,8 +2171,166 @@ export default function PreviewPage() {
             />
           </div>
         </section>
+        )}
       </main>
-      <Footer />
+      {cropTarget && (
+        <PreviewImageCropModal
+          imageUrl={cropTarget.imageUrl}
+          saving={cropSaving}
+          error={cropError}
+          onSave={(croppedUrl) => {
+            void handleCropSave(croppedUrl);
+          }}
+          onCancel={closeCropModal}
+        />
+      )}
+      {replaceCropImageUrl && (
+        <MobileImageEditor
+          key={`replace-crop-${replaceCropImageUrl}-${replaceSmartCropLoading ? "loading" : replaceSmartCropArea ? `${replaceSmartCropArea.x}-${replaceSmartCropArea.y}-${replaceSmartCropArea.width}-${replaceSmartCropArea.height}` : "fallback"}`}
+          imageUrl={replaceCropImageUrl}
+          isSmartCropLoading={replaceSmartCropLoading}
+          initialSmartCropPixels={replaceSmartCropArea}
+          referenceFaceBoxes={replaceEditorFaceBoxes}
+          onSave={(croppedUrl) => {
+            void handleReplaceCropSave(croppedUrl);
+          }}
+          onCancel={handleReplaceCropCancel}
+        />
+      )}
+      {compareImageModal && activeCompareModalOutput && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("preview.originalImage")}
+          onClick={() => setCompareImageModal(null)}
+        >
+          <div
+            className="relative max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-[#F9F7EE] p-4 shadow-2xl sm:p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setCompareImageModal(null)}
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
+              aria-label={t("preview.closeLightbox")}
+            >
+              <X className="h-5 w-5" strokeWidth={2.25} />
+            </button>
+
+            <div className="grid gap-4 pt-9 sm:grid-cols-2 sm:pt-7">
+              <div>
+                <p className="mb-2 text-center font-body-bold text-sm text-dark-gray">
+                  {t("preview.originalPhoto")}
+                </p>
+                <div
+                  className="relative w-full overflow-hidden rounded-xl bg-[#ebe6dc]"
+                  style={{ aspectRatio: compareModalAspectRatio }}
+                >
+                  <img
+                    src={compareImageModal.originalUrl}
+                    alt={compareImageModal.originalAlt}
+                    className={cn(
+                      SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                      "absolute inset-0 h-full w-full object-cover",
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-center font-body-bold text-sm text-dark-gray">
+                  {t("preview.generatedImage")}
+                </p>
+                <div
+                  className="relative w-full overflow-hidden rounded-xl bg-[#ebe6dc]"
+                  style={{ aspectRatio: compareModalAspectRatio }}
+                >
+                  <img
+                    src={activeCompareModalOutput.url}
+                    alt={activeCompareModalOutput.alt}
+                    onLoad={(event) => {
+                      const { naturalWidth, naturalHeight } =
+                        event.currentTarget;
+                      if (!naturalWidth || !naturalHeight) {
+                        return;
+                      }
+
+                      const aspectRatio = naturalWidth / naturalHeight;
+                      setCompareImageModal((current) =>
+                        current
+                          ? {
+                              ...current,
+                              outputs: current.outputs.map((output) =>
+                                output.id === activeCompareModalOutput.id
+                                  ? { ...output, aspectRatio }
+                                  : output,
+                              ),
+                            }
+                          : current,
+                      );
+                    }}
+                    className={cn(
+                      SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                      "absolute inset-0 h-full w-full object-contain",
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {compareImageModal.outputs.length > 1 && (
+              <div className="mt-4 overflow-x-auto hide-scrollbar">
+                <div className="flex justify-center gap-2 pb-1">
+                  {compareImageModal.outputs.map((output) => {
+                    const isActive =
+                      output.id === compareImageModal.activeOutputId;
+
+                    return (
+                      <button
+                        key={output.id}
+                        type="button"
+                        onClick={() =>
+                          setCompareImageModal((current) =>
+                            current
+                              ? { ...current, activeOutputId: output.id }
+                              : current,
+                          )
+                        }
+                        className={cn(
+                          "h-16 w-14 shrink-0 cursor-pointer overflow-hidden rounded-md border-2 bg-white transition-opacity hover:opacity-90",
+                          isActive
+                            ? "border-primary-orange"
+                            : "border-transparent",
+                        )}
+                      >
+                        <img
+                          src={output.url}
+                          alt=""
+                          className={cn(
+                            SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                            "h-full w-full object-cover",
+                          )}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <PreviewBookLightbox
+        open={bookLightboxOpen}
+        slides={bookLightboxSlides}
+        initialIndex={bookLightboxIndex}
+        onClose={() => setBookLightboxOpen(false)}
+        closeLabel={t("preview.closeLightbox")}
+        previousLabel={t("preview.lightboxPrevious")}
+        nextLabel={t("preview.lightboxNext")}
+      />
+      {!showInitialLoadingScreen && !showColorLoadingScreen && <Footer />}
     </div>
   );
 }

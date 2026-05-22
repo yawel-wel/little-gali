@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
+import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import { cn } from "@/lib/utils";
 
 export function CartDrawer() {
   const { cart, isLoading, removeFromCart } = useCart();
@@ -184,7 +186,10 @@ export function CartDrawer() {
                                     alt={`Image ${
                                       imgIndex + 1
                                     } of book ${displayIndex}`}
-                                    className="w-full h-full object-cover"
+                                    className={cn(
+                                      SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                                      "w-full h-full object-cover",
+                                    )}
                                   />
                                 </div>
                               </div>

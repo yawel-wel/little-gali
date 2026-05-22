@@ -14,310 +14,28 @@ import {
   useCallback,
   Suspense,
 } from "react";
-import Cropper from "react-easy-crop";
+import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
-import { compressImage } from "@/lib/utils";
+import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
-import { anyFaceClippedByCrop } from "@/lib/smartCropGeometry";
-import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import { getOrCreateLgSessionId, persistLgSessionId } from "@/lib/session-id";
+import {
+  getGenerationRateLimitMessage,
+  isGenerationRateLimited,
+} from "@/lib/preview-session/handle-generation-response";
 import Button from "@mui/material/Button";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
-// ─── Mobile Image Editor ──────────────────────────────────────────────────────
-// Uses react-easy-crop for pan/zoom, then crops the image via canvas on save.
+const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
 
-// Crop the image to the pixel area described by `pixelCrop`
-async function getCroppedBlob(
-  imageSrc: string,
-  pixelCrop: Area,
-): Promise<Blob | null> {
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const i = new Image();
-    i.crossOrigin = "anonymous";
-    i.onload = () => resolve(i);
-    i.onerror = reject;
-    i.src = imageSrc;
-  });
+// ─── Upload Image Item ────────────────────────────────────────────────────────
 
-  const canvas = document.createElement("canvas");
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-
-  ctx.drawImage(
-    img,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height,
-  );
-
-  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
-}
-
-type CropState = { crop: { x: number; y: number }; zoom: number };
-
-function MobileImageEditor({
-  imageUrl,
-  initialCrop,
-  initialZoom,
-  isSmartCropLoading,
-  initialSmartCropPixels,
-  referenceFaceBoxes,
-  onSave,
-  onCancel,
-  onChangeImage,
-  currentIndex,
-  totalImages,
-}: {
-  imageUrl: string;
-  initialCrop?: { x: number; y: number };
-  initialZoom?: number;
-  /** When true, only the crop frame + loader are shown (no Cropper yet) to avoid zoom/pan jumps. */
-  isSmartCropLoading?: boolean;
-  /** Passed to react-easy-crop on first paint after loading; omitted when undefined. */
-  initialSmartCropPixels?: Area;
-  /** Face boxes in original image pixels from /api/suggest-crop (may be empty). */
-  referenceFaceBoxes?: Area[];
-  onSave: (croppedUrl: string, cropState: CropState) => void;
-  onCancel: () => void;
-  onChangeImage?: () => void;
-  currentIndex?: number;
-  totalImages?: number;
-}) {
-  const { t, locale } = useLanguage();
-  const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
-  const [zoom, setZoom] = useState(initialZoom ?? 1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [isInteracting, setIsInteracting] = useState(false);
-  /** After a face-cutoff warning, second Done tap saves. Cleared when user gestures. */
-  const [awaitingSecondDoneAfterFaceWarning, setAwaitingSecondDoneAfterFaceWarning] =
-    useState(false);
-  const [faceClipWarning, setFaceClipWarning] = useState(false);
-
-  // Portrait ratio matching the thumbnail frames (72×84 ≈ 6:7)
-  const aspect = 72 / 84;
-
-  const onCropComplete = useCallback((_: Area, pixels: Area) => {
-    setCroppedAreaPixels(pixels);
-  }, []);
-
-  /** react-easy-crop calls this (not always onCropComplete) when crop x/y updates, e.g. after initialCroppedAreaPixels. */
-  const onCropAreaChange = useCallback((_: Area, pixels: Area) => {
-    setCroppedAreaPixels(pixels);
-  }, []);
-
-  const clearFaceClipWarning = useCallback(() => {
-    setFaceClipWarning(false);
-    setAwaitingSecondDoneAfterFaceWarning(false);
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    if (!croppedAreaPixels) return;
-
-    const faces = referenceFaceBoxes ?? [];
-    const clipped =
-      faces.length > 0 &&
-      anyFaceClippedByCrop(faces, croppedAreaPixels);
-
-    if (clipped && !awaitingSecondDoneAfterFaceWarning) {
-      setFaceClipWarning(true);
-      setAwaitingSecondDoneAfterFaceWarning(true);
-      return;
-    }
-
-    setFaceClipWarning(false);
-    setAwaitingSecondDoneAfterFaceWarning(false);
-    const blob = await getCroppedBlob(imageUrl, croppedAreaPixels);
-    if (blob) onSave(URL.createObjectURL(blob), { crop, zoom });
-  }, [
-    imageUrl,
-    croppedAreaPixels,
-    onSave,
-    crop,
-    zoom,
-    referenceFaceBoxes,
-    awaitingSecondDoneAfterFaceWarning,
-  ]);
-
-  useEffect(() => {
-    clearFaceClipWarning();
-    setCroppedAreaPixels(null);
-  }, [imageUrl, clearFaceClipWarning]);
-
-  // Prevent body scroll while editor is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-  const cropFrame = (
-    <div
-      className="relative w-[85vw] md:w-[380px] flex-shrink-0 overflow-hidden rounded-lg bg-[#ebe6dc]"
-      style={{ aspectRatio: "72 / 84" }}
-    >
-      {isSmartCropLoading ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
-          <Loader2
-            className="w-10 h-10 animate-spin text-primary-orange"
-            aria-hidden
-          />
-          <p
-            className="font-body text-center text-sm sm:text-base text-dark-gray"
-            style={{ color: "#374151" }}
-          >
-            {t("upload.analyzingPhoto")}
-          </p>
-        </div>
-      ) : (
-        <Cropper
-          key={imageUrl}
-          image={imageUrl}
-          crop={crop}
-          zoom={zoom}
-          aspect={aspect}
-          onCropChange={setCrop}
-          onZoomChange={setZoom}
-          onCropComplete={onCropComplete}
-          onCropAreaChange={onCropAreaChange}
-          onInteractionStart={() => {
-            setIsInteracting(true);
-            clearFaceClipWarning();
-          }}
-          onInteractionEnd={() => setIsInteracting(false)}
-          {...(initialSmartCropPixels
-            ? { initialCroppedAreaPixels: initialSmartCropPixels }
-            : {})}
-          style={{
-            cropAreaStyle: {
-              border: "3px solid rgba(255,255,255,0.85)",
-              // Idle: opaque mask (#ebe6dc matches frame) hides cropped-out regions like Mixtiles default.
-              // While dragging/pinching: lighter veil so dimmed overflow remains visible.
-              color: isInteracting
-                ? "rgba(249, 247, 238, 0.82)"
-                : "#ebe6dc",
-              transition: "color 0.2s ease",
-            },
-          }}
-        />
-      )}
-    </div>
-  );
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center px-4 pt-14 pb-8"
-      style={{ backgroundColor: "#F9F7EE" }}
-    >
-      {/* X button — top-right corner */}
-      <button
-        onClick={onCancel}
-        className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
-        aria-label={locale === "he" ? "ביטול חיתוך" : "Cancel cropping"}
-      >
-        <X className="w-6 h-6" />
-      </button>
-
-      <div className="flex flex-col items-center w-full max-w-lg gap-8">
-        <div className="flex flex-col items-center gap-4 w-full">
-          {currentIndex !== undefined && totalImages !== undefined && (
-            <span className="font-body-bold text-dark-gray text-lg">
-              {currentIndex + 1}/{totalImages}
-            </span>
-          )}
-          {cropFrame}
-        </div>
-
-        {/* Text + button — faded while smart-crop loads (space reserved); fades on desktop while dragging/pinching */}
-        <div
-          className={`flex flex-col items-center gap-4 transition-opacity duration-200 ${
-            isSmartCropLoading
-              ? "opacity-0 pointer-events-none select-none"
-              : ""
-          } ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
-          aria-hidden={isSmartCropLoading || undefined}
-        >
-          <div className="flex flex-col items-center gap-1.5 px-6 max-w-md">
-            <p
-              className="font-body text-center text-base"
-              style={{ color: "#374151" }}
-            >
-              {t("upload.cropInstruction")}
-            </p>
-            <p className="font-body text-center text-xs sm:text-[0.8125rem] text-gray-500 leading-snug">
-              {t("upload.cropInstructionTip")}
-            </p>
-            {faceClipWarning && (
-              <div className="flex flex-col gap-1.5 max-w-md">
-                <p
-                  className="font-body text-center text-sm rounded-lg px-3 py-2 bg-amber-50 text-amber-900 border border-amber-200/80"
-                  role="status"
-                >
-                  {t("upload.cropFaceClipWarning")}
-                </p>
-                {awaitingSecondDoneAfterFaceWarning && (
-                  <p className="font-body text-center text-xs text-gray-600">
-                    {t("upload.cropFaceClipTapDoneAgain")}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col gap-1 items-center">
-            <button
-              onClick={handleSave}
-              className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
-            >
-              {t("upload.cropDone")}
-            </button>
-            {onChangeImage && (
-              <button
-                type="button"
-                onClick={onChangeImage}
-                className="font-body-bold text-dark-gray text-base bg-transparent border-0 cursor-pointer py-1 px-1 hover:opacity-70 transition-opacity"
-              >
-                {t("upload.changeImage")}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Sortable Image Item ──────────────────────────────────────────────────────
-
-interface SortableImageItemProps {
-  id: string;
+interface UploadImageItemProps {
   url: string;
   index: number;
   locale: string;
@@ -326,28 +44,14 @@ interface SortableImageItemProps {
   onTap: (index: number) => void;
 }
 
-function SortableImageItem({
-  id,
+function UploadImageItem({
   url,
   index,
   locale,
   onRemove,
   isSubmitting,
   onTap,
-}: SortableImageItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id,
-    animateLayoutChanges: () => false, // Disable layout animation on drop
-  });
-
-  // Preload style example images so they're ready when the style selector appears
+}: UploadImageItemProps) {
   useEffect(() => {
     [
       "/style-example-cartoon.png",
@@ -360,52 +64,11 @@ function SortableImageItem({
     });
   }, []);
 
-  // Track whether a drag actually started so we can ignore click-after-drag
-  const wasDragging = useRef(false);
-
-  useEffect(() => {
-    if (isDragging) {
-      wasDragging.current = true;
-    } else if (wasDragging.current) {
-      // Give the browser time to fire any synthetic click before resetting
-      const t = setTimeout(() => {
-        wasDragging.current = false;
-      }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [isDragging]);
-
-  const dragTransform = CSS.Transform.toString(transform);
-  const isDraggingTransform =
-    dragTransform &&
-    dragTransform !== "none" &&
-    dragTransform !== "translate3d(0, 0, 0)";
-
-  const style = {
-    transform: dragTransform,
-    transition: "none", // Always disable transitions to prevent flicker on all items
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   return (
     <div
-      ref={setNodeRef}
-      style={{
-        ...style,
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-        cursor: isDragging ? "grabbing" : "grab",
-        touchAction: "none", // Prevent default touch behaviors on mobile
-        WebkitTouchCallout: "none", // Prevent iOS callout menu
-        WebkitUserSelect: "none", // Prevent text selection
-        userSelect: "none",
-        willChange: isDragging ? "transform" : "auto", // Optimize for dragging
-      }}
-      className="relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0"
-      {...attributes}
-      {...listeners}
-      onClick={() => {
-        if (!wasDragging.current) onTap(index);
-      }}
+      style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
+      className="relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0 cursor-pointer"
+      onClick={() => onTap(index)}
     >
       <img
         src={url}
@@ -414,7 +77,10 @@ function SortableImageItem({
             ? `Selected photo ${index + 1}`
             : `תמונה נבחרת ${index + 1}`
         }
-        className="w-full h-full object-cover border-2 border-primary-orange rounded-lg pointer-events-none"
+        className={cn(
+          SENTRY_REPLAY_BLOCK_USER_IMAGE,
+          "w-full h-full object-cover border-2 border-primary-orange rounded-lg pointer-events-none",
+        )}
         loading="eager"
         decoding="async"
         draggable={false}
@@ -445,6 +111,7 @@ function SortableImageItem({
 
 function UploadPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { images: contextImages, setImages, clearImages } = useUploadImages();
   const { addToCart, removeFromCart, cart } = useCart();
 
@@ -454,9 +121,11 @@ function UploadPageContent() {
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreviewLoader, setShowPreviewLoader] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
+    errorCode?: "preview_rate_limit" | "generation_rate_limit";
   }>({ type: null, message: "" });
   const [uploadingImages, setUploadingImages] = useState<Set<number>>(
     new Set(),
@@ -539,11 +208,13 @@ function UploadPageContent() {
         if (ac.signal.aborted) return;
         setEditorFaceBoxes(Array.isArray(data.faceBoxes) ? data.faceBoxes : []);
         if (isInCroppingFlow) {
-          if (data.fallback || !data.croppedAreaPixels) {
-            setSmartCropArea(undefined);
-          } else {
-            setSmartCropArea(data.croppedAreaPixels);
-          }
+          const pixels = data.croppedAreaPixels as Area | undefined;
+          const hasValidSuggestion =
+            !data.fallback &&
+            pixels &&
+            pixels.width > 0 &&
+            pixels.height > 0;
+          setSmartCropArea(hasValidSuggestion ? pixels : undefined);
         }
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
@@ -552,7 +223,7 @@ function UploadPageContent() {
           if (isInCroppingFlow) setSmartCropArea(undefined);
         }
       } finally {
-        if (!ac.signal.aborted && isInCroppingFlow) {
+        if (!ac.signal.aborted) {
           setSmartCropLoading(false);
         }
       }
@@ -666,33 +337,37 @@ function UploadPageContent() {
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = event.target.files;
-    if (files) {
-      // Filter only image files and limit to 5
-      const imageFiles = Array.from(files).filter((file) =>
-        file.type.startsWith("image/"),
+    if (!files) return;
+
+    const imageFiles = Array.from(files).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    const currentCount = images.length;
+    const availableSlots = 5 - currentCount;
+    if (availableSlots <= 0) return;
+
+    const filesToProcess = imageFiles.slice(0, availableSlots);
+    setSmartCropLoading(true);
+    setSmartCropArea(undefined);
+    setIsInCroppingFlow(true);
+    setEditingImageIndex(-1);
+
+    try {
+      const preparedBlobs = await Promise.all(
+        filesToProcess.map((file) => prepareImageForCrop(file)),
       );
-
-      // Calculate how many more images we can add
-      const currentCount = images.length;
-      const availableSlots = 5 - currentCount;
-      
-      if (availableSlots <= 0) {
-        return; // Already have 5 images
-      }
-
-      // Take only as many as we have slots for
-      const filesToProcess = imageFiles.slice(0, availableSlots);
-
-      // Create blob URLs for the new images
-      const blobUrls = filesToProcess.map((file) => URL.createObjectURL(file));
-
-      // Store these URLs as pending for cropping
+      const blobUrls = preparedBlobs.map((blob) => URL.createObjectURL(blob));
       setPendingCropImages(blobUrls);
       setCurrentCropIndex(0);
-      setIsInCroppingFlow(true);
-
-      // Auto-open the cropping modal for the first image
-      setEditingImageIndex(-1); // Use -1 to indicate we're in the sequential flow
+    } catch (error) {
+      console.error("Failed to prepare images for cropping:", error);
+      setSmartCropLoading(false);
+      setIsInCroppingFlow(false);
+      setEditingImageIndex(null);
+      setSubmitStatus({
+        type: "error",
+        message: t("upload.serverError"),
+      });
     }
   };
 
@@ -726,38 +401,6 @@ function UploadPageContent() {
     cloudinaryUrls.current = shiftMap(cloudinaryUrls.current);
     originalUrls.current = shiftMap(originalUrls.current);
     cropStates.current = shiftMap(cropStates.current);
-  };
-
-  const handleStartOver = () => {
-    // Revoke display blob URLs
-    images.forEach((url) => {
-      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
-    });
-    // Revoke original blob URLs that differ from display URLs
-    originalUrls.current.forEach((origUrl, i) => {
-      if (origUrl.startsWith("blob:") && origUrl !== images[i]) {
-        URL.revokeObjectURL(origUrl);
-      }
-    });
-    // Revoke pending crop images
-    pendingCropImages.forEach((url) => {
-      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
-    });
-    
-    clearImages();
-    setUploadingImages(new Set());
-    setSelectedStyle("pencil");
-    cloudinaryUrls.current.clear();
-    originalUrls.current.clear();
-    cropStates.current.clear();
-    setPendingCropImages([]);
-    setCurrentCropIndex(0);
-    setIsInCroppingFlow(false);
-    setEditingImageIndex(null);
-    
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   // Open the mobile editor for a specific image
@@ -849,109 +492,47 @@ function UploadPageContent() {
 
   // Handle file selection for replacing an image
   const handleReplaceImageChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
-      if (files && files.length > 0 && isInCroppingFlow) {
-        const file = files[0];
-        if (file.type.startsWith("image/")) {
-          // Revoke the old blob URL
-          const oldUrl = pendingCropImages[currentCropIndex];
-          if (oldUrl && oldUrl.startsWith("blob:")) {
-            URL.revokeObjectURL(oldUrl);
-          }
+      if (!files || files.length === 0 || !isInCroppingFlow) return;
 
-          // Create new blob URL
-          const newBlobUrl = URL.createObjectURL(file);
+      const file = files[0];
+      if (!file.type.startsWith("image/")) return;
 
-          // Replace the image in the pending array
-          const newPendingImages = [...pendingCropImages];
-          newPendingImages[currentCropIndex] = newBlobUrl;
-          setPendingCropImages(newPendingImages);
+      const oldUrl = pendingCropImages[currentCropIndex];
+      if (oldUrl && oldUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(oldUrl);
+      }
 
-          // Clear the file input so the same file can be selected again if needed
-          if (replaceImageInputRef.current) {
-            replaceImageInputRef.current.value = "";
-          }
+      setSmartCropLoading(true);
+      setSmartCropArea(undefined);
+
+      try {
+        const prepared = await prepareImageForCrop(file);
+        const newBlobUrl = URL.createObjectURL(prepared);
+        const newPendingImages = [...pendingCropImages];
+        newPendingImages[currentCropIndex] = newBlobUrl;
+        setPendingCropImages(newPendingImages);
+      } catch (error) {
+        console.error("Failed to prepare replacement image:", error);
+        setSmartCropLoading(false);
+        setSubmitStatus({
+          type: "error",
+          message: t("upload.serverError"),
+        });
+      } finally {
+        if (replaceImageInputRef.current) {
+          replaceImageInputRef.current.value = "";
         }
       }
     },
-    [isInCroppingFlow, currentCropIndex, pendingCropImages]
+    [isInCroppingFlow, currentCropIndex, pendingCropImages, t],
   );
-
-  // Drag and drop sensors
-  // Use PointerSensor for mouse (with distance) and TouchSensor for touch (with delay)
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // Require 8px of movement before drag starts (for mouse)
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 50, // 50ms delay on touch before drag starts (very short for responsiveness)
-        tolerance: 15, // Allow 15px of movement during delay
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  // Handle drag end to reorder images
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = images.findIndex((_, i) => i.toString() === active.id);
-      const newIndex = images.findIndex((_, i) => i.toString() === over.id);
-
-      // Reorder images array
-      const newImages = arrayMove(images, oldIndex, newIndex);
-      setImages(newImages);
-
-      // Reorder Cloudinary URLs map
-      const newCloudinaryUrls = new Map<number, string>();
-      const oldCloudinaryUrls = new Map(cloudinaryUrls.current);
-
-      // Create a temporary array to track the reordering
-      const tempUrls: (string | undefined)[] = Array(images.length);
-      oldCloudinaryUrls.forEach((url, i) => {
-        tempUrls[i] = url;
-      });
-
-      // Reorder the temp array
-      const reorderedTemp = arrayMove(tempUrls, oldIndex, newIndex);
-
-      // Rebuild the map with new indices
-      reorderedTemp.forEach((url, i) => {
-        if (url) {
-          newCloudinaryUrls.set(i, url);
-        }
-      });
-
-      cloudinaryUrls.current = newCloudinaryUrls;
-
-      // Reorder originalUrls and cropStates the same way
-      const reorderMap = <T,>(map: Map<number, T>) => {
-        const tempArr: (T | undefined)[] = Array(images.length);
-        map.forEach((v, i) => {
-          tempArr[i] = v;
-        });
-        const reordered = arrayMove(tempArr, oldIndex, newIndex);
-        const next = new Map<number, T>();
-        reordered.forEach((v, i) => {
-          if (v !== undefined) next.set(i, v);
-        });
-        return next;
-      };
-      originalUrls.current = reorderMap(originalUrls.current);
-      cropStates.current = reorderMap(cropStates.current);
-    }
-  };
 
   const previewEnabled = isAiPreviewEnabled();
 
   const handleContinueToPreview = async () => {
+    setShowPreviewLoader(true);
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
 
@@ -969,43 +550,74 @@ function UploadPageContent() {
       const compressedImages = await Promise.all(
         images.map((url) => compressImage(url)),
       );
-      const uploadFormData = new FormData();
+      const previewFormData = new FormData();
+      const previewSessionId = getOrCreateLgSessionId();
+      previewFormData.append("sessionId", previewSessionId);
       compressedImages.forEach((file) => {
-        uploadFormData.append("images", file);
+        previewFormData.append("images", file);
       });
 
-      const uploadResponse = await fetch("/api/upload-images", {
+      const previewResponse = await fetch("/api/preview-session", {
         method: "POST",
-        body: uploadFormData,
+        body: previewFormData,
       });
-      if (!uploadResponse.ok) {
-        const uploadError = await uploadResponse.json();
+      const previewData = (await previewResponse.json()) as {
+        session?: { id: string; generationStatus?: string };
+        error?: string;
+      };
+      if (!previewResponse.ok) {
         setUploadingImages(new Set());
-        throw new Error(uploadError.error || "Failed to upload images");
+        setIsSubmitting(false);
+        setShowPreviewLoader(false);
+        const isGenerationLimited = isGenerationRateLimited(
+          previewResponse,
+          previewData,
+        );
+        const isPreviewRateLimited =
+          previewResponse.status === 429 &&
+          (previewData.error === "preview_rate_limit" ||
+            previewData.error?.includes("24 hours"));
+        setSubmitStatus({
+          type: "error",
+          message: isGenerationLimited
+            ? ""
+            : isPreviewRateLimited
+              ? t("upload.previewRateLimit")
+              : previewData.error || t("upload.serverError"),
+          errorCode: isGenerationLimited
+            ? "generation_rate_limit"
+            : isPreviewRateLimited
+              ? "preview_rate_limit"
+              : undefined,
+        });
+        return;
       }
 
-      const uploadData = await uploadResponse.json();
-      const originalUrls = uploadData.imageUrls;
-      if (!originalUrls || originalUrls.length !== 5) {
+      if (!previewData.session?.id) {
         setUploadingImages(new Set());
-        throw new Error("Invalid response from upload API");
+        setIsSubmitting(false);
+        setShowPreviewLoader(false);
+        setSubmitStatus({
+          type: "error",
+          message: t("upload.serverError"),
+        });
+        return;
       }
 
       setUploadingImages(new Set());
-      const previewResponse = await fetch("/api/preview-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ originalUrls }),
-      });
-      const previewData = await previewResponse.json();
-      if (!previewResponse.ok) {
-        throw new Error(previewData.error || t("upload.serverError"));
+      if (typeof window !== "undefined") {
+        persistLgSessionId(previewData.session.id);
+        sessionStorage.setItem(
+          `${PREVIEW_LOADING_IMAGES_STORAGE_PREFIX}:${previewData.session.id}`,
+          JSON.stringify(images.slice(0, 5)),
+        );
       }
-
       router.push(`/preview/${previewData.session.id}`);
+      return;
     } catch (error) {
       console.error("Preview start error:", error);
       setUploadingImages(new Set());
+      setShowPreviewLoader(false);
       setSubmitStatus({
         type: "error",
         message: t("upload.serverError"),
@@ -1129,6 +741,18 @@ function UploadPageContent() {
     }
   };
 
+  const withoutPreviewStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (searchParams.get("withoutPreview") !== "1") return;
+    if (withoutPreviewStartedRef.current) return;
+    if (images.length !== 5 || isSubmitting) return;
+
+    withoutPreviewStartedRef.current = true;
+    router.replace("/upload");
+    void handleAddToCart();
+  }, [handleAddToCart, images.length, isSubmitting, router, searchParams]);
+
   return (
     <div
       className="min-h-screen overflow-x-hidden"
@@ -1161,14 +785,15 @@ function UploadPageContent() {
               {/* First Paragraph */}
               <div className="text-center mb-8 -mt-4">
                 <p className="text-lg font-body text-dark-gray leading-relaxed text-center">
-                  {t("upload.description")
-                    .split("\n")
-                    .map((line, i, arr) => (
-                      <span key={i}>
-                        {line}
-                        {i < arr.length - 1 && <br />}
-                      </span>
-                    ))}
+                  {(images.length >= 5
+                    ? t("upload.description").split("\n").slice(1)
+                    : t("upload.description").split("\n")
+                  ).map((line, i, arr) => (
+                    <span key={i}>
+                      {line}
+                      {i < arr.length - 1 && <br />}
+                    </span>
+                  ))}
                 </p>
               </div>
 
@@ -1204,18 +829,9 @@ function UploadPageContent() {
                   {images.length >= 5 && (
                     <div className="flex flex-col gap-1 text-sm font-body text-dark-gray text-center mt-3">
                       <p>{t("upload.tapToCrop")}</p>
-                      <p>{t("upload.dragToReorder")}</p>
-                      {/* Info link to show image selection tips */}
-                      <div className="mt-2">
-                        <button
-                          onClick={handleInfoClick}
-                          className="inline-flex items-center gap-1.5 text-sm font-body-bold cursor-pointer hover:opacity-80 transition-opacity"
-                          style={{ color: "#693430" }}
-                        >
-                          <Info className="w-4 h-4" />
-                          <span>{t("upload.photoTip")}</span>
-                        </button>
-                      </div>
+                      <p className="text-xs text-gray-500">
+                        {t("upload.cropBackgroundTip")}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -1243,40 +859,25 @@ function UploadPageContent() {
               {/* Selected Images Display */}
               {images.length > 0 && (
                 <div className="space-y-4">
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                    modifiers={[restrictToHorizontalAxis]}
-                  >
-                    <SortableContext
-                      items={images
-                        .slice(0, 5)
-                        .map((_, index) => index.toString())}
-                      strategy={horizontalListSortingStrategy}
-                    >
-                      <div className="w-full overflow-x-auto md:overflow-visible">
-                        <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2">
-                          {images.slice(0, 5).map((url, index) => (
-                            <SortableImageItem
-                              key={url} // Use URL as key to prevent re-renders on reorder
-                              id={index.toString()}
-                              url={url}
-                              index={index}
-                              locale={locale}
-                              onRemove={handleRemoveImage}
-                              isSubmitting={isSubmitting}
-                              onTap={handleImageTap}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </SortableContext>
-                  </DndContext>
+                  <div className="w-full overflow-x-auto md:overflow-visible">
+                    <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2">
+                      {images.slice(0, 5).map((url, index) => (
+                        <UploadImageItem
+                          key={url}
+                          url={url}
+                          index={index}
+                          locale={locale}
+                          onRemove={handleRemoveImage}
+                          isSubmitting={isSubmitting}
+                          onTap={handleImageTap}
+                        />
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Action Buttons */}
                   {images.length >= 5 && (
-                    <div className="flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
+                    <div className="mt-10 flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       {!previewEnabled && (
                         <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
                           <StyleSelector
@@ -1301,7 +902,6 @@ function UploadPageContent() {
                           fontWeight: 700,
                           py: { xs: 1.5, sm: 2 },
                           boxShadow: "none",
-                          marginTop: "-8px",
                         }}
                       >
                         {isSubmitting ? (
@@ -1312,53 +912,36 @@ function UploadPageContent() {
                           t("upload.addToCart")
                         )}
                       </Button>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={handleStartOver}
-                        className="w-full cursor-pointer flex items-center justify-center gap-2"
-                        sx={{
-                          borderRadius: "12px",
-                          textTransform: "none",
-                          fontSize: "0.95rem",
-                          fontWeight: 700,
-                          py: { xs: 1.5, sm: 2 },
-                          borderColor: "#D1D5DB",
-                          color: "#374151",
-                          backgroundColor: "#FFFFFF",
-                          "&:hover": {
-                            backgroundColor: "#F9FAFB",
-                            borderColor: "#D1D5DB",
-                          },
-                        }}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                          />
-                        </svg>
-                        <span className="font-body-bold text-base">
-                          {t("upload.startOver")}
-                        </span>
-                      </Button>
                       {/* Status Message */}
                       {submitStatus.type && (
                         <div
-                          className={`w-full p-4 rounded-lg text-center font-body-bold ${
+                          className={cn(
+                            "w-full rounded-lg p-4 text-center",
                             submitStatus.type === "success"
-                              ? "bg-green-50 text-green-700 border border-green-200"
-                              : "bg-red-50 text-red-700 border border-red-200"
-                          }`}
+                              ? "border border-green-200 bg-green-50 font-body-bold text-green-700"
+                              : submitStatus.errorCode === "generation_rate_limit"
+                                ? "border border-gray-200 bg-[#F9F7EE] font-body text-dark-gray"
+                                : "border border-red-200 bg-red-50 font-body-bold text-red-700",
+                          )}
                         >
-                          {submitStatus.message}
+                          {submitStatus.errorCode === "generation_rate_limit" ? (
+                            <span className="font-body text-dark-gray">
+                              {getGenerationRateLimitMessage(t)}
+                            </span>
+                          ) : submitStatus.errorCode === "preview_rate_limit" ? (
+                            <>
+                              {t("upload.previewRateLimit")}
+                              {t("upload.previewRateLimitOr")}
+                              <Link
+                                href="/contact"
+                                className="underline underline-offset-2 hover:opacity-80"
+                              >
+                                {t("upload.previewRateLimitContactLink")}
+                              </Link>
+                            </>
+                          ) : (
+                            submitStatus.message
+                          )}
                         </div>
                       )}
                     </div>
@@ -1414,7 +997,7 @@ function UploadPageContent() {
         <MobileImageEditor
           key={
             isInCroppingFlow
-              ? `crop-pending-${currentCropIndex}-${pendingCropImages[currentCropIndex] ?? ""}`
+              ? `crop-pending-${currentCropIndex}-${pendingCropImages[currentCropIndex] ?? ""}-${smartCropLoading ? "loading" : smartCropArea ? `${smartCropArea.x}-${smartCropArea.y}-${smartCropArea.width}-${smartCropArea.height}` : "fallback"}`
               : `crop-edit-${editingImageIndex ?? "x"}`
           }
           imageUrl={
@@ -1449,6 +1032,54 @@ function UploadPageContent() {
           currentIndex={isInCroppingFlow ? currentCropIndex : undefined}
           totalImages={isInCroppingFlow ? pendingCropImages.length : undefined}
         />
+      )}
+
+      {/* Full-screen preview loader – shown immediately on button click */}
+      {showPreviewLoader && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-10 text-center"
+          style={{ backgroundColor: "#F3EEE8" }}
+        >
+          <div className="flex w-full max-w-2xl flex-col items-center">
+            {images.length > 0 && (
+              <div className="mb-7 flex justify-center" dir="ltr">
+                {images.slice(0, 5).map((url, index) => (
+                  <div
+                    key={`${url}-${index}`}
+                    className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
+                    style={{
+                      animationDelay: `${index * 140}ms`,
+                      marginLeft: index === 0 ? 0 : -18,
+                      zIndex: images.length - index,
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            <h1 className="max-w-xl font-heading text-[2.35rem] leading-[1.12] text-accent-burgundy md:text-5xl">
+              {t("preview.bwLoadingTitle")}
+            </h1>
+            <div className="mt-8 h-1.5 w-48 overflow-hidden rounded-full bg-[#EAD9D4] shadow-inner md:w-56">
+              <div className="h-full origin-left rounded-full bg-primary-orange preview-initial-progress" />
+            </div>
+            <div className="mt-8 flex min-h-8 items-center justify-center">
+              <p className="font-body-bold text-xl text-dark-gray md:text-2xl">
+                {t("preview.bwLoadingLine2")}
+              </p>
+            </div>
+            <div className="mt-7 flex min-h-10 items-center justify-center">
+              <p className="font-body text-base text-dark-gray/50">
+                {t("preview.loadingDuration")}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       <Footer />

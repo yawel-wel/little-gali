@@ -18,10 +18,16 @@ export interface CartItem {
   giftCardAmount?: number;
 }
 
+export interface PreviewGenerationStats {
+  totalGenerations: number;
+  selectedGenerationBySlot: number[];
+}
+
 export interface BookFulfillmentImages {
   originalUrls: string[];
   generatedBwUrls: string[];
   previewSessionId: string;
+  generationStats?: PreviewGenerationStats;
 }
 
 export interface Cart {
@@ -308,6 +314,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
             previewSessionId: fulfillment?.previewSessionId,
+            generationStats: fulfillment?.generationStats,
           }),
         });
       } else {
@@ -327,6 +334,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
             previewSessionId: fulfillment?.previewSessionId,
+            generationStats: fulfillment?.generationStats,
           }),
         });
       }

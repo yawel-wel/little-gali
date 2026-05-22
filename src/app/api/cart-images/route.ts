@@ -11,16 +11,27 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { cartId, lineId, imageUrls, style, originalUrls, generatedBwUrls, previewSessionId } =
-      body as {
-        cartId: string;
-        lineId?: string;
-        imageUrls: string[];
-        style?: StoredCartImages["style"];
-        originalUrls?: string[];
-        generatedBwUrls?: string[];
-        previewSessionId?: string;
-      };
+    const {
+      cartId,
+      lineId,
+      imageUrls,
+      style,
+      originalUrls,
+      generatedBwUrls,
+      previewSessionId,
+      previewGenTotal,
+      previewGenSelected,
+    } = body as {
+      cartId: string;
+      lineId?: string;
+      imageUrls: string[];
+      style?: StoredCartImages["style"];
+      originalUrls?: string[];
+      generatedBwUrls?: string[];
+      previewSessionId?: string;
+      previewGenTotal?: number;
+      previewGenSelected?: string;
+    };
 
     if (!cartId || !imageUrls || imageUrls.length !== 5) {
       return NextResponse.json(
@@ -36,6 +47,8 @@ export async function POST(request: NextRequest) {
       originalUrls,
       generatedBwUrls,
       previewSessionId,
+      previewGenTotal,
+      previewGenSelected,
     });
 
     return NextResponse.json({ success: true });

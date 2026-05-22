@@ -3,6 +3,12 @@ import sharp from "sharp";
 import { buildNanoBananaSystemInstructionText } from "@/lib/gemini-nano-banana-system";
 import { BLACK_AND_WHITE_PROMPT } from "@/lib/prompts/constants";
 import type { GenerationError } from "./types";
+import {
+  logGeminiRequest,
+  logGeminiResponse,
+  logPreviewGenerationFailure,
+  type PreviewGenerationContext,
+} from "./generation-log";
 
 const BW_MODEL = "gemini-2.5-flash-image";
 const MAX_RETRIES = 2;
@@ -64,24 +70,48 @@ async function downloadImageAsBase64(
   return { base64: buffer.toString("base64"), mimeType };
 }
 
-async function generateWithGemini(imageUrl: string): Promise<Buffer> {
+async function generateWithGemini(
+  imageUrl: string,
+  generationContext?: PreviewGenerationContext,
+): Promise<Buffer> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured");
+    const error = new Error("GEMINI_API_KEY is not configured");
+    logPreviewGenerationFailure(
+      "bw",
+      { model: BW_MODEL, stage: "config" },
+      error,
+      generationContext,
+    );
+    throw error;
   }
 
   const { base64, mimeType } = await downloadImageAsBase64(imageUrl);
   const ai = new GoogleGenAI({ apiKey });
+  const systemInstruction = buildNanoBananaSystemInstructionText(true);
 
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    let geminiStartedAt = Date.now();
     try {
+      logGeminiRequest(
+        "bw",
+        {
+          model: BW_MODEL,
+          systemInstruction,
+          userPrompt: BLACK_AND_WHITE_PROMPT,
+          attempt: attempt + 1,
+        },
+        generationContext,
+      );
+
+      geminiStartedAt = Date.now();
       const response = await ai.models.generateContent({
         model: BW_MODEL,
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
-          systemInstruction: buildNanoBananaSystemInstructionText(true),
+          systemInstruction,
           imageConfig: {
             aspectRatio: "1:1",
           },
@@ -105,6 +135,16 @@ async function generateWithGemini(imageUrl: string): Promise<Buffer> {
       const parts = response.candidates?.[0]?.content?.parts ?? [];
       for (const part of parts) {
         if (part.inlineData?.data) {
+          logGeminiResponse(
+            "bw",
+            {
+              model: BW_MODEL,
+              attempt: attempt + 1,
+              durationMs: Date.now() - geminiStartedAt,
+              outcome: "success",
+            },
+            generationContext,
+          );
           return Buffer.from(part.inlineData.data, "base64");
         }
       }
@@ -114,10 +154,27 @@ async function generateWithGemini(imageUrl: string): Promise<Buffer> {
         throw new Error(`safety blocked: ${blockReason}`);
       }
 
-      throw new Error("Gemini response did not include an image");
+      const finishReason = response.candidates?.[0]?.finishReason;
+      throw new Error(
+        finishReason
+          ? `Gemini response did not include an image (finishReason=${finishReason})`
+          : "Gemini response did not include an image",
+      );
     } catch (error) {
       lastError = error;
       const classified = classifyGenerationError(error);
+      logPreviewGenerationFailure(
+        "bw",
+        {
+          model: BW_MODEL,
+          stage: "gemini",
+          attempt: attempt + 1,
+          code: classified.code,
+          durationMs: Date.now() - geminiStartedAt,
+        },
+        error,
+        generationContext,
+      );
       if (classified.code === "safety" || attempt === MAX_RETRIES) {
         throw error;
       }
@@ -131,11 +188,12 @@ async function generateWithGemini(imageUrl: string): Promise<Buffer> {
 
 export async function generateBwImageBuffer(
   imageUrl: string,
+  generationContext?: PreviewGenerationContext,
 ): Promise<Buffer> {
   if (isMockGenerationEnabled()) {
     return createMockBwImage(imageUrl);
   }
-  return generateWithGemini(imageUrl);
+  return generateWithGemini(imageUrl, generationContext);
 }
 
 export function toGenerationError(error: unknown): GenerationError {

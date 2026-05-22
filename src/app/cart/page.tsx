@@ -21,6 +21,8 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
+import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import { cn } from "@/lib/utils";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -378,7 +380,10 @@ export default function CartPage() {
                                             alt={`Image ${
                                               imgIndex + 1
                                             } of book ${displayIndex}`}
-                                            className="w-full h-full object-cover"
+                                            className={cn(
+                                              SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                                              "w-full h-full object-cover",
+                                            )}
                                             loading="eager"
                                             decoding="async"
                                           />
@@ -402,7 +407,10 @@ export default function CartPage() {
                                           alt={`Image ${
                                             imgIndex + 1
                                           } of book ${displayIndex}`}
-                                          className="w-full h-full object-cover"
+                                          className={cn(
+                                            SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                                            "w-full h-full object-cover",
+                                          )}
                                           loading="eager"
                                           decoding="async"
                                         />

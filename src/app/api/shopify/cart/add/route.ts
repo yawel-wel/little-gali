@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  formatSelectedGenerationBySlot,
+  originalUrlsShopifyAttributes,
+  type PreviewGenerationStats,
+  previewStatsShopifyAttributes,
+} from "@/lib/preview-session/generation-stats";
 
 export const runtime = "nodejs";
 
@@ -16,6 +22,7 @@ export async function POST(request: NextRequest) {
       originalUrls,
       generatedBwUrls,
       previewSessionId,
+      generationStats,
     } = body as {
       cartId: string;
       imageUrls: string[];
@@ -27,6 +34,7 @@ export async function POST(request: NextRequest) {
       originalUrls?: string[];
       generatedBwUrls?: string[];
       previewSessionId?: string;
+      generationStats?: PreviewGenerationStats;
     };
 
     console.log(
@@ -177,6 +185,8 @@ export async function POST(request: NextRequest) {
                   },
                 ]
               : []),
+            ...previewStatsShopifyAttributes(previewSessionId, generationStats),
+            ...originalUrlsShopifyAttributes(originalUrls),
           ],
         },
       ],
@@ -279,6 +289,12 @@ export async function POST(request: NextRequest) {
               originalUrls,
               generatedBwUrls,
               previewSessionId,
+              previewGenTotal: generationStats?.totalGenerations,
+              previewGenSelected: generationStats
+                ? formatSelectedGenerationBySlot(
+                    generationStats.selectedGenerationBySlot,
+                  )
+                : undefined,
             }),
           }
         );

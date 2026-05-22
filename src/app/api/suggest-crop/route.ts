@@ -14,6 +14,13 @@ import {
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
+function isLikelyHeifBuffer(buffer: Buffer): boolean {
+  if (buffer.length < 12) return false;
+  if (buffer.subarray(4, 8).toString("ascii") !== "ftyp") return false;
+  const majorBrand = buffer.subarray(8, 12).toString("ascii");
+  return ["heic", "heif", "mif1", "msf1"].includes(majorBrand);
+}
+
 // --- Tunables (smart crop behavior) ------------------------------------------
 /** Longest edge of image sent to Vision (speed + cost). */
 const VISION_MAX_EDGE = 1600;
@@ -253,6 +260,15 @@ export async function POST(request: NextRequest) {
     }
 
     const inputBuffer = Buffer.from(await file.arrayBuffer());
+    if (isLikelyHeifBuffer(inputBuffer)) {
+      return NextResponse.json({
+        ok: true,
+        fallback: true,
+        reason: "heif_unsupported",
+        faceBoxes: [],
+      });
+    }
+
     // Apply EXIF orientation once and use this bitmap's dimensions as the canonical
     // "original" space for mapping Vision results. Browser <img> uses the same oriented
     // pixel grid (naturalWidth/height), which pre-rotate metadata width/height can mismatch.

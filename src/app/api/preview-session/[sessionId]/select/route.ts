@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { StyleType } from "@/components/style-selector";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
+import { getColorCandidateForStyle } from "@/lib/preview-session/color-by-style";
+import {
+  clearSlotColorPreview,
+  enqueuePendingColorRegen,
+} from "@/lib/preview-session/color-generation-runner";
+import { logPreviewCandidateReselected } from "@/lib/preview-session/generation-log";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
@@ -33,12 +40,50 @@ export async function POST(
   }
 
   const slot = session.slots[slotIndex];
-  const candidate = slot?.candidates.find((item) => item.id === candidateId);
+  const bwCandidate = slot?.candidates.find((item) => item.id === candidateId);
+  const colorCandidates = slot?.colorCandidates ?? [];
+  const colorCandidate =
+    colorCandidates.find((item) => item.id === candidateId) ??
+    (slot?.colorPreview?.id === candidateId ? slot.colorPreview : undefined);
+  const candidate = bwCandidate ?? colorCandidate;
+
   if (!slot || !candidate || candidate.error || !candidate.previewUrl) {
     return NextResponse.json({ error: "Candidate not available" }, { status: 400 });
   }
 
-  slot.activeCandidateId = candidateId;
+  if (candidate.kind === "color") {
+    const style = (candidate.style ?? "pencil") as StyleType;
+    const previousColorId = getColorCandidateForStyle(slot, style)?.id;
+    if (previousColorId && previousColorId !== candidateId) {
+      logPreviewCandidateReselected({
+        sessionId,
+        slot: slotIndex,
+        side: "color",
+        previousCandidateId: previousColorId,
+        candidateId,
+        style,
+      });
+    }
+    slot.colorCandidates = colorCandidates.some((item) => item.id === candidate.id)
+      ? colorCandidates
+      : [...colorCandidates, candidate];
+    slot.colorPreview = candidate;
+  } else {
+    const previousActiveId = slot.activeCandidateId;
+    if (previousActiveId && previousActiveId !== candidateId) {
+      logPreviewCandidateReselected({
+        sessionId,
+        slot: slotIndex,
+        side: "bw",
+        previousCandidateId: previousActiveId,
+        candidateId,
+      });
+      clearSlotColorPreview(session, slotIndex);
+      enqueuePendingColorRegen(session, slotIndex);
+    }
+    slot.activeCandidateId = candidateId;
+  }
+
   await savePreviewSession(session);
   return NextResponse.json({ session: toPublicView(session) });
 }
