@@ -7,11 +7,12 @@ import type { Swiper as SwiperType } from "swiper";
 import { motion } from "framer-motion";
 import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
 import "swiper/css";
 import "swiper/css/free-mode";
 
-const easeOwlet = [0.16, 1, 0.3, 1];
+const easeOwlet = [0.16, 1, 0.3, 1] as const;
 
 const dotVariants = {
   inactive: {
@@ -168,14 +169,14 @@ export function StyleExamplesSection() {
     };
   }, [modalOpen]);
 
+  const reveal = useScrollReveal(easeOwlet);
+
   return (
     <motion.section
       aria-label={t("home.styleExamples.ariaLabel")}
       className="relative bg-[#F9F7EE] pb-16 lg:pb-24"
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      {...reveal.section}
       transition={{ duration: 0.9, ease: easeOwlet }}
-      viewport={{ once: true, amount: 0.2 }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}

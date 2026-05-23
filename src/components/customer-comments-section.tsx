@@ -6,6 +6,7 @@ import { motion, useReducedMotion, useInView } from "framer-motion";
 import MuiButton from "@mui/material/Button";
 import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useIsMobile } from "@/lib/use-is-mobile";
 
 const COMMENT_COUNT = 42;
 const INITIAL_MOBILE_COUNT = 12;
@@ -98,10 +99,7 @@ export function CustomerCommentsSection() {
   const { t } = useLanguage();
   const prefersReducedMotion = useReducedMotion();
 
-  const [isMobile, setIsMobile] = useState<boolean | null>(() => {
-    if (typeof window === "undefined") return null;
-    return window.innerWidth < 640;
-  });
+  const isMobile = useIsMobile(640);
   const [numCols, setNumCols] = useState<number>(() => {
     if (typeof window === "undefined") return 5;
     return getNumCols(window.innerWidth);
@@ -113,9 +111,9 @@ export function CustomerCommentsSection() {
 
   useEffect(() => {
     const check = () => {
-      setIsMobile(window.innerWidth < 640);
       setNumCols(getNumCols(window.innerWidth));
     };
+    check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
@@ -128,11 +126,11 @@ export function CustomerCommentsSection() {
   }, [isInView]);
 
   const desktopInitialCount = Math.min(DESKTOP_INITIAL_ROWS * numCols, COMMENT_COUNT);
-  const initialCount = isMobile === true ? INITIAL_MOBILE_COUNT : desktopInitialCount;
+  const initialCount = isMobile ? INITIAL_MOBILE_COUNT : desktopInitialCount;
   const showButton = !showAll && initialCount < COMMENT_COUNT;
 
   // Slide-up distance: slightly softer on mobile
-  const slideY = isMobile === true ? 15 : 20;
+  const slideY = isMobile ? 15 : 20;
 
   return (
     <section
@@ -168,25 +166,26 @@ export function CustomerCommentsSection() {
               const rotate = OFFSETS[i % OFFSETS.length].rotate;
               const locked = initialAnimated;
 
-              const initial = prefersReducedMotion || locked
-                ? false
-                : { opacity: 0, y: slideY };
+              const initial =
+                prefersReducedMotion || isMobile || locked
+                  ? false
+                  : { opacity: 0, y: slideY };
 
-              const animate = prefersReducedMotion
-                ? undefined
-                : locked || isInView
-                ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: slideY };
+              const animate =
+                prefersReducedMotion || isMobile
+                  ? { opacity: 1, y: 0 }
+                  : locked || isInView
+                    ? { opacity: 1, y: 0 }
+                    : { opacity: 0, y: slideY };
 
               const transition = locked
                 ? { duration: 0 }
                 : {
                     duration: 0.7,
                     ease: "easeOut" as const,
-                    delay:
-                      isMobile === true
-                        ? getMobileDelay(i, INITIAL_MOBILE_COUNT)
-                        : getDesktopDelay(i, numCols, initialCount),
+                    delay: isMobile
+                      ? getMobileDelay(i, INITIAL_MOBILE_COUNT)
+                      : getDesktopDelay(i, numCols, initialCount),
                   };
 
               return (
@@ -225,7 +224,7 @@ export function CustomerCommentsSection() {
                 const rotate = OFFSETS[i % OFFSETS.length].rotate;
                 const revealedCount = COMMENT_COUNT - initialCount;
 
-                const delay = isMobile === true
+                const delay = isMobile
                   ? getMobileDelay(j, revealedCount)
                   : getDesktopDelay(j, numCols, revealedCount);
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,28 +14,12 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
+import { CustomerCommentsSection } from "@/components/customer-comments-section";
 import { GiftCardSection } from "@/components/gift-card-section";
+import { GalleryCarouselSection } from "@/components/gallery-carousel-section";
 import { StyleExamplesSection } from "@/components/style-examples-section";
-
-const GalleryCarouselSection = dynamic(
-  () =>
-    import("@/components/gallery-carousel-section").then(
-      (mod) => mod.GalleryCarouselSection,
-    ),
-  {
-    loading: () => <div className="min-h-[280px] bg-white" aria-hidden />,
-  },
-);
-
-const CustomerCommentsSection = dynamic(
-  () =>
-    import("@/components/customer-comments-section").then(
-      (mod) => mod.CustomerCommentsSection,
-    ),
-  {
-    loading: () => <div className="min-h-[320px] bg-white" aria-hidden />,
-  },
-);
+import { useIsMobile } from "@/lib/use-is-mobile";
+import { useScrollReveal } from "@/lib/use-scroll-reveal";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -62,14 +45,11 @@ const dotVariants = {
   },
 };
 
-function ComingSoonSection({
-  prefersReducedMotion,
-  easeOwlet,
-}: {
-  prefersReducedMotion: boolean | null;
-  easeOwlet: any;
-}) {
+function ComingSoonSection() {
   const { locale, t } = useLanguage();
+  const easeOwlet = [0.16, 1, 0.3, 1] as const;
+  const prefersReducedMotion = useReducedMotion();
+  const reveal = useScrollReveal(easeOwlet);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -138,27 +118,13 @@ function ComingSoonSection({
       id="fabric-book-signup"
       className="relative pb-16 lg:pb-24"
       style={{ backgroundColor: "#F9F7EE" }}
-      initial={
-        prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
-      }
-      whileInView={
-        prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
-      }
-      transition={{ duration: 0.9, ease: easeOwlet }}
-      viewport={{ once: true, amount: 0.2 }}
+      {...reveal.section}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="max-w-3xl mx-auto text-center"
-          initial={prefersReducedMotion ? false : "hidden"}
-          whileInView={prefersReducedMotion ? undefined : "show"}
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{
-            hidden: {},
-            show: {
-              transition: { staggerChildren: 0.15 },
-            },
-          }}
+          {...reveal.staggerContainer({ amount: 0.2 })}
         >
           {/* Main Heading - Largest, Most Prominent */}
           <motion.div
@@ -185,14 +151,7 @@ function ComingSoonSection({
           <div className="flex justify-center my-8">
             <motion.div
               className="w-full max-w-md rounded-lg overflow-hidden shadow-lg"
-              initial={
-                prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }
-              }
-              whileInView={
-                prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }
-              }
-              transition={{ duration: 0.8, ease: easeOwlet, delay: 0.2 }}
-              viewport={{ once: true, amount: 0.3 }}
+              {...reveal.imageReveal}
               whileHover={{
                 scale: 1.02,
                 transition: { duration: 0.3, ease: easeOwlet },
@@ -520,7 +479,8 @@ export default function Home() {
           src: "/book-example-pencil.jpeg",
         },
       ];
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const isMobile = useIsMobile();
+  const reveal = useScrollReveal(easeOwlet);
   const heroImages = ["/hero-image-1.jpeg", "/hero-image-2.jpg", "/hero-image-3.jpg", "/hero-image-4.jpg"];
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const bookImages = [
@@ -576,17 +536,6 @@ export default function Home() {
     animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   };
 
-  // Check if mobile - starts as null to avoid hydration mismatch
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    const handleResize = () => checkMobile();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   // Handle hash scrolling on page load
   useEffect(() => {
     const hash = window.location.hash;
@@ -637,7 +586,7 @@ export default function Home() {
                 initial={{ opacity: i === 0 ? 1 : 0, scale: 1 }}
                 animate={{
                   opacity: i === currentHeroIndex ? 1 : 0,
-                  scale: i === currentHeroIndex ? (isMobile === true ? 1.20 : 1.05) : 1,
+                  scale: i === currentHeroIndex ? (isMobile ? 1.20 : 1.05) : 1,
                 }}
                 transition={{
                   opacity: { duration: 0.8, ease: "easeInOut" },
@@ -785,11 +734,7 @@ export default function Home() {
         <motion.section
           aria-label={t("home.book.ariaLabel")}
           className="relative -mt-0 pt-8 lg:pt-0 pb-12 lg:pb-16 bg-white"
-          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
-          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.05 }}
+          {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
@@ -999,11 +944,7 @@ export default function Home() {
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
           className="relative pb-16 lg:pb-24 bg-white"
-          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
-          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.05 }}
+          {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1025,16 +966,7 @@ export default function Home() {
               className={`flex flex-col lg:flex-row max-w-6xl mx-auto relative items-start lg:items-stretch gap-8 ${
                 previewOn ? "lg:gap-10" : "lg:gap-0"
               }`}
-              initial={prefersReducedMotion || isMobile === true ? undefined : "hidden"}
-              animate={isMobile === false && !prefersReducedMotion ? undefined : "show"}
-              whileInView={isMobile === false && !prefersReducedMotion ? "show" : undefined}
-              viewport={{ once: true, amount: 0.15 }}
-              variants={{
-                hidden: {},
-                show: {
-                  transition: { staggerChildren: 0.15, staggerDirection: -1 },
-                },
-              }}
+              {...reveal.staggerContainer({ staggerDirection: -1 })}
             >
               {howItWorksSteps.map((step) => (
                 <motion.div
@@ -1091,14 +1023,7 @@ export default function Home() {
                   {/* Step Image */}
                   <motion.div
                     className="mt-auto"
-                    initial={
-                      prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }
-                    }
-                    whileInView={
-                      prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }
-                    }
-                    transition={{ duration: 0.5, ease: easeOwlet, delay: 0.2 }}
-                    viewport={{ once: true, amount: 0.3 }}
+                    {...reveal.imageReveal}
                   >
                     <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
                       <Image
@@ -1116,12 +1041,9 @@ export default function Home() {
             </motion.div>
 
             {/* Bottom CTA */}
-            <motion.div 
+            <motion.div
               className="text-center mt-10 md:mt-16"
-              initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: easeOwlet, delay: 0.3 }}
-              viewport={{ once: true }}
+              {...reveal.section}
             >
               <a href="/upload" aria-label={t("home.howItWorks.ctaAriaLabel")}>
                 <MuiButton
@@ -1150,11 +1072,7 @@ export default function Home() {
         <motion.section
           aria-label={t("home.special.ariaLabel")}
           className="relative bg-[#F3EEE8] pb-16 lg:pb-24"
-          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
-          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.05 }}
+          {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
@@ -1170,16 +1088,7 @@ export default function Home() {
             {/* 4 Column Grid */}
             <motion.div 
               className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto"
-              initial={prefersReducedMotion || isMobile === true ? undefined : "hidden"}
-              animate={isMobile === false && !prefersReducedMotion ? undefined : "show"}
-              whileInView={isMobile === false && !prefersReducedMotion ? "show" : undefined}
-              viewport={{ once: true, amount: 0.2 }}
-              variants={{
-                hidden: {},
-                show: {
-                  transition: { staggerChildren: 0.1 },
-                },
-              }}
+              {...reveal.staggerContainer({ amount: 0.2, staggerChildren: 0.1 })}
             >
               {/* Column 1 */}
               <motion.div 
@@ -1313,22 +1222,14 @@ export default function Home() {
           id="about"
           aria-labelledby="about-heading"
           className={`relative bg-white ${locale === "en" ? "pb-16 md:pb-20" : "pb-6"}`}
-          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
-          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.05 }}
+          {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
               {/* Left Column - Image */}
-              <motion.div 
+              <motion.div
                 className="relative rounded-3xl overflow-hidden"
-                initial={prefersReducedMotion || isMobile === true ? undefined : { scale: 0.95, opacity: 0 }}
-                animate={isMobile === false && !prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
-                whileInView={isMobile === false && !prefersReducedMotion ? { scale: 1, opacity: 1 } : undefined}
-                transition={{ duration: 0.7, ease: easeOwlet, delay: 0.1 }}
-                viewport={{ once: true, amount: 0.3 }}
+                {...reveal.imageReveal}
               >
                   <div className="w-full aspect-[4/3] relative">
                   <Image
@@ -1380,27 +1281,17 @@ export default function Home() {
         </motion.section>
 
         {/* Coming Soon Section */}
-        <ComingSoonSection
-          prefersReducedMotion={prefersReducedMotion}
-          easeOwlet={easeOwlet}
-        />
+        <ComingSoonSection />
 
         {/* Gift Card Section */}
-        <GiftCardSection
-          prefersReducedMotion={prefersReducedMotion}
-          easeOwlet={easeOwlet}
-        />
+        <GiftCardSection />
 
         {/* Q&A Section */}
         <motion.section
           id="qa"
           aria-labelledby="qa-heading"
           className="relative pb-16 lg:pb-24 bg-[#F3EEE8]"
-          initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
-          animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 0.6, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.05 }}
+          {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}

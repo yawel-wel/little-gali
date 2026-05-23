@@ -8,17 +8,13 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
 import MuiButton from "@mui/material/Button";
 import { GIFT_CARD_OPTIONS } from "@/lib/constants";
+import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
-interface GiftCardSectionProps {
-  prefersReducedMotion: boolean | null;
-  easeOwlet: any;
-}
+const easeOwlet = [0.16, 1, 0.3, 1] as const;
 
-export function GiftCardSection({
-  prefersReducedMotion,
-  easeOwlet,
-}: GiftCardSectionProps) {
+export function GiftCardSection() {
   const { t, locale } = useLanguage();
+  const reveal = useScrollReveal(easeOwlet);
   const { addGiftCardToCart } = useCart();
   
   const [selectedOption, setSelectedOption] = useState<string>(
@@ -44,27 +40,13 @@ export function GiftCardSection({
     <motion.section
       id="gift-card"
       className="relative pb-16 lg:pb-24 bg-white"
-      initial={
-        prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
-      }
-      whileInView={
-        prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }
-      }
+      {...reveal.section}
       transition={{ duration: 0.9, ease: easeOwlet }}
-      viewport={{ once: true, amount: 0.2 }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="max-w-4xl mx-auto"
-          initial={prefersReducedMotion ? false : "hidden"}
-          whileInView={prefersReducedMotion ? undefined : "show"}
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{
-            hidden: {},
-            show: {
-              transition: { staggerChildren: 0.15 },
-            },
-          }}
+          {...reveal.staggerContainer({ amount: 0.2 })}
         >
           {/* Title */}
           <motion.div
@@ -89,10 +71,7 @@ export function GiftCardSection({
             {/* Gift Card Image Placeholder */}
             <motion.div
               className="w-full max-w-md mx-auto mb-8"
-              initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
-              whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: easeOwlet, delay: 0.2 }}
-              viewport={{ once: true, amount: 0.3 }}
+              {...reveal.imageReveal}
             >
               <div className="relative aspect-[16/10] rounded-xl overflow-hidden shadow-lg">
                 <Image
