@@ -355,11 +355,13 @@ const hebrewTranslations = {
   "home.howItWorks.step1.title": "מעלים תמונות",
   "home.howItWorks.step1.description":
     "בחרו 5 תמונות שיופיעו בספרון",
+  "home.howItWorks.step1.descriptionWithoutPreview":
+    "בחרו 5 תמונות שיופיעו בספרון ואת הסגנון לצד הצבעוני",
   "home.howItWorks.step1.imageAlt": "דוגמה להעלאת תמונות",
   "home.howItWorks.step2.label": "אנחנו עושים",
   "home.howItWorks.step2.title": "יוצרים את הספרון",
   "home.howItWorks.step2.description":
-    "אנחנו ניצור מהתמונות ספרון דו צדדי.\nצד אחד עם חמשת התמונות בשחור לבן, וצד שני עם \nאותם חמש תמונות בעיבוד צבעוני.",
+    "אנחנו ניצור מהתמונות שלכם ספרון דו צדדי, נדפיס ונשלח אליכם",
   "home.howItWorks.step2.imageAlt": "דוגמה לתמונות מעובדות בספרון",
   "home.howItWorks.previewStep2.label": "אנחנו עושים",
   "home.howItWorks.previewStep2.title": "יוצרים את האיורים",
@@ -1034,11 +1036,13 @@ const englishTranslations = {
   "home.howItWorks.step1.title": "Upload photos",
   "home.howItWorks.step1.description":
     "Choose 5 photos to appear in the book",
+  "home.howItWorks.step1.descriptionWithoutPreview":
+    "Choose 5 photos for the book and a style for the colorful side",
   "home.howItWorks.step1.imageAlt": "Example of photo upload",
   "home.howItWorks.step2.label": "We do",
   "home.howItWorks.step2.title": "Process the images",
   "home.howItWorks.step2.description":
-    "Using artificial intelligence (AI), we convert the images into clear, baby-friendly versions – in black and white and in color.",
+    "We'll create a double-sided book from your photos, print it, and ship it to you",
   "home.howItWorks.step2.imageAlt": "Example of processed images in book",
   "home.howItWorks.previewStep2.label": "We do",
   "home.howItWorks.previewStep2.title": "We create the images",

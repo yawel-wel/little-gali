@@ -488,7 +488,7 @@ export default function Home() {
           num: 1,
           labelKey: "home.howItWorks.step1.label",
           titleKey: "home.howItWorks.step1.title",
-          descriptionKey: "home.howItWorks.step1.description",
+          descriptionKey: "home.howItWorks.step1.descriptionWithoutPreview",
           imageAltKey: "home.howItWorks.step1.imageAlt",
           src: "/upload-images.png",
         },
