@@ -1,3 +1,5 @@
+import type { StyleType } from "@/components/style-selector";
+import { getColorCandidateForStyle } from "./color-by-style";
 import { normalizeDisplayOrder, urlsInDisplayOrder } from "./display-order";
 import type {
   PreviewGenerationStatus,
@@ -153,7 +155,11 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
       }),
     canRegenerateColor: inColorPhase && noColorInFlight && hasCredits,
     canSelectStyle: inColorPhase && generationStatus === "complete",
-    canAddToCart: session.phase === "style_selected",
+    canAddToCart:
+      inColorPhase &&
+      generationStatus === "complete" &&
+      noColorInFlight &&
+      session.phase !== "cart_added",
   };
 }
 
@@ -169,6 +175,19 @@ export function getSelectedGeneratedBwUrls(session: PreviewSession): string[] {
     );
     if (!active?.cleanUrl) {
       throw new Error(`Missing selected B&W output for slot`);
+    }
+    return active.cleanUrl;
+  });
+}
+
+export function getSelectedGeneratedColorUrls(
+  session: PreviewSession,
+  style: StyleType,
+): string[] {
+  return urlsInDisplayOrder(session, (slot) => {
+    const active = getColorCandidateForStyle(slot, style);
+    if (!active?.cleanUrl) {
+      throw new Error(`Missing selected color output for slot`);
     }
     return active.cleanUrl;
   });

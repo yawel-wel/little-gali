@@ -18,19 +18,15 @@ import { StyleSelector, type StyleType } from "@/components/style-selector";
 import { MobileImageEditor } from "@/components/mobile-image-editor";
 import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
 import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
-import {
-  PreviewSlotVersionsStrip,
-  buildPreviewVersionEntries,
-} from "@/components/preview-slot-versions-strip";
+import { PreviewPhaseFooter } from "@/components/preview-phase-footer";
+import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternate-versions";
+import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
 import { PreviewSlotFadeImage } from "@/components/preview-slot-fade-image";
 import {
   PreviewBookLightbox,
   type PreviewBookLightboxSlide,
 } from "@/components/preview-book-lightbox";
-import {
-  PreviewSortableSlots,
-  type PreviewDragActivator,
-} from "@/components/preview-sortable-slots";
+import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import {
   BOOK_SLOT_INDEX,
   getColorCandidateForStyleFromPublicSlot,
@@ -51,6 +47,10 @@ import {
   isGenerationRateLimitErrorNode,
   throwIfGenerationRateLimited,
 } from "@/lib/preview-session/handle-generation-response";
+import {
+  getSelectableBwVersionCandidates,
+  getSelectableColorVersionCandidates,
+} from "@/lib/preview-session/preview-version-selection";
 import type { PreviewSessionPublicView } from "@/lib/preview-session/types";
 import type { Area } from "react-easy-crop";
 import Button from "@mui/material/Button";
@@ -74,16 +74,6 @@ type CropTarget = {
   bookSide: PreviewBookSide;
   imageUrl: string;
 };
-type InitialPreviewLoadingScreenProps = {
-  imageUrls: string[];
-  isExiting: boolean;
-  isComplete: boolean;
-  loadingLine: string;
-  slowText: string;
-  standardText: string;
-  title: string;
-};
-
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
 const COLOR_STRIP_PREFETCH_STORAGE_PREFIX = "lg-color-strip-prefetch";
 
@@ -176,6 +166,39 @@ function frozenStripThumbnailsReady(
   );
 }
 
+function slotBwHasProhibitedContent(
+  slot: PreviewSessionPublicView["slots"][number],
+): boolean {
+  const active = slot.candidates.find(
+    (candidate) => candidate.id === slot.activeCandidateId,
+  );
+  return active?.error?.code === "prohibited_content";
+}
+
+function canReplacePreviewSlot(
+  session: PreviewSessionPublicView | null,
+  slotIndex: number,
+  colorStyle?: StyleType,
+): boolean {
+  if (!session) {
+    return false;
+  }
+  const slot = session.slots.find((item) => item.index === slotIndex);
+  if (!slot) {
+    return false;
+  }
+  if (slotBwHasProhibitedContent(slot)) {
+    return true;
+  }
+  if (colorStyle) {
+    const activeColor = getColorCandidateForStyleFromPublicSlot(slot, colorStyle);
+    if (activeColor?.error?.code === "prohibited_content") {
+      return true;
+    }
+  }
+  return session.canReplace;
+}
+
 function stripThumbnailsReady(
   session: PreviewSessionPublicView | null,
   bookSlot: PreviewSessionPublicView["slots"][number] | undefined,
@@ -193,170 +216,36 @@ function stripThumbnailsReady(
 }
 
 function PreviewSlotLightboxActivator({
-  dragActivator,
-  disabled,
+  lightboxEnabled,
   onOpenLightbox,
   className,
   style,
   children,
 }: {
-  dragActivator: PreviewDragActivator;
-  disabled: boolean;
+  /** When false, renders a div so nested controls (e.g. upload) stay clickable. */
+  lightboxEnabled: boolean;
   onOpenLightbox: () => void;
   className?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
-  const [pressPending, setPressPending] = useState(false);
-  const { reorderEnabled, listeners, attributes, ref, isDragging } =
-    dragActivator;
-
-  useEffect(() => {
-    if (isDragging) {
-      setPressPending(false);
-    }
-  }, [isDragging]);
-
-  const l = reorderEnabled ? listeners : undefined;
+  if (!lightboxEnabled) {
+    return (
+      <div className={className} style={style}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <button
       type="button"
-      ref={(el) => {
-        ref(el);
-      }}
-      disabled={disabled}
       onClick={onOpenLightbox}
-      className={cn(
-        className,
-        reorderEnabled &&
-          "touch-manipulation select-none [-webkit-touch-callout:none]",
-        reorderEnabled &&
-          pressPending &&
-          "ring-2 ring-inset ring-primary-orange/40",
-      )}
+      className={className}
       style={style}
-      {...(reorderEnabled ? attributes : {})}
-      {...(l ?? {})}
-      onPointerDown={(e) => {
-        l?.onPointerDown?.(e);
-        if (reorderEnabled) {
-          setPressPending(true);
-        }
-      }}
-      onPointerUp={(e) => {
-        l?.onPointerUp?.(e);
-        setPressPending(false);
-      }}
-      onPointerCancel={(e) => {
-        l?.onPointerCancel?.(e);
-        setPressPending(false);
-      }}
-      onPointerLeave={(e) => {
-        l?.onPointerLeave?.(e);
-        setPressPending(false);
-      }}
-      onTouchStart={(e) => {
-        l?.onTouchStart?.(e);
-        if (reorderEnabled) {
-          setPressPending(true);
-        }
-      }}
-      onTouchEnd={(e) => {
-        l?.onTouchEnd?.(e);
-        setPressPending(false);
-      }}
-      onTouchCancel={(e) => {
-        l?.onTouchCancel?.(e);
-        setPressPending(false);
-      }}
     >
       {children}
     </button>
-  );
-}
-
-function InitialPreviewLoadingScreen({
-  imageUrls,
-  isExiting,
-  isComplete,
-  loadingLine,
-  slowText,
-  standardText,
-  title,
-}: InitialPreviewLoadingScreenProps) {
-  const [isTakingLonger, setIsTakingLonger] = useState(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setIsTakingLonger(true), 90000);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  return (
-    <section
-      className={cn(
-        "flex min-h-[calc(100vh-72px-var(--banner-height,0px))] items-center justify-center px-4 py-10 text-center opacity-100 transition-opacity duration-[400ms] ease-out",
-        isExiting && "opacity-0",
-      )}
-      aria-busy={!isComplete}
-    >
-      <div className="flex w-full max-w-2xl flex-col items-center">
-        {imageUrls.length > 0 && (
-          <div className="mb-7 flex justify-center" dir="ltr">
-            {imageUrls.slice(0, 5).map((url, index) => (
-              <div
-                key={`${url}-${index}`}
-                className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
-                style={{
-                  animationDelay: `${index * 140}ms`,
-                  marginLeft: index === 0 ? 0 : -18,
-                  zIndex: imageUrls.length - index,
-                }}
-              >
-                <img
-                  src={url}
-                  alt=""
-                  className={cn(
-                    SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                    "h-full w-full object-cover",
-                  )}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        <h1 className="max-w-xl font-heading text-[2.35rem] leading-[1.12] text-accent-burgundy md:text-5xl">
-          {title}
-        </h1>
-
-        <div className="mt-8 h-1.5 w-48 overflow-hidden rounded-full bg-[#EAD9D4] shadow-inner md:w-56">
-          <div
-            className={cn(
-              "h-full origin-left rounded-full bg-primary-orange",
-              isComplete
-                ? "preview-initial-progress-complete"
-                : "preview-initial-progress",
-            )}
-          />
-        </div>
-
-        <div className="mt-8 flex min-h-8 items-center justify-center">
-          <p
-            key={loadingLine}
-            className="preview-loading-subtitle-fade font-body-bold text-xl text-dark-gray md:text-2xl"
-          >
-            {loadingLine}
-          </p>
-        </div>
-
-        <div className="mt-7 flex min-h-10 items-center justify-center">
-          <p className="font-body text-base text-dark-gray/50">
-            {isTakingLonger ? slowText : standardText}
-          </p>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -364,7 +253,7 @@ export default function PreviewPage() {
   const params = useParams<{ sessionId: string }>();
   const sessionId = params.sessionId;
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { addToCart } = useCart();
   const [localInitialPhotoUrls] = useState<string[]>(() => {
     if (typeof window === "undefined") {
@@ -539,6 +428,14 @@ export default function PreviewPage() {
   }, [applySession, markLoadFailure, sessionId, t]);
 
   useEffect(() => {
+    if (!session?.selectedColorStyle) {
+      return;
+    }
+    setSelectedStyle(session.selectedColorStyle);
+    setActiveColorStyle(session.selectedColorStyle);
+  }, [session?.selectedColorStyle]);
+
+  useEffect(() => {
     refreshSession().catch((err: Error & { status?: number }) => {
       Sentry.setUser({ id: sessionId });
       Sentry.setTag("sessionId", sessionId);
@@ -569,13 +466,6 @@ export default function PreviewPage() {
       console.error("Failed to report preview failure:", reportError);
     });
   }, [failureDetail, failureStatus, loadFailed, sessionId]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLoadingLineIndex((current) => (current + 1) % 5);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const pulseSeenKey = "little-gali-preview-actions-pulse-seen";
@@ -695,6 +585,39 @@ export default function PreviewPage() {
     !showInitialLoadingScreen && (isColorGenerating || keepColorLoadingVisible);
   const isColorLoadingExiting = !isColorGenerating && keepColorLoadingVisible;
 
+  const isLoadingScreenActive =
+    showInitialLoadingScreen || showColorLoadingScreen;
+  const activeLoadingLineCount = showColorLoadingScreen
+    ? colorLoadingLines.length
+    : bwLoadingLines.length;
+
+  const wasInitialLoadingScreenRef = useRef(false);
+  const wasColorLoadingScreenRef = useRef(false);
+
+  useEffect(() => {
+    if (showInitialLoadingScreen && !wasInitialLoadingScreenRef.current) {
+      setLoadingLineIndex(0);
+    }
+    wasInitialLoadingScreenRef.current = showInitialLoadingScreen;
+  }, [showInitialLoadingScreen]);
+
+  useEffect(() => {
+    if (showColorLoadingScreen && !wasColorLoadingScreenRef.current) {
+      setLoadingLineIndex(0);
+    }
+    wasColorLoadingScreenRef.current = showColorLoadingScreen;
+  }, [showColorLoadingScreen]);
+
+  useEffect(() => {
+    if (!isLoadingScreenActive || activeLoadingLineCount === 0) {
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingLineIndex((current) => (current + 1) % activeLoadingLineCount);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [activeLoadingLineCount, isLoadingScreenActive]);
+
   const isColorPhase =
     session !== null &&
     (session.phase === "bw_approved" ||
@@ -702,9 +625,11 @@ export default function PreviewPage() {
       session.phase === "cart_added");
   const sessionInitialPhotoUrls =
     session?.slots
-      .map((slot) => slot.originalUrl)
-      .filter((url): url is string => Boolean(url))
-      .slice(0, 5) ?? [];
+      ? sortSlotsByDisplayOrder(session.slots, session.displayOrder)
+          .map((slot) => slot.originalUrl)
+          .filter((url): url is string => Boolean(url))
+          .slice(0, 5)
+      : [];
   const initialLoadingPhotoUrls =
     sessionInitialPhotoUrls.length > 0
       ? sessionInitialPhotoUrls
@@ -794,39 +719,6 @@ export default function PreviewPage() {
       },
     );
   }, [activeColorStyle, displayedBookSide, session, t]);
-
-  const previewVersionEntries = useMemo(() => {
-    if (!session) {
-      return [];
-    }
-    return buildPreviewVersionEntries({
-      session,
-      displayedBookSide,
-      activeColorStyle,
-      getColorVersionsForStyle,
-    });
-  }, [session, displayedBookSide, activeColorStyle]);
-
-  const isSlotColorBusyForVersions = useCallback(
-    (slotIndex: number) => {
-      if (!session) {
-        return false;
-      }
-      const slot = session.slots.find((item) => item.index === slotIndex);
-      if (!slot) {
-        return false;
-      }
-      const pending =
-        (session.pendingColorRegenSlotIndexes?.includes(slotIndex) ?? false) ||
-        slotsPendingColorRegen.has(slotIndex);
-      return (
-        slot.colorInFlight ||
-        pending ||
-        (displayedBookSide === "color" && busySlotIndexes.has(slotIndex))
-      );
-    },
-    [busySlotIndexes, displayedBookSide, session, slotsPendingColorRegen],
-  );
 
   useEffect(() => {
     setBookLightboxOpen(false);
@@ -1036,6 +928,8 @@ export default function PreviewPage() {
     [t],
   );
 
+  const getPreviewColorTabStyleLabel = getColorStyleLabel;
+
   useEffect(() => {
     if (bookLightboxOpen && bookLightboxSlides.length === 0) {
       setBookLightboxOpen(false);
@@ -1216,7 +1110,13 @@ export default function PreviewPage() {
     const file = event.target.files?.[0];
     const slotIndex = replaceSlotRef.current;
     event.target.value = "";
-    if (!file || slotIndex === null || !session?.canReplace) return;
+    if (
+      !file ||
+      slotIndex === null ||
+      !canReplacePreviewSlot(session, slotIndex, activeColorStyle)
+    ) {
+      return;
+    }
 
     setError(null);
     try {
@@ -1239,7 +1139,10 @@ export default function PreviewPage() {
 
   const handleReplaceCropSave = async (croppedUrl: string) => {
     const slotIndex = replaceSlotRef.current;
-    if (slotIndex === null || !session?.canReplace) {
+    if (
+      slotIndex === null ||
+      !canReplacePreviewSlot(session, slotIndex, activeColorStyle)
+    ) {
       if (croppedUrl.startsWith("blob:")) {
         URL.revokeObjectURL(croppedUrl);
       }
@@ -1277,7 +1180,7 @@ export default function PreviewPage() {
       applySession(updatedSession);
       setFailedPreviewUrls((current) => {
         const next = new Set(current);
-        const previousSlot = session.slots.find((item) => item.index === slotIndex);
+        const previousSlot = session?.slots.find((item) => item.index === slotIndex);
         if (previousSlot) {
           for (const candidate of previousSlot.candidates) {
             if (candidate.previewUrl) {
@@ -1408,35 +1311,6 @@ export default function PreviewPage() {
     }
   };
 
-  const handleDisplayOrderChange = useCallback(
-    async (displayOrder: number[]) => {
-      if (!session) return;
-
-      applySession({ ...session, displayOrder });
-
-      try {
-        const response = await fetch(
-          `/api/preview-session/${sessionId}/reorder`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ displayOrder }),
-          },
-        );
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error || t("preview.sessionError"));
-        }
-        applySession(data.session);
-      } catch (err) {
-        console.error("Failed to save page order:", err);
-        setError(err instanceof Error ? err.message : t("preview.sessionError"));
-        void refreshSession();
-      }
-    },
-    [applySession, refreshSession, session, sessionId, t],
-  );
-
   const handleContinueToCart = async () => {
     if (!session) return;
     setIsSubmitting(true);
@@ -1447,7 +1321,7 @@ export default function PreviewPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ style: selectedStyle }),
+          body: JSON.stringify({ style: activeColorStyle }),
         },
       );
       const styleData = await styleResponse.json();
@@ -1470,14 +1344,43 @@ export default function PreviewPage() {
         }
         return active.cleanUrl;
       });
-
-      await addToCart(generatedBwUrls, 1, undefined, undefined, selectedStyle, {
-        originalUrls,
-        generatedBwUrls,
-        previewSessionId: sessionId,
-        generationStats: buildPreviewGenerationStats(latest),
+      const generatedColorUrls = orderedSlots.map((slot) => {
+        const active = getColorCandidateForStyleFromPublicSlot(
+          slot,
+          activeColorStyle,
+        );
+        if (!active?.cleanUrl) {
+          throw new Error(t("preview.sessionError"));
+        }
+        return active.cleanUrl;
       });
+
+      try {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("adding_to_cart", "1");
+        }
+      } catch {}
+
+      const addPromise = addToCart(
+        generatedBwUrls,
+        1,
+        undefined,
+        undefined,
+        activeColorStyle,
+        {
+          originalUrls,
+          generatedBwUrls,
+          generatedColorUrls,
+          previewSessionId: sessionId,
+          generationStats: buildPreviewGenerationStats(latest),
+        },
+      );
+
       router.push("/cart");
+
+      addPromise.catch((e) => {
+        console.error("Add to cart failed:", e);
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : t("preview.sessionError"));
     } finally {
@@ -1538,47 +1441,52 @@ export default function PreviewPage() {
     activeCompareModalOutput?.aspectRatio ?? 72 / 84;
 
   return (
-    <div
-      className="min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: "#F3EEE8" }}
-    >
+    <div className="min-h-screen overflow-x-hidden bg-warm-light">
       <Header />
       <main
         className="flex-1"
         style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
       >
         {showInitialLoadingScreen ? (
-          <InitialPreviewLoadingScreen
+          <PreviewInitialLoadingScreen
             imageUrls={initialLoadingPhotoUrls}
             isExiting={isInitialLoadingExiting}
             isComplete={!isInitialLoading}
-            loadingLine={bwLoadingLines[loadingLineIndex % 5]}
+            loadingLine={
+              bwLoadingLines[loadingLineIndex % bwLoadingLines.length] ??
+              bwLoadingLines[0]
+            }
             slowText={t("preview.loadingSlow")}
             standardText={t("preview.loadingDuration")}
             title={t("preview.bwLoadingTitle")}
+            locale={locale}
           />
         ) : showColorLoadingScreen ? (
-          <InitialPreviewLoadingScreen
+          <PreviewInitialLoadingScreen
             imageUrls={initialLoadingPhotoUrls}
             isExiting={isColorLoadingExiting}
             isComplete={!isColorGenerating}
-            loadingLine={colorLoadingLines[loadingLineIndex % 5]}
+            loadingLine={
+              colorLoadingLines[loadingLineIndex % colorLoadingLines.length] ??
+              colorLoadingLines[0]
+            }
             slowText={t("preview.loadingSlow")}
             standardText={t("preview.loadingDuration")}
             title={t("preview.colorLoadingTitle")}
+            locale={locale}
           />
         ) : (
-          <section className="pt-5 pb-10 md:py-14">
+          <section className="bg-warm-light pt-5 pb-0 md:pb-14">
             <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
               <Title
                 highlightText={
                   isColorPhase
-                    ? t("preview.colorPhaseTitle")
+                    ? t("preview.colorPhaseTitleHighlight")
                     : t("preview.bwPhaseTitle")
                 }
                 size="xl"
                 roundedUnderline
-                className="text-center text-2xl font-bold md:text-4xl"
+                className="text-center text-2xl font-bold md:text-4xl mb-6"
               >
                 {isColorPhase
                   ? t("preview.colorPhaseTitle")
@@ -1615,13 +1523,35 @@ export default function PreviewPage() {
                 </div>
               </div>
             ) : session ? (
-              <div className="mt-2 md:mt-4">
-                {!isColorPhase && (
-                  <p className="mx-auto max-w-xl whitespace-pre-line text-center font-body text-sm leading-tight text-dark-gray md:text-base">
-                    {t("preview.bwPhaseDescription")}
+              <div>
+                {isColorPhase ? (
+                  <p className="mx-auto max-w-xl text-center font-body text-xs leading-tight text-dark-gray md:text-base">
+                    {t("preview.colorPhaseDescription")
+                      .split("\n")
+                      .map((line, index) => (
+                        <span
+                          key={index}
+                          className={cn("block", index > 0 && "mt-1")}
+                        >
+                          {line}
+                        </span>
+                      ))}
+                  </p>
+                ) : (
+                  <p className="mx-auto max-w-xl text-center font-body text-xs leading-tight text-dark-gray md:text-base">
+                    {t("preview.bwPhaseDescription")
+                      .split("\n")
+                      .map((line, index) => (
+                        <span
+                          key={index}
+                          className={cn("block", index > 0 && "mt-1")}
+                        >
+                          {line}
+                        </span>
+                      ))}
                   </p>
                 )}
-                <div className="mt-4 text-center md:mt-5">
+                <div className="mt-4 flex justify-center md:mt-5">
                   {session.changeCreditsRemaining > 0 ? (
                     <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-[11px] font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
                       {t("preview.changesRemainingBadge").replace(
@@ -1630,18 +1560,54 @@ export default function PreviewPage() {
                       )}
                     </span>
                   ) : (
-                    <div className="space-y-1 font-body text-sm text-dark-gray">
-                      <p>{t("preview.changesExhaustedLine1")}</p>
-                      <p>{t("preview.changesExhaustedLine2")}</p>
-                      <p>{t("preview.changesExhaustedLine3")}</p>
+                    <div
+                      className="my-2 w-fit max-w-xl rounded-2xl border border-[#DCD3CC] bg-[#F2EEEA] px-3 py-3"
+                      dir="rtl"
+                    >
+                      <div className="flex items-center gap-4">
+                        <i
+                          className="ti ti-refresh-off shrink-0 text-xs text-accent-burgundy md:text-[14px]"
+                          aria-hidden="true"
+                        />
+                        <div
+                          className="space-y-0 text-right font-body text-xs leading-relaxed md:text-[14px]"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          <p className="text-right">
+                            {t("preview.changesExhaustedLine1")}
+                          </p>
+                          <p className="text-right">
+                            {t("preview.changesExhaustedLine2Before")}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                router.push(
+                                  `/contact?previewSessionId=${sessionId}`,
+                                )
+                              }
+                              className="cursor-pointer border-0 bg-transparent p-0 font-body text-xs text-accent-burgundy underline decoration-accent-burgundy/50 underline-offset-2 transition-opacity hover:opacity-75 md:text-[14px]"
+                            >
+                              {t("preview.changesExhaustedContactLink")}
+                            </button>
+                            {t("preview.changesExhaustedLine2After")}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <div className="mx-auto mt-2 w-full max-w-5xl md:mt-3">
+                <div
+                  className={cn(
+                    "mx-auto w-full max-w-5xl",
+                    session.changeCreditsRemaining > 0
+                      ? "mt-2 md:mt-3"
+                      : "mt-3 md:mt-6",
+                  )}
+                >
                   {isColorPhase && (
                   <div
-                    className="flex justify-center gap-8 border-b border-gray-200 sm:gap-10"
+                    className="flex justify-center gap-8 border-b border-gray-200 pt-1 sm:gap-10 md:mt-2"
                     role="tablist"
                     aria-label={t("preview.colorPhaseTitle")}
                   >
@@ -1678,7 +1644,7 @@ export default function PreviewPage() {
 
                   <div
                     className={cn(
-                      "bg-warm-light px-6 py-6 opacity-100 transition-opacity duration-200 ease-linear motion-reduce:transition-none md:px-6",
+                      "px-4 pb-2 pt-6 opacity-100 transition-opacity duration-200 ease-linear motion-reduce:transition-none md:px-6 md:py-6",
                       !isTabCardsVisible && "pointer-events-none opacity-0",
                     )}
                   >
@@ -1700,7 +1666,7 @@ export default function PreviewPage() {
                             }}
                             disabled={bookLightboxSlides.length === 0}
                             className={cn(
-                              "inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#5b534d]/92 px-3.5 py-1.5 font-body text-sm text-white shadow-sm transition-colors hover:bg-[#443d38] disabled:cursor-not-allowed disabled:opacity-45",
+                              "inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#5b534d]/92 px-3.5 py-1.5 font-body text-xs text-white shadow-sm transition-colors hover:bg-[#443d38] disabled:cursor-not-allowed disabled:opacity-45 md:text-sm",
                             )}
                           >
                             <Expand className="h-4 w-4" strokeWidth={2.25} />
@@ -1708,19 +1674,16 @@ export default function PreviewPage() {
                           </button>
                         </div>
                         <div className="relative">
-                        <div className="overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar">
-                          <div className="flex w-max items-start gap-3 md:gap-3.5 lg:mx-auto lg:gap-3">
-                      <PreviewSortableSlots
-                        slots={session.slots}
-                        displayOrder={session.displayOrder}
-                        disabled={
-                          isSubmitting ||
-                          session.slots.some(
-                            (slot) => slot.inFlight || slot.colorInFlight,
-                          )
-                        }
-                        onReorder={handleDisplayOrderChange}
-                        renderSlot={(slot, { displayPosition: pageNum, dragActivator }) => {
+                        <div className="overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0">
+                          <div className="flex w-max items-start gap-3 md:gap-3.5 lg:mx-auto lg:justify-center lg:gap-3">
+                      {sortSlotsByDisplayOrder(
+                        session.slots,
+                        session.displayOrder,
+                      ).map((slot) => {
+                        const pageNum = displayPosition(
+                          slot.index,
+                          session.displayOrder,
+                        );
                         const active = slot.candidates.find(
                           (candidate) => candidate.id === slot.activeCandidateId,
                         );
@@ -1841,21 +1804,209 @@ export default function PreviewPage() {
                             currentPreviewUrl,
                           );
                         };
+                        const versionCandidates =
+                          displayedBookSide === "bw"
+                            ? getSelectableBwVersionCandidates(slot)
+                            : isColorPhase
+                              ? getSelectableColorVersionCandidates(
+                                  slot,
+                                  activeColorStyle,
+                                )
+                              : [];
+                        const activeVersionCandidateId =
+                          displayedBookSide === "bw"
+                            ? slot.activeCandidateId
+                            : activeColorCandidate?.id;
                         return (
-                            <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                              <div className="relative w-full shrink-0">
-                              <PreviewSlotLightboxActivator
-                                dragActivator={dragActivator}
-                                disabled={!currentPreviewUrl}
-                                onOpenLightbox={openSlotLightbox}
-                                className={cn(
-                                  "relative block w-full overflow-hidden rounded-none bg-[#ebe6dc]",
-                                  currentPreviewUrl
-                                    ? "cursor-pointer transition-opacity lg:hover:opacity-90"
-                                    : "cursor-default",
-                                )}
-                                style={{ aspectRatio: "72 / 84" }}
-                              >
+                          <div
+                            key={slot.index}
+                            className="w-[9rem] flex-shrink-0 snap-center sm:w-[10.5rem] lg:w-[11rem]"
+                          >
+                          <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-[#E5DDD4]">
+                            <div
+                              className="relative flex w-full shrink-0 flex-col gap-1.5 bg-[#EAE6E1]"
+                              style={{ aspectRatio: "72 / 84" }}
+                            >
+                              {currentPreviewUrl && !previewUrlFailed ? (
+                                <div
+                                  className="flex shrink-0 justify-end pe-1 pt-1 md:pe-2"
+                                  data-preview-actions-menu
+                                  dir="ltr"
+                                >
+                                  <div className="relative pointer-events-auto">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setOpenSlotActionsIndex((current) =>
+                                        current === slot.index ? null : slot.index,
+                                      )
+                                    }
+                                    className={cn(
+                                      "group flex cursor-pointer items-center justify-center",
+                                      showActionsPulse && "preview-more-pulse",
+                                    )}
+                                    aria-label={t("preview.imageActions")}
+                                    aria-expanded={openSlotActionsIndex === slot.index}
+                                  >
+                                    <span className="relative flex h-4 min-w-[22px] items-center justify-center overflow-hidden rounded-full bg-white px-1.5 py-0 text-[#693430]/80 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                                      <span className="absolute inset-0 bg-[#693430] opacity-0 transition-opacity duration-150 ease-in group-hover:opacity-10 group-active:opacity-10" />
+                                      <MoreHorizontal
+                                        className="relative h-3 w-3"
+                                        strokeWidth={2.4}
+                                      />
+                                    </span>
+                                  </button>
+                                  {openSlotActionsIndex === slot.index && (
+                                    <>
+                                      <div
+                                        className="fixed inset-0 z-50 flex items-end bg-black/20 p-3 sm:hidden"
+                                        onClick={() => setOpenSlotActionsIndex(null)}
+                                      >
+                                        <div
+                                          className="w-full rounded-xl border border-gray-200 bg-[#F9F7EE] p-2 shadow-xl"
+                                          onClick={(event) => event.stopPropagation()}
+                                        >
+                                          <div className="flex flex-col gap-0">
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                (displayedBookSide === "bw" ? !session.canRegenerate : !session.canRegenerateColor) ||
+                                                isVisibleSideBusy ||
+                                                isSubmitting
+                                              }
+                                              onClick={() => {
+                                                setOpenSlotActionsIndex(null);
+                                                if (displayedBookSide === "bw") {
+                                                  void handleRegenerate(slot.index);
+                                                  return;
+                                                }
+                                                void handleRegenerateColor(slot.index);
+                                              }}
+                                              className="block w-full cursor-pointer rounded-lg px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.regenerate")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={
+                                                !canReplacePreviewSlot(
+                                                  session,
+                                                  slot.index,
+                                                ) ||
+                                                isSlotBusy ||
+                                                isSubmitting
+                                              }
+                                              onClick={() => {
+                                                setOpenSlotActionsIndex(null);
+                                                handleReplaceClick(slot.index);
+                                              }}
+                                              className="block w-full cursor-pointer rounded-lg px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.replaceImage")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={!activeCompareOutput}
+                                              onClick={() => {
+                                                setOpenSlotActionsIndex(null);
+                                                openCompareModal();
+                                              }}
+                                              className="block w-full cursor-pointer rounded-lg px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.originalImage")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              disabled={!canCropImage}
+                                              onClick={() => {
+                                                openCropModal();
+                                              }}
+                                              className="block w-full cursor-pointer rounded-lg px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                            >
+                                              {t("preview.cropImage")}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="absolute right-0 top-full z-40 mt-1.5 hidden w-36 rounded-xl border border-gray-200 bg-[#F9F7EE] p-1 shadow-xl sm:block">
+                                        <button
+                                          type="button"
+                                          disabled={
+                                            (displayedBookSide === "bw" ? !session.canRegenerate : !session.canRegenerateColor) ||
+                                            isVisibleSideBusy ||
+                                            isSubmitting
+                                          }
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            if (displayedBookSide === "bw") {
+                                              void handleRegenerate(slot.index);
+                                              return;
+                                            }
+                                            void handleRegenerateColor(slot.index);
+                                          }}
+                                          className="block w-full cursor-pointer rounded-lg px-2 py-1 text-end font-body-bold text-xs text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.regenerate")}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={
+                                            !canReplacePreviewSlot(
+                                              session,
+                                              slot.index,
+                                            ) ||
+                                            isSlotBusy ||
+                                            isSubmitting
+                                          }
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            handleReplaceClick(slot.index);
+                                          }}
+                                          className="block w-full cursor-pointer rounded-lg px-2 py-1 text-end font-body-bold text-xs text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.replaceImage")}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={!activeCompareOutput}
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            openCompareModal();
+                                          }}
+                                          className="block w-full cursor-pointer rounded-lg px-2 py-1 text-end font-body-bold text-xs text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.originalImage")}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={!canCropImage}
+                                          onClick={() => {
+                                            setOpenSlotActionsIndex(null);
+                                            openCropModal();
+                                          }}
+                                          className="block w-full cursor-pointer rounded-lg px-2 py-1 text-end font-body-bold text-xs text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
+                                        >
+                                          {t("preview.cropImage")}
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                  </div>
+                                </div>
+                              ) : null}
+                              <div className="flex min-h-0 flex-1 items-center justify-center px-0 pb-[14px] md:px-0.5 md:pb-[18px]">
+                                <PreviewSlotLightboxActivator
+                                  lightboxEnabled={Boolean(currentPreviewUrl)}
+                                  onOpenLightbox={openSlotLightbox}
+                                  className={cn(
+                                    "relative block h-full w-auto max-w-[80%] overflow-hidden rounded-sm",
+                                    currentPreviewUrl
+                                      ? "cursor-pointer transition-opacity lg:hover:opacity-90"
+                                      : "cursor-default",
+                                  )}
+                                  style={{ aspectRatio: "72 / 84" }}
+                                >
                                 {displayedBookSide === "bw" ? (
                                   isSlotBusy ? (
                                     <div className="flex h-full flex-col items-center justify-center gap-2">
@@ -1869,6 +2020,15 @@ export default function PreviewPage() {
                                       key={`${slot.index}-${slot.activeCandidateId}`}
                                       src={active.previewUrl}
                                       alt={`${t("preview.title")} ${pageNum}`}
+                                    />
+                                  ) : active?.error?.code === "prohibited_content" ? (
+                                    <PreviewSlotProhibitedContent
+                                      disabled={
+                                        isVisibleSideBusy || isSubmitting
+                                      }
+                                      onUpload={() =>
+                                        handleReplaceClick(slot.index)
+                                      }
                                     />
                                   ) : (
                                     <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
@@ -1903,6 +2063,12 @@ export default function PreviewPage() {
                                       });
                                     }}
                                   />
+                                ) : activeColorCandidate?.error?.code ===
+                                  "prohibited_content" ? (
+                                  <PreviewSlotProhibitedContent
+                                    disabled={isVisibleSideBusy || isSubmitting}
+                                    onUpload={() => handleReplaceClick(slot.index)}
+                                  />
                                 ) : (
                                   <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
                                     {activeColorCandidate?.error?.message ||
@@ -1912,185 +2078,28 @@ export default function PreviewPage() {
                                   </div>
                                 )}
                               </PreviewSlotLightboxActivator>
-                              {currentPreviewUrl && !previewUrlFailed ? (
-                                <div
-                                  className="pointer-events-none absolute right-1 top-1 z-30"
-                                  data-preview-actions-menu
-                                >
-                                  <div className="relative pointer-events-auto" dir="ltr">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setOpenSlotActionsIndex((current) =>
-                                        current === slot.index ? null : slot.index,
-                                      )
-                                    }
-                                    className={cn(
-                                      "group flex h-8 w-8 cursor-pointer items-center justify-center rounded-full",
-                                      showActionsPulse && "preview-more-pulse",
-                                    )}
-                                    aria-label={t("preview.imageActions")}
-                                    aria-expanded={openSlotActionsIndex === slot.index}
-                                  >
-                                    <span className="relative flex h-6 w-8 items-center justify-center overflow-hidden rounded-full bg-white/60 text-[#693430]/65 shadow-[0_1px_4px_rgba(0,0,0,0.08)] backdrop-blur-[4px]">
-                                      <span className="absolute inset-0 bg-[#693430] opacity-0 transition-opacity duration-150 ease-in group-hover:opacity-10 group-active:opacity-10" />
-                                      <MoreHorizontal
-                                        className="relative h-4 w-4"
-                                        strokeWidth={2.4}
-                                      />
-                                    </span>
-                                  </button>
-                                  {openSlotActionsIndex === slot.index && (
-                                    <>
-                                      <div
-                                        className="fixed inset-0 z-50 flex items-end bg-black/20 p-3 sm:hidden"
-                                        onClick={() => setOpenSlotActionsIndex(null)}
-                                      >
-                                        <div
-                                          className="w-full rounded-2xl border border-gray-200 bg-[#F9F7EE] p-3 shadow-xl"
-                                          onClick={(event) => event.stopPropagation()}
-                                        >
-                                          <div className="flex flex-col gap-1">
-                                            <button
-                                              type="button"
-                                              disabled={
-                                                (displayedBookSide === "bw" ? !session.canRegenerate : !session.canRegenerateColor) ||
-                                                isVisibleSideBusy ||
-                                                isSubmitting
-                                              }
-                                              onClick={() => {
-                                                setOpenSlotActionsIndex(null);
-                                                if (displayedBookSide === "bw") {
-                                                  void handleRegenerate(slot.index);
-                                                  return;
-                                                }
-                                                void handleRegenerateColor(slot.index);
-                                              }}
-                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                            >
-                                              {t("preview.regenerate")}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              disabled={
-                                                !session.canReplace ||
-                                                isSlotBusy ||
-                                                isSubmitting
-                                              }
-                                              onClick={() => {
-                                                setOpenSlotActionsIndex(null);
-                                                handleReplaceClick(slot.index);
-                                              }}
-                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                            >
-                                              {t("preview.replaceImage")}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              disabled={!activeCompareOutput}
-                                              onClick={() => {
-                                                setOpenSlotActionsIndex(null);
-                                                openCompareModal();
-                                              }}
-                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                            >
-                                              {t("preview.originalImage")}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              disabled={!canCropImage}
-                                              onClick={() => {
-                                                openCropModal();
-                                              }}
-                                              className="block w-full cursor-pointer rounded-xl px-4 py-3 text-end font-body-bold text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                            >
-                                              {t("preview.cropImage")}
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div className="absolute right-0 top-full z-40 mt-2 hidden w-44 rounded-2xl border border-gray-200 bg-[#F9F7EE] p-2 shadow-xl sm:block">
-                                        <button
-                                          type="button"
-                                          disabled={
-                                            (displayedBookSide === "bw" ? !session.canRegenerate : !session.canRegenerateColor) ||
-                                            isVisibleSideBusy ||
-                                            isSubmitting
-                                          }
-                                          onClick={() => {
-                                            setOpenSlotActionsIndex(null);
-                                            if (displayedBookSide === "bw") {
-                                              void handleRegenerate(slot.index);
-                                              return;
-                                            }
-                                            void handleRegenerateColor(slot.index);
-                                          }}
-                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                        >
-                                          {t("preview.regenerate")}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          disabled={
-                                            !session.canReplace ||
-                                            isSlotBusy ||
-                                            isSubmitting
-                                          }
-                                          onClick={() => {
-                                            setOpenSlotActionsIndex(null);
-                                            handleReplaceClick(slot.index);
-                                          }}
-                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                        >
-                                          {t("preview.replaceImage")}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          disabled={!activeCompareOutput}
-                                          onClick={() => {
-                                            setOpenSlotActionsIndex(null);
-                                            openCompareModal();
-                                          }}
-                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                        >
-                                          {t("preview.originalImage")}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          disabled={!canCropImage}
-                                          onClick={() => {
-                                            setOpenSlotActionsIndex(null);
-                                            openCropModal();
-                                          }}
-                                          className="block w-full cursor-pointer rounded-xl px-3 py-2 text-end font-body-bold text-sm text-dark-gray transition-colors hover:bg-[#EFE7DF] disabled:cursor-not-allowed disabled:opacity-45"
-                                        >
-                                          {t("preview.cropImage")}
-                                        </button>
-                                      </div>
-                                    </>
-                                  )}
-                                  </div>
-                                </div>
-                              ) : null}
                               </div>
-
+                            </div>
+                            {versionCandidates.length > 1 ? (
+                              <PreviewSlotAlternateVersions
+                                versions={versionCandidates}
+                                activeCandidateId={activeVersionCandidateId}
+                                title={t("preview.allVersions")}
+                                disabled={
+                                  isVisibleSideBusy || isSubmitting
+                                }
+                                onSelect={(candidateId) => {
+                                  void handleSelectCandidate(
+                                    slot.index,
+                                    candidateId,
+                                  );
+                                }}
+                              />
+                            ) : null}
+                          </div>
                           </div>
                         );
-                      }}
-                      />
-                      {session ? (
-                        <PreviewSlotVersionsStrip
-                          entries={previewVersionEntries}
-                          displayedBookSide={displayedBookSide}
-                          isSlotColorBusy={isSlotColorBusyForVersions}
-                          isSubmitting={isSubmitting}
-                          onSelectCandidate={(slotIndex, candidateId) => {
-                            void handleSelectCandidate(slotIndex, candidateId);
-                          }}
-                          title={t("preview.previousVersions")}
-                        />
-                      ) : null}
+                      })}
                           </div>
                         </div>
                       </div>
@@ -2116,48 +2125,74 @@ export default function PreviewPage() {
                   </div>
                 </div>
 
+                <PreviewPhaseFooter.MobileContact
+                  contactBefore={t("preview.bwApproveBelowBefore")}
+                  contactLinkLabel={t("preview.contactButton")}
+                  onContactClick={() =>
+                    router.push(`/contact?previewSessionId=${sessionId}`)
+                  }
+                />
+
                 {isColorPhase ? (
-                  <div className="mt-8 flex flex-col items-center gap-4">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      disabled={!session.canAddToCart || isSubmitting}
-                      onClick={handleContinueToCart}
-                    >
-                      {isSubmitting
-                        ? t("preview.addingToCart")
-                        : t("preview.addToCart")}
-                    </Button>
-                    <p className="text-center font-body text-sm text-dark-gray">
-                      {t("preview.contactPrompt")}{" "}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          router.push(`/contact?previewSessionId=${sessionId}`)
-                        }
-                        className="cursor-pointer border-0 bg-transparent p-0 font-body-bold text-accent-burgundy underline underline-offset-2 transition-opacity hover:opacity-75"
-                      >
-                        {t("preview.contactButton")}
-                      </button>
-                    </p>
-                  </div>
+                  <>
+                    <PreviewPhaseFooter
+                      variant="fixedMobile"
+                      headline={t("preview.colorCartAbove")}
+                      buttonLabel={t("preview.addToCart")}
+                      submittingLabel={t("preview.addingToCart")}
+                      buttonDisabled={!session.canAddToCart}
+                      isSubmitting={isSubmitting}
+                      onButtonClick={handleContinueToCart}
+                      contactBefore={t("preview.bwApproveBelowBefore")}
+                      contactLinkLabel={t("preview.contactButton")}
+                      onContactClick={() =>
+                        router.push(`/contact?previewSessionId=${sessionId}`)
+                      }
+                    />
+                    <PreviewPhaseFooter
+                      variant="inline"
+                      headline={t("preview.colorCartAbove")}
+                      buttonLabel={t("preview.addToCart")}
+                      submittingLabel={t("preview.addingToCart")}
+                      buttonDisabled={!session.canAddToCart}
+                      isSubmitting={isSubmitting}
+                      onButtonClick={handleContinueToCart}
+                      contactBefore={t("preview.bwApproveBelowBefore")}
+                      contactLinkLabel={t("preview.contactButton")}
+                      onContactClick={() =>
+                        router.push(`/contact?previewSessionId=${sessionId}`)
+                      }
+                    />
+                  </>
                 ) : (
-                  <div className="mt-8 flex flex-col items-center gap-3">
-                    <p className="text-center font-body text-sm text-dark-gray">
-                      {t("preview.bwApproveAbove")}
-                    </p>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      disabled={!session.canApproveBw || isSubmitting}
-                      onClick={handleApproveBw}
-                    >
-                      {t("preview.approveBwButton")}
-                    </Button>
-                    <p className="text-center font-body text-sm text-dark-gray/70">
-                      {t("preview.bwApproveBelow")}
-                    </p>
-                  </div>
+                  <>
+                    <PreviewPhaseFooter
+                      variant="fixedMobile"
+                      headline={t("preview.bwApproveAbove")}
+                      buttonLabel={t("preview.approveBwButton")}
+                      buttonDisabled={!session.canApproveBw}
+                      isSubmitting={isSubmitting}
+                      onButtonClick={handleApproveBw}
+                      contactBefore={t("preview.bwApproveBelowBefore")}
+                      contactLinkLabel={t("preview.contactButton")}
+                      onContactClick={() =>
+                        router.push(`/contact?previewSessionId=${sessionId}`)
+                      }
+                    />
+                    <PreviewPhaseFooter
+                      variant="inline"
+                      headline={t("preview.bwApproveAbove")}
+                      buttonLabel={t("preview.approveBwButton")}
+                      buttonDisabled={!session.canApproveBw}
+                      isSubmitting={isSubmitting}
+                      onButtonClick={handleApproveBw}
+                      contactBefore={t("preview.bwApproveBelowBefore")}
+                      contactLinkLabel={t("preview.contactButton")}
+                      onContactClick={() =>
+                        router.push(`/contact?previewSessionId=${sessionId}`)
+                      }
+                    />
+                  </>
                 )}
               </div>
             ) : null}

@@ -9,6 +9,7 @@ import {
   type PreviewGenerationContext,
   type PreviewGenerationTrigger,
 } from "./generation-log";
+import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewCandidate, PreviewSession } from "./types";
 
@@ -71,6 +72,16 @@ async function buildCandidate(
       error,
       generationContext,
     );
+    maybeLogProhibitedContentEvent({
+      sessionId,
+      slotIndex,
+      side: "bw",
+      candidateId,
+      sourceUrl,
+      trigger,
+      error,
+      errorCode: candidate.error.code,
+    });
   }
 
   return candidate;

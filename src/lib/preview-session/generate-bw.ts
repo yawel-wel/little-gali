@@ -2,7 +2,10 @@ import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
 import { buildNanoBananaSystemInstructionText } from "@/lib/gemini-nano-banana-system";
 import { BLACK_AND_WHITE_PROMPT } from "@/lib/prompts/constants";
-import type { GenerationError } from "./types";
+import {
+  classifyGenerationError,
+  shouldStopGeminiRetry,
+} from "./generation-errors";
 import {
   logGeminiRequest,
   logGeminiResponse,
@@ -15,34 +18,6 @@ const MAX_RETRIES = 2;
 
 function isMockGenerationEnabled(): boolean {
   return process.env.MOCK_AI_GENERATION === "true";
-}
-
-function classifyGenerationError(error: unknown): GenerationError {
-  const message =
-    error instanceof Error ? error.message : "Unknown generation error";
-  const lower = message.toLowerCase();
-  if (
-    lower.includes("safety") ||
-    lower.includes("blocked") ||
-    lower.includes("policy") ||
-    lower.includes("harm")
-  ) {
-    return {
-      code: "safety",
-      message:
-        "לא הצלחנו לעבד את התמונה. נסו תמונה אחרת עם פחות רגישות לפרטיות.",
-    };
-  }
-  if (lower.includes("timeout") || lower.includes("timed out")) {
-    return {
-      code: "timeout",
-      message: "העיבוד לקח יותר מדי זמן. נסו שוב בעוד רגע.",
-    };
-  }
-  return {
-    code: "generic",
-    message: "משהו השתבש בזמן יצירת התמונה. נסו שוב.",
-  };
 }
 
 async function createMockBwImage(sourceUrl: string): Promise<Buffer> {
@@ -175,7 +150,7 @@ async function generateWithGemini(
         error,
         generationContext,
       );
-      if (classified.code === "safety" || attempt === MAX_RETRIES) {
+      if (shouldStopGeminiRetry(classified) || attempt === MAX_RETRIES) {
         throw error;
       }
     }
@@ -196,6 +171,4 @@ export async function generateBwImageBuffer(
   return generateWithGemini(imageUrl, generationContext);
 }
 
-export function toGenerationError(error: unknown): GenerationError {
-  return classifyGenerationError(error);
-}
+export { classifyGenerationError as toGenerationError } from "./generation-errors";

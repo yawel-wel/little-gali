@@ -24,6 +24,7 @@ import {
   type PreviewGenerationContext,
   type PreviewGenerationTrigger,
 } from "./generation-log";
+import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type {
   FrozenStyleStripThumbnail,
@@ -131,6 +132,17 @@ async function buildColorPreview(
       error,
       generationContext,
     );
+    maybeLogProhibitedContentEvent({
+      sessionId,
+      slotIndex,
+      side: "color",
+      candidateId,
+      sourceUrl,
+      trigger,
+      style,
+      error,
+      errorCode: candidate.error.code,
+    });
   }
 
   return candidate;

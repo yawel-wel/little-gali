@@ -21,7 +21,7 @@ export async function POST(
   }
 
   const session = auth.session;
-  if (session.phase !== "bw_approved") {
+  if (session.phase !== "bw_approved" && session.phase !== "style_selected") {
     return NextResponse.json({ error: "Approve B&W before choosing style" }, { status: 409 });
   }
 

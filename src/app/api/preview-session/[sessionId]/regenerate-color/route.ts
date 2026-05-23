@@ -5,7 +5,10 @@ import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import { runSlotColorGeneration } from "@/lib/preview-session/color-generation-runner";
 import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
-import { consumeChangeCredit, hasChangeCredits } from "@/lib/preview-session/credits";
+import {
+  consumeChangeCreditForResult,
+  hasChangeCredits,
+} from "@/lib/preview-session/credits";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
@@ -90,9 +93,6 @@ export async function POST(
   });
 
   try {
-    consumeChangeCredit(session);
-    await savePreviewSession(session);
-
     const updated = await runSlotColorGeneration(sessionId, slotIndex, style, {
       trigger: "regenerate",
     });
@@ -102,6 +102,8 @@ export async function POST(
 
     const activeSlot = updated.slots[slotIndex];
     const colorPreview = activeSlot?.colorPreview;
+    consumeChangeCreditForResult(updated, colorPreview?.error);
+    await savePreviewSession(updated);
     const durationMs = Date.now() - startedAt;
     logPreviewApiOperation(
       "image_regeneration",

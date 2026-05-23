@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       style,
       originalUrls,
       generatedBwUrls,
+      generatedColorUrls,
       previewSessionId,
       previewGenTotal,
       previewGenSelected,
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
       style?: StoredCartImages["style"];
       originalUrls?: string[];
       generatedBwUrls?: string[];
+      generatedColorUrls?: string[];
       previewSessionId?: string;
       previewGenTotal?: number;
       previewGenSelected?: string;
@@ -46,6 +48,7 @@ export async function POST(request: NextRequest) {
       style: style || "cartoon",
       originalUrls,
       generatedBwUrls,
+      generatedColorUrls,
       previewSessionId,
       previewGenTotal,
       previewGenSelected,

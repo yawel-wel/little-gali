@@ -6,7 +6,10 @@ import {
   readIdempotentResponse,
   writeIdempotentResponse,
 } from "@/lib/preview-session/idempotency";
-import { consumeChangeCredit, hasChangeCredits } from "@/lib/preview-session/credits";
+import {
+  consumeChangeCreditForResult,
+  hasChangeCredits,
+} from "@/lib/preview-session/credits";
 import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
 import { runSlotGeneration } from "@/lib/preview-session/generation-runner";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
@@ -82,7 +85,6 @@ export async function POST(
 
   try {
     slot.pendingIdempotencyKey = idempotencyKey;
-    consumeChangeCredit(session);
     await savePreviewSession(session);
 
     const updated = await runSlotGeneration(session, slotIndex, slot.originalUrl, {
@@ -93,6 +95,7 @@ export async function POST(
       (candidate) =>
         candidate.kind === "bw" && candidate.id === activeSlot.activeCandidateId,
     );
+    consumeChangeCreditForResult(updated, activeCandidate?.error);
     await savePreviewSession(updated);
     const view = toPublicView(updated);
     await writeIdempotentResponse(sessionId, idempotencyKey, view);

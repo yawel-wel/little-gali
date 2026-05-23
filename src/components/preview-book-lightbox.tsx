@@ -153,18 +153,10 @@ export function PreviewBookLightbox({
   };
 
   const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    if (!window.matchMedia("(max-width: 767px)").matches) {
-      return;
-    }
-
     touchStartXRef.current = event.touches[0]?.clientX ?? null;
   };
 
   const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
-    if (!window.matchMedia("(max-width: 767px)").matches) {
-      return;
-    }
-
     const startX = touchStartXRef.current;
     touchStartXRef.current = null;
     const endX = event.changedTouches[0]?.clientX;
@@ -185,6 +177,9 @@ export function PreviewBookLightbox({
     goToPrevious();
   };
 
+  const navButtonClass =
+    "absolute top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-dark-gray shadow-[0_1px_4px_rgba(0,0,0,0.1)] transition hover:bg-white/95";
+
   return (
     <AnimatePresence>
       {open && slides.length > 0 && activeSlide ? (
@@ -193,62 +188,58 @@ export function PreviewBookLightbox({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={overlayTransition}
-          className="fixed inset-0 z-[70] flex items-center justify-center px-4 py-8 sm:px-6"
-          style={{ backgroundColor: "#F9F7EE" }}
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#F9F7EE] px-4 py-6 sm:px-6 sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-label={activeSlide.alt}
+          dir="ltr"
         >
           <motion.div
             initial={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, y: 8 }
+              prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }
             }
             animate={{ opacity: 1, y: 0 }}
-            exit={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, y: 6 }
-            }
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
             transition={panelTransition}
-            className="flex w-full max-w-[min(96vw,760px)] flex-col items-center gap-5"
+            className="flex max-h-[min(92vh,720px)] w-full max-w-[min(92vw,22rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:max-w-[26rem] md:max-w-[28rem]"
           >
-            <div className="flex w-full items-center justify-center gap-3 sm:gap-4" dir="ltr">
+            <div className="relative flex min-h-[min(58vh,520px)] flex-1 flex-col bg-[#EAE6E1] px-3 pb-4 pt-3 sm:min-h-[min(60vh,560px)] sm:px-4 sm:pb-5 sm:pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="absolute right-2 top-2 z-30 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-white text-dark-gray shadow-[0_1px_4px_rgba(0,0,0,0.1)] transition hover:bg-white/95"
+                aria-label={closeLabel}
+              >
+                <X className="h-3 w-3" strokeWidth={2} />
+              </button>
+
               {slides.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={goToPrevious}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white/90 text-dark-gray shadow-sm transition hover:bg-white cursor-pointer"
-                  aria-label={previousLabel}
-                >
-                  <ChevronLeft className="h-6 w-6" strokeWidth={2.25} />
-                </button>
-              ) : (
-                <div className="h-10 w-10 shrink-0" aria-hidden />
-              )}
+                <>
+                  <button
+                    type="button"
+                    onClick={goToPrevious}
+                    className={cn(navButtonClass, "left-2 sm:left-3")}
+                    aria-label={previousLabel}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNext}
+                    className={cn(navButtonClass, "right-2 sm:right-3")}
+                    aria-label={nextLabel}
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
+                  </button>
+                </>
+              ) : null}
 
-              <div className="relative w-full max-w-[min(82vw,520px)]">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="group absolute right-2 top-2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full"
-                  aria-label={closeLabel}
-                >
-                  <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#F9F7EE]/80 text-gray-700 shadow-sm backdrop-blur-[4px]">
-                    <span className="absolute inset-0 rounded-full bg-[#F9F7EE] opacity-0 transition-opacity duration-150 ease-in group-hover:opacity-20 group-active:opacity-20" />
-                    <X
-                      className="relative h-[18px] w-[18px]"
-                      strokeWidth={2.25}
-                    />
-                  </span>
-                </button>
-
+              <div className="flex flex-1 items-center justify-center px-8 sm:px-10">
                 <div
-                  className="relative mx-auto w-full overflow-hidden rounded-lg bg-[#ebe6dc] shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                  className="relative w-full overflow-hidden rounded-xl bg-[#EAE6E1]"
                   style={{
                     aspectRatio: activeImageAspectRatio,
-                    maxHeight: "min(72vh, 900px)",
+                    maxHeight: "min(48vh, 480px)",
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchEnd={handleTouchEnd}
@@ -284,52 +275,26 @@ export function PreviewBookLightbox({
                   </AnimatePresence>
                 </div>
               </div>
-
-              {slides.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={goToNext}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white/90 text-dark-gray shadow-sm transition hover:bg-white cursor-pointer"
-                  aria-label={nextLabel}
-                >
-                  <ChevronRight className="h-6 w-6" strokeWidth={2.25} />
-                </button>
-              ) : (
-                <div className="h-10 w-10 shrink-0" aria-hidden />
-              )}
             </div>
 
             {slides.length > 1 ? (
-              <motion.div
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={panelTransition}
-                className="w-full max-w-[min(92vw,560px)] overflow-x-auto hide-scrollbar"
-              >
-                <div className="flex justify-center gap-2 px-1 pb-1">
+              <div className="shrink-0 bg-white px-4 py-4 sm:px-5 sm:py-5">
+                <div className="flex justify-center gap-2 overflow-x-auto hide-scrollbar">
                   {slides.map((slide, index) => {
                     const isActive = index === activeIndex;
 
                     return (
-                      <motion.button
+                      <button
                         key={`${slide.pageNumber}-${slide.imageUrl}`}
                         type="button"
                         onClick={() => goToIndex(index)}
                         aria-label={slide.alt}
                         aria-current={isActive}
-                        layout
-                        whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
-                        whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-                        animate={{
-                          opacity: isActive ? 1 : 0.78,
-                          scale: isActive ? 1.03 : 1,
-                        }}
-                        transition={imageTransition}
                         className={cn(
-                          "relative h-14 w-12 shrink-0 overflow-hidden rounded-md border-2 transition-colors cursor-pointer bg-white sm:h-16 sm:w-14",
+                          "h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 bg-[#EAE6E1] transition-colors cursor-pointer sm:h-12 sm:w-12",
                           isActive
-                            ? "border-primary-orange"
-                            : "border-gray-200 hover:border-gray-300",
+                            ? "border-accent-burgundy"
+                            : "border-transparent opacity-75 hover:opacity-100",
                         )}
                       >
                         <img
@@ -340,11 +305,11 @@ export function PreviewBookLightbox({
                             "h-full w-full object-cover",
                           )}
                         />
-                      </motion.button>
+                      </button>
                     );
                   })}
                 </div>
-              </motion.div>
+              </div>
             ) : null}
           </motion.div>
         </motion.div>

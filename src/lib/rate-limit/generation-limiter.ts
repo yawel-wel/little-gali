@@ -1,15 +1,20 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+import { getGenerationRateLimitConfig } from "./config";
 import { GENERATION_LIMIT_ERROR_CODE } from "./constants";
 
 export { GENERATION_LIMIT_ERROR_CODE } from "./constants";
 
 const redis = Redis.fromEnv();
+const generationRateLimitConfig = getGenerationRateLimitConfig();
 
 export const generationLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(35, "24 h"),
+  limiter: Ratelimit.slidingWindow(
+    generationRateLimitConfig.limit,
+    generationRateLimitConfig.window,
+  ),
   analytics: false,
   prefix: "little-gali:generation",
 });
@@ -30,7 +35,7 @@ export async function checkGenerationLimit(
   if (isGenerationRateLimitDisabled()) {
     return {
       success: true,
-      remaining: 35,
+      remaining: generationRateLimitConfig.limit,
       reset: Date.now() + 24 * 60 * 60 * 1000,
     };
   }

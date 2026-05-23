@@ -7,7 +7,7 @@ import {
   PENCIL_COLOR_PROMPT,
   WATERCOLOR_COLOR_PROMPT,
 } from "@/lib/prompts/constants";
-import { toGenerationError } from "./generate-bw";
+import { classifyGenerationError, shouldStopGeminiRetry } from "./generation-errors";
 import {
   logGeminiRequest,
   logGeminiResponse,
@@ -155,7 +155,7 @@ async function generateWithGemini(
       );
     } catch (error) {
       lastError = error;
-      const classified = toGenerationError(error);
+      const classified = classifyGenerationError(error);
       logPreviewGenerationFailure(
         "color",
         {
@@ -168,7 +168,7 @@ async function generateWithGemini(
         error,
         generationContext,
       );
-      if (classified.code === "safety" || attempt === MAX_RETRIES) {
+      if (shouldStopGeminiRetry(classified) || attempt === MAX_RETRIES) {
         throw error;
       }
     }

@@ -17,7 +17,11 @@ import {
   writeIdempotentResponse,
 } from "@/lib/preview-session/idempotency";
 import { logPreviewImageReplaced } from "@/lib/preview-session/generation-log";
-import { consumeChangeCredit, hasChangeCredits } from "@/lib/preview-session/credits";
+import {
+  consumeChangeCreditForResult,
+  hasChangeCredits,
+  slotHasProhibitedContentForReplace,
+} from "@/lib/preview-session/credits";
 import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
 import { runSlotGeneration } from "@/lib/preview-session/generation-runner";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
@@ -85,11 +89,17 @@ export async function POST(
   }
 
   const session = auth.session;
-  if (session.phase !== "bw_review") {
+  const fixingProhibited = slotHasProhibitedContentForReplace(
+    session,
+    slotIndex,
+    session.selectedColorStyle,
+  );
+
+  if (!fixingProhibited && session.phase !== "bw_review") {
     return NextResponse.json({ error: "Session is not in B&W review" }, { status: 409 });
   }
 
-  if (!hasChangeCredits(session)) {
+  if (!fixingProhibited && !hasChangeCredits(session)) {
     return NextResponse.json(
       { error: "No change credits remaining" },
       { status: 403 },
@@ -116,8 +126,6 @@ export async function POST(
   });
 
   try {
-    consumeChangeCredit(session);
-
     const currentInputVersion = slot.inputVersion ?? 1;
     if (slot.originalUrl) {
       await copyCloudinaryUrlToPublicId(
@@ -138,6 +146,8 @@ export async function POST(
     slot.originalUrl = inputUpload.secureUrl;
     slot.originalPublicId = inputUpload.publicId;
     slot.inputVersion = nextInputVersion;
+    slot.candidates = [];
+    slot.activeCandidateId = undefined;
     slot.pendingIdempotencyKey = idempotencyKey;
     await savePreviewSession(session);
 
@@ -150,6 +160,9 @@ export async function POST(
         candidate.kind === "bw" && candidate.id === activeSlot.activeCandidateId,
     );
 
+    if (!fixingProhibited) {
+      consumeChangeCreditForResult(updated, activeCandidate?.error);
+    }
     await savePreviewSession(updated);
 
     if (activeCandidate?.previewUrl) {

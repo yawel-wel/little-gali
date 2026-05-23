@@ -68,3 +68,22 @@ export function originalUrlsShopifyAttributes(
     value: url,
   }));
 }
+
+export function generatedColorUrlsShopifyAttributes(
+  generatedColorUrls?: string[],
+): Array<{ key: string; value: string }> {
+  if (!generatedColorUrls || generatedColorUrls.length !== 5) {
+    return [];
+  }
+
+  return generatedColorUrls.map((url, index) => ({
+    key: `_color_image_${index + 1}`,
+    value: url,
+  }));
+}
+
+export function hasInvalidHttpImageUrls(urls: string[]): boolean {
+  return urls.some(
+    (url) => !url.startsWith("http://") && !url.startsWith("https://"),
+  );
+}

@@ -168,6 +168,26 @@ export function logPreviewGenerationSuccess(
   });
 }
 
+export function logPreviewProhibitedContent(
+  context: LogAttributes & {
+    sessionId: string;
+    slot: number;
+    side: PreviewGenerationKind;
+    candidateId: string;
+    finishReason?: string;
+    cloudinaryErrorPublicId?: string;
+  },
+  generationContext?: PreviewGenerationContext,
+): void {
+  console.warn(
+    `[preview-${context.side}] prohibited content ${formatContext(context)}`,
+  );
+  emitSentryLog("warn", "preview.generation.prohibited_content", generationContext, {
+    ...context,
+    side: context.side,
+  });
+}
+
 export function logPreviewGenerationFailure(
   kind: PreviewGenerationKind,
   context: LogAttributes,

@@ -10,6 +10,7 @@ export interface CartItem {
   imageUrls: string[];
   originalUrls?: string[];
   generatedBwUrls?: string[];
+  generatedColorUrls?: string[];
   previewSessionId?: string;
   title?: string;
   lineId?: string;
@@ -26,6 +27,7 @@ export interface PreviewGenerationStats {
 export interface BookFulfillmentImages {
   originalUrls: string[];
   generatedBwUrls: string[];
+  generatedColorUrls?: string[];
   previewSessionId: string;
   generationStats?: PreviewGenerationStats;
 }
@@ -134,6 +136,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             imageUrls: string[];
             originalUrls?: string[];
             generatedBwUrls?: string[];
+            generatedColorUrls?: string[];
             previewSessionId?: string;
             style?: "cartoon" | "pencil" | "watercolor";
           }> => {
@@ -152,6 +155,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                       imageUrls: json.imageUrls,
                       originalUrls: json.originalUrls,
                       generatedBwUrls: json.generatedBwUrls,
+                      generatedColorUrls: json.generatedColorUrls,
                       previewSessionId: json.previewSessionId,
                       style: json.style,
                     };
@@ -182,6 +186,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               // Fallback to Shopify attributes if cart-images API returned empty (production issue)
               // This happens because in-memory storage doesn't work across serverless instances
               let imageUrls = lineData.imageUrls;
+              let generatedColorUrls = lineData.generatedColorUrls;
               if (imageUrls.length === 0) {
                 // First try the imageUrls already extracted by the get route (from Shopify attributes)
                 if (line.imageUrls && Array.isArray(line.imageUrls) && line.imageUrls.length > 0) {
@@ -201,6 +206,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   if (shopifyImageUrls.length > 0) {
                     imageUrls = shopifyImageUrls;
                   }
+                }
+              }
+              if (
+                (!generatedColorUrls || generatedColorUrls.length === 0) &&
+                line.attributes
+              ) {
+                const shopifyColorUrls: string[] = [];
+                for (let i = 1; i <= 5; i++) {
+                  const colorAttr = line.attributes.find(
+                    (attr: any) => attr.key === `_color_image_${i}`,
+                  );
+                  if (colorAttr?.value) {
+                    shopifyColorUrls.push(colorAttr.value);
+                  }
+                }
+                if (shopifyColorUrls.length === 5) {
+                  generatedColorUrls = shopifyColorUrls;
                 }
               }
               
@@ -248,6 +270,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 imageUrls: isGiftCard ? [] : imageUrls,
                 originalUrls: isGiftCard ? undefined : lineData.originalUrls,
                 generatedBwUrls: isGiftCard ? undefined : lineData.generatedBwUrls,
+                generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
                 previewSessionId: isGiftCard ? undefined : lineData.previewSessionId,
                 style: isGiftCard ? undefined : style,
                 isGiftCard,
@@ -313,6 +336,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             locale,
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
+            generatedColorUrls: fulfillment?.generatedColorUrls,
             previewSessionId: fulfillment?.previewSessionId,
             generationStats: fulfillment?.generationStats,
           }),
@@ -333,6 +357,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             locale,
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
+            generatedColorUrls: fulfillment?.generatedColorUrls,
             previewSessionId: fulfillment?.previewSessionId,
             generationStats: fulfillment?.generationStats,
           }),

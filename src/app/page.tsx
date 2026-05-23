@@ -26,6 +26,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
+import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -454,6 +455,52 @@ export default function Home() {
   const prefersReducedMotion = useReducedMotion();
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
+  const previewOn = isAiPreviewEnabled();
+  const howItWorksSteps = previewOn
+    ? [
+        {
+          num: 1,
+          labelKey: "home.howItWorks.step1.label",
+          titleKey: "home.howItWorks.step1.title",
+          descriptionKey: "home.howItWorks.step1.description",
+          imageAltKey: "home.howItWorks.step1.imageAlt",
+          src: "/upload-images.png",
+        },
+        {
+          num: 2,
+          labelKey: "home.howItWorks.previewStep2.label",
+          titleKey: "home.howItWorks.previewStep2.title",
+          descriptionKey: "home.howItWorks.previewStep2.description",
+          imageAltKey: "home.howItWorks.previewStep2.imageAlt",
+          src: "/preview-images-10.png",
+        },
+        {
+          num: 3,
+          labelKey: "home.howItWorks.previewStep3.label",
+          titleKey: "home.howItWorks.previewStep3.title",
+          descriptionKey: "home.howItWorks.previewStep3.description",
+          imageAltKey: "home.howItWorks.previewStep3.imageAlt",
+          src: "/book-example-pencil.jpeg",
+        },
+      ]
+    : [
+        {
+          num: 1,
+          labelKey: "home.howItWorks.step1.label",
+          titleKey: "home.howItWorks.step1.title",
+          descriptionKey: "home.howItWorks.step1.description",
+          imageAltKey: "home.howItWorks.step1.imageAlt",
+          src: "/upload-images.png",
+        },
+        {
+          num: 2,
+          labelKey: "home.howItWorks.step2.label",
+          titleKey: "home.howItWorks.step2.title",
+          descriptionKey: "home.howItWorks.step2.description",
+          imageAltKey: "home.howItWorks.step2.imageAlt",
+          src: "/book-example-pencil.jpeg",
+        },
+      ];
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const heroImages = ["/hero-image-1.jpeg", "/hero-image-2.jpg", "/hero-image-3.jpg", "/hero-image-4.jpg"];
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
@@ -955,8 +1002,9 @@ export default function Home() {
 
             {/* Steps - Side by Side Layout */}
             <motion.div
-              className={`flex flex-col lg:flex-row gap-8 lg:gap-0 max-w-6xl mx-auto relative items-start ${
-                locale === "he" ? "lg:flex-row-reverse" : ""
+              dir={locale === "he" ? "rtl" : "ltr"}
+              className={`flex flex-col lg:flex-row max-w-6xl mx-auto relative items-start lg:items-stretch gap-8 ${
+                previewOn ? "lg:gap-10" : "lg:gap-0"
               }`}
               initial={prefersReducedMotion || isMobile === true ? undefined : "hidden"}
               animate={isMobile === false && !prefersReducedMotion ? undefined : "show"}
@@ -969,111 +1017,83 @@ export default function Home() {
                 },
               }}
             >
-              {/* Step 2 */}
-              <motion.div 
-                className="flex-1 text-center order-2 lg:order-none lg:-mr-8"
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeOwlet } },
-                }}
-              >
-                {/* Step Number */}
-                <div className="relative inline-block mb-6">
-                  <div
-                    className="w-10 h-10 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
-                    style={{ backgroundColor: "#FFFFFF" }}
-                  >
-                    <span className="text-dark-gray font-heading text-lg lg:text-2xl font-bold">
-                      2
-                    </span>
-                  </div>
-                </div>
-
-                {/* Step Content */}
-                <div className="space-y-3 max-w-xs mx-auto mb-6">
-                  <p className="text-sm font-body-bold text-primary-orange mb-1">
-                    {t("home.howItWorks.step2.label")}
-                  </p>
-                  <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
-                    {t("home.howItWorks.step2.title")}
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed text-base lg:text-lg">
-                    {t("home.howItWorks.step2.description")}
-                  </p>
-                </div>
-
-                {/* Step Image - Large */}
+              {howItWorksSteps.map((step) => (
                 <motion.div
-                  initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
-                  whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, ease: easeOwlet, delay: 0.2 }}
-                  viewport={{ once: true, amount: 0.3 }}
+                  key={step.num}
+                  className={`flex flex-col flex-1 min-w-0 text-center ${
+                    !previewOn && step.num === 1
+                      ? locale === "he"
+                        ? "lg:-mr-8"
+                        : "lg:-ml-8"
+                      : !previewOn && step.num === 2
+                        ? locale === "he"
+                          ? "lg:-ml-8"
+                          : "lg:-mr-8"
+                        : ""
+                  }`}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.6, ease: easeOwlet },
+                    },
+                  }}
                 >
-                  <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
-                    <Image
-                      src="/book-example-pencil.jpeg"
-                      alt={t("home.howItWorks.step2.imageAlt")}
-                      width={500}
-                      height={500}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </motion.div>
-              </motion.div>
-
-              {/* Step 1 */}
-              <motion.div 
-                className="flex-1 text-center order-1 lg:order-none lg:-ml-8"
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easeOwlet } },
-                }}
-              >
-                {/* Step Number */}
-                <div className="relative inline-block mb-6 lg:mb-6 -mt-6 lg:mt-0">
+                  {/* Step Number */}
                   <div
-                    className="w-10 h-10 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
-                    style={{ backgroundColor: "#FFFFFF" }}
+                    className={`relative inline-block mb-6 lg:mb-6 ${
+                      step.num === 1 ? "-mt-6 lg:mt-0" : ""
+                    }`}
                   >
-                    <span className="text-dark-gray font-heading text-lg lg:text-2xl font-bold">
-                      1
-                    </span>
+                    <div
+                      className="w-10 h-10 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
+                      style={{ backgroundColor: "#FFFFFF" }}
+                    >
+                      <span className="text-dark-gray font-heading text-lg lg:text-2xl font-bold">
+                        {step.num}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Step Content */}
-                <div className="space-y-3 max-w-xs mx-auto mb-6">
-                  <p className="text-sm font-body-bold text-primary-orange mb-1">
-                    {t("home.howItWorks.step1.label")}
-                  </p>
-                  <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
-                    {t("home.howItWorks.step1.title")}
-                  </h3>
-                  <p className="font-body text-medium-gray leading-relaxed text-base lg:text-lg">
-                    {t("home.howItWorks.step1.description")}
-                  </p>
-                </div>
-
-                {/* Step Image - Large */}
-                <motion.div
-                  initial={prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }}
-                  whileInView={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, ease: easeOwlet, delay: 0.2 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                >
-                  <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
-                    <Image
-                      src="/upload-images.png"
-                      alt={t("home.howItWorks.step1.imageAlt")}
-                      width={500}
-                      height={500}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                  {/* Step Content */}
+                  <div className="space-y-3 max-w-xs mx-auto mb-6">
+                    <p className="text-sm font-body-bold text-primary-orange mb-1">
+                      {t(step.labelKey)}
+                    </p>
+                    <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
+                      {t(step.titleKey)}
+                    </h3>
+                    <p className="font-body text-medium-gray leading-relaxed text-base lg:text-lg whitespace-pre-line">
+                      {t(step.descriptionKey)}
+                    </p>
                   </div>
+
+                  {/* Step Image */}
+                  <motion.div
+                    className="mt-auto"
+                    initial={
+                      prefersReducedMotion ? undefined : { scale: 0.95, opacity: 0 }
+                    }
+                    whileInView={
+                      prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }
+                    }
+                    transition={{ duration: 0.5, ease: easeOwlet, delay: 0.2 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                  >
+                    <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
+                      <Image
+                        src={step.src}
+                        alt={t(step.imageAltKey)}
+                        width={500}
+                        height={500}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              ))}
             </motion.div>
 
             {/* Bottom CTA */}

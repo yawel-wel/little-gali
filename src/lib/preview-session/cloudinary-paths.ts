@@ -126,6 +126,18 @@ export function candidatePublicIds(
 }
 
 /** Unique path for crop uploads when signed overwrite is unavailable. */
+export function prohibitedContentErrorPublicId(
+  sessionId: string,
+  kind: PreviewOutputKind,
+  slotIndex: number,
+  candidateId: string,
+): string {
+  return `${PREVIEW_SESSION_ROOT}/${sessionId}/errors/${kind}/${slotFilePrefix(
+    sessionId,
+    slotIndex,
+  )}_${candidateId}_prohibited`;
+}
+
 export function cropRevisionPublicId(
   sessionId: string,
   kind: PreviewOutputKind,

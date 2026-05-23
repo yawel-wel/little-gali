@@ -78,6 +78,7 @@ function splitAssetPath(assetPath: string): { folder: string; fileName: string }
 async function uploadNamedToCloudinary(
   file: File | Blob,
   assetPath: string,
+  extraTags: string[] = [],
 ): Promise<CloudinaryUploadResult> {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
@@ -86,11 +87,22 @@ async function uploadNamedToCloudinary(
   }
 
   const { folder, fileName } = splitAssetPath(assetPath);
-  const namedFile = new File([file], `${fileName}.jpg`, {
-    type: file.type || "image/jpeg",
-  });
+  const extension =
+    file instanceof File && file.name.includes(".")
+      ? file.name.slice(file.name.lastIndexOf("."))
+      : ".jpg";
+  const namedFile =
+    file instanceof File && file.name.includes(".")
+      ? file
+      : new File([file], `${fileName}${extension}`, {
+          type: file.type || "image/jpeg",
+        });
 
   const sessionIdFromPath = folder.match(/sessions\/([^/]+)\//)?.[1];
+  const tags = [
+    ...(sessionIdFromPath ? [`preview_session_${sessionIdFromPath}`] : []),
+    ...extraTags,
+  ];
 
   const formData = new FormData();
   formData.append("file", namedFile);
@@ -99,8 +111,8 @@ async function uploadNamedToCloudinary(
   // Unsigned presets often ignore folder for the stored public_id; setting public_id + tags
   // keeps session-scoped assets findable in Media Library search (incl. color outputs).
   formData.append("public_id", fileName);
-  if (sessionIdFromPath) {
-    formData.append("tags", `preview_session_${sessionIdFromPath}`);
+  if (tags.length > 0) {
+    formData.append("tags", tags.join(","));
   }
 
   const response = await fetch(
@@ -140,19 +152,35 @@ export async function uploadBufferToCloudinary(
 export async function uploadBufferToCloudinaryPublicId(
   buffer: Buffer,
   assetPath: string,
+  extraTags: string[] = [],
 ): Promise<CloudinaryUploadResult> {
   const bytes = Uint8Array.from(buffer);
   const file = new File([bytes], `${assetPath.split("/").pop() ?? "image"}.png`, {
     type: "image/png",
   });
-  return uploadNamedToCloudinary(file, assetPath);
+  return uploadNamedToCloudinary(file, assetPath, extraTags);
 }
 
 export async function uploadFileToCloudinaryPublicId(
   file: File | Blob,
   assetPath: string,
+  extraTags: string[] = [],
 ): Promise<CloudinaryUploadResult> {
-  return uploadNamedToCloudinary(file, assetPath);
+  return uploadNamedToCloudinary(file, assetPath, extraTags);
+}
+
+export async function uploadJsonToCloudinaryPublicId(
+  payload: Record<string, unknown>,
+  assetPath: string,
+  extraTags: string[] = [],
+): Promise<CloudinaryUploadResult> {
+  const json = JSON.stringify(payload);
+  const bytes = new TextEncoder().encode(json);
+  const fileName = assetPath.split("/").pop() ?? "error";
+  const file = new File([bytes], `${fileName}.json`, {
+    type: "application/json",
+  });
+  return uploadNamedToCloudinary(file, assetPath, extraTags);
 }
 
 /**

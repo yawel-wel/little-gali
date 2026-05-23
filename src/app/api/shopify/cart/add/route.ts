@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   formatSelectedGenerationBySlot,
+  generatedColorUrlsShopifyAttributes,
+  hasInvalidHttpImageUrls,
   originalUrlsShopifyAttributes,
   type PreviewGenerationStats,
   previewStatsShopifyAttributes,
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
       locale,
       originalUrls,
       generatedBwUrls,
+      generatedColorUrls,
       previewSessionId,
       generationStats,
     } = body as {
@@ -33,6 +36,7 @@ export async function POST(request: NextRequest) {
       locale?: string;
       originalUrls?: string[];
       generatedBwUrls?: string[];
+      generatedColorUrls?: string[];
       previewSessionId?: string;
       generationStats?: PreviewGenerationStats;
     };
@@ -83,6 +87,24 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    if (generatedColorUrls) {
+      if (generatedColorUrls.length !== 5) {
+        return NextResponse.json(
+          { error: "Invalid color image count" },
+          { status: 400 },
+        );
+      }
+      if (hasInvalidHttpImageUrls(generatedColorUrls)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid color image URLs. Images should be uploaded to Cloudinary first.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     const cartLinesAddMutation = `
@@ -187,6 +209,7 @@ export async function POST(request: NextRequest) {
               : []),
             ...previewStatsShopifyAttributes(previewSessionId, generationStats),
             ...originalUrlsShopifyAttributes(originalUrls),
+            ...generatedColorUrlsShopifyAttributes(generatedColorUrls),
           ],
         },
       ],
@@ -288,6 +311,7 @@ export async function POST(request: NextRequest) {
               style: styleToStore,
               originalUrls,
               generatedBwUrls,
+              generatedColorUrls,
               previewSessionId,
               previewGenTotal: generationStats?.totalGenerations,
               previewGenSelected: generationStats

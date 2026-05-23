@@ -228,7 +228,7 @@ export function MobileImageEditor({
           <div className="flex flex-col gap-1 items-center">
             <button
               onClick={handleSave}
-              className="bg-primary-orange text-white font-body-bold rounded-xl px-10 py-3 text-lg cursor-pointer lg:hover:opacity-85 transition-opacity"
+              className="bg-primary-orange text-white font-body-bold rounded-xl px-7 py-2.5 text-base cursor-pointer md:px-10 md:py-3 md:text-lg lg:hover:opacity-85 transition-opacity"
             >
               {saveButtonLabel ?? t("upload.cropDone")}
             </button>

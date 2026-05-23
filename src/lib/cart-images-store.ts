@@ -8,6 +8,7 @@ export interface StoredCartImages {
   imageUrls: string[];
   originalUrls?: string[];
   generatedBwUrls?: string[];
+  generatedColorUrls?: string[];
   previewSessionId?: string;
   previewGenTotal?: number;
   previewGenSelected?: string;

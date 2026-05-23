@@ -1,8 +1,8 @@
+import { getFullGenerationRateLimitConfig } from "@/lib/rate-limit/config";
 import { kvExpire, kvIncr } from "./kv";
 import { previewFullGenerationRateKey } from "./redis";
 
-const FULL_GENERATION_WINDOW_SECONDS = 24 * 60 * 60;
-const MAX_FULL_GENERATIONS_PER_WINDOW = 1;
+const fullGenerationRateLimitConfig = getFullGenerationRateLimitConfig();
 
 function isPreviewRateLimitDisabled(): boolean {
   return process.env.SKIP_PREVIEW_RATE_LIMIT === "true";
@@ -11,20 +11,22 @@ function isPreviewRateLimitDisabled(): boolean {
 export async function checkFullGenerationRateLimit(
   ipHash: string,
 ): Promise<{ allowed: boolean; remaining: number }> {
+  const { limit: maxPerWindow, windowSeconds } = fullGenerationRateLimitConfig;
+
   if (isPreviewRateLimitDisabled()) {
-    return { allowed: true, remaining: MAX_FULL_GENERATIONS_PER_WINDOW };
+    return { allowed: true, remaining: maxPerWindow };
   }
 
   const key = previewFullGenerationRateKey(ipHash);
   const count = await kvIncr(key);
   if (count === 1) {
-    await kvExpire(key, FULL_GENERATION_WINDOW_SECONDS);
+    await kvExpire(key, windowSeconds);
   }
-  if (count > MAX_FULL_GENERATIONS_PER_WINDOW) {
+  if (count > maxPerWindow) {
     return { allowed: false, remaining: 0 };
   }
   return {
     allowed: true,
-    remaining: Math.max(0, MAX_FULL_GENERATIONS_PER_WINDOW - count),
+    remaining: Math.max(0, maxPerWindow - count),
   };
 }

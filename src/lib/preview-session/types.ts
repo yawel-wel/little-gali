@@ -12,7 +12,11 @@ export type PreviewGenerationStatus =
   | "complete"
   | "failed";
 
-export type GenerationErrorCode = "safety" | "timeout" | "generic";
+export type GenerationErrorCode =
+  | "safety"
+  | "timeout"
+  | "generic"
+  | "prohibited_content";
 
 export interface GenerationError {
   code: GenerationErrorCode;

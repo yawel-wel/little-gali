@@ -51,6 +51,16 @@ export async function POST(
     return NextResponse.json({ error: "Candidate not available" }, { status: 400 });
   }
 
+  if (
+    bwCandidate &&
+    bwCandidate.sourceUrl !== slot.originalUrl
+  ) {
+    return NextResponse.json(
+      { error: "Candidate is from a previous photo" },
+      { status: 409 },
+    );
+  }
+
   if (candidate.kind === "color") {
     const style = (candidate.style ?? "pencil") as StyleType;
     const previousColorId = getColorCandidateForStyle(slot, style)?.id;

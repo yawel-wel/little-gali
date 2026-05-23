@@ -12,8 +12,10 @@ import {
   useEffect,
   useLayoutEffect,
   useCallback,
+  useMemo,
   Suspense,
 } from "react";
+import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
 import Link from "next/link";
@@ -22,6 +24,13 @@ import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
+import { arrayMove } from "@dnd-kit/sortable";
+import {
+  UploadImageDragSurface,
+  UploadSortableImages,
+  type UploadDragActivator,
+} from "@/components/upload-sortable-images";
+import { reorderIndexMaps } from "@/lib/reorder-indexed-maps";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
 import { getOrCreateLgSessionId, persistLgSessionId } from "@/lib/session-id";
@@ -42,6 +51,7 @@ interface UploadImageItemProps {
   onRemove: (index: number) => void;
   isSubmitting: boolean;
   onTap: (index: number) => void;
+  dragActivator?: UploadDragActivator;
 }
 
 function UploadImageItem({
@@ -51,6 +61,7 @@ function UploadImageItem({
   onRemove,
   isSubmitting,
   onTap,
+  dragActivator,
 }: UploadImageItemProps) {
   useEffect(() => {
     [
@@ -64,27 +75,45 @@ function UploadImageItem({
     });
   }, []);
 
+  const thumbnail = (
+    <img
+      src={url}
+      alt={
+        locale === "en"
+          ? `Selected photo ${index + 1}`
+          : `תמונה נבחרת ${index + 1}`
+      }
+      className={cn(
+        SENTRY_REPLAY_BLOCK_USER_IMAGE,
+        "w-full h-full object-cover border-2 border-primary-orange rounded-lg pointer-events-none",
+      )}
+      loading="eager"
+      decoding="async"
+      draggable={false}
+    />
+  );
+
+  const shellClassName =
+    "relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0 cursor-pointer rounded-lg";
+
   return (
-    <div
-      style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
-      className="relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0 cursor-pointer"
-      onClick={() => onTap(index)}
-    >
-      <img
-        src={url}
-        alt={
-          locale === "en"
-            ? `Selected photo ${index + 1}`
-            : `תמונה נבחרת ${index + 1}`
-        }
-        className={cn(
-          SENTRY_REPLAY_BLOCK_USER_IMAGE,
-          "w-full h-full object-cover border-2 border-primary-orange rounded-lg pointer-events-none",
-        )}
-        loading="eager"
-        decoding="async"
-        draggable={false}
-      />
+    <div style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }} className={shellClassName}>
+      {dragActivator ? (
+        <UploadImageDragSurface
+          dragActivator={dragActivator}
+          onTap={() => onTap(index)}
+          className="relative h-full w-full"
+        >
+          {thumbnail}
+        </UploadImageDragSurface>
+      ) : (
+        <div
+          className="relative h-full w-full"
+          onClick={() => onTap(index)}
+        >
+          {thumbnail}
+        </div>
+      )}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -122,6 +151,7 @@ function UploadPageContent() {
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreviewLoader, setShowPreviewLoader] = useState(false);
+  const [previewLoaderLineIndex, setPreviewLoaderLineIndex] = useState(0);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
@@ -408,6 +438,26 @@ function UploadPageContent() {
     setEditingImageIndex(index);
   }, []);
 
+  const handleImagesReorder = useCallback(
+    (oldIndex: number, newIndex: number) => {
+      if (oldIndex === newIndex) {
+        return;
+      }
+      setImages(arrayMove(images, oldIndex, newIndex));
+      reorderIndexMaps(
+        [
+          originalUrls.current,
+          cropStates.current,
+          cloudinaryUrls.current,
+        ],
+        oldIndex,
+        newIndex,
+        images.length,
+      );
+    },
+    [images, setImages],
+  );
+
   // Save the cropped image back into the images array
   const handleSaveCrop = useCallback(
     (croppedUrl: string, cropState: CropState) => {
@@ -531,7 +581,31 @@ function UploadPageContent() {
 
   const previewEnabled = isAiPreviewEnabled();
 
+  const bwLoadingLines = useMemo(
+    () => [
+      t("preview.bwLoadingLine1"),
+      t("preview.bwLoadingLine2"),
+      t("preview.bwLoadingLine3"),
+      t("preview.bwLoadingLine4"),
+      t("preview.bwLoadingLine5"),
+    ],
+    [t],
+  );
+
+  useEffect(() => {
+    if (!showPreviewLoader || bwLoadingLines.length === 0) {
+      return;
+    }
+    const interval = setInterval(() => {
+      setPreviewLoaderLineIndex(
+        (current) => (current + 1) % bwLoadingLines.length,
+      );
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [bwLoadingLines.length, showPreviewLoader]);
+
   const handleContinueToPreview = async () => {
+    setPreviewLoaderLineIndex(0);
     setShowPreviewLoader(true);
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
@@ -772,28 +846,38 @@ function UploadPageContent() {
             <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
               <div className="text-center md:mt-2">
-                <Title
-                  highlightText={t("upload.titleHighlight")}
-                  size="xl"
-                  roundedUnderline
-                  className="text-2xl md:text-4xl font-bold"
-                >
-                  {t("upload.title")}
-                </Title>
+                {images.length > 0 ? (
+                  <Title
+                    highlightText={t("upload.titleReadyHighlight")}
+                    size="xl"
+                    roundedUnderline
+                    className="text-2xl md:text-4xl font-bold"
+                  >
+                    {t("upload.titleReady")}
+                  </Title>
+                ) : (
+                  <Title
+                    highlightText={t("upload.titleHighlight")}
+                    size="xl"
+                    roundedUnderline
+                    className="text-2xl md:text-4xl font-bold"
+                  >
+                    {t("upload.title")}
+                  </Title>
+                )}
               </div>
 
               {/* First Paragraph */}
               <div className="text-center mb-8 -mt-4">
                 <p className="text-lg font-body text-dark-gray leading-relaxed text-center">
-                  {(images.length >= 5
-                    ? t("upload.description").split("\n").slice(1)
-                    : t("upload.description").split("\n")
-                  ).map((line, i, arr) => (
-                    <span key={i}>
-                      {line}
-                      {i < arr.length - 1 && <br />}
-                    </span>
-                  ))}
+                  {t("upload.description")
+                    .split("\n")
+                    .map((line, i, arr) => (
+                      <span key={i}>
+                        {line}
+                        {i < arr.length - 1 && <br />}
+                      </span>
+                    ))}
                 </p>
               </div>
 
@@ -812,30 +896,6 @@ function UploadPageContent() {
                   </span>
                 </div>
               </div>
-
-              {/* Section 1 Title - Image Selection */}
-              {images.length > 0 && (
-                <div className="text-center mt-6">
-                  <h3 className="text-lg font-body-bold text-dark-gray flex items-center justify-center gap-2">
-                    <span 
-                      className="inline-flex items-center justify-center w-5 h-5 rounded-full text-xs text-white font-body-bold"
-                      style={{ backgroundColor: "#e1b093" }}
-                    >
-                      1
-                    </span>
-                    {locale === "he" ? "בחירת תמונות" : "Select Images"}
-                  </h3>
-                  {/* Helper texts under title - only show when 5 images */}
-                  {images.length >= 5 && (
-                    <div className="flex flex-col gap-1 text-sm font-body text-dark-gray text-center mt-3">
-                      <p>{t("upload.tapToCrop")}</p>
-                      <p className="text-xs text-gray-500">
-                        {t("upload.cropBackgroundTip")}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Hidden File Input */}
               <input
@@ -859,19 +919,46 @@ function UploadPageContent() {
               {/* Selected Images Display */}
               {images.length > 0 && (
                 <div className="space-y-4">
-                  <div className="w-full overflow-x-auto md:overflow-visible">
-                    <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end pt-2">
-                      {images.slice(0, 5).map((url, index) => (
-                        <UploadImageItem
-                          key={url}
-                          url={url}
-                          index={index}
-                          locale={locale}
-                          onRemove={handleRemoveImage}
-                          isSubmitting={isSubmitting}
-                          onTap={handleImageTap}
+                  <div>
+                    {images.length === 5 && (
+                      <p className="mb-4 text-center font-body text-sm text-dark-gray px-4">
+                        {t("upload.dragToReorder")}
+                      </p>
+                    )}
+                    <div className="w-full overflow-x-auto md:overflow-visible">
+                      <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end">
+                      {images.length === 5 ? (
+                        <UploadSortableImages
+                          count={5}
+                          disabled={isSubmitting}
+                          onReorder={handleImagesReorder}
+                          renderItem={(index, { dragActivator }) => (
+                            <UploadImageItem
+                              key={index}
+                              url={images[index]}
+                              index={index}
+                              locale={locale}
+                              onRemove={handleRemoveImage}
+                              isSubmitting={isSubmitting}
+                              onTap={handleImageTap}
+                              dragActivator={dragActivator}
+                            />
+                          )}
                         />
-                      ))}
+                      ) : (
+                        images.map((url, index) => (
+                          <UploadImageItem
+                            key={url}
+                            url={url}
+                            index={index}
+                            locale={locale}
+                            onRemove={handleRemoveImage}
+                            isSubmitting={isSubmitting}
+                            onTap={handleImageTap}
+                          />
+                        ))
+                      )}
+                      </div>
                     </div>
                   </div>
 
@@ -1034,52 +1121,21 @@ function UploadPageContent() {
         />
       )}
 
-      {/* Full-screen preview loader – shown immediately on button click */}
       {showPreviewLoader && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-10 text-center"
-          style={{ backgroundColor: "#F3EEE8" }}
-        >
-          <div className="flex w-full max-w-2xl flex-col items-center">
-            {images.length > 0 && (
-              <div className="mb-7 flex justify-center" dir="ltr">
-                {images.slice(0, 5).map((url, index) => (
-                  <div
-                    key={`${url}-${index}`}
-                    className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
-                    style={{
-                      animationDelay: `${index * 140}ms`,
-                      marginLeft: index === 0 ? 0 : -18,
-                      zIndex: images.length - index,
-                    }}
-                  >
-                    <img
-                      src={url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-            <h1 className="max-w-xl font-heading text-[2.35rem] leading-[1.12] text-accent-burgundy md:text-5xl">
-              {t("preview.bwLoadingTitle")}
-            </h1>
-            <div className="mt-8 h-1.5 w-48 overflow-hidden rounded-full bg-[#EAD9D4] shadow-inner md:w-56">
-              <div className="h-full origin-left rounded-full bg-primary-orange preview-initial-progress" />
-            </div>
-            <div className="mt-8 flex min-h-8 items-center justify-center">
-              <p className="font-body-bold text-xl text-dark-gray md:text-2xl">
-                {t("preview.bwLoadingLine2")}
-              </p>
-            </div>
-            <div className="mt-7 flex min-h-10 items-center justify-center">
-              <p className="font-body text-base text-dark-gray/50">
-                {t("preview.loadingDuration")}
-              </p>
-            </div>
-          </div>
-        </div>
+        <PreviewInitialLoadingScreen
+          variant="overlay"
+          imageUrls={images.slice(0, 5)}
+          isExiting={false}
+          isComplete={false}
+          loadingLine={
+            bwLoadingLines[previewLoaderLineIndex % bwLoadingLines.length] ??
+            bwLoadingLines[0]
+          }
+          slowText={t("preview.loadingSlow")}
+          standardText={t("preview.loadingDuration")}
+          title={t("preview.bwLoadingTitle")}
+          locale={locale}
+        />
       )}
 
       <Footer />
