@@ -1,38 +1,37 @@
 // This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: "https://7ddf52a3620c62e3c71663a4015b27a3@o4511405882540032.ingest.de.sentry.io/4511405886668880",
+try {
+  const integrations: ReturnType<typeof Sentry.replayIntegration>[] = [];
 
-  integrations: [
-    Sentry.replayIntegration({
-      // Show UI text and non-user media in replays; block only tagged photos.
-      maskAllText: false,
-      blockAllMedia: false,
-      mask: [".sentry-mask", "[data-sentry-mask]"],
-      block: [".sentry-block", "[data-sentry-block]"],
-    }),
-  ],
+  // Session Replay is heavy and can break some mobile browsers / blockers.
+  if (
+    typeof window !== "undefined" &&
+    !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  ) {
+    integrations.push(
+      Sentry.replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+        mask: [".sentry-mask", "[data-sentry-mask]"],
+        block: [".sentry-block", "[data-sentry-block]"],
+      }),
+    );
+  }
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
-});
+  Sentry.init({
+    dsn: "https://7ddf52a3620c62e3c71663a4015b27a3@o4511405882540032.ingest.de.sentry.io/4511405886668880",
+    integrations,
+    tracesSampleRate: 1,
+    enableLogs: true,
+    replaysSessionSampleRate: integrations.length > 0 ? 0.1 : 0,
+    replaysOnErrorSampleRate: integrations.length > 0 ? 1.0 : 0,
+    sendDefaultPii: true,
+  });
+} catch (error) {
+  console.warn("Sentry client init skipped:", error);
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

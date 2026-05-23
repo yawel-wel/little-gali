@@ -10,6 +10,29 @@ import {
 
 export type Locale = "he" | "en";
 
+function readSavedLocale(): Locale {
+  if (typeof window === "undefined") {
+    return "he";
+  }
+  try {
+    const savedLocale = localStorage.getItem("locale");
+    if (savedLocale === "he" || savedLocale === "en") {
+      return savedLocale;
+    }
+  } catch {
+    // Private mode / storage blocked — use default Hebrew
+  }
+  return "he";
+}
+
+function writeSavedLocale(locale: Locale): void {
+  try {
+    localStorage.setItem("locale", locale);
+  } catch {
+    // ignore quota / blocked storage
+  }
+}
+
 interface LanguageContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
@@ -25,15 +48,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   // Initialize locale from localStorage immediately to avoid flash of wrong language
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window !== "undefined") {
-      const savedLocale = localStorage.getItem("locale") as Locale;
-      if (savedLocale === "he" || savedLocale === "en") {
-        return savedLocale;
-      }
-    }
-    return "he";
-  });
+  const [locale, setLocaleState] = useState<Locale>(() => readSavedLocale());
 
   // Mark as mounted and ensure HTML attributes are set
   useEffect(() => {
@@ -46,7 +61,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem("locale", newLocale);
+    writeSavedLocale(newLocale);
     // Update HTML lang and dir attributes
     document.documentElement.lang = newLocale;
     document.documentElement.dir = newLocale === "he" ? "rtl" : "ltr";

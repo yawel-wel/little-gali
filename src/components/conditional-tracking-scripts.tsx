@@ -21,7 +21,11 @@ export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingS
 
   const [hasConsent, setHasConsent] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("little-gali-cookie-consent") === "accepted";
+    try {
+      return localStorage.getItem("little-gali-cookie-consent") === "accepted";
+    } catch {
+      return false;
+    }
   });
 
   // Only load scripts if consent is given

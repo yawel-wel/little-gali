@@ -69,6 +69,7 @@ export default function RootLayout({
     <html
       lang="he"
       dir="rtl"
+      data-locale="he"
       suppressHydrationWarning
     >
       <head>
@@ -90,21 +91,6 @@ export default function RootLayout({
                 } catch (e) {}
               })();
             `,
-          }}
-        />
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-            html:not([data-locale]) body {
-              opacity: 0;
-              visibility: hidden;
-            }
-            html[data-locale] body {
-              opacity: 1;
-              visibility: visible;
-              transition: opacity 0.1s;
-            }
-          `,
           }}
         />
       </head>
