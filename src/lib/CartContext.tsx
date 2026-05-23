@@ -81,20 +81,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [locale]);
 
-  // Warmup the runtime early to reduce first-action latency
+  // Defer cart I/O until after first paint so home/upload feel snappier.
   useEffect(() => {
-    fetch("/api/warmup").catch(() => {});
-  }, []);
+    const run = () => {
+      fetch("/api/warmup").catch(() => {});
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCartId = localStorage.getItem("shopify_cart_id");
-    if (savedCartId) {
-      fetchCart(savedCartId);
-    } else {
-      // No existing cart; we're done initializing
-      setIsLoading(false);
+      let savedCartId: string | null = null;
+      try {
+        savedCartId = localStorage.getItem("shopify_cart_id");
+      } catch {
+        setIsLoading(false);
+        return;
+      }
+
+      if (savedCartId) {
+        void fetchCart(savedCartId);
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(run, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
     }
+
+    const id = window.setTimeout(run, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   // Update checkoutUrl whenever locale changes (but not when cart changes to avoid loops)

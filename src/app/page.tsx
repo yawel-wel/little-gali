@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -14,10 +15,28 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
-import { CustomerCommentsSection } from "@/components/customer-comments-section";
 import { GiftCardSection } from "@/components/gift-card-section";
-import { GalleryCarouselSection } from "@/components/gallery-carousel-section";
 import { StyleExamplesSection } from "@/components/style-examples-section";
+
+const GalleryCarouselSection = dynamic(
+  () =>
+    import("@/components/gallery-carousel-section").then(
+      (mod) => mod.GalleryCarouselSection,
+    ),
+  {
+    loading: () => <div className="min-h-[280px] bg-white" aria-hidden />,
+  },
+);
+
+const CustomerCommentsSection = dynamic(
+  () =>
+    import("@/components/customer-comments-section").then(
+      (mod) => mod.CustomerCommentsSection,
+    ),
+  {
+    loading: () => <div className="min-h-[320px] bg-white" aria-hidden />,
+  },
+);
 import { Input } from "@/components/ui/input";
 import {
   Accordion,

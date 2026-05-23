@@ -13,13 +13,12 @@ import {
   useLayoutEffect,
   useCallback,
   useMemo,
-  Suspense,
 } from "react";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
@@ -140,7 +139,6 @@ function UploadImageItem({
 
 function UploadPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { images: contextImages, setImages, clearImages } = useUploadImages();
   const { addToCart, removeFromCart, cart } = useCart();
 
@@ -818,14 +816,16 @@ function UploadPageContent() {
   const withoutPreviewStartedRef = useRef(false);
 
   useEffect(() => {
-    if (searchParams.get("withoutPreview") !== "1") return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("withoutPreview") !== "1") return;
     if (withoutPreviewStartedRef.current) return;
     if (images.length !== 5 || isSubmitting) return;
 
     withoutPreviewStartedRef.current = true;
     router.replace("/upload");
     void handleAddToCart();
-  }, [handleAddToCart, images.length, isSubmitting, router, searchParams]);
+  }, [handleAddToCart, images.length, isSubmitting, router]);
 
   return (
     <div
@@ -1144,18 +1144,5 @@ function UploadPageContent() {
 }
 
 export default function UploadPage() {
-  return (
-    <Suspense
-      fallback={
-        <div
-          className="min-h-screen overflow-x-hidden flex items-center justify-center"
-          style={{ backgroundColor: "#F3EEE8" }}
-        >
-          <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
-        </div>
-      }
-    >
-      <UploadPageContent />
-    </Suspense>
-  );
+  return <UploadPageContent />;
 }
