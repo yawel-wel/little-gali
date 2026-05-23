@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -10,6 +11,46 @@
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+@keyframes preview-more-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(225, 176, 147, 0);
+  }
+  45% {
+    box-shadow: 0 0 0 7px rgba(225, 176, 147, 0.2);
+  }
+}
+
+@keyframes preview-loading-avatar-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes preview-initial-progress {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(0.85);
+  }
+}
+
+@keyframes preview-loading-subtitle-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  14%,
+  86% {
+    opacity: 1;
   }
 }
 
@@ -56,6 +97,7 @@
 }
 
 :root {
+  --color-text-secondary: #6b6560;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.15 0 0);
@@ -328,5 +370,30 @@
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .preview-more-pulse {
+    animation: preview-more-pulse 1.4s ease-in-out 2;
+  }
+
+  .preview-loading-avatar {
+    animation: preview-loading-avatar-breathe 2.8s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .preview-initial-progress {
+    animation: preview-initial-progress 50s linear forwards;
+    transform: scaleX(0);
+    transform-origin: left;
+    will-change: transform;
+  }
+
+  .preview-initial-progress-complete {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .preview-loading-subtitle-fade {
+    animation: preview-loading-subtitle-fade 3.5s ease-in-out both;
   }
 }

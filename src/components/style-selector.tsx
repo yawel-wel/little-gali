@@ -126,7 +126,7 @@ export function StyleSelector({
         </div>
 
         {/* Style Options */}
-        <div className="flex flex-row gap-1.5 sm:gap-4 justify-center w-full max-w-full sm:max-w-2xl px-2 sm:px-0">
+        <div className="mx-auto flex w-full max-w-2xl flex-row items-stretch justify-center gap-1.5 px-2 sm:gap-4 sm:px-0">
           {/* Pencil Option */}
           <button
             onClick={() => handleStyleChange("pencil")}

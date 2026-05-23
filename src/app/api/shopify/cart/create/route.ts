@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  formatSelectedGenerationBySlot,
+  generatedColorUrlsShopifyAttributes,
+  hasInvalidHttpImageUrls,
+  originalUrlsShopifyAttributes,
+  type PreviewGenerationStats,
+  previewStatsShopifyAttributes,
+} from "@/lib/preview-session/generation-stats";
 
 export const runtime = "nodejs";
 
@@ -12,6 +20,11 @@ export async function POST(request: NextRequest) {
       phoneNumber,
       style,
       locale,
+      originalUrls,
+      generatedBwUrls,
+      generatedColorUrls,
+      previewSessionId,
+      generationStats,
     } = body as {
       imageUrls: string[];
       quantity?: number;
@@ -19,6 +32,11 @@ export async function POST(request: NextRequest) {
       phoneNumber?: string;
       style?: "cartoon" | "pencil" | "watercolor";
       locale?: string;
+      originalUrls?: string[];
+      generatedBwUrls?: string[];
+      generatedColorUrls?: string[];
+      previewSessionId?: string;
+      generationStats?: PreviewGenerationStats;
     };
 
     if (!imageUrls || imageUrls.length !== 5) {
@@ -68,6 +86,24 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    if (generatedColorUrls) {
+      if (generatedColorUrls.length !== 5) {
+        return NextResponse.json(
+          { error: "Invalid color image count" },
+          { status: 400 },
+        );
+      }
+      if (hasInvalidHttpImageUrls(generatedColorUrls)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid color image URLs. Images should be uploaded to Cloudinary first.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     const cartCreateMutation = `
@@ -138,6 +174,9 @@ export async function POST(request: NextRequest) {
                 key: "style",
                 value: style || "cartoon",
               },
+              ...previewStatsShopifyAttributes(previewSessionId, generationStats),
+              ...originalUrlsShopifyAttributes(originalUrls),
+              ...generatedColorUrlsShopifyAttributes(generatedColorUrls),
             ],
           },
         ],
@@ -258,6 +297,16 @@ export async function POST(request: NextRequest) {
               lineId: lineId,
               imageUrls: urls,
               style: styleToStore,
+              originalUrls,
+              generatedBwUrls,
+              generatedColorUrls,
+              previewSessionId,
+              previewGenTotal: generationStats?.totalGenerations,
+              previewGenSelected: generationStats
+                ? formatSelectedGenerationBySlot(
+                    generationStats.selectedGenerationBySlot,
+                  )
+                : undefined,
             }),
           }
         );

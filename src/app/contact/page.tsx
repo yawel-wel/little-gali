@@ -1,25 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { ImagePlus, X } from "lucide-react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/LanguageContext";
+import {
+  CONTACT_ATTACHMENT_MAX_FILES,
+  validateContactAttachments,
+} from "@/lib/contact-attachment-rules";
 import { trackContact } from "@/lib/meta-pixel-events";
+import { cn } from "@/lib/utils";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
-export default function ContactPage() {
+function ContactPageContent() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
+  const searchParams = useSearchParams();
+  const previewSessionId = searchParams.get("previewSessionId");
+  const isPreviewContact = Boolean(previewSessionId);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
@@ -32,13 +44,41 @@ export default function ContactPage() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      if (isPreviewContact && attachedFiles.length > 0) {
+        const validation = validateContactAttachments(attachedFiles);
+        if (!validation.ok) {
+          setSubmitStatus({
+            type: "error",
+            message: t(validation.errorKey),
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      let response: Response;
+      if (isPreviewContact) {
+        const body = new FormData();
+        body.append("name", formData.name);
+        body.append("email", formData.email);
+        body.append("message", formData.message);
+        body.append("previewSessionId", previewSessionId!);
+        attachedFiles.forEach((file) => body.append("images", file));
+        response = await fetch("/api/contact", {
+          method: "POST",
+          body,
+        });
+      } else {
+        response = await fetch("/api/contact", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+          }),
+        });
+      }
 
       const data = await response.json();
 
@@ -47,20 +87,22 @@ export default function ContactPage() {
           type: "success",
           message: data.message || t("contact.success"),
         });
-        
-        // Track Meta Pixel Contact event
+
         try {
           trackContact();
         } catch (err) {
           console.error("Error tracking Contact:", err);
         }
-        
-        // Reset form
+
         setFormData({
           name: "",
           email: "",
           message: "",
         });
+        setAttachedFiles([]);
+        if (attachmentInputRef.current) {
+          attachmentInputRef.current.value = "";
+        }
       } else {
         setSubmitStatus({
           type: "error",
@@ -84,11 +126,55 @@ export default function ContactPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Clear status when user starts typing
     if (submitStatus.type) {
       setSubmitStatus({ type: null, message: "" });
     }
   };
+
+  const handleAttachmentChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const remaining = CONTACT_ATTACHMENT_MAX_FILES - attachedFiles.length;
+    if (remaining <= 0) {
+      if (attachmentInputRef.current) {
+        attachmentInputRef.current.value = "";
+      }
+      return;
+    }
+
+    const selected = Array.from(event.target.files ?? []).slice(0, remaining);
+    if (selected.length === 0) {
+      return;
+    }
+
+    const merged = [...attachedFiles, ...selected];
+    const validation = validateContactAttachments(merged);
+    if (!validation.ok) {
+      setSubmitStatus({
+        type: "error",
+        message: t(validation.errorKey),
+      });
+      if (attachmentInputRef.current) {
+        attachmentInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setAttachedFiles(merged);
+    setSubmitStatus({ type: null, message: "" });
+    if (attachmentInputRef.current) {
+      attachmentInputRef.current.value = "";
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachedFiles((current) => current.filter((_, i) => i !== index));
+    if (submitStatus.type) {
+      setSubmitStatus({ type: null, message: "" });
+    }
+  };
+
+  const textAlign = locale === "en" ? "text-left" : "text-right";
 
   return (
     <div
@@ -234,7 +320,99 @@ export default function ContactPage() {
                         }`}
                         placeholder={t("contact.messagePlaceholder")}
                       />
+                      {previewSessionId && (
+                        <p
+                          className={cn(
+                            "mt-1 font-body text-sm text-medium-gray",
+                            textAlign,
+                          )}
+                        >
+                          {t("contact.previewLinked")}
+                        </p>
+                      )}
                     </div>
+
+                    {isPreviewContact && (
+                      <div>
+                        <label
+                          className={cn(
+                            "mb-2 block text-sm font-body-bold text-dark-gray",
+                            textAlign,
+                          )}
+                        >
+                          {t("contact.attachments")}
+                        </label>
+                        <input
+                          ref={attachmentInputRef}
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,.jpg,.jpeg,.png"
+                          multiple
+                          className="hidden"
+                          onChange={handleAttachmentChange}
+                          disabled={
+                            isSubmitting ||
+                            attachedFiles.length >= CONTACT_ATTACHMENT_MAX_FILES
+                          }
+                        />
+                        <div
+                          dir={locale === "en" ? "ltr" : "rtl"}
+                          className="flex flex-wrap items-center justify-start gap-3"
+                        >
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={
+                              isSubmitting ||
+                              attachedFiles.length >= CONTACT_ATTACHMENT_MAX_FILES
+                            }
+                            onClick={() => attachmentInputRef.current?.click()}
+                            className="cursor-pointer gap-2 rounded-full border-gray-300 bg-white font-body text-dark-gray hover:bg-gray-50"
+                          >
+                            <ImagePlus
+                              className="h-4 w-4"
+                              strokeWidth={2.25}
+                            />
+                            {t("contact.attachmentsChoose")}
+                          </Button>
+                        </div>
+                        <p
+                          className={cn(
+                            "mt-2 font-body text-xs text-medium-gray",
+                            textAlign,
+                          )}
+                        >
+                          {t("contact.attachmentsLimitHint")}
+                        </p>
+                        {attachedFiles.length > 0 && (
+                          <ul className="mt-4 space-y-2">
+                            {attachedFiles.map((file, index) => (
+                              <li
+                                key={`${file.name}-${file.size}-${index}`}
+                                className={cn(
+                                  "flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2",
+                                  locale === "en"
+                                    ? "flex-row"
+                                    : "flex-row-reverse",
+                                )}
+                              >
+                                <span className="min-w-0 flex-1 truncate font-body text-sm text-dark-gray">
+                                  {file.name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeAttachment(index)}
+                                  disabled={isSubmitting}
+                                  className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label={t("contact.attachmentsRemove")}
+                                >
+                                  <X className="h-4 w-4" strokeWidth={2.25} />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
 
                     {/* Status Messages */}
                     {submitStatus.type && (
@@ -282,5 +460,13 @@ export default function ContactPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactPageContent />
+    </Suspense>
   );
 }

@@ -23,6 +23,43 @@ export async function blobToBase64(blobUrl: string): Promise<string> {
   }
 }
 
+function isHeicLikeFile(file: File): boolean {
+  const type = file.type.toLowerCase();
+  const name = file.name.toLowerCase();
+  return (
+    type === "image/heic" ||
+    type === "image/heif" ||
+    type.includes("heic") ||
+    type.includes("heif") ||
+    name.endsWith(".heic") ||
+    name.endsWith(".heif")
+  );
+}
+
+/** Normalize uploads to a browser- and Sharp-friendly JPEG blob for cropping. */
+export async function prepareImageForCrop(file: File): Promise<Blob> {
+  if (isHeicLikeFile(file)) {
+    const heic2any = (await import("heic2any")).default;
+    const converted = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.92,
+    });
+    const blob = Array.isArray(converted) ? converted[0] : converted;
+    if (!(blob instanceof Blob)) {
+      throw new Error("Failed to convert HEIC image");
+    }
+    return blob;
+  }
+
+  const blobUrl = URL.createObjectURL(file);
+  try {
+    return await compressImage(blobUrl);
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+}
+
 // Compress and resize image to reduce file size
 // Optimized for faster uploads: slightly reduced quality and dimensions
 export async function compressImage(

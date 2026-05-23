@@ -8,11 +8,28 @@ export interface CartItem {
   id: string;
   quantity: number;
   imageUrls: string[];
+  originalUrls?: string[];
+  generatedBwUrls?: string[];
+  generatedColorUrls?: string[];
+  previewSessionId?: string;
   title?: string;
   lineId?: string;
   style?: "cartoon" | "pencil" | "watercolor";
   isGiftCard?: boolean;
   giftCardAmount?: number;
+}
+
+export interface PreviewGenerationStats {
+  totalGenerations: number;
+  selectedGenerationBySlot: number[];
+}
+
+export interface BookFulfillmentImages {
+  originalUrls: string[];
+  generatedBwUrls: string[];
+  generatedColorUrls?: string[];
+  previewSessionId: string;
+  generationStats?: PreviewGenerationStats;
 }
 
 export interface Cart {
@@ -32,7 +49,8 @@ interface CartContextType {
     quantity?: number,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor"
+    style?: "cartoon" | "pencil" | "watercolor",
+    fulfillment?: BookFulfillmentImages
   ) => Promise<void>;
   addGiftCardToCart: (optionId: string) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
@@ -114,7 +132,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             lId: string,
             attempts = 3,
             delayMs = 200
-          ): Promise<{ imageUrls: string[]; style?: "cartoon" | "pencil" | "watercolor" }> => {
+          ): Promise<{
+            imageUrls: string[];
+            originalUrls?: string[];
+            generatedBwUrls?: string[];
+            generatedColorUrls?: string[];
+            previewSessionId?: string;
+            style?: "cartoon" | "pencil" | "watercolor";
+          }> => {
             for (let i = 0; i < attempts; i++) {
               try {
                 const res = await fetch(
@@ -128,6 +153,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   ) {
                     return {
                       imageUrls: json.imageUrls,
+                      originalUrls: json.originalUrls,
+                      generatedBwUrls: json.generatedBwUrls,
+                      generatedColorUrls: json.generatedColorUrls,
+                      previewSessionId: json.previewSessionId,
                       style: json.style,
                     };
                   }
@@ -157,6 +186,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               // Fallback to Shopify attributes if cart-images API returned empty (production issue)
               // This happens because in-memory storage doesn't work across serverless instances
               let imageUrls = lineData.imageUrls;
+              let generatedColorUrls = lineData.generatedColorUrls;
               if (imageUrls.length === 0) {
                 // First try the imageUrls already extracted by the get route (from Shopify attributes)
                 if (line.imageUrls && Array.isArray(line.imageUrls) && line.imageUrls.length > 0) {
@@ -176,6 +206,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   if (shopifyImageUrls.length > 0) {
                     imageUrls = shopifyImageUrls;
                   }
+                }
+              }
+              if (
+                (!generatedColorUrls || generatedColorUrls.length === 0) &&
+                line.attributes
+              ) {
+                const shopifyColorUrls: string[] = [];
+                for (let i = 1; i <= 5; i++) {
+                  const colorAttr = line.attributes.find(
+                    (attr: any) => attr.key === `_color_image_${i}`,
+                  );
+                  if (colorAttr?.value) {
+                    shopifyColorUrls.push(colorAttr.value);
+                  }
+                }
+                if (shopifyColorUrls.length === 5) {
+                  generatedColorUrls = shopifyColorUrls;
                 }
               }
               
@@ -221,6 +268,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 quantity: line.quantity,
                 title: line.title,
                 imageUrls: isGiftCard ? [] : imageUrls,
+                originalUrls: isGiftCard ? undefined : lineData.originalUrls,
+                generatedBwUrls: isGiftCard ? undefined : lineData.generatedBwUrls,
+                generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
+                previewSessionId: isGiftCard ? undefined : lineData.previewSessionId,
                 style: isGiftCard ? undefined : style,
                 isGiftCard,
                 giftCardAmount,
@@ -261,7 +312,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number = 1,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor"
+    style?: "cartoon" | "pencil" | "watercolor",
+    fulfillment?: BookFulfillmentImages
   ) => {
     setIsLoading(true);
     try {
@@ -282,6 +334,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             locale,
+            originalUrls: fulfillment?.originalUrls,
+            generatedBwUrls: fulfillment?.generatedBwUrls,
+            generatedColorUrls: fulfillment?.generatedColorUrls,
+            previewSessionId: fulfillment?.previewSessionId,
+            generationStats: fulfillment?.generationStats,
           }),
         });
       } else {
@@ -298,6 +355,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             locale,
+            originalUrls: fulfillment?.originalUrls,
+            generatedBwUrls: fulfillment?.generatedBwUrls,
+            generatedColorUrls: fulfillment?.generatedColorUrls,
+            previewSessionId: fulfillment?.previewSessionId,
+            generationStats: fulfillment?.generationStats,
           }),
         });
       }
