@@ -13,12 +13,14 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
+import { isAiPreviewEnabled } from "@/lib/feature-flags";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
 export default function QAPage() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
+  const previewOn = isAiPreviewEnabled();
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F3EEE8" }}>
       <Header />
@@ -119,6 +121,39 @@ export default function QAPage() {
                     </AccordionContent>
                   </AccordionItem>
                 </motion.div>
+
+                {previewOn && (
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      show: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 1.1, ease: easeOwlet },
+                      },
+                    }}
+                  >
+                    <AccordionItem
+                      value="item-preview"
+                      className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
+                    >
+                      <AccordionTrigger
+                        className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
+                      >
+                        {t("qa.questionPreview")}
+                      </AccordionTrigger>
+                      <AccordionContent
+                        className={`font-body text-medium-gray leading-relaxed pt-4 ${
+                          locale === "en" ? "text-left" : "text-right"
+                        }`}
+                      >
+                        {t("qa.answerPreview")}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </motion.div>
+                )}
 
                 <motion.div
                   variants={{
@@ -332,15 +367,30 @@ export default function QAPage() {
                         locale === "en" ? "text-left" : "text-right"
                       }`}
                     >
-                      <span>
-                        {t("qa.answer9.beforeLink")}
-                        <Link
-                          href="/contact"
-                          className="underline underline-offset-2 decoration-current hover:opacity-80"
-                        >
-                          {t("qa.answer9.linkText")}
-                        </Link>
-                      </span>
+                      {previewOn ? (
+                        <span className="block space-y-4">
+                          <span className="block">{t("qa.answer9.previewLine1")}</span>
+                          <span className="block">
+                            {t("qa.answer9.previewLine2Before")}
+                            <Link
+                              href="/contact"
+                              className="underline underline-offset-2 decoration-current hover:opacity-80"
+                            >
+                              {t("qa.answer9.linkText")}
+                            </Link>
+                          </span>
+                        </span>
+                      ) : (
+                        <span>
+                          {t("qa.answer9.beforeLink")}
+                          <Link
+                            href="/contact"
+                            className="underline underline-offset-2 decoration-current hover:opacity-80"
+                          >
+                            {t("qa.answer9.linkText")}
+                          </Link>
+                        </span>
+                      )}
                     </AccordionContent>
                   </AccordionItem>
                 </motion.div>

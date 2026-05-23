@@ -417,7 +417,7 @@ const hebrewTranslations = {
   "home.about.paragraph2":
     "מהר מאוד הבנתי שזה לא רק תהליך יצירתי בשבילי. התגובות של אמהות שקיבלו את הספרון חידדו שיש כאן משהו אחר - אישי ומיוחד. מוצר שגם אני הייתי בוחרת עבור גלי שלי, אולי בגלל זה היא ממשיכה לקבל עוד ועוד ספרונים עד עכשיו.",
   "home.about.paragraph3":
-    "הספרון נולד כמוצר לתינוק, אבל גם כמתנה מקורית: כזו שיש בה מחשבה וקשר אישי, וכזו שרוצים להשאיר בבית לא רק לשימוש — אלא גם כחפץ שנעים לראות.",
+    "הספרון נולד כמוצר לתינוק, אבל גם כמתנה מקורית: כזו שיש בה מחשבה וקשר אישי, וכזו שרוצים להשאיר בבית לא רק לשימוש - אלא גם כחפץ שנעים לראות.",
   "home.qa.title": "שאלו אותנו",
   "home.qa.titleHighlight": "אותנו",
   "home.qa.subtitle": "התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו",
@@ -465,6 +465,9 @@ const hebrewTranslations = {
   "qa.question2": "כמה תמונות צריך לבחור?",
   "qa.answer2":
     "5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד השני בצבעוני.",
+  "qa.questionPreview": "האם אפשר לראות את התוצאה לפני הקניה?",
+  "qa.answerPreview":
+    "כן, אנחנו מאפשרים לראות את התוצאה המלאה של הספרון לפני הקניה, כולל את התמונות בשחור לבן ואת התמונות הצבעוניות בכל הסגנונות.",
   "qa.question3": "מי כדאי שיהיה בספרון?",
   "qa.answer3":
     "כל מי שאתם רוצים להראות לתינוק. כמה רעיונות: משפחה קרובה, משפחה רחוקה, חברים, חיות מחמד.",
@@ -484,6 +487,10 @@ const hebrewTranslations = {
   "qa.question9": "מה אם אני לא מרוצה מהספרון?",
   "qa.answer9.beforeLink":
     "המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם קיבלתם את הספרון ומשהו בו לא עבד לכם כמו שציפיתם, מוזמנים לפנות ",
+  "qa.answer9.previewLine1":
+    "הספרון הסופי יהיה זהה בדיוק לספרון שתאשרו לפני הקניה.",
+  "qa.answer9.previewLine2Before":
+    "אם בכל זאת משהו לא עבד לכם כמו שציפיתם אתם מוזמנים לפנות ",
   "qa.answer9.linkText": "אלינו",
   "qa.notFound": "לא מצאתם את התשובה שחיפשתם?",
   "qa.contact": "צרו איתנו קשר",
@@ -1138,6 +1145,9 @@ const englishTranslations = {
   "qa.question2": "How many photos should I choose?",
   "qa.answer2":
     "Only 5 photos. The same photos appear on one side in black and white and on the other side in color.",
+  "qa.questionPreview": "Can I see the result before buying?",
+  "qa.answerPreview":
+    "Yes, we let you see the full book result before purchase, including the black and white images and the colorful images in all styles.",
   "qa.question3": "Who should be in the book?",
   "qa.answer3":
     "Anyone you want to show your baby. Some ideas: close family, extended family, friends, pets.",
@@ -1159,6 +1169,10 @@ const englishTranslations = {
   "qa.question9": "What if I'm not satisfied with the book?",
   "qa.answer9.beforeLink":
     "Our goal is for you to love and be happy with your book. If you received it and something didn’t turn out as you expected, feel free to ",
+  "qa.answer9.previewLine1":
+    "The final book will be exactly the same as the book you approved before purchase.",
+  "qa.answer9.previewLine2Before":
+    "If something still didn’t turn out as you expected, feel free to contact ",
   "qa.answer9.linkText": "contact us",
   "qa.notFound": "Didn't find the answer you were looking for?",
   "qa.contact": "Contact Us",

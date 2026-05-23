@@ -472,7 +472,7 @@ export default function Home() {
           titleKey: "home.howItWorks.previewStep2.title",
           descriptionKey: "home.howItWorks.previewStep2.description",
           imageAltKey: "home.howItWorks.previewStep2.imageAlt",
-          src: "/preview-images-10.png",
+          src: "/preview-images.png",
         },
         {
           num: 3,
@@ -1443,6 +1443,28 @@ export default function Home() {
                   </AccordionContent>
                 </AccordionItem>
 
+                {previewOn && (
+                  <AccordionItem
+                    value="item-preview"
+                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
+                  >
+                    <AccordionTrigger
+                      className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
+                        locale === "en" ? "text-left" : "text-right"
+                      }`}
+                    >
+                      {t("qa.questionPreview")}
+                    </AccordionTrigger>
+                    <AccordionContent
+                      className={`font-body text-medium-gray leading-relaxed pt-4 ${
+                        locale === "en" ? "text-left" : "text-right"
+                      }`}
+                    >
+                      {t("qa.answerPreview")}
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
                 <AccordionItem
                   value="item-3"
                   className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
@@ -1479,15 +1501,30 @@ export default function Home() {
                       locale === "en" ? "text-left" : "text-right"
                     }`}
                   >
-                    <span>
-                      {t("qa.answer9.beforeLink")}
-                      <Link
-                        href="/contact"
-                        className="underline underline-offset-2 decoration-current hover:opacity-80"
-                      >
-                        {t("qa.answer9.linkText")}
-                      </Link>
-                    </span>
+                    {previewOn ? (
+                      <span className="block space-y-4">
+                        <span className="block">{t("qa.answer9.previewLine1")}</span>
+                        <span className="block">
+                          {t("qa.answer9.previewLine2Before")}
+                          <Link
+                            href="/contact"
+                            className="underline underline-offset-2 decoration-current hover:opacity-80"
+                          >
+                            {t("qa.answer9.linkText")}
+                          </Link>
+                        </span>
+                      </span>
+                    ) : (
+                      <span>
+                        {t("qa.answer9.beforeLink")}
+                        <Link
+                          href="/contact"
+                          className="underline underline-offset-2 decoration-current hover:opacity-80"
+                        >
+                          {t("qa.answer9.linkText")}
+                        </Link>
+                      </span>
+                    )}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
