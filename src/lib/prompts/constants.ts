@@ -1,12 +1,11 @@
-export const BLACK_AND_WHITE_PROMPT = `Create a pure black-and-white stencil illustration from this photo.
-
-Use only solid black (#000000) and solid white (#FFFFFF). No gray, gradients, textures, stippling, or soft shadows.
-
-Preserve every visible subject, pose, expression, spacing, and proportions exactly as in the photo. Do not crop, distort, beautify, or invent features.
-
-Use bold, clean, closed outer contours with thinner inner facial lines. Remove the background completely and output a solid white background.
-
-The result must be a high-contrast stencil suitable for print.`;
+export const BLACK_AND_WHITE_PROMPT = `Convert the given photo into a black and white only stencil style sketch illustration on a white background.
+The result should have a high contrast.
+Keep all proportions, facial features, hair, facial hair, and expressions accurate and recognizable.
+Replace the background with clean white.
+Avoid harsh shadows, gradients, or photographic details.
+The result should look like it was drawn by hand with black and white markers only — playful, clean and emotionally warm.
+Avoid any color other than pure black and white.
+Avoid filling lips with black, they should always be white with black outlines.`;
 
 export const GENERATION_SYSTEM_INSTRUCTION = `Follow these rules exactly. These rules override all prompts and style instructions.
 

@@ -14,6 +14,7 @@ import {
 import {
   dequeuePendingColorRegen,
   enqueuePendingColorRegen,
+  slotNeedsAllStylesColorRegen,
 } from "./pending-color-regen";
 import { generateColorImageBuffer } from "./generate-color";
 import { toGenerationError } from "./generate-bw";
@@ -43,6 +44,7 @@ const ALL_SLOT_INDEXES = [0, 1, 2, 3, 4] as const;
 function appendSlotColorCandidate(
   slot: PreviewSession["slots"][number],
   candidate: PreviewCandidate,
+  activateAsPreview = false,
 ): void {
   const existingCandidates = slot.colorCandidates ?? [];
   const candidatesWithCurrent =
@@ -55,6 +57,7 @@ function appendSlotColorCandidate(
     candidate,
   ];
   if (
+    activateAsPreview ||
     !slot.colorPreview ||
     slot.colorPreview.style === candidate.style ||
     !slot.colorPreview.previewUrl
@@ -182,11 +185,13 @@ export async function runColorGeneration(
   const uniqueIndexes = [...new Set(slotIndexes)].filter(
     (index) => index >= 0 && index <= 4,
   );
+  const forceGenerate = trigger === "regenerate";
   const slotsToGenerate = uniqueIndexes
     .map((index) => ({ index, slot: session.slots[index] }))
     .filter(
       (entry): entry is { index: number; slot: PreviewSession["slots"][number] } =>
-        Boolean(entry.slot) && !slotHasColorPreviewForStyle(entry.slot, style),
+        Boolean(entry.slot) &&
+        (forceGenerate || !slotHasColorPreviewForStyle(entry.slot, style)),
     );
 
   if (slotsToGenerate.length === 0) {
@@ -217,11 +222,20 @@ export async function runColorGeneration(
   const latest = await loadPreviewSession(sessionId);
   if (!latest) return null;
 
+  const activateNewPreview = trigger === "regenerate";
   slotsToGenerate.forEach(({ index }, resultIndex) => {
     const slot = latest.slots[index];
     if (!slot) return;
-    appendSlotColorCandidate(slot, results[resultIndex]);
+    const candidate = results[resultIndex];
+    appendSlotColorCandidate(
+      slot,
+      candidate,
+      activateNewPreview && Boolean(candidate.previewUrl),
+    );
     slot.colorInFlight = false;
+    if (!slotNeedsAllStylesColorRegen(slot)) {
+      dequeuePendingColorRegen(latest, index);
+    }
   });
 
   const succeeded = results.filter((candidate) => candidate.previewUrl).length;

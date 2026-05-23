@@ -43,11 +43,30 @@ function pickLatestDisplayColorCandidate(
   );
 }
 
+function pickDisplayColorCandidateForStyle(
+  slot: PreviewSlotPublic,
+  style: StyleType,
+  forStyle: PreviewCandidate[],
+): PreviewCandidate | undefined {
+  if (
+    slot.colorPreview &&
+    (slot.colorPreview.style ?? "pencil") === style &&
+    forStyle.some((candidate) => candidate.id === slot.colorPreview?.id)
+  ) {
+    return slot.colorPreview;
+  }
+  return pickLatestDisplayColorCandidate(forStyle);
+}
+
 export function getColorCandidateForStyle(
   slot: PreviewSlot,
   style: StyleType,
 ): PreviewCandidate | undefined {
-  return pickLatestDisplayColorCandidate(getColorCandidatesForStyle(slot, style));
+  return pickDisplayColorCandidateForStyle(
+    slot,
+    style,
+    getColorCandidatesForStyle(slot, style),
+  );
 }
 
 export function slotHasColorForStyle(slot: PreviewSlot, style: StyleType): boolean {
@@ -119,5 +138,5 @@ export function getColorCandidateForStyleFromPublicSlot(
   const forStyle = merged.filter(
     (candidate) => (candidate.style ?? "pencil") === style,
   );
-  return pickLatestDisplayColorCandidate(forStyle);
+  return pickDisplayColorCandidateForStyle(slot, style, forStyle);
 }

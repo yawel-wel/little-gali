@@ -15,8 +15,13 @@ import {
   type PreviewGenerationContext,
 } from "./generation-log";
 
-const BW_MODEL = "gemini-2.5-flash-image";
+const DEFAULT_BW_IMAGE_MODEL = "gemini-2.5-flash-image";
 const MAX_RETRIES = 2;
+
+function getBwImageModel(): string {
+  const configured = process.env.GEMINI_BW_IMAGE_MODEL?.trim();
+  return configured || DEFAULT_BW_IMAGE_MODEL;
+}
 
 function isMockGenerationEnabled(): boolean {
   return process.env.MOCK_AI_GENERATION === "true";
@@ -56,7 +61,7 @@ async function generateWithGemini(
     const error = new Error("GEMINI_API_KEY is not configured");
     logPreviewGenerationFailure(
       "bw",
-      { model: BW_MODEL, stage: "config" },
+      { model: getBwImageModel(), stage: "config" },
       error,
       generationContext,
     );
@@ -66,6 +71,7 @@ async function generateWithGemini(
   const { base64, mimeType } = await downloadImageAsBase64(imageUrl);
   const ai = new GoogleGenAI({ apiKey });
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
+  const bwModel = getBwImageModel();
 
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
@@ -74,7 +80,7 @@ async function generateWithGemini(
       logGeminiRequest(
         "bw",
         {
-          model: BW_MODEL,
+          model: bwModel,
           systemInstruction,
           userPrompt: BLACK_AND_WHITE_PROMPT,
           attempt: attempt + 1,
@@ -84,7 +90,7 @@ async function generateWithGemini(
 
       geminiStartedAt = Date.now();
       const response = await ai.models.generateContent({
-        model: BW_MODEL,
+        model: bwModel,
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
@@ -115,7 +121,7 @@ async function generateWithGemini(
           logGeminiResponse(
             "bw",
             {
-              model: BW_MODEL,
+              model: bwModel,
               attempt: attempt + 1,
               durationMs: Date.now() - geminiStartedAt,
               outcome: "success",
@@ -143,7 +149,7 @@ async function generateWithGemini(
       logPreviewGenerationFailure(
         "bw",
         {
-          model: BW_MODEL,
+          model: bwModel,
           stage: "gemini",
           attempt: attempt + 1,
           code: classified.code,

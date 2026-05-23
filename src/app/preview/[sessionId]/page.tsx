@@ -992,6 +992,7 @@ export default function PreviewPage() {
   const handleRegenerateColor = async (slotIndex: number) => {
     if (!session) return;
     markSlotBusy(slotIndex);
+    mutationInProgressRef.current = true;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -1012,10 +1013,16 @@ export default function PreviewPage() {
         throw new Error(data.error || t("preview.sessionError"));
       }
       applySession(data.session as PreviewSessionPublicView);
+      setSlotsPendingColorRegen((current) => {
+        const next = new Set(current);
+        next.delete(slotIndex);
+        return next;
+      });
     } catch (err) {
       setGenerationError(err);
     } finally {
       clearSlotBusy(slotIndex);
+      mutationInProgressRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -1705,7 +1712,8 @@ export default function PreviewPage() {
                             false) || slotsPendingColorRegen.has(slot.index);
                         const isColorSlotBusy =
                           slot.colorInFlight ||
-                          isSlotPendingColorRegen ||
+                          (isSlotPendingColorRegen &&
+                            !activeColorCandidate?.previewUrl) ||
                           (displayedBookSide === "color" &&
                             busySlotIndexes.has(slot.index));
                         const isVisibleSideBusy =
@@ -1722,9 +1730,7 @@ export default function PreviewPage() {
                             ? active?.previewUrl
                             : showColorBwInterim
                               ? active?.previewUrl
-                              : isSlotPendingColorRegen
-                                ? undefined
-                                : activeColorCandidate?.previewUrl;
+                              : activeColorCandidate?.previewUrl;
                         const previewUrlFailed = Boolean(
                           currentPreviewUrl &&
                             failedPreviewUrls.has(currentPreviewUrl),
@@ -2049,8 +2055,7 @@ export default function PreviewPage() {
                                     alt={`${t("preview.tabBw")} ${pageNum}`}
                                   />
                                 ) : activeColorCandidate?.previewUrl &&
-                                  !previewUrlFailed &&
-                                  !isSlotPendingColorRegen ? (
+                                  !previewUrlFailed ? (
                                   <PreviewSlotFadeImage
                                     key={`${slot.index}-color-${activeColorCandidate.id}`}
                                     src={activeColorCandidate.previewUrl}

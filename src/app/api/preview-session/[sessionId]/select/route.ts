@@ -35,8 +35,8 @@ export async function POST(
   }
 
   const session = auth.session;
-  if (session.phase !== "bw_review") {
-    return NextResponse.json({ error: "Session is not in B&W review" }, { status: 409 });
+  if (session.phase === "cart_added") {
+    return NextResponse.json({ error: "Session is already in cart" }, { status: 409 });
   }
 
   const slot = session.slots[slotIndex];
