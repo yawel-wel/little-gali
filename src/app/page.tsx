@@ -979,7 +979,7 @@ export default function Home() {
         <motion.section
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
-          className="relative pb-16 lg:pb-24 bg-warm-light"
+          className="relative pb-16 lg:pb-24 bg-white"
           initial={prefersReducedMotion || isMobile === true ? undefined : { opacity: 0, y: 20 }}
           animate={isMobile === false && !prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           whileInView={isMobile === false && !prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}

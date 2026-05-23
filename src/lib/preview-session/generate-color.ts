@@ -3,7 +3,7 @@ import sharp from "sharp";
 import type { StyleType } from "@/components/style-selector";
 import {
   CARTOON_COLOR_PROMPT,
-  COLOR_SYSTEM_INSTRUCTION,
+  GENERATION_SYSTEM_INSTRUCTION,
   PENCIL_COLOR_PROMPT,
   WATERCOLOR_COLOR_PROMPT,
 } from "@/lib/prompts/constants";
@@ -81,7 +81,7 @@ async function generateWithGemini(
 
   const { base64, mimeType } = await downloadImageAsBase64(imageUrl);
   const ai = new GoogleGenAI({ apiKey });
-  const systemInstruction = COLOR_SYSTEM_INSTRUCTION;
+  const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {

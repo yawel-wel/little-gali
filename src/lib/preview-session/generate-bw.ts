@@ -1,7 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
-import { buildNanoBananaSystemInstructionText } from "@/lib/gemini-nano-banana-system";
-import { BLACK_AND_WHITE_PROMPT } from "@/lib/prompts/constants";
+import {
+  BLACK_AND_WHITE_PROMPT,
+  GENERATION_SYSTEM_INSTRUCTION,
+} from "@/lib/prompts/constants";
 import {
   classifyGenerationError,
   shouldStopGeminiRetry,
@@ -63,7 +65,7 @@ async function generateWithGemini(
 
   const { base64, mimeType } = await downloadImageAsBase64(imageUrl);
   const ai = new GoogleGenAI({ apiKey });
-  const systemInstruction = buildNanoBananaSystemInstructionText(true);
+  const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {

@@ -362,7 +362,7 @@ const hebrewTranslations = {
     "אנחנו ניצור מהתמונות ספרון דו צדדי.\nצד אחד עם חמשת התמונות בשחור לבן, וצד שני עם \nאותם חמש תמונות בעיבוד צבעוני.",
   "home.howItWorks.step2.imageAlt": "דוגמה לתמונות מעובדות בספרון",
   "home.howItWorks.previewStep2.label": "אנחנו עושים",
-  "home.howItWorks.previewStep2.title": "יוצרים את התמונות",
+  "home.howItWorks.previewStep2.title": "יוצרים את האיורים",
   "home.howItWorks.previewStep2.description":
     "אתם רואים את האיורים ובוחרים סגנון לפני הקניה",
   "home.howItWorks.previewStep2.imageAlt": "דוגמה לתמונות בתצוגה מקדימה",
