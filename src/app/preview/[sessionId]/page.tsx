@@ -1483,7 +1483,7 @@ export default function PreviewPage() {
             locale={locale}
           />
         ) : (
-          <section className="bg-warm-light pt-5 pb-0 md:pb-14">
+          <section className="bg-warm-light pt-5 pb-0 max-md:pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-14">
             <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
               <Title
                 highlightText={
@@ -1532,7 +1532,7 @@ export default function PreviewPage() {
             ) : session ? (
               <div>
                 {isColorPhase ? (
-                  <p className="mx-auto max-w-xl text-center font-body text-xs leading-tight text-dark-gray md:text-base">
+                  <p className="mx-auto max-w-xl text-center font-body text-base leading-relaxed text-dark-gray">
                     {t("preview.colorPhaseDescription")
                       .split("\n")
                       .map((line, index) => (
@@ -1545,7 +1545,7 @@ export default function PreviewPage() {
                       ))}
                   </p>
                 ) : (
-                  <p className="mx-auto max-w-xl text-center font-body text-xs leading-tight text-dark-gray md:text-base">
+                  <p className="mx-auto max-w-xl text-center font-body text-base leading-relaxed text-dark-gray">
                     {t("preview.bwPhaseDescription")
                       .split("\n")
                       .map((line, index) => (
@@ -1560,7 +1560,7 @@ export default function PreviewPage() {
                 )}
                 <div className="mt-4 flex justify-center md:mt-5">
                   {session.changeCreditsRemaining > 0 ? (
-                    <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-[11px] font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
+                    <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-base font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
                       {t("preview.changesRemainingBadge").replace(
                         "{count}",
                         String(session.changeCreditsRemaining),
@@ -2370,7 +2370,11 @@ export default function PreviewPage() {
         previousLabel={t("preview.lightboxPrevious")}
         nextLabel={t("preview.lightboxNext")}
       />
-      {!showInitialLoadingScreen && !showColorLoadingScreen && <Footer />}
+      {!showInitialLoadingScreen && !showColorLoadingScreen && (
+        <div className="max-md:hidden">
+          <Footer />
+        </div>
+      )}
     </div>
   );
 }

@@ -91,6 +91,7 @@ interface UploadSortableImagesProps {
   count: number;
   disabled?: boolean;
   onReorder: (oldIndex: number, newIndex: number) => void;
+  onDraggingChange?: (isDragging: boolean) => void;
   renderItem: (
     index: number,
     context: { dragActivator: UploadDragActivator },
@@ -101,6 +102,7 @@ export function UploadSortableImages({
   count,
   disabled,
   onReorder,
+  onDraggingChange,
   renderItem,
 }: UploadSortableImagesProps) {
   const indices = Array.from({ length: count }, (_, index) => index);
@@ -119,6 +121,7 @@ export function UploadSortableImages({
   );
 
   const handleDragStart = (event: DragStartEvent) => {
+    onDraggingChange?.(true);
     const index = Number(event.active.id);
     if (!Number.isNaN(index)) {
       setActiveIndex(index);
@@ -126,6 +129,7 @@ export function UploadSortableImages({
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    onDraggingChange?.(false);
     setActiveIndex(null);
 
     const { active, over } = event;
@@ -150,6 +154,7 @@ export function UploadSortableImages({
   };
 
   const handleDragCancel = () => {
+    onDraggingChange?.(false);
     setActiveIndex(null);
   };
 
@@ -213,7 +218,7 @@ export function UploadImageDragSurface({
       className={cn(
         className,
         reorderEnabled &&
-          "touch-manipulation select-none [-webkit-touch-callout:none]",
+          "touch-none select-none [-webkit-touch-callout:none]",
         reorderEnabled &&
           pressPending &&
           "ring-2 ring-inset ring-primary-orange/40",

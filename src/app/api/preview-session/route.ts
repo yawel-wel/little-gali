@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 import { after, NextRequest, NextResponse } from "next/server";
+import { logPreviewFullGenerationRateLimited } from "@/lib/preview-session/log-preview-rate-limit";
 import { isPreviewEnabled, requirePreviewSession } from "@/lib/preview-session/auth";
 import { isAllowedCloudinaryUrl } from "@/lib/preview-session/cloudinary";
 import { isUuid } from "@/lib/preview-session/cloudinary-paths";
@@ -41,6 +42,7 @@ async function assertCanStartFullGeneration(
   const ipHash = hashClientIp(getRequestIp(request));
   const rate = await checkFullGenerationRateLimit(ipHash);
   if (!rate.allowed) {
+    logPreviewFullGenerationRateLimited("api");
     return { error: PREVIEW_RATE_LIMIT_ERROR_CODE, status: 429 };
   }
   return { ok: true };

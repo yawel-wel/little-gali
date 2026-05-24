@@ -90,7 +90,7 @@ export function PreviewPhaseFooter({
   if (variant === "fixedMobile") {
     return (
       <div
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5DDD4] bg-warm-light px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E0E0E0] bg-white px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
         dir="rtl"
       >
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-2">
@@ -136,7 +136,7 @@ export function PreviewPhaseMobileContact({
   contactAfter,
 }: PreviewPhaseMobileContactProps) {
   return (
-    <div className="mt-2 border-t border-[#E5DDD4] pt-4 pb-6 max-md:mb-[5.75rem] md:hidden">
+    <div className="mt-2 border-t border-[#E5DDD4] pt-4 max-md:pb-9 md:hidden">
       <PreviewPhaseContactLine
         contactBefore={contactBefore}
         contactLinkLabel={contactLinkLabel}

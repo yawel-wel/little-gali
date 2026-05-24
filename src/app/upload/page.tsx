@@ -37,6 +37,7 @@ import {
   getGenerationRateLimitMessage,
   isGenerationRateLimited,
 } from "@/lib/preview-session/handle-generation-response";
+import { logPreviewFullGenerationRateLimited } from "@/lib/preview-session/log-preview-rate-limit";
 import Button from "@mui/material/Button";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
@@ -148,6 +149,7 @@ function UploadPageContent() {
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReorderingImages, setIsReorderingImages] = useState(false);
   const [showPreviewLoader, setShowPreviewLoader] = useState(false);
   const [previewLoaderLineIndex, setPreviewLoaderLineIndex] = useState(0);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -649,6 +651,12 @@ function UploadPageContent() {
           previewResponse.status === 429 &&
           (previewData.error === "preview_rate_limit" ||
             previewData.error?.includes("24 hours"));
+        if (isPreviewRateLimited) {
+          logPreviewFullGenerationRateLimited(
+            "upload_client",
+            previewSessionId,
+          );
+        }
         setSubmitStatus({
           type: "error",
           message: isGenerationLimited
@@ -869,7 +877,7 @@ function UploadPageContent() {
 
               {/* First Paragraph */}
               <div className="text-center mb-8 -mt-4">
-                <p className="text-lg font-body text-dark-gray leading-relaxed text-center">
+                <p className="text-base font-body text-dark-gray leading-relaxed text-center">
                   {t("upload.description")
                     .split("\n")
                     .map((line, i, arr) => (
@@ -925,12 +933,20 @@ function UploadPageContent() {
                         {t("upload.dragToReorder")}
                       </p>
                     )}
-                    <div className="w-full overflow-x-auto md:overflow-visible">
+                    <div
+                      className={cn(
+                        "w-full md:overflow-visible",
+                        isReorderingImages
+                          ? "overflow-x-hidden"
+                          : "overflow-x-auto overscroll-x-contain",
+                      )}
+                    >
                       <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end">
                       {images.length === 5 ? (
                         <UploadSortableImages
                           count={5}
                           disabled={isSubmitting}
+                          onDraggingChange={setIsReorderingImages}
                           onReorder={handleImagesReorder}
                           renderItem={(index, { dragActivator }) => (
                             <UploadImageItem
