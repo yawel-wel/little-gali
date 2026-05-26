@@ -132,7 +132,13 @@ async function prepareSessionForPipelineStart(
 
   const existing = await loadPreviewSession(sessionId);
   if (!existing) {
-    const session = await createNewPreviewSession(request, sessionId);
+    /**
+     * If the client sends a sessionId but KV has expired (or was evicted),
+     * reusing the same id is dangerous because Cloudinary inputs/outputs are
+     * deterministically keyed by sessionId. That can lead to "yesterday's images"
+     * showing up for a "new" upload. Always rotate to a fresh session id.
+     */
+    const session = await createNewPreviewSession(request, randomUUID());
     return { session, shouldSchedulePipeline: true };
   }
 
@@ -241,7 +247,7 @@ export async function POST(request: NextRequest) {
 
       if (!shouldSchedule) {
         const genStatus = resolveGenerationStatus(sessionForPipeline);
-        if (genStatus === "complete") {
+        if (genStatus === "complete" || genStatus === "running") {
           const fresh = await startFreshPreviewSessionForNewUpload(request);
           sessionForPipeline = fresh.session;
           shouldSchedule = true;
@@ -323,7 +329,7 @@ export async function POST(request: NextRequest) {
 
     if (!shouldSchedule) {
       const genStatus = resolveGenerationStatus(sessionForPipeline);
-        if (genStatus === "complete") {
+        if (genStatus === "complete" || genStatus === "running") {
           const fresh = await startFreshPreviewSessionForNewUpload(request);
           sessionForPipeline = fresh.session;
           shouldSchedule = true;
