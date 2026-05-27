@@ -9,6 +9,7 @@ import {
   consumeChangeCreditForResult,
   hasChangeCredits,
 } from "@/lib/preview-session/credits";
+import { slotColorActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
@@ -32,9 +33,11 @@ export async function POST(
   const body = (await request.json().catch(() => ({}))) as {
     slotIndex?: number;
     style?: StyleType;
+    freeRetry?: boolean;
   };
   const { slotIndex } = body;
   const style = body.style ?? auth.session.selectedColorStyle ?? "pencil";
+  const requestedFreeRetry = body.freeRetry === true;
 
   if (
     typeof slotIndex !== "number" ||
@@ -53,17 +56,13 @@ export async function POST(
     );
   }
 
-  if (!hasChangeCredits(session)) {
-    return NextResponse.json(
-      { error: "No change credits remaining" },
-      { status: 403 },
-    );
-  }
-
   const slot = session.slots[slotIndex];
   if (!slot || slot.colorInFlight) {
     return NextResponse.json({ error: "Slot is busy" }, { status: 409 });
   }
+
+  const freeRetry =
+    requestedFreeRetry && slotColorActiveHasRetryableError(slot, style);
 
   const active = slot.candidates.find(
     (candidate) =>
@@ -73,6 +72,13 @@ export async function POST(
     return NextResponse.json(
       { error: "B&W preview is not ready for color generation" },
       { status: 409 },
+    );
+  }
+
+  if (!freeRetry && !hasChangeCredits(session)) {
+    return NextResponse.json(
+      { error: "No change credits remaining" },
+      { status: 403 },
     );
   }
 
@@ -102,7 +108,9 @@ export async function POST(
 
     const activeSlot = updated.slots[slotIndex];
     const colorPreview = activeSlot?.colorPreview;
-    consumeChangeCreditForResult(updated, colorPreview?.error);
+    if (!freeRetry) {
+      consumeChangeCreditForResult(updated, colorPreview?.error);
+    }
     await savePreviewSession(updated);
     const durationMs = Date.now() - startedAt;
     logPreviewApiOperation(

@@ -50,3 +50,18 @@ export async function checkFullGenerationRateLimit(
     remaining: Math.max(0, maxPerWindow - count),
   };
 }
+
+/** Counts as one full preview for the IP window (same as checkFullGenerationRateLimit). */
+export async function recordFullGenerationUse(ipHash: string): Promise<void> {
+  const { windowSeconds } = fullGenerationRateLimitConfig;
+
+  if (isPreviewRateLimitDisabled()) {
+    return;
+  }
+
+  const key = previewFullGenerationRateKey(ipHash);
+  const count = await kvIncr(key);
+  if (count === 1) {
+    await kvExpire(key, windowSeconds);
+  }
+}

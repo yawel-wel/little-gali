@@ -1,4 +1,6 @@
 import { INITIAL_CHANGE_CREDITS } from "./credits";
+import { getRequestIp, hashClientIp } from "./hash";
+import { recordFullGenerationUse } from "./rate-limit";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewSession } from "./types";
 
@@ -6,13 +8,10 @@ import type { PreviewSession } from "./types";
  * Ops: in Upstash, open `preview:session:{sessionId}` and set:
  * `"supportAllowNextPreviewRound": true`
  *
- * On the user's next preview-related request for that session id, this grants:
- * - 3 change credits (`changeCreditsRemaining`)
- * - one bypass of the 24h full-preview (per-IP) limit
- * - 3 bypasses of the per-session technical generation rate limit
- *
- * The flag is cleared when applied. Legacy flags `supportAllowFullGeneration` /
- * `supportAllowGeneration` still work for one-off cases.
+ * Activates once at the start of POST /api/preview-session (before rate checks).
+ * Grants 3 change credits, one full-generation bypass, and 3 technical-limit bypasses.
+ * The round flag is cleared on activation; full-generation bypass is consumed when
+ * the pipeline actually starts and always records the per-IP quota.
  */
 export async function applySupportNextPreviewRoundIfRequested(
   sessionId: string | undefined,
@@ -43,15 +42,13 @@ export function inheritSupportGrants(
       remaining,
     );
   }
-  if (from.supportAllowFullGeneration) {
-    to.supportAllowFullGeneration = true;
-  }
+  // Do not copy supportAllowFullGeneration — one bypass per upload attempt only.
 }
 
 export async function tryConsumeSupportFullGenerationBypass(
+  request: Request,
   clientSessionId: string | undefined,
 ): Promise<boolean> {
-  await applySupportNextPreviewRoundIfRequested(clientSessionId);
   if (!clientSessionId) {
     return false;
   }
@@ -61,13 +58,16 @@ export async function tryConsumeSupportFullGenerationBypass(
   }
   session.supportAllowFullGeneration = false;
   await savePreviewSession(session);
+
+  const ipHash = hashClientIp(getRequestIp(request));
+  await recordFullGenerationUse(ipHash);
+
   return true;
 }
 
 export async function tryConsumeSupportGenerationBypass(
   sessionId: string,
 ): Promise<boolean> {
-  await applySupportNextPreviewRoundIfRequested(sessionId);
   const session = await loadPreviewSession(sessionId);
   if (!session) {
     return false;

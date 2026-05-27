@@ -20,6 +20,7 @@ import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
 import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
 import { PreviewPhaseFooter } from "@/components/preview-phase-footer";
 import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternate-versions";
+import { PreviewSlotGenerationError } from "@/components/preview-slot-generation-error";
 import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
 import { PreviewSlotFadeImage } from "@/components/preview-slot-fade-image";
 import {
@@ -952,8 +953,8 @@ export default function PreviewPage() {
     });
   };
 
-  const handleRegenerate = async (slotIndex: number) => {
-    if (!session?.canRegenerate) return;
+  const runBwRegenerate = async (slotIndex: number, freeRetry: boolean) => {
+    if (!freeRetry && !session?.canRegenerate) return;
     markSlotBusy(slotIndex);
     mutationInProgressRef.current = true;
     setIsSubmitting(true);
@@ -967,6 +968,7 @@ export default function PreviewPage() {
           body: JSON.stringify({
             slotIndex,
             idempotencyKey: createIdempotencyKey(),
+            ...(freeRetry ? { freeRetry: true } : {}),
           }),
         },
       );
@@ -989,8 +991,17 @@ export default function PreviewPage() {
     }
   };
 
-  const handleRegenerateColor = async (slotIndex: number) => {
+  const handleRegenerate = (slotIndex: number) => {
+    void runBwRegenerate(slotIndex, false);
+  };
+
+  const handleRetryBwSlot = (slotIndex: number) => {
+    void runBwRegenerate(slotIndex, true);
+  };
+
+  const runColorRegenerate = async (slotIndex: number, freeRetry: boolean) => {
     if (!session) return;
+    if (!freeRetry && !session.canRegenerateColor) return;
     markSlotBusy(slotIndex);
     mutationInProgressRef.current = true;
     setIsSubmitting(true);
@@ -1001,7 +1012,11 @@ export default function PreviewPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slotIndex, style: activeColorStyle }),
+          body: JSON.stringify({
+            slotIndex,
+            style: activeColorStyle,
+            ...(freeRetry ? { freeRetry: true } : {}),
+          }),
         },
       );
       const data = (await response.json()) as {
@@ -1025,6 +1040,14 @@ export default function PreviewPage() {
       mutationInProgressRef.current = false;
       setIsSubmitting(false);
     }
+  };
+
+  const handleRegenerateColor = (slotIndex: number) => {
+    void runColorRegenerate(slotIndex, false);
+  };
+
+  const handleRetryColorSlot = (slotIndex: number) => {
+    void runColorRegenerate(slotIndex, true);
   };
 
   const clearReplaceCropState = useCallback(() => {
@@ -2036,9 +2059,22 @@ export default function PreviewPage() {
                                         handleReplaceClick(slot.index)
                                       }
                                     />
+                                  ) : active?.error ? (
+                                    <PreviewSlotGenerationError
+                                      message={
+                                        active.error.message ||
+                                        t("preview.sessionError")
+                                      }
+                                      disabled={
+                                        isVisibleSideBusy || isSubmitting
+                                      }
+                                      onRetry={() =>
+                                        handleRetryBwSlot(slot.index)
+                                      }
+                                    />
                                   ) : (
                                     <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
-                                      {active?.error?.message || t("preview.sessionError")}
+                                      {t("preview.sessionError")}
                                     </div>
                                   )
                                 ) : isColorSlotBusy ? (
@@ -2074,12 +2110,32 @@ export default function PreviewPage() {
                                     disabled={isVisibleSideBusy || isSubmitting}
                                     onUpload={() => handleReplaceClick(slot.index)}
                                   />
+                                ) : activeColorCandidate?.error ? (
+                                  <PreviewSlotGenerationError
+                                    message={
+                                      activeColorCandidate.error.message ||
+                                      t("preview.sessionError")
+                                    }
+                                    disabled={
+                                      isVisibleSideBusy || isSubmitting
+                                    }
+                                    onRetry={() =>
+                                      handleRetryColorSlot(slot.index)
+                                    }
+                                  />
+                                ) : previewUrlFailed ? (
+                                  <PreviewSlotGenerationError
+                                    message={t("preview.imageLoadFailed")}
+                                    disabled={
+                                      isVisibleSideBusy || isSubmitting
+                                    }
+                                    onRetry={() =>
+                                      handleRegenerateColor(slot.index)
+                                    }
+                                  />
                                 ) : (
                                   <div className="flex h-full items-center justify-center px-4 text-center font-body text-sm text-dark-gray">
-                                    {activeColorCandidate?.error?.message ||
-                                      (previewUrlFailed
-                                        ? t("preview.imageLoadFailed")
-                                        : t("preview.sessionError"))}
+                                    {t("preview.sessionError")}
                                   </div>
                                 )}
                               </PreviewSlotLightboxActivator>

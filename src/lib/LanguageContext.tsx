@@ -579,7 +579,7 @@ const hebrewTranslations = {
   "upload.dragToReorder": "גררו את התמונות כדי לשנות את הסדר",
   "upload.cropInstruction": "גררו את התמונה כדי לשנות את הגודל והמיקום",
   "upload.cropInstructionTip":
-    "המלצה שלנו: הגדילו את הדמויות כך שימלאו כמה שיותר מהתמונה כי הרקע יוסר בתוצאה הסופית",
+    "לתוצאה מיטבית, מומלץ להשאיר כמה שפחות שטח ריק סביב המצולמים",
   "upload.cropDone": "סיימתי",
   "upload.analyzingPhoto": "מציעים חיתוך חכם…",
   "upload.cropFaceClipWarning":
@@ -592,8 +592,9 @@ const hebrewTranslations = {
   "upload.photoNote":
     "אין צורך בתמונה מושלמת, אנחנו נדאג שהפנים, ההבעה והחום האנושי שבתמונה יבואו לידי ביטוי.",
   "upload.continueToPreview": "המשיכו לתצוגה מקדימה",
-  "upload.continueWithoutPreview": "המשך ללא תצוגה מקדימה",
-  "upload.withoutPreviewReassurance": "אנחנו נדאג שהתמונות שלכם יראו מדהים",
+  "upload.continueWithoutPreview": "הוסף לעגלה ללא תצוגה מקדימה",
+  "upload.withoutPreviewReassurance":
+    "תוכלו ליצור איתנו קשר אם תרצו לראות את התוצאה אחרי התשלום",
   "upload.startingPreview": "מכינים את התצוגה המקדימה...",
   "upload.previewRateLimit":
     "ניתן ליצור תצוגה מקדימה אחת בלבד בכל 24 שעות. נסו שוב מאוחר יותר",
@@ -655,6 +656,7 @@ const hebrewTranslations = {
   "preview.prohibitedContentLine1": "התמונה נחסמה על ידי המודל.",
   "preview.prohibitedContentLine2": "יש להעלות תמונה אחרת במקום.",
   "preview.prohibitedContentUpload": "העלה תמונה",
+  "preview.slotRetryAgain": "נסה שוב",
   "preview.imageActions": "אפשרויות תמונה",
   "preview.originalImage": "השווה לתמונה מקורית",
   "preview.cropImage": "חיתוך תמונה",
@@ -1265,7 +1267,7 @@ const englishTranslations = {
   "upload.cropInstruction":
     "Drag the image to adjust size and position.",
   "upload.cropInstructionTip":
-    "Our recommendation: zoom in so the subjects fill as much of the frame as possible, because the background will be removed in the final result.",
+    "For best results, leave as little empty space around your subjects as possible.",
   "upload.cropDone": "Done",
   "upload.analyzingPhoto": "Suggesting a smart crop…",
   "upload.cropFaceClipWarning":
@@ -1342,6 +1344,7 @@ const englishTranslations = {
   "preview.prohibitedContentLine1": "The photo was blocked by the model.",
   "preview.prohibitedContentLine2": "Please upload a different photo instead.",
   "preview.prohibitedContentUpload": "Upload photo",
+  "preview.slotRetryAgain": "Try again",
   "preview.imageActions": "Image options",
   "preview.originalImage": "Compare with original image",
   "preview.cropImage": "Crop image",

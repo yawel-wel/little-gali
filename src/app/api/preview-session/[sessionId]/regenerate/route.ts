@@ -10,6 +10,7 @@ import {
   consumeChangeCreditForResult,
   hasChangeCredits,
 } from "@/lib/preview-session/credits";
+import { slotBwActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
 import { runSlotGeneration } from "@/lib/preview-session/generation-runner";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
@@ -33,9 +34,11 @@ export async function POST(
   const body = (await request.json()) as {
     slotIndex?: number;
     idempotencyKey?: string;
+    freeRetry?: boolean;
   };
   const slotIndex = body.slotIndex;
   const idempotencyKey = body.idempotencyKey;
+  const requestedFreeRetry = body.freeRetry === true;
 
   if (
     typeof slotIndex !== "number" ||
@@ -56,16 +59,18 @@ export async function POST(
     return NextResponse.json({ error: "Session is already in cart" }, { status: 409 });
   }
 
-  if (!hasChangeCredits(session)) {
+  const slot = session.slots[slotIndex];
+  if (!slot || slot.inFlight) {
+    return NextResponse.json({ error: "Slot is busy" }, { status: 409 });
+  }
+
+  const freeRetry =
+    requestedFreeRetry && slotBwActiveHasRetryableError(slot);
+  if (!freeRetry && !hasChangeCredits(session)) {
     return NextResponse.json(
       { error: "No change credits remaining" },
       { status: 403 },
     );
-  }
-
-  const slot = session.slots[slotIndex];
-  if (!slot || slot.inFlight) {
-    return NextResponse.json({ error: "Slot is busy" }, { status: 409 });
   }
 
   Sentry.setUser({ id: sessionId });
@@ -95,7 +100,9 @@ export async function POST(
       (candidate) =>
         candidate.kind === "bw" && candidate.id === activeSlot.activeCandidateId,
     );
-    consumeChangeCreditForResult(updated, activeCandidate?.error);
+    if (!freeRetry) {
+      consumeChangeCreditForResult(updated, activeCandidate?.error);
+    }
     await savePreviewSession(updated);
     const view = toPublicView(updated);
     await writeIdempotentResponse(sessionId, idempotencyKey, view);

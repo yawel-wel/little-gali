@@ -23,6 +23,7 @@ import {
 import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { checkFullGenerationRateLimit } from "@/lib/preview-session/rate-limit";
 import {
+  applySupportNextPreviewRoundIfRequested,
   inheritSupportGrants,
   tryConsumeSupportFullGenerationBypass,
 } from "@/lib/preview-session/support-bypass";
@@ -61,7 +62,7 @@ async function assertCanStartFullGeneration(
   request: NextRequest,
   clientSessionId?: string,
 ): Promise<{ ok: true } | { error: string; status: number }> {
-  if (await tryConsumeSupportFullGenerationBypass(clientSessionId)) {
+  if (await tryConsumeSupportFullGenerationBypass(request, clientSessionId)) {
     return { ok: true };
   }
 
@@ -227,6 +228,9 @@ export async function POST(request: NextRequest) {
       const sessionIdForLimit = await resolveSessionIdForGenerationLimit(
         requestedSessionId,
       );
+      await applySupportNextPreviewRoundIfRequested(
+        requestedSessionId ?? sessionIdForLimit,
+      );
       const generationLimit = await assertGenerationRateLimit(sessionIdForLimit);
       if (generationLimit) {
         return generationLimit;
@@ -302,6 +306,9 @@ export async function POST(request: NextRequest) {
     const requestedSessionId = readRequestedSessionId(body.sessionId);
     const sessionIdForLimit = await resolveSessionIdForGenerationLimit(
       requestedSessionId,
+    );
+    await applySupportNextPreviewRoundIfRequested(
+      requestedSessionId ?? sessionIdForLimit,
     );
     const generationLimit = await assertGenerationRateLimit(sessionIdForLimit);
     if (generationLimit) {
