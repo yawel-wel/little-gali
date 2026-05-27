@@ -592,6 +592,8 @@ const hebrewTranslations = {
   "upload.photoNote":
     "אין צורך בתמונה מושלמת, אנחנו נדאג שהפנים, ההבעה והחום האנושי שבתמונה יבואו לידי ביטוי.",
   "upload.continueToPreview": "המשיכו לתצוגה מקדימה",
+  "upload.continueWithoutPreview": "המשך ללא תצוגה מקדימה",
+  "upload.withoutPreviewReassurance": "אנחנו נדאג שהתמונות שלכם יראו מדהים",
   "upload.startingPreview": "מכינים את התצוגה המקדימה...",
   "upload.previewRateLimit":
     "ניתן ליצור תצוגה מקדימה אחת בלבד בכל 24 שעות. נסו שוב מאוחר יותר",
@@ -1276,6 +1278,8 @@ const englishTranslations = {
   "upload.photoNote":
     "No need for a perfect photo, we'll make sure the faces, expressions, and human warmth in the photo come through.",
   "upload.continueToPreview": "Continue to preview",
+  "upload.continueWithoutPreview": "Continue without preview",
+  "upload.withoutPreviewReassurance": "We'll make sure your photos look amazing",
   "upload.startingPreview": "Preparing your preview...",
   "upload.previewRateLimit":
     "You can only generate one preview every 24 hours. Please try again later.",

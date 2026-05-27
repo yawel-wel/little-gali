@@ -111,6 +111,9 @@ export async function POST(request: NextRequest) {
       if (!(auth instanceof NextResponse)) {
         previewHtml = buildPreviewContactHtml(auth.session);
         previewText = `\n\n${buildPreviewContactMessage(auth.session)}`;
+      } else {
+        previewHtml = `<p><strong>מזהה תצוגה מקדימה:</strong> ${escapeHtml(previewSessionId)}</p>`;
+        previewText = `\n\nמזהה תצוגה מקדימה: ${previewSessionId}`;
       }
     }
 

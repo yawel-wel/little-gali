@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
@@ -15,6 +15,7 @@ import {
   validateContactAttachments,
 } from "@/lib/contact-attachment-rules";
 import { trackContact } from "@/lib/meta-pixel-events";
+import { getPersistedLgSessionId } from "@/lib/session-id";
 import { cn } from "@/lib/utils";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
@@ -23,7 +24,19 @@ function ContactPageContent() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
   const searchParams = useSearchParams();
-  const previewSessionId = searchParams.get("previewSessionId");
+  const previewSessionIdFromUrl = searchParams.get("previewSessionId");
+  const [previewSessionId, setPreviewSessionId] = useState<string | null>(
+    previewSessionIdFromUrl,
+  );
+
+  useEffect(() => {
+    if (previewSessionIdFromUrl) {
+      setPreviewSessionId(previewSessionIdFromUrl);
+      return;
+    }
+    setPreviewSessionId(getPersistedLgSessionId());
+  }, [previewSessionIdFromUrl]);
+
   const isPreviewContact = Boolean(previewSessionId);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
@@ -57,7 +70,8 @@ function ContactPageContent() {
       }
 
       let response: Response;
-      if (isPreviewContact) {
+      const hasAttachments = isPreviewContact && attachedFiles.length > 0;
+      if (hasAttachments) {
         const body = new FormData();
         body.append("name", formData.name);
         body.append("email", formData.email);
@@ -76,6 +90,7 @@ function ContactPageContent() {
           },
           body: JSON.stringify({
             ...formData,
+            ...(previewSessionId ? { previewSessionId } : {}),
           }),
         });
       }

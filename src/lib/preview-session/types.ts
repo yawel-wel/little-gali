@@ -78,6 +78,17 @@ export interface PreviewSession {
   createdAt: string;
   updatedAt: string;
   clientIpHash?: string;
+  /**
+   * Ops: set to true in KV for one full support reset (credits + rate limits).
+   * See support-bypass.ts.
+   */
+  supportAllowNextPreviewRound?: boolean;
+  /** Set automatically when support round is applied; ops need not set manually. */
+  supportGenerationBypassCallsRemaining?: number;
+  /** Legacy one-off: bypass 24h full preview limit on next upload. */
+  supportAllowFullGeneration?: boolean;
+  /** Legacy one-off: bypass technical generation limit on next API call. */
+  supportAllowGeneration?: boolean;
 }
 
 export interface PreviewSessionPublicView {

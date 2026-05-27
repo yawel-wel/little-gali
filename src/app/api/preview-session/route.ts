@@ -23,6 +23,10 @@ import {
 import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { checkFullGenerationRateLimit } from "@/lib/preview-session/rate-limit";
 import {
+  inheritSupportGrants,
+  tryConsumeSupportFullGenerationBypass,
+} from "@/lib/preview-session/support-bypass";
+import {
   createPendingSlots,
   loadPreviewSession,
   resolveGenerationStatus,
@@ -38,7 +42,12 @@ export const PREVIEW_RATE_LIMIT_ERROR_CODE = "preview_rate_limit";
 
 async function assertCanStartFullGeneration(
   request: NextRequest,
+  clientSessionId?: string,
 ): Promise<{ ok: true } | { error: string; status: number }> {
+  if (await tryConsumeSupportFullGenerationBypass(clientSessionId)) {
+    return { ok: true };
+  }
+
   const ipHash = hashClientIp(getRequestIp(request));
   const rate = await checkFullGenerationRateLimit(ipHash);
   if (!rate.allowed) {
@@ -248,8 +257,11 @@ export async function POST(request: NextRequest) {
       if (!shouldSchedule) {
         const genStatus = resolveGenerationStatus(sessionForPipeline);
         if (genStatus === "complete" || genStatus === "running") {
+          const priorSession = sessionForPipeline;
           const fresh = await startFreshPreviewSessionForNewUpload(request);
           sessionForPipeline = fresh.session;
+          inheritSupportGrants(priorSession, sessionForPipeline);
+          await savePreviewSession(sessionForPipeline);
           shouldSchedule = true;
           const freshGenerationLimit = await assertGenerationRateLimit(
             sessionForPipeline.id,
@@ -262,7 +274,10 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const rateLimit = await assertCanStartFullGeneration(request);
+      const rateLimit = await assertCanStartFullGeneration(
+        request,
+        requestedSessionId ?? sessionIdForLimit,
+      );
       if ("error" in rateLimit) {
         return NextResponse.json(
           { error: rateLimit.error },
@@ -330,8 +345,11 @@ export async function POST(request: NextRequest) {
     if (!shouldSchedule) {
       const genStatus = resolveGenerationStatus(sessionForPipeline);
         if (genStatus === "complete" || genStatus === "running") {
+          const priorSession = sessionForPipeline;
           const fresh = await startFreshPreviewSessionForNewUpload(request);
           sessionForPipeline = fresh.session;
+          inheritSupportGrants(priorSession, sessionForPipeline);
+          await savePreviewSession(sessionForPipeline);
           shouldSchedule = true;
           const freshGenerationLimit = await assertGenerationRateLimit(
             sessionForPipeline.id,
@@ -344,7 +362,10 @@ export async function POST(request: NextRequest) {
         }
       }
 
-    const rateLimit = await assertCanStartFullGeneration(request);
+    const rateLimit = await assertCanStartFullGeneration(
+      request,
+      requestedSessionId ?? sessionIdForLimit,
+    );
     if ("error" in rateLimit) {
       return NextResponse.json(
         { error: rateLimit.error },

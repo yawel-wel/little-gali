@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+import { tryConsumeSupportGenerationBypass } from "@/lib/preview-session/support-bypass";
 import { getGenerationRateLimitConfig } from "./config";
 import { GENERATION_LIMIT_ERROR_CODE } from "./constants";
 
@@ -32,6 +33,14 @@ function isGenerationRateLimitDisabled(): boolean {
 export async function checkGenerationLimit(
   sessionId: string,
 ): Promise<RateLimitResult> {
+  if (await tryConsumeSupportGenerationBypass(sessionId)) {
+    return {
+      success: true,
+      remaining: generationRateLimitConfig.limit,
+      reset: Date.now() + 24 * 60 * 60 * 1000,
+    };
+  }
+
   if (isGenerationRateLimitDisabled()) {
     return {
       success: true,

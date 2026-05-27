@@ -41,6 +41,39 @@ import { logPreviewFullGenerationRateLimited } from "@/lib/preview-session/log-p
 import Button from "@mui/material/Button";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
+const UPLOAD_PREVIEW_BLOCKED_KEY = "upload_preview_blocked";
+
+type UploadPreviewBlockedCode = "preview_rate_limit" | "generation_rate_limit";
+
+function readUploadPreviewBlocked(): UploadPreviewBlockedCode | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const stored = sessionStorage.getItem(UPLOAD_PREVIEW_BLOCKED_KEY);
+    if (stored === "preview_rate_limit" || stored === "generation_rate_limit") {
+      return stored;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function persistUploadPreviewBlocked(code: UploadPreviewBlockedCode | null) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    if (!code) {
+      sessionStorage.removeItem(UPLOAD_PREVIEW_BLOCKED_KEY);
+      return;
+    }
+    sessionStorage.setItem(UPLOAD_PREVIEW_BLOCKED_KEY, code);
+  } catch {
+    // ignore
+  }
+}
 
 // ─── Upload Image Item ────────────────────────────────────────────────────────
 
@@ -155,8 +188,10 @@ function UploadPageContent() {
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
-    errorCode?: "preview_rate_limit" | "generation_rate_limit";
+    errorCode?: UploadPreviewBlockedCode;
   }>({ type: null, message: "" });
+  const [previewBlockedCode, setPreviewBlockedCode] =
+    useState<UploadPreviewBlockedCode | null>(() => readUploadPreviewBlocked());
   const [uploadingImages, setUploadingImages] = useState<Set<number>>(
     new Set(),
   );
@@ -284,7 +319,13 @@ function UploadPageContent() {
     setUploadingImages(new Set());
     setSelectedStyle("pencil");
     selectedStyleRef.current = "pencil";
-    setSubmitStatus({ type: null, message: "" });
+    const blockedOnMount = readUploadPreviewBlocked();
+    if (blockedOnMount) {
+      setPreviewBlockedCode(blockedOnMount);
+      setSubmitStatus({ type: "error", errorCode: blockedOnMount, message: "" });
+    } else {
+      setSubmitStatus({ type: null, message: "" });
+    }
     setIsSubmitting(false);
     cloudinaryUrls.current.clear();
     originalUrls.current.clear();
@@ -580,6 +621,7 @@ function UploadPageContent() {
   );
 
   const previewEnabled = isAiPreviewEnabled();
+  const showWithoutPreviewCartPath = previewBlockedCode !== null;
 
   const bwLoadingLines = useMemo(
     () => [
@@ -608,7 +650,9 @@ function UploadPageContent() {
     setPreviewLoaderLineIndex(0);
     setShowPreviewLoader(true);
     setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: "" });
+    if (!previewBlockedCode && !readUploadPreviewBlocked()) {
+      setSubmitStatus({ type: null, message: "" });
+    }
 
     try {
       if (!images || images.length !== 5) {
@@ -657,6 +701,17 @@ function UploadPageContent() {
             previewSessionId,
           );
         }
+        const blockedCode: UploadPreviewBlockedCode | null = isGenerationLimited
+          ? "generation_rate_limit"
+          : isPreviewRateLimited
+            ? "preview_rate_limit"
+            : previewResponse.status === 429
+              ? "preview_rate_limit"
+              : null;
+        if (blockedCode) {
+          setPreviewBlockedCode(blockedCode);
+          persistUploadPreviewBlocked(blockedCode);
+        }
         setSubmitStatus({
           type: "error",
           message: isGenerationLimited
@@ -664,11 +719,7 @@ function UploadPageContent() {
             : isPreviewRateLimited
               ? t("upload.previewRateLimit")
               : previewData.error || t("upload.serverError"),
-          errorCode: isGenerationLimited
-            ? "generation_rate_limit"
-            : isPreviewRateLimited
-              ? "preview_rate_limit"
-              : undefined,
+          errorCode: blockedCode ?? undefined,
         });
         return;
       }
@@ -685,6 +736,8 @@ function UploadPageContent() {
       }
 
       setUploadingImages(new Set());
+      setPreviewBlockedCode(null);
+      persistUploadPreviewBlocked(null);
       if (typeof window !== "undefined") {
         persistLgSessionId(previewData.session.id);
         sessionStorage.setItem(
@@ -708,6 +761,8 @@ function UploadPageContent() {
 
   const handleAddToCart = async () => {
     setIsSubmitting(true);
+    setPreviewBlockedCode(null);
+    persistUploadPreviewBlocked(null);
     setSubmitStatus({ type: null, message: "" });
 
     try {
@@ -981,7 +1036,7 @@ function UploadPageContent() {
                   {/* Action Buttons */}
                   {images.length >= 5 && (
                     <div className="mt-10 flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      {!previewEnabled && (
+                      {(!previewEnabled || showWithoutPreviewCartPath) && (
                         <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
                           <StyleSelector
                             selectedStyle={selectedStyle}
@@ -994,7 +1049,9 @@ function UploadPageContent() {
                         variant="contained"
                         color="primary"
                         onClick={
-                          previewEnabled ? handleContinueToPreview : handleAddToCart
+                          showWithoutPreviewCartPath || !previewEnabled
+                            ? handleAddToCart
+                            : handleContinueToPreview
                         }
                         disabled={isSubmitting}
                         className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1009,12 +1066,19 @@ function UploadPageContent() {
                       >
                         {isSubmitting ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : showWithoutPreviewCartPath ? (
+                          t("upload.continueWithoutPreview")
                         ) : previewEnabled ? (
                           t("upload.continueToPreview")
                         ) : (
                           t("upload.addToCart")
                         )}
                       </Button>
+                      {showWithoutPreviewCartPath && (
+                        <p className="text-center font-body text-sm text-medium-gray -mt-2">
+                          {t("upload.withoutPreviewReassurance")}
+                        </p>
+                      )}
                       {/* Status Message */}
                       {submitStatus.type && (
                         <div
@@ -1027,11 +1091,13 @@ function UploadPageContent() {
                                 : "border border-red-200 bg-red-50 font-body-bold text-red-700",
                           )}
                         >
-                          {submitStatus.errorCode === "generation_rate_limit" ? (
+                          {(submitStatus.errorCode ?? previewBlockedCode) ===
+                          "generation_rate_limit" ? (
                             <span className="font-body text-dark-gray">
                               {getGenerationRateLimitMessage(t)}
                             </span>
-                          ) : submitStatus.errorCode === "preview_rate_limit" ? (
+                          ) : (submitStatus.errorCode ?? previewBlockedCode) ===
+                            "preview_rate_limit" ? (
                             <>
                               {t("upload.previewRateLimit")}
                               {t("upload.previewRateLimitOr")}
