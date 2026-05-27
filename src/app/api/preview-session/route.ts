@@ -33,12 +33,29 @@ import {
   savePreviewSession,
   toPublicView,
 } from "@/lib/preview-session/store";
+import { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
 import type { PreviewSession } from "@/lib/preview-session/types";
+import { resolveSessionIdForGenerationLimit } from "@/lib/preview-session/resolve-session-id-for-limit";
+
+export { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-export const PREVIEW_RATE_LIMIT_ERROR_CODE = "preview_rate_limit";
+function rateLimitedJson(
+  error: string,
+  sessionId?: string,
+  extra?: Record<string, unknown>,
+): NextResponse {
+  return NextResponse.json(
+    {
+      error,
+      ...(sessionId ? { sessionId } : {}),
+      ...extra,
+    },
+    { status: 429 },
+  );
+}
 
 async function assertCanStartFullGeneration(
   request: NextRequest,
@@ -181,23 +198,6 @@ async function markPipelineRunning(session: PreviewSession): Promise<void> {
   await savePreviewSession(session);
 }
 
-async function resolveSessionIdForGenerationLimit(
-  request: NextRequest,
-  requestedSessionId?: string,
-): Promise<string> {
-  if (requestedSessionId) {
-    return requestedSessionId;
-  }
-  const cookieStore = await cookies();
-  const fromCookie = verifyPreviewSessionCookie(
-    cookieStore.get(PREVIEW_SESSION_COOKIE)?.value,
-  );
-  if (fromCookie) {
-    return fromCookie;
-  }
-  return randomUUID();
-}
-
 function readRequestedSessionId(value: FormDataEntryValue | string | undefined | null) {
   if (typeof value !== "string" || !value) {
     return undefined;
@@ -225,7 +225,6 @@ export async function POST(request: NextRequest) {
       const files = formData.getAll("images") as File[];
       const requestedSessionId = readRequestedSessionId(formData.get("sessionId"));
       const sessionIdForLimit = await resolveSessionIdForGenerationLimit(
-        request,
         requestedSessionId,
       );
       const generationLimit = await assertGenerationRateLimit(sessionIdForLimit);
@@ -265,6 +264,7 @@ export async function POST(request: NextRequest) {
           shouldSchedule = true;
           const freshGenerationLimit = await assertGenerationRateLimit(
             sessionForPipeline.id,
+            sessionForPipeline.id,
           );
           if (freshGenerationLimit) {
             return freshGenerationLimit;
@@ -279,10 +279,7 @@ export async function POST(request: NextRequest) {
         requestedSessionId ?? sessionIdForLimit,
       );
       if ("error" in rateLimit) {
-        return NextResponse.json(
-          { error: rateLimit.error },
-          { status: rateLimit.status },
-        );
+        return rateLimitedJson(rateLimit.error, sessionForPipeline.id);
       }
 
       const pendingUploads = await Promise.all(
@@ -304,7 +301,6 @@ export async function POST(request: NextRequest) {
     };
     const requestedSessionId = readRequestedSessionId(body.sessionId);
     const sessionIdForLimit = await resolveSessionIdForGenerationLimit(
-      request,
       requestedSessionId,
     );
     const generationLimit = await assertGenerationRateLimit(sessionIdForLimit);
@@ -353,6 +349,7 @@ export async function POST(request: NextRequest) {
           shouldSchedule = true;
           const freshGenerationLimit = await assertGenerationRateLimit(
             sessionForPipeline.id,
+            sessionForPipeline.id,
           );
           if (freshGenerationLimit) {
             return freshGenerationLimit;
@@ -367,10 +364,7 @@ export async function POST(request: NextRequest) {
       requestedSessionId ?? sessionIdForLimit,
     );
     if ("error" in rateLimit) {
-      return NextResponse.json(
-        { error: rateLimit.error },
-        { status: rateLimit.status },
-      );
+      return rateLimitedJson(rateLimit.error, sessionForPipeline.id);
     }
 
     await markPipelineRunning(sessionForPipeline);

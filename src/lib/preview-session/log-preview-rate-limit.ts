@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 export function logPreviewFullGenerationRateLimited(
-  source: "api" | "upload_client",
+  source: "api" | "upload_client" | "upload_client_check" | "check",
   sessionId?: string,
 ): void {
   if (sessionId) {

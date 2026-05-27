@@ -646,30 +646,88 @@ function UploadPageContent() {
     return () => clearInterval(interval);
   }, [bwLoadingLines.length, showPreviewLoader]);
 
+  const applyPreviewStartBlockedState = (
+    response: Response,
+    data: { error?: string; sessionId?: string },
+    previewSessionId: string,
+    source: "upload_client" | "upload_client_check",
+  ) => {
+    if (data.sessionId && typeof window !== "undefined") {
+      persistLgSessionId(data.sessionId);
+    }
+    const isGenerationLimited = isGenerationRateLimited(response, data);
+    const isPreviewRateLimited =
+      response.status === 429 &&
+      (data.error === "preview_rate_limit" || data.error?.includes("24 hours"));
+    if (isPreviewRateLimited) {
+      logPreviewFullGenerationRateLimited(source, previewSessionId);
+    }
+    const blockedCode: UploadPreviewBlockedCode | null = isGenerationLimited
+      ? "generation_rate_limit"
+      : isPreviewRateLimited
+        ? "preview_rate_limit"
+        : response.status === 429
+          ? "preview_rate_limit"
+          : null;
+    if (blockedCode) {
+      setPreviewBlockedCode(blockedCode);
+      persistUploadPreviewBlocked(blockedCode);
+    }
+    setSubmitStatus({
+      type: "error",
+      message: isGenerationLimited
+        ? ""
+        : isPreviewRateLimited
+          ? t("upload.previewRateLimit")
+          : data.error || t("upload.serverError"),
+      errorCode: blockedCode ?? undefined,
+    });
+  };
+
   const handleContinueToPreview = async () => {
-    setPreviewLoaderLineIndex(0);
-    setShowPreviewLoader(true);
+    if (!images || images.length !== 5) {
+      setSubmitStatus({
+        type: "error",
+        message: t("upload.selectExactly5"),
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     if (!previewBlockedCode && !readUploadPreviewBlocked()) {
       setSubmitStatus({ type: null, message: "" });
     }
 
     try {
-      if (!images || images.length !== 5) {
-        setSubmitStatus({
-          type: "error",
-          message: t("upload.selectExactly5"),
-        });
+      const previewSessionId = getOrCreateLgSessionId();
+      const checkResponse = await fetch("/api/preview-session/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: previewSessionId }),
+      });
+      const checkData = (await checkResponse.json()) as {
+        allowed?: boolean;
+        error?: string;
+        sessionId?: string;
+      };
+      if (!checkResponse.ok || checkData.allowed === false) {
+        applyPreviewStartBlockedState(
+          checkResponse,
+          checkData,
+          previewSessionId,
+          "upload_client_check",
+        );
         setIsSubmitting(false);
         return;
       }
 
+      setPreviewLoaderLineIndex(0);
+      setShowPreviewLoader(true);
       setUploadingImages(new Set([0, 1, 2, 3, 4]));
       const compressedImages = await Promise.all(
         images.map((url) => compressImage(url)),
       );
       const previewFormData = new FormData();
-      const previewSessionId = getOrCreateLgSessionId();
       previewFormData.append("sessionId", previewSessionId);
       compressedImages.forEach((file) => {
         previewFormData.append("images", file);
@@ -682,45 +740,21 @@ function UploadPageContent() {
       const previewData = (await previewResponse.json()) as {
         session?: { id: string; generationStatus?: string };
         error?: string;
+        sessionId?: string;
       };
       if (!previewResponse.ok) {
+        if (previewData.sessionId && typeof window !== "undefined") {
+          persistLgSessionId(previewData.sessionId);
+        }
         setUploadingImages(new Set());
         setIsSubmitting(false);
         setShowPreviewLoader(false);
-        const isGenerationLimited = isGenerationRateLimited(
+        applyPreviewStartBlockedState(
           previewResponse,
           previewData,
+          previewSessionId,
+          "upload_client",
         );
-        const isPreviewRateLimited =
-          previewResponse.status === 429 &&
-          (previewData.error === "preview_rate_limit" ||
-            previewData.error?.includes("24 hours"));
-        if (isPreviewRateLimited) {
-          logPreviewFullGenerationRateLimited(
-            "upload_client",
-            previewSessionId,
-          );
-        }
-        const blockedCode: UploadPreviewBlockedCode | null = isGenerationLimited
-          ? "generation_rate_limit"
-          : isPreviewRateLimited
-            ? "preview_rate_limit"
-            : previewResponse.status === 429
-              ? "preview_rate_limit"
-              : null;
-        if (blockedCode) {
-          setPreviewBlockedCode(blockedCode);
-          persistUploadPreviewBlocked(blockedCode);
-        }
-        setSubmitStatus({
-          type: "error",
-          message: isGenerationLimited
-            ? ""
-            : isPreviewRateLimited
-              ? t("upload.previewRateLimit")
-              : previewData.error || t("upload.serverError"),
-          errorCode: blockedCode ?? undefined,
-        });
         return;
       }
 

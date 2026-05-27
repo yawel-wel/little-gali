@@ -1,11 +1,31 @@
 import { getFullGenerationRateLimitConfig } from "@/lib/rate-limit/config";
-import { kvExpire, kvIncr } from "./kv";
+import { kvExpire, kvGet, kvIncr } from "./kv";
 import { previewFullGenerationRateKey } from "./redis";
 
 const fullGenerationRateLimitConfig = getFullGenerationRateLimitConfig();
 
 function isPreviewRateLimitDisabled(): boolean {
   return process.env.SKIP_PREVIEW_RATE_LIMIT === "true";
+}
+
+/** Read-only check; does not increment the per-IP counter. */
+export async function peekFullGenerationRateLimit(
+  ipHash: string,
+): Promise<{ allowed: boolean }> {
+  const { limit: maxPerWindow } = fullGenerationRateLimitConfig;
+
+  if (isPreviewRateLimitDisabled()) {
+    return { allowed: true };
+  }
+
+  const key = previewFullGenerationRateKey(ipHash);
+  const raw = await kvGet<number | string>(key);
+  const count =
+    typeof raw === "number"
+      ? raw
+      : Number.parseInt(String(raw ?? "0"), 10) || 0;
+
+  return { allowed: count < maxPerWindow };
 }
 
 export async function checkFullGenerationRateLimit(

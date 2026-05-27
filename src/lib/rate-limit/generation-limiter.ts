@@ -30,6 +30,18 @@ function isGenerationRateLimitDisabled(): boolean {
   return process.env.SKIP_PREVIEW_RATE_LIMIT === "true";
 }
 
+/** Read-only check; does not consume a request or support bypass credits. */
+export async function peekGenerationLimit(
+  sessionId: string,
+): Promise<{ allowed: boolean }> {
+  if (isGenerationRateLimitDisabled()) {
+    return { allowed: true };
+  }
+
+  const { remaining } = await generationLimiter.getRemaining(sessionId);
+  return { allowed: remaining > 0 };
+}
+
 export async function checkGenerationLimit(
   sessionId: string,
 ): Promise<RateLimitResult> {
@@ -67,6 +79,7 @@ export async function checkGenerationLimit(
 
 export function generationRateLimitResponse(
   rateLimitResult: RateLimitResult,
+  responseSessionId?: string,
 ): NextResponse {
   return NextResponse.json(
     {
@@ -74,6 +87,7 @@ export function generationRateLimitResponse(
       message:
         "You have reached the maximum number of generations for today. Please try again tomorrow.",
       reset: rateLimitResult.reset,
+      ...(responseSessionId ? { sessionId: responseSessionId } : {}),
     },
     { status: 429 },
   );
@@ -81,10 +95,14 @@ export function generationRateLimitResponse(
 
 export async function assertGenerationRateLimit(
   sessionId: string,
+  responseSessionId?: string,
 ): Promise<NextResponse | null> {
   const rateLimitResult = await checkGenerationLimit(sessionId);
   if (!rateLimitResult.success) {
-    return generationRateLimitResponse(rateLimitResult);
+    return generationRateLimitResponse(
+      rateLimitResult,
+      responseSessionId ?? sessionId,
+    );
   }
   return null;
 }
