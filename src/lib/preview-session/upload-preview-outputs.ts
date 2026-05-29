@@ -1,12 +1,14 @@
 import type { StyleType } from "@/components/style-selector";
 import { uploadBufferToCloudinaryPublicId } from "./cloudinary";
 import type { CloudinaryUploadResult } from "./cloudinary";
-import { buildWatermarkedPreviewDeliveryUrl } from "./cloudinary-preview-url";
 import {
   colorOutputPublicId,
   outputPublicId,
+  watermarkedColorOutputPublicId,
+  watermarkedOutputPublicId,
   type PreviewOutputKind,
 } from "./cloudinary-paths";
+import { applyPreviewWatermark } from "./watermark";
 
 export async function uploadCleanAndWatermarkedOutputs(
   cleanBuffer: Buffer,
@@ -25,13 +27,21 @@ export async function uploadCleanAndWatermarkedOutputs(
       : outputPublicId(sessionId, kind, slotIndex, version);
 
   const cleanUpload = await uploadBufferToCloudinaryPublicId(cleanBuffer, cleanPath);
-  const previewUrl = buildWatermarkedPreviewDeliveryUrl(cleanUpload.publicId);
+  const watermarkedBuffer = await applyPreviewWatermark(cleanBuffer);
+  const previewPath =
+    kind === "color" && colorStyle
+      ? watermarkedColorOutputPublicId(sessionId, slotIndex, colorStyle, version)
+      : watermarkedOutputPublicId(sessionId, kind, slotIndex, version);
+  const previewUpload = await uploadBufferToCloudinaryPublicId(
+    watermarkedBuffer,
+    previewPath,
+  );
 
   return {
     cleanUpload,
     previewUpload: {
-      secureUrl: previewUrl,
-      publicId: cleanUpload.publicId,
+      secureUrl: previewUpload.secureUrl,
+      publicId: previewUpload.publicId,
     },
   };
 }

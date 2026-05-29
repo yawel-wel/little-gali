@@ -2,8 +2,8 @@ import type { Duration } from "@upstash/ratelimit";
 
 const DEFAULT_GENERATION_LIMIT = 35;
 const DEFAULT_GENERATION_WINDOW = "24 h";
-const DEFAULT_FULL_GENERATION_LIMIT = 1;
-const DEFAULT_FULL_GENERATION_WINDOW_SECONDS = 24 * 60 * 60;
+const DEFAULT_FULL_GENERATION_LIMIT = 2;
+const DEFAULT_FULL_GENERATION_WINDOW_SECONDS = 12 * 60 * 60;
 
 function parsePositiveInt(value: string | undefined, fallback: number): number {
   if (!value?.trim()) {

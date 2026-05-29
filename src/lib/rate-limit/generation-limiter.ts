@@ -2,6 +2,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 import { tryConsumeSupportGenerationBypass } from "@/lib/preview-session/support-bypass";
+import { isPreviewLimitsBypassed } from "@/lib/preview-session/preview-limits-bypass";
 import { getGenerationRateLimitConfig } from "./config";
 import { GENERATION_LIMIT_ERROR_CODE } from "./constants";
 
@@ -27,7 +28,7 @@ export type RateLimitResult = {
 };
 
 function isGenerationRateLimitDisabled(): boolean {
-  return process.env.SKIP_PREVIEW_RATE_LIMIT === "true";
+  return isPreviewLimitsBypassed();
 }
 
 /** Read-only check; does not consume a request or support bypass credits. */

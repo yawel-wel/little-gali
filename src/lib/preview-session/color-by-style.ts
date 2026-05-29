@@ -3,6 +3,9 @@ import type { PreviewCandidate, PreviewSession, PreviewSlot } from "./types";
 
 export const COLOR_STYLES: StyleType[] = ["pencil", "cartoon", "watercolor"];
 
+/** Style shown first on the preview color tab when the user has not picked one yet. */
+export const DEFAULT_COLOR_STYLE: StyleType = "watercolor";
+
 export const BOOK_SLOT_INDEX = 0;
 
 function listColorCandidates(slot: PreviewSlot): PreviewCandidate[] {

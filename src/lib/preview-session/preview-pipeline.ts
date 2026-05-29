@@ -7,7 +7,7 @@ import { runInitialParallelColorBundle } from "./color-generation-runner";
 import { runInitialParallelGeneration } from "./generation-runner";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewSession, PreviewSlot } from "./types";
-import { allSlotsHaveColorForStyle } from "./color-by-style";
+import { allSlotsHaveColorForStyle, DEFAULT_COLOR_STYLE } from "./color-by-style";
 
 export interface PendingUpload {
   buffer: Buffer;
@@ -36,8 +36,11 @@ export function syncGenerationStatus(session: PreviewSession): void {
 }
 
 function syncColorGenerationStatus(session: PreviewSession): void {
-  const allPencilDone = allSlotsHaveColorForStyle(session, "pencil");
-  if (allPencilDone) {
+  const defaultColorReady = allSlotsHaveColorForStyle(
+    session,
+    DEFAULT_COLOR_STYLE,
+  );
+  if (defaultColorReady) {
     session.generationStatus = "complete";
     session.initializationError = undefined;
   }

@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
     let email = "";
     let message = "";
     let previewSessionId: string | undefined;
+    let secondaryPreviewSessionId: string | undefined;
     let attachmentFiles: File[] = [];
 
     if (contentType.includes("multipart/form-data")) {
@@ -57,6 +58,10 @@ export async function POST(request: NextRequest) {
       message = readFormField(formData.get("message"));
       const sessionField = readFormField(formData.get("previewSessionId"));
       previewSessionId = sessionField || undefined;
+      const secondaryField = readFormField(
+        formData.get("secondaryPreviewSessionId"),
+      );
+      secondaryPreviewSessionId = secondaryField || undefined;
       attachmentFiles = formData
         .getAll("images")
         .filter((entry): entry is File => entry instanceof File && entry.size > 0);
@@ -66,11 +71,14 @@ export async function POST(request: NextRequest) {
         email?: string;
         message?: string;
         previewSessionId?: string;
+        secondaryPreviewSessionId?: string;
       };
       name = body.name?.trim() ?? "";
       email = body.email?.trim() ?? "";
       message = body.message?.trim() ?? "";
       previewSessionId = body.previewSessionId?.trim() || undefined;
+      secondaryPreviewSessionId =
+        body.secondaryPreviewSessionId?.trim() || undefined;
     }
 
     if (!name || !email || !message) {
@@ -106,14 +114,19 @@ export async function POST(request: NextRequest) {
 
     let previewHtml = "";
     let previewText = "";
-    if (previewSessionId) {
-      const auth = await requirePreviewSession(previewSessionId);
+    const previewSessionIds = [
+      previewSessionId,
+      secondaryPreviewSessionId,
+    ].filter((id): id is string => Boolean(id?.trim()));
+
+    for (const sessionId of previewSessionIds) {
+      const auth = await requirePreviewSession(sessionId);
       if (!(auth instanceof NextResponse)) {
-        previewHtml = buildPreviewContactHtml(auth.session);
-        previewText = `\n\n${buildPreviewContactMessage(auth.session)}`;
+        previewHtml += buildPreviewContactHtml(auth.session);
+        previewText += `\n\n${buildPreviewContactMessage(auth.session)}`;
       } else {
-        previewHtml = `<p><strong>מזהה תצוגה מקדימה:</strong> ${escapeHtml(previewSessionId)}</p>`;
-        previewText = `\n\nמזהה תצוגה מקדימה: ${previewSessionId}`;
+        previewHtml += `<p><strong>מזהה תצוגה מקדימה:</strong> ${escapeHtml(sessionId)}</p>`;
+        previewText += `\n\nמזהה תצוגה מקדימה: ${sessionId}`;
       }
     }
 

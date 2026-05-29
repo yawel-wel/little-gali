@@ -6,6 +6,7 @@ type KvClient = {
   del(key: string): Promise<void>;
   incr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<void>;
+  ttl(key: string): Promise<number | null>;
 };
 
 class MemoryKv implements KvClient {
@@ -57,6 +58,21 @@ class MemoryKv implements KvClient {
       ...entry,
       expiresAt: Date.now() + seconds * 1000,
     });
+  }
+
+  async ttl(key: string): Promise<number | null> {
+    if (this.isExpired(key)) {
+      return null;
+    }
+    const entry = this.data.get(key);
+    if (!entry) {
+      return null;
+    }
+    if (!entry.expiresAt) {
+      return -1;
+    }
+    const remainingMs = entry.expiresAt - Date.now();
+    return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : null;
   }
 }
 
@@ -129,6 +145,13 @@ function getRedisClient(): KvClient {
     expire: async (key, seconds) => {
       await redis.expire(key, seconds);
     },
+    ttl: async (key) => {
+      const result = await redis.ttl(key);
+      if (typeof result !== "number" || result < 0) {
+        return null;
+      }
+      return result;
+    },
   };
 }
 
@@ -186,4 +209,8 @@ export async function kvIncr(key: string): Promise<number> {
 
 export async function kvExpire(key: string, seconds: number): Promise<void> {
   return withKv((client) => client.expire(key, seconds));
+}
+
+export async function kvTtl(key: string): Promise<number | null> {
+  return withKv((client) => client.ttl(key));
 }

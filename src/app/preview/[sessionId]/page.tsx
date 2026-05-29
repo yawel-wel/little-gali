@@ -30,6 +30,7 @@ import {
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import {
   BOOK_SLOT_INDEX,
+  DEFAULT_COLOR_STYLE,
   getColorCandidateForStyleFromPublicSlot,
 } from "@/lib/preview-session/color-by-style";
 import {
@@ -278,8 +279,8 @@ export default function PreviewPage() {
   const [displayedBookSide, setDisplayedBookSide] =
     useState<PreviewBookSide>("bw");
   const [isTabCardsVisible, setIsTabCardsVisible] = useState(true);
-  const [selectedStyle, setSelectedStyle] = useState<StyleType>("pencil");
-  const [activeColorStyle, setActiveColorStyle] = useState<StyleType>("pencil");
+  const [selectedStyle, setSelectedStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
+  const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
   const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
     () => new Set(),
   );
@@ -675,10 +676,10 @@ export default function PreviewPage() {
     const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
     if (
       bookSlot &&
-      !slotHasColorPreviewForStylePublic(bookSlot, "pencil") &&
+      !slotHasColorPreviewForStylePublic(bookSlot, DEFAULT_COLOR_STYLE) &&
       (session.generationStatus === "running" || bookSlot.colorInFlight)
     ) {
-      loading.add("pencil");
+      loading.add(DEFAULT_COLOR_STYLE);
     }
     return loading;
   }, [session, styleStripLoading]);

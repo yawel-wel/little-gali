@@ -13,7 +13,7 @@ import type {
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
 import { cn } from "@/lib/utils";
 
-const STRIP_STYLES: StyleType[] = ["pencil", "cartoon", "watercolor"];
+const STRIP_STYLES: StyleType[] = ["watercolor", "cartoon", "pencil"];
 
 type PreviewColorStyleStripProps = {
   session: PreviewSessionPublicView;

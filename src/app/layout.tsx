@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Assistant, Heebo } from "next/font/google";
 import "./globals.css";
+import { PreviewLimitsProvider } from "@/lib/PreviewLimitsContext";
 import { UploadImagesProvider } from "@/lib/UploadImagesContext";
 import { CartProvider } from "@/lib/CartContext";
 import { LanguageProvider } from "@/lib/LanguageContext";
@@ -101,12 +102,14 @@ export default function RootLayout({
         <MuiThemeProvider>
           <LanguageProvider>
             <CartProvider>
-              <UploadImagesProvider>
+              <PreviewLimitsProvider>
+                <UploadImagesProvider>
                 <TopBanner />
                 {children}
                 <CookieConsent />
                 <ConditionalTrackingScripts metaPixelId={metaPixelId} />
-              </UploadImagesProvider>
+                </UploadImagesProvider>
+              </PreviewLimitsProvider>
             </CartProvider>
           </LanguageProvider>
         </MuiThemeProvider>

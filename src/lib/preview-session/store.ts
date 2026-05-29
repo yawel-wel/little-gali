@@ -1,6 +1,7 @@
 import type { StyleType } from "@/components/style-selector";
 import { getColorCandidateForStyle } from "./color-by-style";
 import { normalizeDisplayOrder, urlsInDisplayOrder } from "./display-order";
+import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type {
   PreviewGenerationStatus,
   PreviewSession,
@@ -117,7 +118,8 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
   });
   const noBwInFlight = session.slots.every((slot) => !slot.inFlight);
   const noColorInFlight = session.slots.every((slot) => !slot.colorInFlight);
-  const hasCredits = session.changeCreditsRemaining > 0;
+  const hasCredits =
+    isPreviewLimitsBypassed() || session.changeCreditsRemaining > 0;
 
   return {
     id: session.id,

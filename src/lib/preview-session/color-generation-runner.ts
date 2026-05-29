@@ -6,6 +6,7 @@ import {
   allSlotsHaveColorForStyle,
   BOOK_SLOT_INDEX,
   COLOR_STYLES,
+  DEFAULT_COLOR_STYLE,
   getColorCandidateForStyle,
   slotHasColorPreviewForStyle,
   syncColorPreviewForSlots,
@@ -305,7 +306,7 @@ export async function runSlotAllStylesColorGeneration(
 
   if (stylesToGenerate.length === 0) {
     dequeuePendingColorRegen(session, slotIndex);
-    const activeStyle = session.selectedColorStyle ?? "pencil";
+    const activeStyle = session.selectedColorStyle ?? DEFAULT_COLOR_STYLE;
     syncColorPreviewForSlots(session, activeStyle, [slotIndex]);
     await savePreviewSession(session);
     return session;
@@ -345,7 +346,7 @@ export async function runSlotAllStylesColorGeneration(
   }
 
   dequeuePendingColorRegen(latest, slotIndex);
-  const activeStyle = latest.selectedColorStyle ?? "pencil";
+  const activeStyle = latest.selectedColorStyle ?? DEFAULT_COLOR_STYLE;
   syncColorPreviewForSlots(latest, activeStyle, [slotIndex]);
 
   const succeeded = results.filter(({ candidate }) => candidate.previewUrl).length;
@@ -392,7 +393,7 @@ export async function runInitialParallelColorBundle(
   }
 
   if (tasks.length === 0) {
-    syncColorPreviewToStyle(session, "pencil");
+    syncColorPreviewToStyle(session, DEFAULT_COLOR_STYLE);
     freezeStyleStripThumbnailsIfNeeded(session);
     await savePreviewSession(session);
     return session;
@@ -456,7 +457,7 @@ export async function runInitialParallelColorBundle(
     { sessionId, trigger: "initial", side: "color" },
   );
 
-  syncColorPreviewToStyle(latest, "pencil");
+  syncColorPreviewToStyle(latest, DEFAULT_COLOR_STYLE);
   freezeStyleStripThumbnailsIfNeeded(latest);
   await savePreviewSession(latest);
   return latest;

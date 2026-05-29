@@ -9,6 +9,7 @@ import {
   consumeChangeCreditForResult,
   hasChangeCredits,
 } from "@/lib/preview-session/credits";
+import { DEFAULT_COLOR_STYLE } from "@/lib/preview-session/color-by-style";
 import { slotColorActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
@@ -36,7 +37,7 @@ export async function POST(
     freeRetry?: boolean;
   };
   const { slotIndex } = body;
-  const style = body.style ?? auth.session.selectedColorStyle ?? "pencil";
+  const style = body.style ?? auth.session.selectedColorStyle ?? DEFAULT_COLOR_STYLE;
   const requestedFreeRetry = body.freeRetry === true;
 
   if (

@@ -9,16 +9,12 @@ export function withCacheBustedUrl(url: string, version: number): string {
 
 export function applyCropUploadToCandidate(
   candidate: PreviewCandidate,
-  upload: CloudinaryUploadResult,
+  cleanUpload: CloudinaryUploadResult,
+  previewUpload: CloudinaryUploadResult,
   cacheVersion: number,
 ): void {
-  const secureUrl = withCacheBustedUrl(upload.secureUrl, cacheVersion);
-  candidate.previewUrl = secureUrl;
-  candidate.previewPublicId = upload.publicId;
-  if (candidate.cleanUrl) {
-    candidate.cleanUrl = secureUrl;
-  }
-  if (candidate.cleanPublicId) {
-    candidate.cleanPublicId = upload.publicId;
-  }
+  candidate.cleanUrl = withCacheBustedUrl(cleanUpload.secureUrl, cacheVersion);
+  candidate.cleanPublicId = cleanUpload.publicId;
+  candidate.previewUrl = withCacheBustedUrl(previewUpload.secureUrl, cacheVersion);
+  candidate.previewPublicId = previewUpload.publicId;
 }

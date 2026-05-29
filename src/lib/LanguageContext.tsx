@@ -597,7 +597,13 @@ const hebrewTranslations = {
     "תוכלו ליצור איתנו קשר אם תרצו לראות את התוצאה אחרי התשלום",
   "upload.startingPreview": "מכינים את התצוגה המקדימה...",
   "upload.previewRateLimit":
-    "ניתן ליצור תצוגה מקדימה אחת בלבד בכל 24 שעות. נסו שוב מאוחר יותר",
+    "ניתן ליצור עד {limit} תצוגות מקדימות בכל {windowHours} שעות. נסו שוב מאוחר יותר",
+  "upload.previewLastGenerationWarning":
+    "זו התצוגה המקדימה האחרונה שלכם ל-{windowHours} השעות הקרובות.",
+  "upload.previewLastGenerationWarningWithReset":
+    "זו התצוגה המקדימה האחרונה שלכם ל-{windowHours} השעות הקרובות. לאחר מכן תוכלו לנסות שוב ב-{resetTime} או ליצור איתנו קשר.",
+  "upload.previewRateLimitWithoutPreviewHint":
+    "בינתיים אפשר להוסיף לעגלה ללא תצוגה מקדימה באמצעות הכפתור למטה.",
   "upload.previewRateLimitOr": " או ",
   "upload.previewRateLimitContactLink": "צרו איתנו קשר",
 
@@ -1284,7 +1290,13 @@ const englishTranslations = {
   "upload.withoutPreviewReassurance": "We'll make sure your photos look amazing",
   "upload.startingPreview": "Preparing your preview...",
   "upload.previewRateLimit":
-    "You can only generate one preview every 24 hours. Please try again later.",
+    "You can only generate {limit} previews every {windowHours} hours. Please try again later.",
+  "upload.previewLastGenerationWarning":
+    "This is your last preview for the next {windowHours} hours.",
+  "upload.previewLastGenerationWarningWithReset":
+    "This is your last preview for the next {windowHours} hours. After this you can try again at {resetTime} or contact us.",
+  "upload.previewRateLimitWithoutPreviewHint":
+    "You can still add to cart without a preview using the button below.",
   "upload.previewRateLimitOr": "Or ",
   "upload.previewRateLimitContactLink": "contact us",
 

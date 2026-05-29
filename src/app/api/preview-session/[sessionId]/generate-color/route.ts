@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { StyleType } from "@/components/style-selector";
 import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
-import { COLOR_STYLES } from "@/lib/preview-session/color-by-style";
+import { COLOR_STYLES, DEFAULT_COLOR_STYLE } from "@/lib/preview-session/color-by-style";
 import {
   runColorGeneration,
   runSlotAllStylesColorGeneration,
@@ -89,7 +89,7 @@ export async function POST(
     return NextResponse.json({ session: toPublicView(latest) });
   }
 
-  const style = body.style ?? "pencil";
+  const style = body.style ?? DEFAULT_COLOR_STYLE;
   if (!COLOR_STYLES.includes(style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }

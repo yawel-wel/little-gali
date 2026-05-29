@@ -38,42 +38,25 @@ import {
   isGenerationRateLimited,
 } from "@/lib/preview-session/handle-generation-response";
 import { logPreviewFullGenerationRateLimited } from "@/lib/preview-session/log-preview-rate-limit";
+import { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
+import { usePreviewLimits } from "@/lib/PreviewLimitsContext";
+import {
+  formatLastFullGenerationWarning,
+  formatPreviewRateLimitMessage,
+} from "@/lib/preview-session/preview-limit-messages";
+import { buildPreviewRateLimitContactHref } from "@/lib/preview-session/preview-contact-url";
+import {
+  getKnownPreviewSessionIds,
+  recordPreviewSessionId,
+} from "@/lib/preview-session/preview-session-id-history";
+import {
+  persistUploadPreviewBlocked,
+  readUploadPreviewBlocked,
+  type UploadPreviewBlockedCode,
+} from "@/lib/preview-session/upload-preview-blocked-storage";
 import Button from "@mui/material/Button";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
-const UPLOAD_PREVIEW_BLOCKED_KEY = "upload_preview_blocked";
-
-type UploadPreviewBlockedCode = "preview_rate_limit" | "generation_rate_limit";
-
-function readUploadPreviewBlocked(): UploadPreviewBlockedCode | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  try {
-    const stored = sessionStorage.getItem(UPLOAD_PREVIEW_BLOCKED_KEY);
-    if (stored === "preview_rate_limit" || stored === "generation_rate_limit") {
-      return stored;
-    }
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
-function persistUploadPreviewBlocked(code: UploadPreviewBlockedCode | null) {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    if (!code) {
-      sessionStorage.removeItem(UPLOAD_PREVIEW_BLOCKED_KEY);
-      return;
-    }
-    sessionStorage.setItem(UPLOAD_PREVIEW_BLOCKED_KEY, code);
-  } catch {
-    // ignore
-  }
-}
 
 // ─── Upload Image Item ────────────────────────────────────────────────────────
 
@@ -179,6 +162,7 @@ function UploadPageContent() {
   // Always use context images directly - we'll clear them on mount
   const images = contextImages;
   const { t, locale } = useLanguage();
+  const { limits, refreshLimits } = usePreviewLimits();
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -621,7 +605,89 @@ function UploadPageContent() {
   );
 
   const previewEnabled = isAiPreviewEnabled();
-  const showWithoutPreviewCartPath = previewBlockedCode !== null;
+  const showWithoutPreviewCartPath =
+    previewBlockedCode === "preview_rate_limit" ||
+    previewBlockedCode === "generation_rate_limit";
+
+  const previewRateLimitMessage = useMemo(
+    () =>
+      formatPreviewRateLimitMessage(t, {
+        windowHours: limits.windowHours,
+        fullGenerationLimit: limits.fullGenerationLimit,
+      }),
+    [t, limits.windowHours, limits.fullGenerationLimit],
+  );
+
+  const lastGenerationWarning = useMemo(() => {
+    if (!limits.isLastFullGenerationAvailable) {
+      return null;
+    }
+    return formatLastFullGenerationWarning(
+      t,
+      { windowHours: limits.windowHours, resetAt: limits.resetAt },
+      locale,
+    );
+  }, [
+    t,
+    locale,
+    limits.isLastFullGenerationAvailable,
+    limits.windowHours,
+    limits.resetAt,
+  ]);
+
+  const previewRateLimitContactHref = useMemo(
+    () => buildPreviewRateLimitContactHref(getKnownPreviewSessionIds()),
+    [limits.fullGenerationsRemaining, limits.fullGenerationsUsed],
+  );
+
+  useEffect(() => {
+    if (limits.isLoading || !previewEnabled) {
+      return;
+    }
+    if (limits.limitsBypassed || !limits.limitsEnforced) {
+      setPreviewBlockedCode((current: UploadPreviewBlockedCode | null) => {
+        if (current === "preview_rate_limit") {
+          persistUploadPreviewBlocked(null);
+          setSubmitStatus((status) =>
+            status.errorCode === "preview_rate_limit"
+              ? { type: null, message: "" }
+              : status,
+          );
+          return null;
+        }
+        return current;
+      });
+      return;
+    }
+    if (limits.fullGenerationsRemaining > 0) {
+      setPreviewBlockedCode((current: UploadPreviewBlockedCode | null) => {
+        if (current === "preview_rate_limit") {
+          persistUploadPreviewBlocked(null);
+          setSubmitStatus((status) =>
+            status.errorCode === "preview_rate_limit"
+              ? { type: null, message: "" }
+              : status,
+          );
+          return null;
+        }
+        return current;
+      });
+      return;
+    }
+    setPreviewBlockedCode("preview_rate_limit");
+    setSubmitStatus({
+      type: "error",
+      errorCode: "preview_rate_limit",
+      message: "",
+    });
+    persistUploadPreviewBlocked("preview_rate_limit");
+  }, [
+    limits.isLoading,
+    limits.limitsBypassed,
+    limits.limitsEnforced,
+    limits.fullGenerationsRemaining,
+    previewEnabled,
+  ]);
 
   const bwLoadingLines = useMemo(
     () => [
@@ -658,7 +724,8 @@ function UploadPageContent() {
     const isGenerationLimited = isGenerationRateLimited(response, data);
     const isPreviewRateLimited =
       response.status === 429 &&
-      (data.error === "preview_rate_limit" || data.error?.includes("24 hours"));
+      (data.error === PREVIEW_RATE_LIMIT_ERROR_CODE ||
+        data.error === "preview_rate_limit");
     if (isPreviewRateLimited) {
       logPreviewFullGenerationRateLimited(source, previewSessionId);
     }
@@ -672,13 +739,14 @@ function UploadPageContent() {
     if (blockedCode) {
       setPreviewBlockedCode(blockedCode);
       persistUploadPreviewBlocked(blockedCode);
+      void refreshLimits();
     }
     setSubmitStatus({
       type: "error",
       message: isGenerationLimited
         ? ""
         : isPreviewRateLimited
-          ? t("upload.previewRateLimit")
+          ? previewRateLimitMessage
           : data.error || t("upload.serverError"),
       errorCode: blockedCode ?? undefined,
     });
@@ -774,6 +842,7 @@ function UploadPageContent() {
       persistUploadPreviewBlocked(null);
       if (typeof window !== "undefined") {
         persistLgSessionId(previewData.session.id);
+        recordPreviewSessionId(previewData.session.id);
         sessionStorage.setItem(
           `${PREVIEW_LOADING_IMAGES_STORAGE_PREFIX}:${previewData.session.id}`,
           JSON.stringify(images.slice(0, 5)),
@@ -1079,6 +1148,15 @@ function UploadPageContent() {
                         </div>
                       )}
 
+                      {lastGenerationWarning &&
+                        previewEnabled &&
+                        !showWithoutPreviewCartPath &&
+                        images.length === 5 && (
+                          <div className="w-full rounded-lg border border-amber-200 bg-amber-50 p-4 text-center font-body text-sm text-dark-gray">
+                            {lastGenerationWarning}
+                          </div>
+                        )}
+
                       <Button
                         variant="contained"
                         color="primary"
@@ -1114,7 +1192,8 @@ function UploadPageContent() {
                         </p>
                       )}
                       {/* Status Message */}
-                      {submitStatus.type && (
+                      {(submitStatus.type ||
+                        previewBlockedCode === "preview_rate_limit") && (
                         <div
                           className={cn(
                             "w-full rounded-lg p-4 text-center",
@@ -1132,16 +1211,21 @@ function UploadPageContent() {
                             </span>
                           ) : (submitStatus.errorCode ?? previewBlockedCode) ===
                             "preview_rate_limit" ? (
-                            <>
-                              {t("upload.previewRateLimit")}
-                              {t("upload.previewRateLimitOr")}
-                              <Link
-                                href="/contact"
-                                className="underline underline-offset-2 hover:opacity-80"
-                              >
-                                {t("upload.previewRateLimitContactLink")}
-                              </Link>
-                            </>
+                            <div className="space-y-2 font-body text-dark-gray">
+                              <p>{previewRateLimitMessage}</p>
+                              <p className="text-sm text-medium-gray">
+                                {t("upload.previewRateLimitWithoutPreviewHint")}
+                              </p>
+                              <p>
+                                {t("upload.previewRateLimitOr")}
+                                <Link
+                                  href={previewRateLimitContactHref}
+                                  className="underline underline-offset-2 hover:opacity-80"
+                                >
+                                  {t("upload.previewRateLimitContactLink")}
+                                </Link>
+                              </p>
+                            </div>
                           ) : (
                             submitStatus.message
                           )}

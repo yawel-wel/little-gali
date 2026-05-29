@@ -25,17 +25,24 @@ function ContactPageContent() {
   const { t, locale } = useLanguage();
   const searchParams = useSearchParams();
   const previewSessionIdFromUrl = searchParams.get("previewSessionId");
+  const secondaryPreviewSessionIdFromUrl = searchParams.get(
+    "secondaryPreviewSessionId",
+  );
   const [previewSessionId, setPreviewSessionId] = useState<string | null>(
     previewSessionIdFromUrl,
   );
+  const [secondaryPreviewSessionId, setSecondaryPreviewSessionId] = useState<
+    string | null
+  >(secondaryPreviewSessionIdFromUrl);
 
   useEffect(() => {
     if (previewSessionIdFromUrl) {
       setPreviewSessionId(previewSessionIdFromUrl);
-      return;
+    } else {
+      setPreviewSessionId(getPersistedLgSessionId());
     }
-    setPreviewSessionId(getPersistedLgSessionId());
-  }, [previewSessionIdFromUrl]);
+    setSecondaryPreviewSessionId(secondaryPreviewSessionIdFromUrl);
+  }, [previewSessionIdFromUrl, secondaryPreviewSessionIdFromUrl]);
 
   const isPreviewContact = Boolean(previewSessionId);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
@@ -77,6 +84,9 @@ function ContactPageContent() {
         body.append("email", formData.email);
         body.append("message", formData.message);
         body.append("previewSessionId", previewSessionId!);
+        if (secondaryPreviewSessionId) {
+          body.append("secondaryPreviewSessionId", secondaryPreviewSessionId);
+        }
         attachedFiles.forEach((file) => body.append("images", file));
         response = await fetch("/api/contact", {
           method: "POST",
@@ -91,6 +101,9 @@ function ContactPageContent() {
           body: JSON.stringify({
             ...formData,
             ...(previewSessionId ? { previewSessionId } : {}),
+            ...(secondaryPreviewSessionId
+              ? { secondaryPreviewSessionId }
+              : {}),
           }),
         });
       }
@@ -262,6 +275,21 @@ function ContactPageContent() {
                   viewport={{ once: true, amount: 0.25 }}
                 >
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {previewSessionId && (
+                      <input
+                        type="hidden"
+                        name="previewSessionId"
+                        value={previewSessionId}
+                      />
+                    )}
+                    {secondaryPreviewSessionId && (
+                      <input
+                        type="hidden"
+                        name="secondaryPreviewSessionId"
+                        value={secondaryPreviewSessionId}
+                      />
+                    )}
+
                     {/* Name Field */}
                     <div>
                       <label

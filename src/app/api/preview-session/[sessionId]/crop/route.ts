@@ -4,7 +4,7 @@ import { applyCropUploadToCandidate } from "@/lib/preview-session/apply-crop";
 import {
   canSignCloudinaryUploads,
   overwriteCloudinaryAsset,
-  uploadFileToCloudinaryPublicId,
+  uploadBufferToCloudinaryPublicId,
 } from "@/lib/preview-session/cloudinary";
 import { cropRevisionPublicId } from "@/lib/preview-session/cloudinary-paths";
 import {
@@ -17,6 +17,7 @@ import {
   writeIdempotentResponse,
 } from "@/lib/preview-session/idempotency";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
+import { applyPreviewWatermark } from "@/lib/preview-session/watermark";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -104,8 +105,12 @@ export async function POST(
     );
   }
 
-  const publicId = candidate.previewPublicId ?? candidate.cleanPublicId;
-  if (!publicId || !candidate.previewUrl) {
+  const cleanPublicId =
+    candidate.cleanPublicId ??
+    (candidate.previewPublicId?.endsWith("_wm")
+      ? candidate.previewPublicId.slice(0, -3)
+      : candidate.previewPublicId);
+  if (!cleanPublicId || !candidate.previewUrl) {
     return NextResponse.json(
       { error: "No generated image to crop" },
       { status: 400 },
@@ -113,20 +118,35 @@ export async function POST(
   }
 
   try {
-    const targetPublicId = assetPathFromPublicId(publicId);
-    const upload = canSignCloudinaryUploads()
-      ? await overwriteCloudinaryAsset(image, targetPublicId)
+    const croppedBuffer = Buffer.from(await image.arrayBuffer());
+    const cleanAssetPath = assetPathFromPublicId(cleanPublicId);
+    const cleanUpload = canSignCloudinaryUploads()
+      ? await overwriteCloudinaryAsset(image, cleanAssetPath)
       : await (async () => {
           const revision = (candidate.cropRevision ?? 0) + 1;
           candidate.cropRevision = revision;
-          return uploadFileToCloudinaryPublicId(
-            image,
+          return uploadBufferToCloudinaryPublicId(
+            croppedBuffer,
             cropRevisionPublicId(sessionId, bookSide, candidateId, revision),
           );
         })();
 
+    const previewAssetPath = candidate.previewPublicId?.endsWith("_wm")
+      ? assetPathFromPublicId(candidate.previewPublicId)
+      : `${cleanAssetPath}_wm`;
+    const watermarkedBuffer = await applyPreviewWatermark(croppedBuffer);
+    const previewUpload = await uploadBufferToCloudinaryPublicId(
+      watermarkedBuffer,
+      previewAssetPath,
+    );
+
     const cacheVersion = Date.now();
-    applyCropUploadToCandidate(candidate, upload, cacheVersion);
+    applyCropUploadToCandidate(
+      candidate,
+      cleanUpload,
+      previewUpload,
+      cacheVersion,
+    );
 
     if (bookSide === "color" && slot.colorPreview?.id === candidateId) {
       slot.colorPreview = candidate;

@@ -1,12 +1,9 @@
 import { getFullGenerationRateLimitConfig } from "@/lib/rate-limit/config";
-import { kvExpire, kvGet, kvIncr } from "./kv";
+import { kvDel, kvExpire, kvGet, kvIncr, kvTtl } from "./kv";
+import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import { previewFullGenerationRateKey } from "./redis";
 
 const fullGenerationRateLimitConfig = getFullGenerationRateLimitConfig();
-
-function isPreviewRateLimitDisabled(): boolean {
-  return process.env.SKIP_PREVIEW_RATE_LIMIT === "true";
-}
 
 /** Read-only check; does not increment the per-IP counter. */
 export async function peekFullGenerationRateLimit(
@@ -14,7 +11,7 @@ export async function peekFullGenerationRateLimit(
 ): Promise<{ allowed: boolean }> {
   const { limit: maxPerWindow } = fullGenerationRateLimitConfig;
 
-  if (isPreviewRateLimitDisabled()) {
+  if (isPreviewLimitsBypassed()) {
     return { allowed: true };
   }
 
@@ -33,7 +30,7 @@ export async function checkFullGenerationRateLimit(
 ): Promise<{ allowed: boolean; remaining: number }> {
   const { limit: maxPerWindow, windowSeconds } = fullGenerationRateLimitConfig;
 
-  if (isPreviewRateLimitDisabled()) {
+  if (isPreviewLimitsBypassed()) {
     return { allowed: true, remaining: maxPerWindow };
   }
 
@@ -55,7 +52,7 @@ export async function checkFullGenerationRateLimit(
 export async function recordFullGenerationUse(ipHash: string): Promise<void> {
   const { windowSeconds } = fullGenerationRateLimitConfig;
 
-  if (isPreviewRateLimitDisabled()) {
+  if (isPreviewLimitsBypassed()) {
     return;
   }
 
@@ -64,4 +61,41 @@ export async function recordFullGenerationUse(ipHash: string): Promise<void> {
   if (count === 1) {
     await kvExpire(key, windowSeconds);
   }
+}
+
+function resetAtFromTtlSeconds(ttlSeconds: number | null): string | null {
+  if (ttlSeconds === null || ttlSeconds <= 0) {
+    return null;
+  }
+  return new Date(Date.now() + ttlSeconds * 1000).toISOString();
+}
+
+/** Read-only snapshot of the per-IP full-generation counter and window expiry. */
+export async function peekFullGenerationRateLimitState(ipHash: string): Promise<{
+  count: number;
+  resetAt: string | null;
+}> {
+  if (isPreviewLimitsBypassed()) {
+    return { count: 0, resetAt: null };
+  }
+
+  const key = previewFullGenerationRateKey(ipHash);
+  const raw = await kvGet<number | string>(key);
+  const count =
+    typeof raw === "number"
+      ? raw
+      : Number.parseInt(String(raw ?? "0"), 10) || 0;
+  const ttlSeconds = await kvTtl(key);
+
+  return {
+    count,
+    resetAt: resetAtFromTtlSeconds(ttlSeconds),
+  };
+}
+
+export async function resetFullGenerationRateLimit(ipHash: string): Promise<void> {
+  if (isPreviewLimitsBypassed()) {
+    return;
+  }
+  await kvDel(previewFullGenerationRateKey(ipHash));
 }

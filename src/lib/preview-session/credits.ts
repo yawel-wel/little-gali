@@ -1,15 +1,22 @@
 import type { StyleType } from "@/components/style-selector";
 import { getColorCandidateForStyle } from "./color-by-style";
 import { isFreeGenerationError } from "./generation-errors";
+import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type { GenerationError, PreviewSession } from "./types";
 
 export const INITIAL_CHANGE_CREDITS = 3;
 
 export function hasChangeCredits(session: PreviewSession): boolean {
+  if (isPreviewLimitsBypassed()) {
+    return true;
+  }
   return session.changeCreditsRemaining > 0;
 }
 
 export function consumeChangeCredit(session: PreviewSession): void {
+  if (isPreviewLimitsBypassed()) {
+    return;
+  }
   if (session.changeCreditsRemaining <= 0) {
     throw new Error("No change credits remaining");
   }
