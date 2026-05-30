@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
 import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
-import { ShoppingCart, Loader2, X } from "lucide-react";
+import { ShoppingCart, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
-import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
-import { cn } from "@/lib/utils";
+import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avatars";
+import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 
 export function CartDrawer() {
   const { cart, isLoading, removeFromCart } = useCart();
@@ -149,75 +149,55 @@ export function CartDrawer() {
                           <Loader2 className="w-6 h-6 animate-spin text-primary-orange" />
                         </div>
                       )}
-                      {/* X Icon for Quick Removal */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveClick(item.lineId || item.id);
-                        }}
-                        className={`absolute top-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer ${
-                          locale === "en" ? "right-2" : "left-2"
-                        }`}
-                        disabled={
-                          isLoading || isRemoving === (item.lineId || item.id)
-                        }
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                      {/* Images Section */}
-                      {isOpen && item.imageUrls && item.imageUrls.length > 0 && (
-                        <div className="mb-3">
-                          <div
-                            className="flex gap-1.5 overflow-x-auto pb-1.5 hide-scrollbar"
-                            style={{
-                              scrollSnapType: "x mandatory",
-                              WebkitOverflowScrolling: "touch",
-                            }}
-                          >
-                            {item.imageUrls.slice(0, 5).map((url, imgIndex) => (
-                              <div
-                                key={imgIndex}
-                                className="flex-shrink-0"
-                                style={{ scrollSnapAlign: "start" }}
-                              >
-                                <div className="w-[60px] h-[60px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
-                                  <img
-                                    src={url}
-                                    alt={`Image ${
-                                      imgIndex + 1
-                                    } of book ${displayIndex}`}
-                                    className={cn(
-                                      SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                                      "w-full h-full object-cover",
-                                    )}
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      {isOpen &&
+                        getCartItemAvatarPreview(item).expectedCount > 0 && (
+                          <CartItemGeneratedAvatars
+                            item={item}
+                            locale={locale}
+                            size="compact"
+                            className="mb-3 px-1"
+                          />
+                        )}
 
                       {/* Title, Style, and Price */}
-                      <div className="mb-3">
+                      <div>
                         {item.isGiftCard ? (
                           <>
-                            {/* Gift Card Title */}
                             <h3 className="text-sm font-body text-dark-gray mb-1">
                               {t("cart.giftCardTitle")}
                             </h3>
-                            {/* Gift Card Price */}
-                            <p className="text-sm font-body-bold text-dark-gray text-right" dir="ltr">
-                              ₪ {item.giftCardAmount}
-                            </p>
+                            <div
+                              className="flex items-center justify-between w-full"
+                              dir="ltr"
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveClick(item.lineId || item.id);
+                                }}
+                                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
+                                disabled={
+                                  isLoading ||
+                                  isRemoving === (item.lineId || item.id)
+                                }
+                                aria-label={t("cart.removeItem")}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                              <p
+                                className="text-sm font-body-bold text-dark-gray"
+                                dir="ltr"
+                              >
+                                ₪ {item.giftCardAmount}
+                              </p>
+                            </div>
                           </>
                         ) : (
                           <>
-                            {/* Title - Smaller size */}
                             <h3 className="text-sm font-body text-dark-gray mb-1">
                               {t("cart.book")} {displayIndex}
                             </h3>
-                            {/* Color Style - Above price */}
                             <div className="text-xs text-medium-gray font-body mb-1">
                               <span>{t("cart.colorStyle")} </span>
                               <span className="font-body text-dark-gray">
@@ -230,19 +210,41 @@ export function CartDrawer() {
                                   : t("cart.style.cartoon")}
                               </span>
                             </div>
-                            {/* Price - Bolder weight */}
-                            <p className="text-sm font-body-bold text-dark-gray text-right" dir="ltr">
-                              {displayIndex > 1 ? (
-                                <>
-                                  <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
-                                  <span className="line-through text-medium-gray ml-2">
-                                    {BOOK_PRICE}
-                                  </span>
-                                </>
-                              ) : (
-                                <>₪ {BOOK_PRICE}</>
-                              )}
-                            </p>
+                            <div
+                              className="flex items-center justify-between w-full"
+                              dir="ltr"
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveClick(item.lineId || item.id);
+                                }}
+                                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
+                                disabled={
+                                  isLoading ||
+                                  isRemoving === (item.lineId || item.id)
+                                }
+                                aria-label={t("cart.removeItem")}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                              <p
+                                className="text-sm font-body-bold text-dark-gray"
+                                dir="ltr"
+                              >
+                                {displayIndex > 1 ? (
+                                  <>
+                                    <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
+                                    <span className="line-through text-medium-gray ml-2">
+                                      {BOOK_PRICE}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>₪ {BOOK_PRICE}</>
+                                )}
+                              </p>
+                            </div>
                           </>
                         )}
                       </div>

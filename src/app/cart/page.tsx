@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
 import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
-import { ArrowRight, Loader2, ShoppingCart, X } from "lucide-react";
+import { ArrowRight, Loader2, ShoppingCart, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -21,8 +21,8 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
-import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
-import { cn } from "@/lib/utils";
+import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avatars";
+import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -338,87 +338,12 @@ export default function CartPage() {
                               <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
                             </div>
                           )}
-                          {/* X Icon for Quick Removal */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveClick(item.lineId || item.id);
-                            }}
-                            className={`absolute top-3 w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center shadow-md transition-all z-10 cursor-pointer ${
-                              locale === "en" ? "right-3" : "left-3"
-                            }`}
-                            disabled={
-                              isLoading ||
-                              isRemoving === (item.lineId || item.id)
-                            }
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                          {/* Images Section - Centered */}
-                          {item.imageUrls && item.imageUrls.length > 0 && (
-                            <div className="mb-4">
-                              {/* Mobile: Scrollable row */}
-                              <div className="md:hidden">
-                                <div
-                                  className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar justify-center"
-                                  style={{
-                                    scrollSnapType: "x mandatory",
-                                    WebkitOverflowScrolling: "touch",
-                                  }}
-                                >
-                                  {item.imageUrls
-                                    .slice(0, 5)
-                                    .map((url, imgIndex) => (
-                                      <div
-                                        key={imgIndex}
-                                        className="flex-shrink-0"
-                                        style={{ scrollSnapAlign: "start" }}
-                                      >
-                                        <div className="w-[65px] h-[65px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
-                                          <img
-                                            src={url}
-                                            alt={`Image ${
-                                              imgIndex + 1
-                                            } of book ${displayIndex}`}
-                                            className={cn(
-                                              SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                                              "w-full h-full object-cover",
-                                            )}
-                                            loading="eager"
-                                            decoding="async"
-                                          />
-                                        </div>
-                                      </div>
-                                    ))}
-                                </div>
-                              </div>
-                              {/* Desktop: All 5 images visible - centered */}
-                              <div className="hidden md:flex gap-2 justify-center">
-                                {item.imageUrls
-                                  .slice(0, 5)
-                                  .map((url, imgIndex) => (
-                                    <div
-                                      key={imgIndex}
-                                      className="flex-shrink-0"
-                                    >
-                                      <div className="w-[75px] h-[75px] rounded-lg overflow-hidden border-2 border-primary-orange shadow-sm">
-                                        <img
-                                          src={url}
-                                          alt={`Image ${
-                                            imgIndex + 1
-                                          } of book ${displayIndex}`}
-                                          className={cn(
-                                            SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                                            "w-full h-full object-cover",
-                                          )}
-                                          loading="eager"
-                                          decoding="async"
-                                        />
-                                      </div>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
+                          {getCartItemAvatarPreview(item).expectedCount > 0 && (
+                            <CartItemGeneratedAvatars
+                              item={item}
+                              locale={locale}
+                              className="mb-4"
+                            />
                           )}
 
                           {/* Title, Style, and Price */}
@@ -433,15 +358,32 @@ export default function CartPage() {
                                 >
                                   {t("cart.giftCardTitle")}
                                 </h3>
-                                {/* Gift Card Price */}
-                                <p
-                                  className={`text-sm md:text-base font-body-bold text-dark-gray ${
-                                    locale === "en" ? "text-left" : "text-right"
-                                  }`}
+                                <div
+                                  className="flex items-center justify-between w-full"
                                   dir="ltr"
                                 >
-                                  ₪ {item.giftCardAmount}
-                                </p>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveClick(item.lineId || item.id);
+                                    }}
+                                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
+                                    disabled={
+                                      isLoading ||
+                                      isRemoving === (item.lineId || item.id)
+                                    }
+                                    aria-label={t("cart.removeItem")}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                  <p
+                                    className="text-sm md:text-base font-body-bold text-dark-gray"
+                                    dir="ltr"
+                                  >
+                                    ₪ {item.giftCardAmount}
+                                  </p>
+                                </div>
                               </>
                             ) : (
                               <>
@@ -470,24 +412,41 @@ export default function CartPage() {
                                       : t("cart.style.cartoon")}
                                   </span>
                                 </div>
-                                {/* Price - Smaller size, bolder weight */}
-                                <p
-                                  className={`text-sm md:text-base font-body-bold text-dark-gray ${
-                                    locale === "en" ? "text-left" : "text-right"
-                                  }`}
+                                <div
+                                  className="flex items-center justify-between w-full"
                                   dir="ltr"
                                 >
-                                  {displayIndex % 2 === 0 ? (
-                                    <>
-                                      <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
-                                      <span className="line-through text-medium-gray ml-2">
-                                        {BOOK_PRICE}
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>₪ {BOOK_PRICE}</>
-                                  )}
-                                </p>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveClick(item.lineId || item.id);
+                                    }}
+                                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
+                                    disabled={
+                                      isLoading ||
+                                      isRemoving === (item.lineId || item.id)
+                                    }
+                                    aria-label={t("cart.removeItem")}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                  <p
+                                    className="text-sm md:text-base font-body-bold text-dark-gray"
+                                    dir="ltr"
+                                  >
+                                    {displayIndex % 2 === 0 ? (
+                                      <>
+                                        <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
+                                        <span className="line-through text-medium-gray ml-2">
+                                          {BOOK_PRICE}
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>₪ {BOOK_PRICE}</>
+                                    )}
+                                  </p>
+                                </div>
                               </>
                             )}
                           </div>

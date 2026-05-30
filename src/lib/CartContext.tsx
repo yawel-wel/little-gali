@@ -387,15 +387,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const cartItems: CartItem[] = data.cart.items.map((item: any) => {
             const existingItem = cart?.items.find((i) => i.lineId === item.lineId);
             const isNewItem = (item.imageUrls?.length ?? 0) > 0;
-            return {
+            const base: CartItem = {
               ...item,
               imageUrls: isNewItem ? item.imageUrls : (existingItem?.imageUrls ?? []),
-              // For the newly added item use the style passed to addToCart directly —
-              // safeguard against API routes not returning it correctly.
               style: isNewItem ? (style ?? "cartoon") : (item.style ?? existingItem?.style),
               isGiftCard: item.isGiftCard ?? existingItem?.isGiftCard,
               giftCardAmount: item.giftCardAmount ?? existingItem?.giftCardAmount,
+              originalUrls: existingItem?.originalUrls ?? item.originalUrls,
+              generatedBwUrls: existingItem?.generatedBwUrls ?? item.generatedBwUrls,
+              generatedColorUrls:
+                existingItem?.generatedColorUrls ?? item.generatedColorUrls,
+              previewSessionId:
+                existingItem?.previewSessionId ?? item.previewSessionId,
             };
+            if (isNewItem && fulfillment) {
+              return {
+                ...base,
+                originalUrls: fulfillment.originalUrls,
+                generatedBwUrls: fulfillment.generatedBwUrls,
+                generatedColorUrls: fulfillment.generatedColorUrls,
+                previewSessionId: fulfillment.previewSessionId,
+              };
+            }
+            return base;
           });
 
           setCart({
