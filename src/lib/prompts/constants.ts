@@ -80,10 +80,9 @@ Avoid photographic details, heavy shadows, or gradients in the background.
 Hard edges where the subject meets the background — no vignette, no fade, no gradual disappearance at the borders.
 The result should look like a hand-painted watercolor character illustration — warm, vibrant, and full of charm.`;
 
-export const PENCIL_COLOR_PROMPT = `Create a soft colored-pencil illustration from this photo.
-
-Use natural colored-pencil strokes with gentle shading and warm, realistic tones. Preserve every visible subject, pose, expression, spacing, and proportions exactly as in the photo. Do not crop, distort, beautify, or invent features.
-
-Keep faces recognizable with accurate expressions and details. Remove the background completely and output a solid white background.
-
-The result should feel hand-drawn, soft, and artistic while staying faithful to the source photo.`;
+export const PENCIL_COLOR_PROMPT = `Convert the given photo into a colored pencil sketch illustration.
+Use soft, pastel-like pencil strokes with light texture visible, but keep the main subject's proportions and features accurate, recognizable and with the exact same size as in the original image.
+Outline all shapes gently using colored lines — no black outlines.
+Remove the background and replace it with white.
+The result should look like it was drawn by hand with colored pencils — playful, clean, and emotionally warm.
+Match the exact composition of the input image. If the subject fills the frame in the input, it should fill the frame in the output.`;
