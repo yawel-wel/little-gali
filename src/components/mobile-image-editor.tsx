@@ -245,7 +245,7 @@ export function MobileImageEditor({
               <button
                 type="button"
                 onClick={onChangeImage}
-                className="font-body-bold text-dark-gray text-base bg-transparent border-0 cursor-pointer py-1 px-1 hover:opacity-70 transition-opacity"
+                className="font-body-bold text-dark-gray text-[14px] bg-transparent border-0 cursor-pointer py-1 px-1 hover:opacity-70 transition-opacity"
               >
                 {t("upload.changeImage")}
               </button>

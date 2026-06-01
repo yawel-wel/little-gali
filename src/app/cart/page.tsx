@@ -964,7 +964,7 @@ export default function CartPage() {
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[calc(100%-2.5rem)] max-w-[425px]">
           <DialogHeader
             className={locale === "en" ? "!text-left" : "!text-center"}
           >

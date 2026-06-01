@@ -109,28 +109,34 @@ function UploadImageItem({
     />
   );
 
-  const shellClassName =
-    "relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] flex-shrink-0 cursor-pointer rounded-lg";
+  const thumbClassName =
+    "relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] cursor-pointer rounded-lg overflow-hidden";
 
   return (
-    <div style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }} className={shellClassName}>
-      {dragActivator ? (
-        <UploadImageDragSurface
-          dragActivator={dragActivator}
-          onTap={() => onTap(index)}
-          className="relative h-full w-full"
-        >
-          {thumbnail}
-        </UploadImageDragSurface>
-      ) : (
-        <div
-          className="relative h-full w-full"
-          onClick={() => onTap(index)}
-        >
-          {thumbnail}
-        </div>
-      )}
+    <div className="relative flex-shrink-0 pt-1.5 pl-1.5">
+      <div
+        style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
+        className={thumbClassName}
+      >
+        {dragActivator ? (
+          <UploadImageDragSurface
+            dragActivator={dragActivator}
+            onTap={() => onTap(index)}
+            className="relative h-full w-full"
+          >
+            {thumbnail}
+          </UploadImageDragSurface>
+        ) : (
+          <div
+            className="relative h-full w-full"
+            onClick={() => onTap(index)}
+          >
+            {thumbnail}
+          </div>
+        )}
+      </div>
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
@@ -142,11 +148,16 @@ function UploadImageItem({
         onTouchStart={(e) => {
           e.stopPropagation();
         }}
-        className="absolute -top-1 -left-1 bg-red-500 hover:bg-red-600 hover:opacity-90 text-white rounded-full p-1 shadow-lg transition-all z-10 cursor-pointer"
+        className="absolute top-0 left-0 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-all hover:bg-red-600 hover:opacity-90 cursor-pointer"
         disabled={isSubmitting}
         style={{ pointerEvents: "auto" }}
+        aria-label={
+          locale === "en"
+            ? `Remove photo ${index + 1}`
+            : `הסרת תמונה ${index + 1}`
+        }
       >
-        <X className="w-3 h-3" />
+        <X className="h-3 w-3" strokeWidth={2.5} />
       </button>
     </div>
   );
@@ -1052,7 +1063,7 @@ function UploadPageContent() {
               <div className="text-center">
                 <div className="inline-block px-4 py-2 rounded-full bg-white border border-gray-200">
                   <span
-                    className={`text-dark-gray font-body-bold text-md ${
+                    className={`text-dark-gray font-body-bold text-sm md:text-base ${
                       locale === "en" ? "text-center" : "text-right"
                     }`}
                   >
@@ -1094,13 +1105,13 @@ function UploadPageContent() {
                     )}
                     <div
                       className={cn(
-                        "w-full md:overflow-visible",
+                        "w-full py-1 md:overflow-visible",
                         isReorderingImages
                           ? "overflow-x-hidden"
                           : "overflow-x-auto overscroll-x-contain",
                       )}
                     >
-                      <div className="flex flex-nowrap justify-center gap-1 md:gap-2 w-full max-w-none mx-auto px-6 overflow-visible items-end">
+                      <div className="mx-auto flex w-max min-w-full flex-nowrap items-end justify-center gap-0.5 overflow-visible px-3 pt-1 sm:px-4 md:gap-1">
                       {images.length === 5 ? (
                         <UploadSortableImages
                           count={5}

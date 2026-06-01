@@ -1585,7 +1585,7 @@ export default function PreviewPage() {
                 )}
                 <div className="mt-4 flex justify-center md:mt-5">
                   {session.changeCreditsRemaining > 0 ? (
-                    <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-base font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
+                    <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-sm font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
                       {t("preview.changesRemainingBadge").replace(
                         "{count}",
                         String(session.changeCreditsRemaining),

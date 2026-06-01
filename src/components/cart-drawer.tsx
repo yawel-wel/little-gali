@@ -343,7 +343,7 @@ export function CartDrawer() {
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[calc(100%-2.5rem)] max-w-[425px]">
           <DialogHeader className="!text-center">
             <DialogTitle className="font-body-bold text-dark-gray mt-4">
               {t("cart.removeItem")}
