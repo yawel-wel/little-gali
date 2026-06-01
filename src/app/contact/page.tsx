@@ -211,7 +211,7 @@ function ContactPageContent() {
     >
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <motion.section
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F3EEE8" }}
@@ -245,10 +245,10 @@ function ContactPageContent() {
                       </Title>
                       <div className="mt-4 text-center">
                         <p className="text-base font-body text-medium-gray leading-relaxed">
-                          מתלבטים בקשר לתמונות? יש לכם שאלה?
+                          {t("contact.subtitle1")}
                         </p>
                         <p className="text-base font-body text-medium-gray leading-relaxed">
-                          מוזמנים ליצור איתנו קשר ונשמח לעזור בכל נושא
+                          {t("contact.subtitle2")}
                         </p>
                       </div>
                     </div>
@@ -257,7 +257,7 @@ function ContactPageContent() {
                     <div className="w-full h-64 lg:h-80 rounded-lg overflow-hidden">
                       <img
                         src="/contact-us.png"
-                        alt="Contact Us"
+                        alt={t("contact.imageAlt")}
                         className="w-full h-full object-cover"
                       />
                     </div>

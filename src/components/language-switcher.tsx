@@ -17,7 +17,7 @@ export function LanguageSwitcher({
   variant?: "desktop" | "mobile";
   onLanguageChange?: () => void;
 }) {
-  const { locale, setLocale } = useLanguage();
+  const { locale, setLocale, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isRTL, setIsRTL] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -59,7 +59,11 @@ export function LanguageSwitcher({
     return (
       <div className="relative w-fit" ref={dropdownRef}>
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          aria-label={t("accessibility.selectLanguage")}
           className="flex items-center justify-between px-4 py-2.5 bg-gray-100 rounded-lg text-dark-gray hover:bg-gray-200 transition-all duration-200 cursor-pointer whitespace-nowrap"
         >
           <span className="text-sm font-body">{currentLanguage}</span>
@@ -70,6 +74,8 @@ export function LanguageSwitcher({
           />
         </button>
         <div
+          role="listbox"
+          aria-label={t("accessibility.selectLanguage")}
           className={`absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 transition-all duration-200 z-50 min-w-[120px] ${
             isRTL ? "right-0" : "left-0"
           } ${
@@ -80,6 +86,9 @@ export function LanguageSwitcher({
         >
           <div className="py-1">
             <button
+              type="button"
+              role="option"
+              aria-selected={locale === "he"}
               onClick={() => handleLanguageChange("he")}
               className={`w-full px-4 py-2 text-sm font-body transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                 isRTL ? "text-right" : "text-left"
@@ -92,6 +101,9 @@ export function LanguageSwitcher({
               עברית
             </button>
             <button
+              type="button"
+              role="option"
+              aria-selected={locale === "en"}
               onClick={() => handleLanguageChange("en")}
               className={`w-full px-4 py-2 text-sm font-body transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                 isRTL ? "text-right" : "text-left"
@@ -117,12 +129,16 @@ export function LanguageSwitcher({
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={t("accessibility.changeLanguage")}
         className="text-dark-gray hover:bg-[#D7D8DA] hover:text-dark-gray cursor-pointer rounded-full transition-all duration-200"
       >
         <Globe className="h-5 w-5" />
-        <span className="sr-only">Change language</span>
       </Button>
       <div
+        role="listbox"
+        aria-label={t("accessibility.selectLanguage")}
         className={`absolute top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 transition-all duration-200 z-50 ${
           isRTL ? "right-0" : "left-0"
         } ${
@@ -133,6 +149,9 @@ export function LanguageSwitcher({
       >
         <div className="py-1">
           <button
+            type="button"
+            role="option"
+            aria-selected={locale === "he"}
             onClick={() => handleLanguageChange("he")}
             className={`w-full px-4 py-2 text-sm font-body transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
               isRTL ? "text-right" : "text-left"
@@ -145,6 +164,9 @@ export function LanguageSwitcher({
             עברית
           </button>
           <button
+            type="button"
+            role="option"
+            aria-selected={locale === "en"}
             onClick={() => handleLanguageChange("en")}
             className={`w-full px-4 py-2 text-sm font-body transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
               isRTL ? "text-right" : "text-left"

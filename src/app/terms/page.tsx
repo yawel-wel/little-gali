@@ -14,7 +14,7 @@ function TermsPageContent() {
     >
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section
           className="relative py-16 lg:py-24 pt-20 md:pt-16"
           style={{ backgroundColor: "#F3EEE8" }}

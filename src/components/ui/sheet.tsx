@@ -5,6 +5,7 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -44,6 +45,22 @@ function SheetOverlay({
   );
 }
 
+function SheetCloseButton({ side }: { side: "top" | "right" | "bottom" | "left" }) {
+  const { t } = useLanguage();
+
+  return (
+    <SheetPrimitive.Close
+      className={cn(
+        "ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none cursor-pointer",
+        side === "left" ? "left-4" : "right-4",
+      )}
+    >
+      <XIcon className="size-4" />
+      <span className="sr-only">{t("accessibility.close")}</span>
+    </SheetPrimitive.Close>
+  );
+}
+
 function SheetContent({
   className,
   children,
@@ -70,13 +87,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className={cn(
-          "ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none cursor-pointer",
-          side === "left" ? "left-4" : "right-4"
-        )}>
-          <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
+        <SheetCloseButton side={side} />
       </SheetPrimitive.Content>
     </SheetPortal>
   );

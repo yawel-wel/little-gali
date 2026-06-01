@@ -146,3 +146,12 @@ export function cropRevisionPublicId(
 ): string {
   return `${PREVIEW_SESSION_ROOT}/${sessionId}/crops/${kind}/${candidateId}_r${revision}`;
 }
+
+export function cropRevisionWatermarkedPublicId(
+  sessionId: string,
+  kind: PreviewOutputKind,
+  candidateId: string,
+  revision: number,
+): string {
+  return `${cropRevisionPublicId(sessionId, kind, candidateId, revision)}_wm`;
+}

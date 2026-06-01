@@ -187,6 +187,17 @@ export async function uploadJsonToCloudinaryPublicId(
  * Replaces an existing Cloudinary asset in place (requires API secret).
  * Unsigned presets cannot pass overwrite; use this for preview crop saves.
  */
+export async function overwriteCloudinaryBuffer(
+  buffer: Buffer,
+  fullPublicId: string,
+): Promise<CloudinaryUploadResult> {
+  const baseName = fullPublicId.split("/").pop() ?? "image";
+  const file = new File([Uint8Array.from(buffer)], `${baseName}.png`, {
+    type: "image/png",
+  });
+  return overwriteCloudinaryAsset(file, fullPublicId);
+}
+
 export async function overwriteCloudinaryAsset(
   file: File | Blob,
   fullPublicId: string,

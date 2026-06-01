@@ -14,6 +14,7 @@ import {
   logPreviewGenerationFailure,
   type PreviewGenerationContext,
 } from "./generation-log";
+import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
 const DEFAULT_BW_IMAGE_MODEL = "gemini-2.5-flash-image";
 const MAX_RETRIES = 2;
@@ -40,18 +41,6 @@ async function createMockBwImage(sourceUrl: string): Promise<Buffer> {
     .toBuffer();
 }
 
-async function downloadImageAsBase64(
-  imageUrl: string,
-): Promise<{ base64: string; mimeType: string }> {
-  const response = await fetch(imageUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to download source image (${response.status})`);
-  }
-  const mimeType = response.headers.get("content-type") || "image/jpeg";
-  const buffer = Buffer.from(await response.arrayBuffer());
-  return { base64: buffer.toString("base64"), mimeType };
-}
-
 async function generateWithGemini(
   imageUrl: string,
   generationContext?: PreviewGenerationContext,
@@ -68,7 +57,7 @@ async function generateWithGemini(
     throw error;
   }
 
-  const { base64, mimeType } = await downloadImageAsBase64(imageUrl);
+  const { base64, mimeType } = await downloadImageAsBase64ForGemini(imageUrl);
   const ai = new GoogleGenAI({ apiKey });
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
   const bwModel = getBwImageModel();

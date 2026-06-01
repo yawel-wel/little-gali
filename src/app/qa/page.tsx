@@ -25,7 +25,7 @@ export default function QAPage() {
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F3EEE8" }}>
       <Header />
 
-      <main className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
+      <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Q&A Section */}
         <motion.section
           className="relative pb-16 lg:pb-24 pt-8 lg:pt-10"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   Dialog,
   DialogContent,
@@ -105,13 +105,14 @@ export function CartDrawer() {
               {cartItemCount}
             </span>
           )}
-          <span className="sr-only">Open cart</span>
+          <span className="sr-only">{t("accessibility.openCart")}</span>
         </Button>
       </SheetTrigger>
       <SheetContent
         side={locale === "he" ? "left" : "right"}
         className="w-[300px] sm:w-[400px]"
       >
+        <SheetTitle className="sr-only">{t("accessibility.cartTitle")}</SheetTitle>
         <div className="flex flex-col h-full">
           <div className="flex-1 overflow-y-auto pt-12">
             {showDrawerSpinner ? (

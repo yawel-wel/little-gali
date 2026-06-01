@@ -1475,6 +1475,7 @@ export default function PreviewPage() {
     <div className="min-h-screen overflow-x-hidden bg-warm-light">
       <Header />
       <main
+        id="main-content"
         className="flex-1"
         style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
       >

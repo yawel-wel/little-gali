@@ -31,7 +31,6 @@ import { BOOK_PRICE } from "@/lib/constants";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import { trackSubscribe, trackViewContent } from "@/lib/meta-pixel-events";
 
 const dotVariants = {
@@ -256,6 +255,7 @@ function ComingSoonSection() {
                         strokeWidth="3"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
+                        aria-hidden="true"
                       >
                         <path d="M5 13l4 4L19 7"></path>
                       </svg>
@@ -316,14 +316,18 @@ function ComingSoonSection() {
                   }`}
                 >
                   <div className="flex-1 max-w-[350px]">
+                    <label htmlFor="coming-soon-email" className="sr-only">
+                      {t("home.comingSoon.emailLabel")}
+                    </label>
                     <Input
+                      id="coming-soon-email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={t("home.comingSoon.emailPlaceholder")}
                       required
                       disabled={isSubmitting}
-                      className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-3.5 text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
+                      className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-[18px] text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
                       dir={locale === "en" ? "ltr" : "rtl"}
                     />
                   </div>
@@ -351,54 +355,39 @@ function ComingSoonSection() {
 
                 {/* Mobile: Horizontal Layout */}
                 <div className="md:hidden flex gap-3 items-center justify-center">
-                  <TextField
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t("home.comingSoon.emailPlaceholder")}
-                    required
-                    disabled={isSubmitting}
-                    variant="outlined"
-                    inputProps={{
-                      dir: locale === "en" ? "ltr" : "rtl",
-                    }}
-                    sx={{
-                      flex: 1,
-                      maxWidth: "350px",
-                      "& .MuiOutlinedInput-root": {
-                        fontFamily: "var(--font-assistant)",
-                        fontSize: "1rem",
-                        backgroundColor: "white",
-                        "& fieldset": {
-                          borderColor: "rgba(0, 0, 0, 0.23)",
-                          borderWidth: "1.5px",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "rgba(0, 0, 0, 0.4)",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "#E16854",
-                          borderWidth: "2px",
-                        },
-                      },
-                      "& .MuiOutlinedInput-input": {
-                        padding: "10px 14px",
-                      },
-                    }}
-                  />
+                  <div className="flex-1 max-w-[350px]">
+                    <label htmlFor="coming-soon-email-mobile" className="sr-only">
+                      {t("home.comingSoon.emailLabel")}
+                    </label>
+                    <Input
+                      id="coming-soon-email-mobile"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t("home.comingSoon.emailPlaceholder")}
+                      required
+                      disabled={isSubmitting}
+                      className="w-full h-[38px] bg-white border-[1.5px] border-gray-300 rounded-lg px-3.5 text-base placeholder:text-[14px] font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
+                      dir={locale === "en" ? "ltr" : "rtl"}
+                    />
+                  </div>
                   <MuiButton
                     type="submit"
                     disabled={isSubmitting}
                     variant="contained"
                     color="primary"
                     sx={{
-                      px: 3,
-                      py: 1,
+                      height: 36,
+                      minHeight: 36,
+                      px: 2.5,
+                      py: 0,
                       fontFamily: "var(--font-assistant)",
                       fontWeight: 700,
-                      fontSize: "0.9rem",
+                      fontSize: "12px",
+                      lineHeight: 1,
                       textTransform: "none",
                       whiteSpace: "nowrap",
+                      flexShrink: 0,
                     }}
                   >
                     {isSubmitting
@@ -415,7 +404,7 @@ function ComingSoonSection() {
                     transition={{ duration: 0.3 }}
                     className="mt-4"
                   >
-                    <p className="text-base font-body text-red-600">
+                    <p className="text-base font-body text-red-600" role="alert">
                       {submitStatus.message}
                     </p>
                   </motion.div>
@@ -484,8 +473,8 @@ export default function Home() {
   const heroImages = ["/hero-image-1.jpeg", "/hero-image-2.jpg", "/hero-image-3.jpg", "/hero-image-4.jpg"];
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const bookImages = [
-    { src: "/our-book-bw.jpg", label: "צד שחור לבן" },
-    { src: "/our-book-color.jpg", label: "צד צבעוני" },
+    { src: "/our-book-bw.jpg", labelKey: "home.book.bwSide" as const },
+    { src: "/our-book-color.jpg", labelKey: "home.book.colorSide" as const },
   ];
   const [bookImageIndex, setBookImageIndex] = useState(0);
   const bookCarouselRef = useRef<HTMLDivElement>(null);
@@ -565,20 +554,13 @@ export default function Home() {
 
   return (
     <div className="overflow-x-hidden bg-warm-light">
-      {/* Skip to main content link for keyboard navigation */}
-      <a 
-        href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary-orange focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-body-bold"
-      >
-        {t("accessibility.skipToMain")}
-      </a>
       <Header />
 
       <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
         <section aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
           {/* Background Images - all rendered in DOM so they preload; opacity controls which is visible */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0" aria-hidden="true">
             {heroImages.map((src, i) => (
               <motion.div
                 key={i}
@@ -595,7 +577,7 @@ export default function Home() {
               >
                 <Image
                   src={src}
-                  alt="Baby book example"
+                  alt=""
                   fill
                   {...(i === 0 ? { priority: true } : { loading: "eager" })}
                   className="object-cover sm:object-[center_65%]"
@@ -853,13 +835,15 @@ export default function Home() {
                       {bookImages.map((img, i) => (
                         <button
                           key={i}
+                          type="button"
                           onClick={() => setBookImageIndex(i)}
+                          aria-pressed={bookImageIndex === i}
                           className="text-sm font-body-bold px-4 py-1.5 rounded-full transition-colors bg-gray-100 text-gray-900 lg:cursor-pointer lg:hover:opacity-70"
                           style={{
                             border: bookImageIndex === i ? "2px solid #693430" : "2px solid transparent",
                           }}
                         >
-                          {img.label}
+                          {t(img.labelKey)}
                         </button>
                       ))}
                     </div>
@@ -888,7 +872,7 @@ export default function Home() {
                           >
                             <Image
                               src={img.src}
-                              alt={img.label}
+                              alt={t(img.labelKey)}
                               fill
                               className="object-cover"
                               sizes="(max-width: 768px) 80vw, 45vw"
@@ -902,6 +886,7 @@ export default function Home() {
                     <div className="flex justify-center gap-2 mt-3" style={{ direction: "ltr" }}>
                       {/* Left dot — always the visually left image */}
                       <motion.button
+                        type="button"
                         onClick={() => setBookImageIndex(locale === "he" ? 1 : 0)}
                         className="block shrink-0 h-2 rounded-full lg:cursor-pointer lg:hover:opacity-70"
                         variants={dotVariants}
@@ -909,10 +894,11 @@ export default function Home() {
                         style={{
                           backgroundColor: bookImageIndex === (locale === "he" ? 1 : 0) ? "#693430" : "#9ca3af",
                         }}
-                        aria-label={bookImages[locale === "he" ? 1 : 0].label}
+                        aria-label={t(bookImages[locale === "he" ? 1 : 0].labelKey)}
                       />
                       {/* Right dot — always the visually right image */}
                       <motion.button
+                        type="button"
                         onClick={() => setBookImageIndex(locale === "he" ? 0 : 1)}
                         className="block shrink-0 h-2 rounded-full lg:cursor-pointer lg:hover:opacity-70"
                         variants={dotVariants}
@@ -920,7 +906,7 @@ export default function Home() {
                         style={{
                           backgroundColor: bookImageIndex === (locale === "he" ? 0 : 1) ? "#693430" : "#9ca3af",
                         }}
-                        aria-label={bookImages[locale === "he" ? 0 : 1].label}
+                        aria-label={t(bookImages[locale === "he" ? 0 : 1].labelKey)}
                       />
                     </div>
                   </div>

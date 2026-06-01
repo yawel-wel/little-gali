@@ -5,10 +5,11 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { CartDrawer } from "@/components/cart-drawer";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { SkipToMain } from "@/components/skip-to-main";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
@@ -77,6 +78,7 @@ export function Header() {
 
   return (
     <>
+      <SkipToMain />
       <motion.header
         role="banner"
         className="fixed left-0 right-0 z-50 transition-[top] duration-300 ease-in-out"
@@ -102,7 +104,7 @@ export function Header() {
                     className="text-dark-gray hover:bg-[#D7D8DA] hover:text-dark-gray cursor-pointer rounded-full transition-all duration-200"
                   >
                     <Menu className="h-6 w-6" />
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">{t("accessibility.openMenu")}</span>
                   </Button>
                 </SheetTrigger>
               </div>
@@ -115,7 +117,7 @@ export function Header() {
                     className="text-dark-gray hover:bg-[#D7D8DA] hover:text-dark-gray cursor-pointer rounded-full transition-all duration-200"
                   >
                     <Menu className="h-6 w-6" />
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">{t("accessibility.openMenu")}</span>
                   </Button>
                 </SheetTrigger>
               </div>
@@ -125,6 +127,7 @@ export function Header() {
                 className="w-[300px] sm:w-[400px]"
                 aria-label={t("nav.menuAriaLabel")}
               >
+                <SheetTitle className="sr-only">{t("nav.menuAriaLabel")}</SheetTitle>
                 <div className="flex flex-col h-full">
                   {/* Navigation */}
                   <nav className="flex-1 pt-14 pb-6" aria-label={t("nav.mainNavAriaLabel")}>
@@ -175,7 +178,7 @@ export function Header() {
 
           {/* Center - Logo (Perfectly Centered using absolute positioning) */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <a href="/" className="block">
+            <a href="/" className="block" aria-label={t("accessibility.homeLink")}>
               <Image
                 src="/logo.svg"
                 alt="Little Gali"

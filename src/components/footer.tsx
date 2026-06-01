@@ -149,7 +149,7 @@ export function Footer() {
             >
               {t("footer.contact")}
             </h3>
-            <a href="/contact">
+            <a href="/contact" aria-label={t("footer.contactUsAriaLabel")}>
               <Button className="cursor-pointer text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200 bg-accent-burgundy hover:opacity-90">
                 {t("footer.contactUs")}
               </Button>

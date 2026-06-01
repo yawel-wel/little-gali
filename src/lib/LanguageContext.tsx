@@ -116,10 +116,19 @@ const hebrewTranslations = {
 
   // Accessibility
   "accessibility.skipToMain": "דלג לתוכן הראשי",
+  "accessibility.openMenu": "פתח תפריט",
+  "accessibility.openCart": "פתח עגלת קניות",
+  "accessibility.close": "סגור",
+  "accessibility.changeLanguage": "שנה שפה",
+  "accessibility.selectLanguage": "בחר שפה",
+  "accessibility.cartTitle": "עגלת קניות",
+  "accessibility.expandImage": "הגדל תמונה",
+  "accessibility.homeLink": "Little Gali - דף הבית",
 
   // Top Banner
   "banner.shipping": "משלוחים לכל הארץ",
   "banner.freeCard": "הוספת כרטיס ברכה אישי בחינם",
+  "banner.ariaLabel": "הודעות מבצעים",
 
   // Cart
   "cart.title": "עגלת הקניות",
@@ -349,7 +358,12 @@ const hebrewTranslations = {
   "home.hero.titleHighlight": "שלכם",
   "home.hero.cta": "צרו ספרון עכשיו",
   "home.hero.ariaLabel": "קטע פתיחה - ספרון לתינוק",
+  "home.hero.imageAlt": "דוגמה לספרון תינוק אישי",
   "home.hero.ctaAriaLabel": "עבור לעמוד יצירת ספרון",
+  "home.gallery.ariaLabel": "גלריית תמונות מלקוחות",
+  "home.gallery.imageAlt": "תמונת לקוח {num}",
+  "home.book.bwSide": "צד שחור לבן",
+  "home.book.colorSide": "צד צבעוני",
   "home.book.title": "ספרון הנייר שלנו",
   "home.book.titleHighlight": "הנייר",
   "home.book.subtitle": "ספרון לתינוק - מהתמונות שאתם בוחרים",
@@ -446,6 +460,7 @@ const hebrewTranslations = {
   "home.comingSoon.productName": "ספרוני בד מיוחדים",
   "home.comingSoon.subtitle":
     "ספרונים מבד שמכילים את התמונות שלכם.\nהשאירו מייל ואנחנו נדאג לעדכן אתכם ראשונים כשהם יגיעו.",
+  "home.comingSoon.emailLabel": "כתובת אימייל",
   "home.comingSoon.emailPlaceholder": "כתובת המייל שלכם",
   "home.comingSoon.button": "עדכנו אותי",
   "home.comingSoon.submitting": "שולח...",
@@ -469,6 +484,7 @@ const hebrewTranslations = {
   "home.styleExamples.cta": "עוד דוגמאות",
   "home.styleExamples.ctaAriaLabel": "עבור לעמוד דוגמאות סגנונות",
   "home.styleExamples.ariaLabel": "סגנונות העיבוד הזמינים",
+  "home.styleExamples.slideLabel": "דוגמה {num}",
 
   "home.customerComments.title": "התגובות שלכם",
   "home.customerComments.titleHighlight": "שלכם",
@@ -528,11 +544,15 @@ const hebrewTranslations = {
   "footer.whoWeAre": "מי אנחנו",
   "footer.contact": "צרו קשר",
   "footer.contactUs": "צרו איתנו קשר",
+  "footer.contactUsAriaLabel": "עבור לעמוד צור קשר",
   "footer.copyright": "© Copyright Little Gali. כל הזכויות שמורות.",
 
   // Contact Page
   "contact.title": "צרו איתנו קשר",
   "contact.titleHighlight": "קשר",
+  "contact.subtitle1": "מתלבטים בקשר לתמונות? יש לכם שאלה?",
+  "contact.subtitle2": "מוזמנים ליצור איתנו קשר ונשמח לעזור בכל נושא",
+  "contact.imageAlt": "צרו קשר",
   "contact.name": "שם",
   "contact.email": "אימייל",
   "contact.message": "הודעה",
@@ -803,10 +823,19 @@ const englishTranslations = {
 
   // Accessibility
   "accessibility.skipToMain": "Skip to main content",
+  "accessibility.openMenu": "Open menu",
+  "accessibility.openCart": "Open cart",
+  "accessibility.close": "Close",
+  "accessibility.changeLanguage": "Change language",
+  "accessibility.selectLanguage": "Select language",
+  "accessibility.cartTitle": "Shopping cart",
+  "accessibility.expandImage": "Expand image",
+  "accessibility.homeLink": "Little Gali - Home",
 
   // Top Banner
   "banner.shipping": "Free Shipping Nationwide",
   "banner.freeCard": "Free Personalized Greeting Card",
+  "banner.ariaLabel": "Promotional announcements",
 
   // Cart
   "cart.title": "Shopping Cart",
@@ -1040,7 +1069,12 @@ const englishTranslations = {
   "home.hero.titleHighlight": "Personalized",
   "home.hero.cta": "Create Your Book Now",
   "home.hero.ariaLabel": "Hero section - Personalized baby book",
+  "home.hero.imageAlt": "Personalized baby book example",
   "home.hero.ctaAriaLabel": "Go to book creation page",
+  "home.gallery.ariaLabel": "Customer photo gallery",
+  "home.gallery.imageAlt": "Customer photo {num}",
+  "home.book.bwSide": "Black and white side",
+  "home.book.colorSide": "Colorful side",
   "home.book.title": "Our Paper Book",
   "home.book.titleHighlight": "Paper",
   "home.book.subtitle": "Personal baby book – with your family photos",
@@ -1138,6 +1172,7 @@ const englishTranslations = {
   "home.comingSoon.productName": "Special Fabric Books",
   "home.comingSoon.subtitle":
     "Fabric books that contain your photos.\nLeave your email and we'll make sure to update you first when they arrive",
+  "home.comingSoon.emailLabel": "Email address",
   "home.comingSoon.emailPlaceholder": "Your email address",
   "home.comingSoon.button": "Notify Me",
   "home.comingSoon.submitting": "Sending...",
@@ -1161,6 +1196,7 @@ const englishTranslations = {
   "home.styleExamples.cta": "See More Style Examples",
   "home.styleExamples.ctaAriaLabel": "Go to style examples page",
   "home.styleExamples.ariaLabel": "Available processing styles",
+  "home.styleExamples.slideLabel": "Example {num}",
 
   "home.customerComments.title": "Your Reactions",
   "home.customerComments.titleHighlight": "Reactions",
@@ -1222,11 +1258,15 @@ const englishTranslations = {
   "footer.whoWeAre": "Who We Are",
   "footer.contact": "Contact",
   "footer.contactUs": "Contact Us",
+  "footer.contactUsAriaLabel": "Go to contact page",
   "footer.copyright": "© Copyright Little Gali. All rights reserved.",
 
   // Contact Page
   "contact.title": "Contact Us",
   "contact.titleHighlight": "Contact",
+  "contact.subtitle1": "Unsure about your photos? Have a question?",
+  "contact.subtitle2": "Feel free to reach out — we're happy to help with anything",
+  "contact.imageAlt": "Contact us",
   "contact.name": "Name",
   "contact.email": "Email",
   "contact.message": "Message",

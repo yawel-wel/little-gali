@@ -11,11 +11,14 @@ import "swiper/css/free-mode";
 const galleryImages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
 export function GalleryCarouselSection() {
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const isHebrew = locale === "he";
 
   return (
-    <section className="pt-8 pb-12 lg:pt-10 lg:pb-20 bg-white">
+    <section
+      aria-label={t("home.gallery.ariaLabel")}
+      className="pt-8 pb-12 lg:pt-10 lg:pb-20 bg-white"
+    >
       <div className="text-center mb-8 lg:mb-12 px-4">
         {isHebrew ? (
           <Title as="h2" highlightText="בבית" size="lg">
@@ -46,7 +49,7 @@ export function GalleryCarouselSection() {
             <div className="relative aspect-[3/4] rounded-xl overflow-hidden lg:cursor-pointer">
               <Image
                 src={`/gallery-image-${num}.jpeg`}
-                alt=""
+                alt={t("home.gallery.imageAlt").replace("{num}", String(num))}
                 fill
                 priority={num < 8}
                 className="object-cover bg-neutral-100"

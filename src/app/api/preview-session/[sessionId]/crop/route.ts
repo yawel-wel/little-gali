@@ -4,9 +4,13 @@ import { applyCropUploadToCandidate } from "@/lib/preview-session/apply-crop";
 import {
   canSignCloudinaryUploads,
   overwriteCloudinaryAsset,
+  overwriteCloudinaryBuffer,
   uploadBufferToCloudinaryPublicId,
 } from "@/lib/preview-session/cloudinary";
-import { cropRevisionPublicId } from "@/lib/preview-session/cloudinary-paths";
+import {
+  cropRevisionPublicId,
+  cropRevisionWatermarkedPublicId,
+} from "@/lib/preview-session/cloudinary-paths";
 import {
   assetPathFromPublicId,
   findCandidateInSession,
@@ -17,9 +21,19 @@ import {
   writeIdempotentResponse,
 } from "@/lib/preview-session/idempotency";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
+import type { PreviewPhase } from "@/lib/preview-session/types";
 import { applyPreviewWatermark } from "@/lib/preview-session/watermark";
 
 export const runtime = "nodejs";
+
+function sessionAllowsCrop(phase: PreviewPhase): boolean {
+  return (
+    phase === "bw_review" ||
+    phase === "bw_approved" ||
+    phase === "style_selected" ||
+    phase === "cart_added"
+  );
+}
 export const maxDuration = 60;
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -80,7 +94,7 @@ export async function POST(
   }
 
   const session = auth.session;
-  if (session.phase !== "bw_review") {
+  if (!sessionAllowsCrop(session.phase)) {
     return NextResponse.json(
       { error: "Session is not in preview review" },
       { status: 409 },
@@ -120,25 +134,37 @@ export async function POST(
   try {
     const croppedBuffer = Buffer.from(await image.arrayBuffer());
     const cleanAssetPath = assetPathFromPublicId(cleanPublicId);
-    const cleanUpload = canSignCloudinaryUploads()
-      ? await overwriteCloudinaryAsset(image, cleanAssetPath)
-      : await (async () => {
-          const revision = (candidate.cropRevision ?? 0) + 1;
-          candidate.cropRevision = revision;
-          return uploadBufferToCloudinaryPublicId(
-            croppedBuffer,
-            cropRevisionPublicId(sessionId, bookSide, candidateId, revision),
-          );
-        })();
-
     const previewAssetPath = candidate.previewPublicId?.endsWith("_wm")
       ? assetPathFromPublicId(candidate.previewPublicId)
       : `${cleanAssetPath}_wm`;
     const watermarkedBuffer = await applyPreviewWatermark(croppedBuffer);
-    const previewUpload = await uploadBufferToCloudinaryPublicId(
-      watermarkedBuffer,
-      previewAssetPath,
-    );
+
+    let cleanUpload;
+    let previewUpload;
+
+    if (canSignCloudinaryUploads()) {
+      cleanUpload = await overwriteCloudinaryAsset(image, cleanAssetPath);
+      previewUpload = await overwriteCloudinaryBuffer(
+        watermarkedBuffer,
+        previewAssetPath,
+      );
+    } else {
+      const revision = (candidate.cropRevision ?? 0) + 1;
+      candidate.cropRevision = revision;
+      cleanUpload = await uploadBufferToCloudinaryPublicId(
+        croppedBuffer,
+        cropRevisionPublicId(sessionId, bookSide, candidateId, revision),
+      );
+      previewUpload = await uploadBufferToCloudinaryPublicId(
+        watermarkedBuffer,
+        cropRevisionWatermarkedPublicId(
+          sessionId,
+          bookSide,
+          candidateId,
+          revision,
+        ),
+      );
+    }
 
     const cacheVersion = Date.now();
     applyCropUploadToCandidate(

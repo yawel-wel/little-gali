@@ -271,6 +271,7 @@ export default function StylesPage() {
       <Header />
 
       <main
+        id="main-content"
         className="flex-1"
         style={{ paddingTop: "calc(96px + var(--banner-height, 0px))" }}
       >

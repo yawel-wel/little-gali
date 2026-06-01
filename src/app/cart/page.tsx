@@ -289,7 +289,7 @@ export default function CartPage() {
     >
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section
           className="relative py-10 lg:py-16 pt-20 md:pt-16"
           style={{ backgroundColor: "#F3EEE8" }}

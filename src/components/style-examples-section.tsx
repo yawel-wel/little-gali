@@ -199,7 +199,9 @@ export function StyleExamplesSection() {
           {styles.map((style) => (
             <motion.button
               key={style.key}
+              type="button"
               onClick={() => setActiveStyle(style.key)}
+              aria-pressed={activeStyle === style.key}
               className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-body-bold text-xs sm:text-sm lg:text-base transition-all duration-300 min-w-[90px] sm:min-w-[140px] cursor-pointer ${
                 activeStyle === style.key
                   ? "bg-primary-orange text-white shadow-lg"
@@ -236,7 +238,16 @@ export function StyleExamplesSection() {
                 <SwiperSlide key={index}>
                   <div
                     className="relative cursor-pointer group flex flex-col gap-3"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={t("accessibility.expandImage")}
                     onClick={() => openModal(index)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openModal(index);
+                      }
+                    }}
                   >
                     {/* Original image (top) - smaller */}
                     <div className="w-1/2 aspect-square mx-auto">
@@ -295,7 +306,10 @@ export function StyleExamplesSection() {
                   style={{
                     backgroundColor: currentIndex === visualIndex ? "#693430" : "#9ca3af",
                   }}
-                  aria-label={`Example ${visualIndex + 1}`}
+                  aria-label={t("home.styleExamples.slideLabel").replace(
+                    "{num}",
+                    String(visualIndex + 1),
+                  )}
                 />
               );
             })}

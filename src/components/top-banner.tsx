@@ -73,6 +73,9 @@ export function TopBanner() {
       {isVisible && (
         <motion.div
           ref={bannerRef}
+          role="region"
+          aria-label={t("banner.ariaLabel")}
+          aria-live="polite"
           initial={{ y: "-100%", opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "-100%", opacity: 0 }}

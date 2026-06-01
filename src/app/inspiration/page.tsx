@@ -43,7 +43,7 @@ export default function InspirationPage() {
     >
       <Header />
 
-      <main className="flex-1" style={{ paddingTop: "calc(96px + var(--banner-height, 0px))" }}>
+      <main id="main-content" className="flex-1" style={{ paddingTop: "calc(96px + var(--banner-height, 0px))" }}>
         {/* Section Title */}
         <motion.section
           className="relative py-4 lg:py-6"
