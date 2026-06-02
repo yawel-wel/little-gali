@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, X } from "lucide-react";
 import MuiButton from "@mui/material/Button";
 import type { StyleType } from "@/components/style-selector";
 import { Header } from "@/components/header";
@@ -19,6 +19,8 @@ import type {
 } from "@/lib/framed-art/types";
 import { useCart } from "@/lib/CartContext";
 import { useLanguage } from "@/lib/LanguageContext";
+import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import { cn } from "@/lib/utils";
 
 function getActiveCandidate(
   session: FramedArtSessionPublicView | null,
@@ -43,6 +45,7 @@ export default function FramedArtPreviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
   const [keepLoadingVisible, setKeepLoadingVisible] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const selectedStyle = session?.selectedStyle;
   const activeCandidate = useMemo(
@@ -89,6 +92,21 @@ export default function FramedArtPreviewPage() {
   };
 
   const heroUrl = activeCandidate?.previewUrl;
+  const lightboxImageUrl =
+    activeCandidate?.cleanUrl ?? activeCandidate?.previewUrl ?? null;
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [lightboxOpen]);
 
   const isGenerating =
     session?.generationStatus !== "failed" &&
@@ -271,25 +289,29 @@ export default function FramedArtPreviewPage() {
           </Title>
 
           {selectedStyle && (
-            <p className="mt-3 text-center font-body text-sm text-dark-gray">
+            <p className="mt-2 text-center font-body text-sm text-dark-gray">
               {t("framedArt.preview.styleLabel")}{" "}
               <span className="font-body-bold">{getStyleLabel(selectedStyle)}</span>
             </p>
           )}
 
           {error && (
-            <p className="mt-4 text-center text-sm text-red-600" role="alert">
+            <p className="mt-3 text-center text-sm text-red-600" role="alert">
               {error}
             </p>
           )}
 
           <FramedArtFrameMockup
-            className="mt-8"
+            className="mt-3"
             imageUrl={heroUrl}
             isLoading={!heroUrl}
+            onImageClick={
+              lightboxImageUrl ? () => setLightboxOpen(true) : undefined
+            }
+            imageClickLabel={t("accessibility.expandImage")}
           />
 
-          <div className="mt-6 flex flex-col items-center gap-3">
+          <div className="mt-3 flex flex-col items-center gap-3">
             <button
               type="button"
               disabled={!session?.canRegenerate || isRegenerating || session?.inFlight}
@@ -320,6 +342,33 @@ export default function FramedArtPreviewPage() {
             </Link>
           </div>
         </main>
+      )}
+      {lightboxOpen && lightboxImageUrl && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("preview.closeLightbox")}
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+            aria-label={t("accessibility.close")}
+          >
+            <X className="h-6 w-6" aria-hidden />
+          </button>
+          <img
+            src={lightboxImageUrl}
+            alt=""
+            className={cn(
+              "max-h-[min(90vh,900px)] max-w-[min(92vw,900px)] object-contain",
+              SENTRY_REPLAY_BLOCK_USER_IMAGE,
+            )}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
       <Footer />
     </div>

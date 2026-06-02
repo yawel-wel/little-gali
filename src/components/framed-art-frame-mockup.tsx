@@ -17,6 +17,9 @@ type FramedArtFrameMockupProps = {
   /** Max width of the mockup (default max-w-md). */
   maxWidthClassName?: string;
   isLoading?: boolean;
+  /** Opens fullscreen view of the artwork (not the frame). */
+  onImageClick?: () => void;
+  imageClickLabel?: string;
 };
 
 export function FramedArtFrameMockup({
@@ -24,6 +27,8 @@ export function FramedArtFrameMockup({
   className,
   maxWidthClassName = "max-w-md",
   isLoading = false,
+  onImageClick,
+  imageClickLabel = "View image",
 }: FramedArtFrameMockupProps) {
   const inset = `${FRAMED_ART_ARTWORK_INSET_PERCENT}%`;
   const size = `${100 - FRAMED_ART_ARTWORK_INSET_PERCENT * 2}%`;
@@ -51,14 +56,32 @@ export function FramedArtFrameMockup({
             }}
           >
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt=""
-                className={cn(
-                  "h-full w-full object-cover",
-                  SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                )}
-              />
+              onImageClick ? (
+                <button
+                  type="button"
+                  onClick={onImageClick}
+                  className="h-full w-full cursor-pointer border-0 bg-transparent p-0"
+                  aria-label={imageClickLabel}
+                >
+                  <img
+                    src={imageUrl}
+                    alt=""
+                    className={cn(
+                      "h-full w-full object-cover",
+                      SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                    )}
+                  />
+                </button>
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className={cn(
+                    "h-full w-full object-cover",
+                    SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                  )}
+                />
+              )
             ) : isLoading ? (
               <div className="flex h-full w-full items-center justify-center bg-[#f5f2eb]">
                 <Loader2 className="h-8 w-8 animate-spin text-primary-orange" />
