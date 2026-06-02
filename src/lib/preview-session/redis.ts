@@ -18,3 +18,11 @@ export function previewFullGenerationRateKey(ipHash: string): string {
 export function cartImagesKey(cartId: string, lineId: string): string {
   return `cart:images:${cartId}:${lineId}`;
 }
+
+export function framedArtSessionKey(sessionId: string): string {
+  return `framed-art:session:${sessionId}`;
+}
+
+export function framedArtUploadRateKey(ipHash: string): string {
+  return `framed-art:rate:upload:${ipHash}`;
+}

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
-import { isAiPreviewEnabled } from "@/lib/feature-flags";
+import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
+import { QaTabsSection } from "@/components/qa-tabs-section";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
 
@@ -21,6 +22,7 @@ export default function QAPage() {
   const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
   const previewOn = isAiPreviewEnabled();
+  const framedOn = isFramedArtEnabled();
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F3EEE8" }}>
       <Header />
@@ -46,7 +48,9 @@ export default function QAPage() {
               </p>
             </div>
 
-            {/* Accordion */}
+            {framedOn ? (
+              <QaTabsSection className="max-w-4xl mx-auto" previewOn={previewOn} />
+            ) : (
             <motion.div
               className="max-w-4xl mx-auto"
               initial={prefersReducedMotion ? false : "hidden"}
@@ -396,6 +400,7 @@ export default function QAPage() {
                 </motion.div>
               </Accordion>
             </motion.div>
+            )}
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">

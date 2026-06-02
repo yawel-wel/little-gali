@@ -11,13 +11,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
-import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
+import {
+  BOOK_PRICE,
+  DISCOUNTED_BOOK_PRICE,
+  FRAMED_ART_UNIT_PRICE,
+} from "@/lib/constants";
 import { ShoppingCart, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
 import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avatars";
+import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
+import { CartLinePrice, resolveCartLinePrice } from "@/components/cart-line-price";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 
 export function CartDrawer() {
@@ -126,7 +132,7 @@ export function CartDrawer() {
                   const reversedItems = [...cart.items].reverse();
                   const paperBooksBeforeThis = reversedItems
                     .slice(0, reversedIndex + 1)
-                    .filter((i) => !i.isGiftCard).length;
+                    .filter((i) => !i.isGiftCard && !i.isFramedArt).length;
                   const displayIndex = paperBooksBeforeThis;
                   return (
                     <div
@@ -151,6 +157,7 @@ export function CartDrawer() {
                         </div>
                       )}
                       {isOpen &&
+                        !item.isFramedArt &&
                         getCartItemAvatarPreview(item).expectedCount > 0 && (
                           <CartItemGeneratedAvatars
                             item={item}
@@ -164,7 +171,7 @@ export function CartDrawer() {
                       <div>
                         {item.isGiftCard ? (
                           <>
-                            <h3 className="text-sm font-body text-dark-gray mb-1">
+                            <h3 className="text-sm font-body-bold text-dark-gray mb-1">
                               {t("cart.giftCardTitle")}
                             </h3>
                             <div
@@ -186,17 +193,73 @@ export function CartDrawer() {
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
-                              <p
-                                className="text-sm font-body-bold text-dark-gray"
-                                dir="ltr"
+                              <CartLinePrice
+                                {...resolveCartLinePrice(item, {
+                                  total: item.giftCardAmount ?? 0,
+                                })}
+                              />
+                            </div>
+                          </>
+                        ) : item.isFramedArt ? (
+                          <>
+                            <div className="flex items-start gap-3" dir="ltr">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveClick(item.lineId || item.id);
+                                }}
+                                className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700"
+                                disabled={
+                                  isLoading ||
+                                  isRemoving === (item.lineId || item.id)
+                                }
+                                aria-label={t("cart.removeItem")}
                               >
-                                ₪ {item.giftCardAmount}
-                              </p>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+
+                              <div className="flex flex-1 items-start justify-end gap-2.5">
+                                <div className="min-w-0 text-right">
+                                  <h3 className="text-sm font-body-bold text-dark-gray">
+                                    {t("cart.framedArtTitle")}
+                                  </h3>
+                                  <div className="mt-1 text-xs text-medium-gray font-body">
+                                    <span>{t("cart.style")} </span>
+                                    <span className="font-body text-dark-gray">
+                                      {item.style === "cartoon"
+                                        ? t("cart.style.cartoon")
+                                        : item.style === "pencil"
+                                          ? t("cart.style.pencil")
+                                          : item.style === "watercolor"
+                                            ? t("cart.style.watercolor")
+                                            : t("cart.style.cartoon")}
+                                    </span>
+                                  </div>
+                                  <CartLinePrice
+                                    className="mt-2 !text-sm"
+                                    {...resolveCartLinePrice(item, {
+                                      total: FRAMED_ART_UNIT_PRICE,
+                                    })}
+                                  />
+                                </div>
+
+                                {(item.framedImageUrl ?? item.imageUrls?.[0]) && (
+                                  <div className="shrink-0 w-[3.8rem]">
+                                    <FramedArtFrameMockup
+                                      imageUrl={
+                                        item.framedImageUrl ?? item.imageUrls?.[0]
+                                      }
+                                      maxWidthClassName="w-full"
+                                    />
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </>
                         ) : (
                           <>
-                            <h3 className="text-sm font-body text-dark-gray mb-1">
+                            <h3 className="text-sm font-body-bold text-dark-gray mb-1">
                               {t("cart.book")} {displayIndex}
                             </h3>
                             <div className="text-xs text-medium-gray font-body mb-1">
@@ -230,21 +293,18 @@ export function CartDrawer() {
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
-                              <p
-                                className="text-sm font-body-bold text-dark-gray"
-                                dir="ltr"
-                              >
-                                {displayIndex > 1 ? (
-                                  <>
-                                    <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
-                                    <span className="line-through text-medium-gray ml-2">
-                                      {BOOK_PRICE}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>₪ {BOOK_PRICE}</>
+                              <CartLinePrice
+                                className="!text-sm"
+                                {...resolveCartLinePrice(
+                                  item,
+                                  displayIndex > 1
+                                    ? {
+                                        total: DISCOUNTED_BOOK_PRICE,
+                                        compare: BOOK_PRICE,
+                                      }
+                                    : { total: BOOK_PRICE },
                                 )}
-                              </p>
+                              />
                             </div>
                           </>
                         )}

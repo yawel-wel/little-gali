@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useLanguage } from "./LanguageContext";
 import { trackAddToCart, trackInitiateCheckout } from "./meta-pixel-events";
+import { parseShopifyLineCost } from "./shopify/cart-line-cost";
 
 export interface CartItem {
   id: string;
@@ -17,6 +18,12 @@ export interface CartItem {
   style?: "cartoon" | "pencil" | "watercolor";
   isGiftCard?: boolean;
   giftCardAmount?: number;
+  isFramedArt?: boolean;
+  framedImageUrl?: string;
+  /** Line total after Shopify discounts (from Storefront API). */
+  lineTotalAmount?: number;
+  /** Line subtotal before discounts, when greater than lineTotalAmount. */
+  lineCompareAmount?: number;
 }
 
 export interface PreviewGenerationStats {
@@ -53,6 +60,10 @@ interface CartContextType {
     fulfillment?: BookFulfillmentImages
   ) => Promise<void>;
   addGiftCardToCart: (optionId: string) => Promise<void>;
+  addFramedArtToCart: (
+    sessionId: string,
+    style: "cartoon" | "pencil" | "watercolor",
+  ) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   fetchCart: (cartId: string) => Promise<void>;
@@ -81,55 +92,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [locale]);
 
-  // Defer cart I/O until after first paint so home/upload feel snappier.
-  useEffect(() => {
-    const run = () => {
-      fetch("/api/warmup").catch(() => {});
-
-      let savedCartId: string | null = null;
-      try {
-        savedCartId = localStorage.getItem("shopify_cart_id");
-      } catch {
-        setIsLoading(false);
-        return;
-      }
-
-      if (savedCartId) {
-        void fetchCart(savedCartId);
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(run, { timeout: 2000 });
-      return () => window.cancelIdleCallback(id);
-    }
-
-    const id = window.setTimeout(run, 0);
-    return () => window.clearTimeout(id);
-  }, []);
-
-  // Update checkoutUrl whenever locale changes (but not when cart changes to avoid loops)
-  useEffect(() => {
-    if (cart?.checkoutUrl) {
-      const updatedUrl = ensureLocaleInCheckoutUrl(cart.checkoutUrl);
-      // Only update if the URL actually changed
-      if (updatedUrl !== cart.checkoutUrl) {
-        setCart({
-          ...cart,
-          checkoutUrl: updatedUrl,
-        });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale, ensureLocaleInCheckoutUrl]);
-
-  const fetchCart = async (cartId: string) => {
+  const fetchCart = useCallback(async (cartId: string) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/shopify/cart/get", {
         method: "POST",
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
         },
@@ -152,17 +120,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             generatedColorUrls?: string[];
             previewSessionId?: string;
             style?: "cartoon" | "pencil" | "watercolor";
+            isFramedArt?: boolean;
+            framedImageUrl?: string;
           }> => {
             for (let i = 0; i < attempts; i++) {
               try {
                 const res = await fetch(
-                  `/api/cart-images?cartId=${cId}&lineId=${lId}`
+                  `/api/cart-images?${new URLSearchParams({
+                    cartId: cId,
+                    lineId: lId,
+                  })}`,
                 );
                 if (res.ok) {
                   const json = await res.json();
                   if (
                     Array.isArray(json.imageUrls) &&
-                    json.imageUrls.length === 5
+                    (json.imageUrls.length === 5 ||
+                      (json.productType === "framed_art" &&
+                        json.imageUrls.length >= 1))
                   ) {
                     return {
                       imageUrls: json.imageUrls,
@@ -171,6 +146,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                       generatedColorUrls: json.generatedColorUrls,
                       previewSessionId: json.previewSessionId,
                       style: json.style,
+                      isFramedArt: json.productType === "framed_art",
+                      framedImageUrl: json.framedImageUrl ?? json.imageUrls[0],
                     };
                   }
                 }
@@ -187,6 +164,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // Also check Shopify attributes for style (fallback)
           const cartItems: CartItem[] = await Promise.all(
             data.cart.lines.map(async (line: any) => {
+              const isFramedArtCheck = line.attributes?.find(
+                (attr: any) =>
+                  attr.key === "_product_type" && attr.value === "framed_art",
+              );
               // Check if this is a gift card first (skip image fetch for gift cards)
               const isGiftCardCheck = line.attributes?.find(
                 (attr: any) => attr.key === "_type" && attr.value === "gift_card"
@@ -200,6 +181,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               // This happens because in-memory storage doesn't work across serverless instances
               let imageUrls = lineData.imageUrls;
               let generatedColorUrls = lineData.generatedColorUrls;
+              const isFramedArt = Boolean(isFramedArtCheck);
               if (imageUrls.length === 0) {
                 // First try the imageUrls already extracted by the get route (from Shopify attributes)
                 if (line.imageUrls && Array.isArray(line.imageUrls) && line.imageUrls.length > 0) {
@@ -275,6 +257,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 }
               }
               
+              const framedImageUrl =
+                isFramedArt && imageUrls[0]
+                  ? imageUrls[0]
+                  : lineData.framedImageUrl;
+
+              const linePricing = parseShopifyLineCost(line.cost);
+
               return {
                 id: line.id,
                 lineId: line.id,
@@ -288,6 +277,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 style: isGiftCard ? undefined : style,
                 isGiftCard,
                 giftCardAmount,
+                isFramedArt: isFramedArt || lineData.isFramedArt,
+                framedImageUrl,
+                lineTotalAmount: linePricing?.total,
+                lineCompareAmount: linePricing?.compare,
               };
             })
           );
@@ -318,7 +311,50 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [ensureLocaleInCheckoutUrl, locale]);
+
+  // Defer cart I/O until after first paint so home/upload feel snappier.
+  useEffect(() => {
+    const run = () => {
+      fetch("/api/warmup").catch(() => {});
+
+      let savedCartId: string | null = null;
+      try {
+        savedCartId = localStorage.getItem("shopify_cart_id");
+      } catch {
+        setIsLoading(false);
+        return;
+      }
+
+      if (savedCartId) {
+        void fetchCart(savedCartId);
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(run, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+
+    const id = window.setTimeout(run, 0);
+    return () => window.clearTimeout(id);
+  }, [fetchCart]);
+
+  // Update checkoutUrl whenever locale changes (but not when cart changes to avoid loops)
+  useEffect(() => {
+    if (cart?.checkoutUrl) {
+      const updatedUrl = ensureLocaleInCheckoutUrl(cart.checkoutUrl);
+      if (updatedUrl !== cart.checkoutUrl) {
+        setCart({
+          ...cart,
+          checkoutUrl: updatedUrl,
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale, ensureLocaleInCheckoutUrl]);
 
   const addToCart = async (
     imageUrls: string[],
@@ -448,6 +484,53 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw error;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addFramedArtToCart = async (
+    sessionId: string,
+    style: "cartoon" | "pencil" | "watercolor",
+  ) => {
+    setIsLoading(true);
+    try {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("adding_to_cart", "1");
+      }
+      const response = await fetch("/api/shopify/cart/add-framed-art", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: cart?.id,
+          sessionId,
+          style,
+          locale,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to add to cart");
+      }
+
+      const data = await response.json();
+      if (data.cart) {
+        await fetchCart(data.cart.id);
+        try {
+          trackAddToCart("איור ממוסגר", sessionId, 129, 1);
+        } catch (err) {
+          console.error("Error tracking framed art AddToCart:", err);
+        }
+      }
+    } catch (error) {
+      console.error("Error adding framed art to cart:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+      try {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("adding_to_cart");
+        }
+      } catch {}
     }
   };
 
@@ -586,6 +669,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         addToCart,
         addGiftCardToCart,
+        addFramedArtToCart,
         removeFromCart,
         updateQuantity,
         fetchCart,

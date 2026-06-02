@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
             fetch(
               `${
                 process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-              }/api/cart-images?cartId=${cartId}&lineId=${lineId}`,
+              }/api/cart-images?${new URLSearchParams({ cartId, lineId })}`,
               {
                 method: "DELETE",
               }

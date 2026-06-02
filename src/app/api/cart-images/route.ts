@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
       previewSessionId,
       previewGenTotal,
       previewGenSelected,
+      productType,
+      framedImageUrl,
     } = body as {
       cartId: string;
       lineId?: string;
@@ -33,9 +35,19 @@ export async function POST(request: NextRequest) {
       previewSessionId?: string;
       previewGenTotal?: number;
       previewGenSelected?: string;
+      productType?: StoredCartImages["productType"];
+      framedImageUrl?: string;
     };
 
-    if (!cartId || !imageUrls || imageUrls.length !== 5) {
+    const isFramedArt = productType === "framed_art";
+    const validBook = imageUrls && imageUrls.length === 5;
+    const validFramed =
+      isFramedArt &&
+      framedImageUrl &&
+      imageUrls?.length === 1 &&
+      imageUrls[0] === framedImageUrl;
+
+    if (!cartId || (!validBook && !validFramed)) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -52,6 +64,8 @@ export async function POST(request: NextRequest) {
       previewSessionId,
       previewGenTotal,
       previewGenSelected,
+      productType,
+      framedImageUrl,
     });
 
     return NextResponse.json({ success: true });

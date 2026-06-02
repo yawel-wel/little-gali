@@ -12,17 +12,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
-import { BOOK_PRICE, DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
+import {
+  BOOK_PRICE,
+  DISCOUNTED_BOOK_PRICE,
+  FRAMED_ART_UNIT_PRICE,
+} from "@/lib/constants";
 import { ArrowRight, Loader2, ShoppingCart, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import TextField from "@mui/material/TextField";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
 import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avatars";
+import { CartSuggestProducts } from "@/components/cart-suggest-products";
+import { CartOrderSummary } from "@/components/cart-order-summary";
+import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
+import { CartLinePrice } from "@/components/cart-line-price";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
+import { resolveCartLinePrice } from "@/components/cart-line-price";
 
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
@@ -33,16 +40,13 @@ export default function CartPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
-  const [shareConsent, setShareConsent] = useState(false);
-  const [isUpdatingConsent, setIsUpdatingConsent] = useState(false);
   const [addGiftMessage, setAddGiftMessage] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
   const [isUpdatingGiftMessage, setIsUpdatingGiftMessage] = useState(false);
   const giftMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch cart on mount if we have a cart ID
+  // Refresh cart when opening /cart (fetchCart is stable unless locale changes).
   useEffect(() => {
-    // Detect optimistic adding to avoid empty flash
     try {
       if (typeof window !== "undefined") {
         const flag = sessionStorage.getItem("adding_to_cart");
@@ -52,10 +56,10 @@ export default function CartPage() {
       }
     } catch {}
     const savedCartId = localStorage.getItem("shopify_cart_id");
-    if (savedCartId && !cart) {
-      fetchCart(savedCartId);
+    if (savedCartId) {
+      void fetchCart(savedCartId);
     }
-  }, [cart, fetchCart]);
+  }, [fetchCart]);
 
   useEffect(() => {
     // Clear optimistic state once cart is loaded
@@ -64,7 +68,7 @@ export default function CartPage() {
     }
   }, [cart]);
 
-  // Load share consent from cart attributes
+  // Load gift message from cart attributes
   useEffect(() => {
     if (cart?.id) {
       // Fetch cart attributes to get the current consent value
@@ -77,14 +81,6 @@ export default function CartPage() {
           });
           const data = await response.json();
           if (data.cart?.attributes) {
-            const consentAttr = data.cart.attributes.find(
-              (attr: any) => attr.key === "_share_consent"
-            );
-            if (consentAttr?.value === "true") {
-              setShareConsent(true);
-            }
-            
-            // Load gift message attributes
             const giftMessageEnabledAttr = data.cart.attributes.find(
               (attr: any) => attr.key === "_gift_message_enabled"
             );
@@ -106,36 +102,6 @@ export default function CartPage() {
       loadConsent();
     }
   }, [cart?.id]);
-
-  const handleShareConsentChange = async (checked: boolean) => {
-    if (!cart?.id || isUpdatingConsent) return;
-    
-    setShareConsent(checked);
-    setIsUpdatingConsent(true);
-    
-    try {
-      const response = await fetch("/api/shopify/cart/update-attributes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cartId: cart.id,
-          attributes: [
-            { key: "_share_consent", value: checked ? "true" : "false" },
-          ],
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to update consent");
-      }
-    } catch (error) {
-      console.error("Error updating consent:", error);
-      // Revert on error
-      setShareConsent(!checked);
-    } finally {
-      setIsUpdatingConsent(false);
-    }
-  };
 
   const handleGiftMessageCheckboxChange = async (checked: boolean) => {
     if (!cart?.id || isUpdatingGiftMessage) return;
@@ -325,7 +291,7 @@ export default function CartPage() {
                       const reversedItems = [...cart.items].reverse();
                       const paperBooksBeforeThis = reversedItems
                         .slice(0, reversedIndex + 1)
-                        .filter((i) => !i.isGiftCard).length;
+                        .filter((i) => !i.isGiftCard && !i.isFramedArt).length;
                       const displayIndex = paperBooksBeforeThis;
                       return (
                         <div
@@ -338,7 +304,8 @@ export default function CartPage() {
                               <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
                             </div>
                           )}
-                          {getCartItemAvatarPreview(item).expectedCount > 0 && (
+                          {!item.isFramedArt &&
+                            getCartItemAvatarPreview(item).expectedCount > 0 && (
                             <CartItemGeneratedAvatars
                               item={item}
                               locale={locale}
@@ -352,7 +319,7 @@ export default function CartPage() {
                               <>
                                 {/* Gift Card Title */}
                                 <h3
-                                  className={`text-sm md:text-base font-body text-dark-gray mb-1 ${
+                                  className={`text-sm md:text-base font-body-bold text-dark-gray mb-1 ${
                                     locale === "en" ? "text-left" : "text-right"
                                   }`}
                                 >
@@ -377,19 +344,81 @@ export default function CartPage() {
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
-                                  <p
-                                    className="text-sm md:text-base font-body-bold text-dark-gray"
-                                    dir="ltr"
+                                  <CartLinePrice
+                                    {...resolveCartLinePrice(item, {
+                                      total: item.giftCardAmount ?? 0,
+                                    })}
+                                  />
+                                </div>
+                              </>
+                            ) : item.isFramedArt ? (
+                              <>
+                                <div className="flex items-start gap-4" dir="ltr">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveClick(item.lineId || item.id);
+                                    }}
+                                    className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
+                                    disabled={
+                                      isLoading ||
+                                      isRemoving === (item.lineId || item.id)
+                                    }
+                                    aria-label={t("cart.removeItem")}
                                   >
-                                    ₪ {item.giftCardAmount}
-                                  </p>
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+
+                                  <div className="flex flex-1 items-start justify-end gap-3">
+                                    <div
+                                      className={`min-w-0 ${
+                                        locale === "en" ? "text-left" : "text-right"
+                                      }`}
+                                    >
+                                      <h3 className="text-sm md:text-base font-body-bold text-dark-gray">
+                                        {t("cart.framedArtTitle")}
+                                      </h3>
+                                      <div className="mt-1 text-sm text-medium-gray font-body">
+                                        <span>{t("cart.style")} </span>
+                                        <span className="font-body text-dark-gray">
+                                          {item.style === "cartoon"
+                                            ? t("cart.style.cartoon")
+                                            : item.style === "pencil"
+                                              ? t("cart.style.pencil")
+                                              : item.style === "watercolor"
+                                                ? t("cart.style.watercolor")
+                                                : t("cart.style.cartoon")}
+                                        </span>
+                                      </div>
+                                      <CartLinePrice
+                                        className="mt-3"
+                                        {...resolveCartLinePrice(item, {
+                                          total: FRAMED_ART_UNIT_PRICE,
+                                        })}
+                                      />
+                                    </div>
+
+                                    {(item.framedImageUrl ??
+                                      item.imageUrls?.[0]) && (
+                                      <div className="shrink-0 w-[5.4rem]">
+                                        <FramedArtFrameMockup
+                                          imageUrl={
+                                            item.framedImageUrl ??
+                                            item.imageUrls?.[0]
+                                          }
+                                          maxWidthClassName="w-full"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </>
                             ) : (
                               <>
                                 {/* Title - Smaller size, regular weight */}
                                 <h3
-                                  className={`text-sm md:text-base font-body text-dark-gray mb-1 ${
+                                  className={`text-sm md:text-base font-body-bold text-dark-gray mb-1 ${
                                     locale === "en" ? "text-left" : "text-right"
                                   }`}
                                 >
@@ -431,21 +460,17 @@ export default function CartPage() {
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
-                                  <p
-                                    className="text-sm md:text-base font-body-bold text-dark-gray"
-                                    dir="ltr"
-                                  >
-                                    {displayIndex % 2 === 0 ? (
-                                      <>
-                                        <span>₪ {DISCOUNTED_BOOK_PRICE}</span>
-                                        <span className="line-through text-medium-gray ml-2">
-                                          {BOOK_PRICE}
-                                        </span>
-                                      </>
-                                    ) : (
-                                      <>₪ {BOOK_PRICE}</>
+                                  <CartLinePrice
+                                    {...resolveCartLinePrice(
+                                      item,
+                                      displayIndex % 2 === 0
+                                        ? {
+                                            total: DISCOUNTED_BOOK_PRICE,
+                                            compare: BOOK_PRICE,
+                                          }
+                                        : { total: BOOK_PRICE },
                                     )}
-                                  </p>
+                                  />
                                 </div>
                               </>
                             )}
@@ -453,478 +478,43 @@ export default function CartPage() {
                         </div>
                       );
                     })}
+                    <CartSuggestProducts />
                   </div>
 
                   {/* Right Column: Order Summary (Desktop) - Sticky */}
                   <div className="hidden md:block md:w-80 md:flex-shrink-0">
                     <div className="sticky top-4">
-                      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                        <h2
-                          className={`text-xl font-body-bold text-dark-gray mb-4 ${
-                            locale === "en" ? "text-left" : "text-right"
-                          }`}
-                        >
-                          {t("cart.orderSummary")}
-                        </h2>
-                        <div className="space-y-3">
-                          <div
-                            className={`flex justify-between items-center ${
-                              locale === "en" ? "flex-row" : "flex-row-reverse"
-                            }`}
-                          >
-                            {locale === "he" ? (
-                              <>
-                                <span className="font-body-bold text-dark-gray">
-                                  {cart.totalQuantity}
-                                </span>
-                                <span className="text-medium-gray font-body">
-                                  {t("cart.itemsCount")}
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="text-medium-gray font-body">
-                                  {t("cart.itemsCount")}
-                                </span>
-                                <span className="font-body-bold text-dark-gray">
-                                  {cart.totalQuantity}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                          <div
-                            className={`flex justify-between items-center ${
-                              locale === "en" ? "flex-row" : "flex-row-reverse"
-                            }`}
-                          >
-                            {locale === "he" ? (
-                              <>
-                                <span className="text-xl font-body-bold text-black">
-                                  {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
-                                  ₪
-                                </span>
-                                <span className="text-medium-gray font-body">
-                                  {t("cart.total")}
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="text-medium-gray font-body">
-                                  {t("cart.total")}
-                                </span>
-                                <span className="text-xl font-body-bold text-black">
-                                  {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
-                                  ₪
-                                </span>
-                              </>
-                            )}
-                          </div>
-                          <div className="pt-4 border-t border-gray-200">
-                            <p
-                              className={`text-sm text-medium-gray font-body ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              {t("cart.deliveryTime")}
-                            </p>
-                          </div>
-                          <div className="pt-4 border-t border-gray-200">
-                            <div className="flex items-start gap-2">
-                              <Checkbox
-                                id="shareBookConsent"
-                                size="small"
-                                checked={shareConsent}
-                                onChange={(e) => handleShareConsentChange(e.target.checked)}
-                                color="primary"
-                                sx={{
-                                  padding: 0,
-                                  marginTop: '2px',
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                  },
-                                }}
-                              />
-                              <label
-                                htmlFor="shareBookConsent"
-                                className={`text-sm text-medium-gray font-body cursor-pointer ${
-                                  locale === "en" ? "text-left" : "text-right"
-                                }`}
-                              >
-                                {t("cart.shareConsent")}
-                                <br />
-                                <span className="text-xs">
-                                  {t("cart.shareConsentNote")}
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-
-                          {/* Gift Message Section */}
-                          <div className="pt-4 border-t border-gray-200">
-                            <div className="flex items-start gap-2">
-                              <Checkbox
-                                id="addGiftMessage"
-                                size="small"
-                                checked={addGiftMessage}
-                                onChange={(e) => handleGiftMessageCheckboxChange(e.target.checked)}
-                                color="primary"
-                                sx={{
-                                  padding: 0,
-                                  marginTop: '2px',
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                  },
-                                }}
-                              />
-                              <label
-                                htmlFor="addGiftMessage"
-                                className={`text-sm text-medium-gray font-body cursor-pointer ${
-                                  locale === "en" ? "text-left" : "text-right"
-                                }`}
-                              >
-                                {t("cart.addGiftMessage")}
-                              </label>
-                            </div>
-                            
-                            {addGiftMessage && (
-                              <div className="mt-3">
-                                <TextField
-                                  multiline
-                                  rows={3}
-                                  fullWidth
-                                  placeholder={t("cart.giftMessagePlaceholder")}
-                                  value={giftMessage}
-                                  onChange={(e) => handleGiftMessageChange(e.target.value)}
-                                  inputProps={{
-                                    maxLength: 200,
-                                    dir: locale === "en" ? "ltr" : "rtl",
-                                    style: { whiteSpace: 'pre-wrap' },
-                                  }}
-                                  sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                      fontFamily: 'inherit',
-                                      fontSize: '0.875rem',
-                                      '& fieldset': {
-                                        borderColor: 'rgba(0, 0, 0, 0.23)',
-                                      },
-                                      '&:hover fieldset': {
-                                        borderColor: 'rgba(0, 0, 0, 0.4)',
-                                      },
-                                      '&.Mui-focused fieldset': {
-                                        borderColor: 'primary.main',
-                                      },
-                                    },
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Checkout Button */}
-                        <div className="mt-6">
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handleCheckout}
-                            disabled={isCheckingOut || isLoading}
-                            className="w-full cursor-pointer"
-                            sx={{
-                              borderRadius: "12px",
-                              textTransform: "none",
-                              fontSize: "0.95rem",
-                              fontWeight: 700,
-                              py: 1.1,
-                              minHeight: 44,
-                            }}
-                          >
-                            {isCheckingOut ? (
-                              <>
-                                <Loader2
-                                  className={`w-5 h-5 animate-spin ${
-                                    locale === "en" ? "mr-2" : "ml-2"
-                                  }`}
-                                />
-                                {t("cart.checkoutProgress")}
-                              </>
-                            ) : (
-                              t("cart.checkout")
-                            )}
-                          </Button>
-                        </div>
-
-                        {/* Add Book Button */}
-                        <div className="mt-3">
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => router.push("/upload")}
-                            className="w-full cursor-pointer"
-                            sx={{
-                              borderRadius: "12px",
-                              textTransform: "none",
-                              fontSize: "0.9rem",
-                              fontWeight: 700,
-                              py: 0.9,
-                              minHeight: 40,
-                              borderWidth: 2,
-                            }}
-                          >
-                            {t("cart.addBook")}
-                          </Button>
-                          <p
-                            className={`text-sm font-body text-medium-gray text-center mt-2 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.secondBook")}
-                          </p>
-                          <p
-                            className={`text-xs font-body text-medium-gray text-center mt-1 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.discountNote")}
-                          </p>
-                        </div>
-                      </div>
+                      <CartOrderSummary
+                        totalQuantity={cart.totalQuantity}
+                        totalAmount={cart.totalAmount}
+                        addGiftMessage={addGiftMessage}
+                        giftMessage={giftMessage}
+                        isCheckingOut={isCheckingOut}
+                        isLoading={isLoading}
+                        isUpdatingGiftMessage={isUpdatingGiftMessage}
+                        onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
+                        onGiftMessageChange={handleGiftMessageChange}
+                        onCheckout={handleCheckout}
+                        giftCheckboxId="addGiftMessage"
+                      />
                     </div>
                   </div>
 
                   {/* Mobile: Order Summary Below Items */}
-                  <div className="md:hidden space-y-6 mt-6">
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                      <h2
-                        className={`text-xl font-body-bold text-dark-gray mb-4 ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                      >
-                        {t("cart.orderSummary")}
-                      </h2>
-                      <div className="space-y-3">
-                        <div
-                          className={`flex justify-between items-center ${
-                            locale === "en" ? "flex-row" : "flex-row-reverse"
-                          }`}
-                        >
-                          {locale === "he" ? (
-                            <>
-                              <span className="font-body-bold text-dark-gray">
-                                {cart.totalQuantity}
-                              </span>
-                              <span className="text-medium-gray font-body">
-                                {t("cart.itemsCount")}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="text-medium-gray font-body">
-                                {t("cart.itemsCount")}
-                              </span>
-                              <span className="font-body-bold text-dark-gray">
-                                {cart.totalQuantity}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <div
-                          className={`flex justify-between items-center ${
-                            locale === "en" ? "flex-row" : "flex-row-reverse"
-                          }`}
-                        >
-                          {locale === "he" ? (
-                            <>
-                              <span className="text-xl font-body-bold text-black">
-                                {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
-                                ₪
-                              </span>
-                              <span className="text-medium-gray font-body">
-                                {t("cart.total")}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="text-medium-gray font-body">
-                                {t("cart.total")}
-                              </span>
-                              <span className="text-xl font-body-bold text-black">
-                                {cart.totalAmount ? parseFloat(cart.totalAmount).toFixed(0) : "0"}{" "}
-                                ₪
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <div className="pt-4 border-t border-gray-200">
-                          <p
-                            className={`text-sm text-medium-gray font-body ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.deliveryTime")}
-                          </p>
-                        </div>
-                        
-                        {/* Share Consent - Mobile */}
-                        <div className="pt-4 border-t border-gray-200">
-                          <div className="flex items-start gap-2">
-                            <Checkbox
-                              id="shareBookConsentMobile"
-                              size="small"
-                              checked={shareConsent}
-                              onChange={(e) => handleShareConsentChange(e.target.checked)}
-                              color="primary"
-                              sx={{
-                                padding: 0,
-                                marginTop: '2px',
-                                '&:hover': {
-                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                              }}
-                            />
-                            <label
-                              htmlFor="shareBookConsentMobile"
-                              className={`text-sm text-medium-gray font-body cursor-pointer ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              {t("cart.shareConsent")}
-                              <br />
-                              <span className="text-xs">
-                                {t("cart.shareConsentNote")}
-                              </span>
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* Gift Message Section - Mobile */}
-                        <div className="pt-4 border-t border-gray-200">
-                          <div className="flex items-start gap-2">
-                            <Checkbox
-                              id="addGiftMessageMobile"
-                              size="small"
-                              checked={addGiftMessage}
-                              onChange={(e) => handleGiftMessageCheckboxChange(e.target.checked)}
-                              color="primary"
-                              sx={{
-                                padding: 0,
-                                marginTop: '2px',
-                                '&:hover': {
-                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                              }}
-                            />
-                            <label
-                              htmlFor="addGiftMessageMobile"
-                              className={`text-sm text-medium-gray font-body cursor-pointer ${
-                                locale === "en" ? "text-left" : "text-right"
-                              }`}
-                            >
-                              {t("cart.addGiftMessage")}
-                            </label>
-                          </div>
-                          
-                          {addGiftMessage && (
-                            <div className="mt-3">
-                              <TextField
-                                multiline
-                                rows={3}
-                                fullWidth
-                                placeholder={t("cart.giftMessagePlaceholder")}
-                                value={giftMessage}
-                                onChange={(e) => handleGiftMessageChange(e.target.value)}
-                                inputProps={{
-                                  maxLength: 200,
-                                  dir: locale === "en" ? "ltr" : "rtl",
-                                  style: { whiteSpace: 'pre-wrap' },
-                                }}
-                                sx={{
-                                  '& .MuiOutlinedInput-root': {
-                                    fontFamily: 'inherit',
-                                    fontSize: '0.875rem',
-                                    '& fieldset': {
-                                      borderColor: 'rgba(0, 0, 0, 0.23)',
-                                    },
-                                    '&:hover fieldset': {
-                                      borderColor: 'rgba(0, 0, 0, 0.4)',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                      borderColor: 'primary.main',
-                                    },
-                                  },
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Checkout Button */}
-                      <div className="mt-6 flex flex-col gap-2">
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleCheckout}
-                          disabled={isCheckingOut || isLoading}
-                          className="w-full cursor-pointer"
-                          sx={{
-                            borderRadius: "12px",
-                            textTransform: "none",
-                            fontSize: "0.95rem",
-                            fontWeight: 700,
-                            py: 1.1,
-                            minHeight: 44,
-                          }}
-                        >
-                          {isCheckingOut ? (
-                            <>
-                              <Loader2
-                                className={`w-5 h-5 animate-spin ${
-                                  locale === "en" ? "mr-2" : "ml-2"
-                                }`}
-                              />
-                              {t("cart.checkoutProgress")}
-                            </>
-                          ) : (
-                            t("cart.checkout")
-                          )}
-                        </Button>
-
-                        {/* Add Book Button */}
-                        <div>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => router.push("/upload")}
-                            className="w-full cursor-pointer"
-                            sx={{
-                              borderRadius: "12px",
-                              textTransform: "none",
-                              fontSize: "0.9rem",
-                              fontWeight: 700,
-                              py: 0.9,
-                              minHeight: 40,
-                              borderWidth: 2,
-                            }}
-                          >
-                            {t("cart.addBook")}
-                          </Button>
-                          <p
-                            className={`text-sm font-body text-medium-gray text-center mt-2 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.secondBook")}
-                          </p>
-                          <p
-                            className={`text-xs font-body text-medium-gray text-center mt-1 ${
-                              locale === "en" ? "text-left" : "text-right"
-                            }`}
-                          >
-                            {t("cart.discountNote")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="md:hidden mt-6">
+                    <CartOrderSummary
+                      totalQuantity={cart.totalQuantity}
+                      totalAmount={cart.totalAmount}
+                      addGiftMessage={addGiftMessage}
+                      giftMessage={giftMessage}
+                      isCheckingOut={isCheckingOut}
+                      isLoading={isLoading}
+                      isUpdatingGiftMessage={isUpdatingGiftMessage}
+                      onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
+                      onGiftMessageChange={handleGiftMessageChange}
+                      onCheckout={handleCheckout}
+                      giftCheckboxId="addGiftMessageMobile"
+                    />
                   </div>
                 </div>
               ) : (

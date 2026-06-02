@@ -13,6 +13,8 @@ export interface StoredCartImages {
   previewGenTotal?: number;
   previewGenSelected?: string;
   style?: StyleType;
+  productType?: "book" | "framed_art";
+  framedImageUrl?: string;
 }
 
 export async function saveCartImages(

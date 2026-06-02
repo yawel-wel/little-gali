@@ -28,7 +28,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
-import { isAiPreviewEnabled } from "@/lib/feature-flags";
+import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
+import { FramedArtHomeSection } from "@/components/framed-art-home-section";
+import { QaTabsSection, HOME_FRAMED_IDS } from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
 import { trackSubscribe, trackViewContent } from "@/lib/meta-pixel-events";
@@ -423,6 +425,7 @@ export default function Home() {
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
   const previewOn = isAiPreviewEnabled();
+  const framedOn = isFramedArtEnabled();
   const howItWorksSteps = previewOn
     ? [
         {
@@ -916,6 +919,8 @@ export default function Home() {
           </div>
         </motion.section>
 
+        {framedOn && <FramedArtHomeSection />}
+
         {/* Gallery Carousel Section */}
         <GalleryCarouselSection />
 
@@ -1296,7 +1301,13 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Accordion */}
+            {framedOn ? (
+              <QaTabsSection
+                className="max-w-4xl mx-auto"
+                framedItemIds={[...HOME_FRAMED_IDS]}
+                previewOn={previewOn}
+              />
+            ) : (
             <div className="max-w-4xl mx-auto">
               <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
                 <AccordionItem
@@ -1425,6 +1436,7 @@ export default function Home() {
                 </AccordionItem>
               </Accordion>
             </div>
+            )}
 
             {/* Button to navigate to Q&A page */}
             <div className="text-center mt-12">

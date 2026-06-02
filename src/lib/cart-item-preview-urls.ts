@@ -6,6 +6,14 @@ export function getCartItemAvatarPreview(item: CartItem): {
   slots: CartItemAvatarSlot[];
   expectedCount: number;
 } {
+  if (item.isFramedArt) {
+    const url = item.framedImageUrl ?? item.imageUrls?.[0] ?? null;
+    return {
+      slots: url ? [url] : [],
+      expectedCount: url ? 1 : 0,
+    };
+  }
+
   const bw =
     item.generatedBwUrls?.length === 5
       ? item.generatedBwUrls

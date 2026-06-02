@@ -25,6 +25,43 @@ function normalizeFullPublicId(publicId: string): string {
   return publicId.replace(/\.(jpg|jpeg|png)$/i, "");
 }
 
+/** Shopify line item property values are limited to 255 characters. */
+export const SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH = 255;
+
+/** Extract Cloudinary public_id from a delivery URL (unsigned or transformed). */
+export function publicIdFromCloudinaryUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const uploadMarker = "/upload/";
+    const markerIndex = parsed.pathname.indexOf(uploadMarker);
+    if (markerIndex === -1) {
+      return null;
+    }
+    let rest = parsed.pathname.slice(markerIndex + uploadMarker.length);
+    // Strip version segment (v1234567890/)
+    rest = rest.replace(/^v\d+\//, "");
+    // Strip transformation segments (comma-separated transforms before the asset path)
+    const segments = rest.split("/");
+    while (segments.length > 1 && segments[0]?.includes(",")) {
+      segments.shift();
+    }
+    const publicId = decodeURIComponent(segments.join("/"));
+    return publicId || null;
+  } catch {
+    return null;
+  }
+}
+
+export function buildCloudinaryDeliveryUrl(publicId: string): string {
+  const cloudName =
+    process.env.CLOUDINARY_CLOUD_NAME?.trim() ||
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim();
+  if (!cloudName) {
+    throw new Error("Cloudinary cloud name is not configured");
+  }
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
+}
+
 export function isAllowedCloudinaryUrl(url: string): boolean {
   try {
     const parsed = new URL(url);

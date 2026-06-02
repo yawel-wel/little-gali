@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Loader2, X } from "lucide-react";
+import { FRAMED_ART_ARTWORK_INSET_PERCENT } from "@/lib/framed-art/frame-layout";
 import { useLanguage } from "@/lib/LanguageContext";
 import { anyFaceClippedByCrop } from "@/lib/smartCropGeometry";
 import { getCroppedBlob, type CropState } from "@/lib/image-crop";
@@ -28,6 +29,13 @@ type MobileImageEditorProps = {
   showBottomCancelButton?: boolean;
   cancelButtonLabel?: string;
   cropInstructionTip?: string;
+  /** Crop aspect width/height (default book page 72:84). Use 1 for square framed art. */
+  aspectRatio?: number;
+  /** Overlay frame mockup so users see final placement while cropping. */
+  showFramedArtFrameOverlay?: boolean;
+  /** Pinch + slider zoom (framed art upload). */
+  showZoomSlider?: boolean;
+  cropInstruction?: string;
 };
 
 export function MobileImageEditor({
@@ -46,6 +54,10 @@ export function MobileImageEditor({
   showBottomCancelButton = false,
   cancelButtonLabel,
   cropInstructionTip,
+  aspectRatio,
+  showFramedArtFrameOverlay = false,
+  showZoomSlider = false,
+  cropInstruction,
 }: MobileImageEditorProps) {
   const { t, locale } = useLanguage();
   const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
@@ -56,7 +68,8 @@ export function MobileImageEditor({
     useState(false);
   const [faceClipWarning, setFaceClipWarning] = useState(false);
 
-  const aspect = 72 / 84;
+  const aspect = aspectRatio ?? 72 / 84;
+  const aspectCss = aspectRatio != null ? String(aspectRatio) : "72 / 84";
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
@@ -116,7 +129,7 @@ export function MobileImageEditor({
         "relative w-[85vw] md:w-[380px] flex-shrink-0 overflow-hidden rounded-lg bg-[#ebe6dc]",
         SENTRY_REPLAY_BLOCK_USER_IMAGE,
       )}
-      style={{ aspectRatio: "72 / 84" }}
+      style={{ aspectRatio: aspectCss }}
     >
       {isSmartCropLoading ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
@@ -156,13 +169,27 @@ export function MobileImageEditor({
             : {})}
           style={{
             cropAreaStyle: {
-              border: "3px solid rgba(255,255,255,0.85)",
+              border: showFramedArtFrameOverlay
+                ? "2px dashed rgba(105, 52, 48, 0.55)"
+                : "3px solid rgba(255,255,255,0.85)",
               color: isInteracting
                 ? "rgba(249, 247, 238, 0.82)"
                 : "#ebe6dc",
               transition: "color 0.2s ease",
             },
           }}
+        />
+      )}
+      {showFramedArtFrameOverlay && !isSmartCropLoading && (
+        <div
+          className="pointer-events-none absolute z-20 border-2 border-dashed border-primary-orange/80"
+          style={{
+            top: `${FRAMED_ART_ARTWORK_INSET_PERCENT}%`,
+            left: `${FRAMED_ART_ARTWORK_INSET_PERCENT}%`,
+            width: `${100 - FRAMED_ART_ARTWORK_INSET_PERCENT * 2}%`,
+            height: `${100 - FRAMED_ART_ARTWORK_INSET_PERCENT * 2}%`,
+          }}
+          aria-hidden
         />
       )}
     </div>
@@ -204,11 +231,31 @@ export function MobileImageEditor({
               className="font-body text-center text-base"
               style={{ color: "#374151" }}
             >
-              {t("upload.cropInstruction")}
+              {cropInstruction ?? t("upload.cropInstruction")}
             </p>
             <p className="font-body text-center text-xs sm:text-[0.8125rem] text-gray-500 leading-snug">
               {cropInstructionTip ?? t("upload.cropInstructionTip")}
             </p>
+            {showZoomSlider && (
+              <div className="mt-2 flex w-full max-w-xs items-center gap-3 px-2">
+                <span className="shrink-0 font-body text-xs text-gray-500">
+                  {t("framedArt.upload.zoomOut")}
+                </span>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="h-1.5 w-full cursor-pointer accent-primary-orange"
+                  aria-label={t("framedArt.upload.zoomSlider")}
+                />
+                <span className="shrink-0 font-body text-xs text-gray-500">
+                  {t("framedArt.upload.zoomIn")}
+                </span>
+              </div>
+            )}
             {faceClipWarning && (
               <div className="flex flex-col gap-1.5 max-w-md">
                 <p
