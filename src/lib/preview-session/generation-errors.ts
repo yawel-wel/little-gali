@@ -38,6 +38,12 @@ export function classifyGenerationError(error: unknown): GenerationError {
       message: "העיבוד לקח יותר מדי זמן. נסו שוב בעוד רגע.",
     };
   }
+  if (process.env.NODE_ENV === "development") {
+    return {
+      code: "generic",
+      message: message.slice(0, 500),
+    };
+  }
   return {
     code: "generic",
     message: "משהו השתבש בזמן יצירת התמונה. נסו שוב.",

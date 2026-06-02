@@ -8,11 +8,10 @@ import {
   framedArtSessionCookieOptions,
   signFramedArtSessionId,
 } from "@/lib/framed-art/cookies";
-import { runFramedArtStyleGeneration } from "@/lib/framed-art/generation-runner";
 import type { StyleType } from "@/components/style-selector";
 import { saveFramedArtSession, toPublicView } from "@/lib/framed-art/store";
 import type { FramedArtSession } from "@/lib/framed-art/types";
-import { consumeFramedUploadSlot } from "@/lib/framed-art/upload-limits";
+import { peekFramedUploadLimit } from "@/lib/framed-art/upload-limits";
 import { getRequestIp, hashClientIp } from "@/lib/preview-session/hash";
 import {
   isAllowedCloudinaryUrl,
@@ -20,17 +19,11 @@ import {
 } from "@/lib/preview-session/cloudinary";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 const FRAMED_UPLOAD_LIMIT_ERROR = "framed_upload_limit";
 
 const VALID_STYLES: StyleType[] = ["cartoon", "pencil", "watercolor"];
-
-function scheduleGeneration(sessionId: string): void {
-  void runFramedArtStyleGeneration(sessionId).catch((error) => {
-    console.error("Framed art generation failed:", error);
-  });
-}
 
 export async function POST(request: NextRequest) {
   const disabled = assertFramedArtEnabled();
@@ -54,7 +47,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ipHash = hashClientIp(getRequestIp(request));
-  const uploadSlot = await consumeFramedUploadSlot(ipHash);
+  const uploadSlot = await peekFramedUploadLimit(ipHash);
   if (!uploadSlot.allowed) {
     return NextResponse.json(
       { error: FRAMED_UPLOAD_LIMIT_ERROR, remaining: 0, limit: uploadSlot.limit },
@@ -87,8 +80,6 @@ export async function POST(request: NextRequest) {
     signFramedArtSessionId(sessionId),
     framedArtSessionCookieOptions(),
   );
-
-  scheduleGeneration(sessionId);
 
   return NextResponse.json({
     session: toPublicView(session),

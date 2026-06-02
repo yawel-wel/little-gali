@@ -52,7 +52,7 @@ export async function peekFramedUploadLimit(ipHash: string): Promise<{
   };
 }
 
-/** Consume one upload slot when starting a new framed-art session. */
+/** Consume one upload slot after a successful framed-art generation. */
 export async function consumeFramedUploadSlot(ipHash: string): Promise<{
   allowed: boolean;
   remaining: number;

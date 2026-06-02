@@ -8,6 +8,9 @@ import { Title } from "@/components/title";
 import { FramedArtStylePicker } from "@/components/framed-art-style-picker";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
+import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
+import { isFramedArtProhibitedContent } from "@/lib/framed-art/prohibited-content";
+import type { FramedArtSessionPublicView } from "@/lib/framed-art/types";
 import type { StyleType } from "@/components/style-selector";
 import { parseFramedArtStyleParam } from "@/lib/framed-art/parse-style-param";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -27,6 +30,7 @@ function FramedArtUploadPageContent() {
   const [showSubmitLoading, setShowSubmitLoading] = useState(false);
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [prohibitedBlocked, setProhibitedBlocked] = useState(false);
 
   useEffect(() => {
     setSelectedStyle(styleFromUrl);
@@ -81,6 +85,7 @@ function FramedArtUploadPageContent() {
       return;
     }
     setError(null);
+    setProhibitedBlocked(false);
     if (pendingImage) {
       URL.revokeObjectURL(pendingImage);
     }
@@ -103,6 +108,7 @@ function FramedArtUploadPageContent() {
       setSubmitLoadingAvatar(croppedUrl);
       setShowSubmitLoading(true);
       setError(null);
+      setProhibitedBlocked(false);
 
       try {
         const blob = await fetch(croppedUrl).then((r) => r.blob());
@@ -121,6 +127,7 @@ function FramedArtUploadPageContent() {
         const sessionRes = await fetch("/api/framed-art/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             originalUrl: uploadData.imageUrls[0],
             style: selectedStyle,
@@ -139,14 +146,51 @@ function FramedArtUploadPageContent() {
           setUploadsRemaining(sessionData.uploadsRemaining);
         }
 
-        router.push(`/framed-art/preview/${sessionData.session.id}`);
+        const sessionId = sessionData.session.id as string;
+        const generateRes = await fetch(
+          `/api/framed-art/session/${sessionId}/generate`,
+          { method: "POST", credentials: "include" },
+        );
+        const generateData = await generateRes.json();
+        if (typeof generateData.uploadsRemaining === "number") {
+          setUploadsRemaining(generateData.uploadsRemaining);
+        }
+
+        const failedSession = generateData.session as
+          | FramedArtSessionPublicView
+          | undefined;
+        if (
+          failedSession &&
+          isFramedArtProhibitedContent(failedSession)
+        ) {
+          setShowSubmitLoading(false);
+          setSubmitLoadingAvatar(null);
+          if (pendingImage) {
+            URL.revokeObjectURL(pendingImage);
+          }
+          setPendingImage(null);
+          setProhibitedBlocked(true);
+          return;
+        }
+
+        if (!generateRes.ok) {
+          console.error("Framed art generate failed:", generateData);
+          throw new Error(generateData.error || t("framedArt.upload.errorGeneric"));
+        }
+        if (generateData.session?.generationStatus === "failed") {
+          throw new Error(
+            generateData.error || t("framedArt.upload.errorGeneric"),
+          );
+        }
+
+        router.push(`/framed-art/preview/${sessionId}`);
       } catch (err) {
         setShowSubmitLoading(false);
         setSubmitLoadingAvatar(null);
         setError(err instanceof Error ? err.message : t("framedArt.upload.errorGeneric"));
       }
     },
-    [router, selectedStyle, t, uploadsRemaining],
+    [pendingImage, router, selectedStyle, t, uploadsRemaining],
   );
 
   const uploadDisabled =
@@ -207,7 +251,18 @@ function FramedArtUploadPageContent() {
             onChange={handleFileChange}
           />
 
-          {!pendingImage ? (
+          {prohibitedBlocked ? (
+            <div className="mx-auto mt-8 max-w-md rounded-2xl border border-gray-200 bg-white px-6 py-8 shadow-sm">
+              <PreviewSlotProhibitedContent
+                onUpload={() => {
+                  setProhibitedBlocked(false);
+                  setError(null);
+                  fileInputRef.current?.click();
+                }}
+                disabled={uploadDisabled}
+              />
+            </div>
+          ) : !pendingImage ? (
             <div className="mt-8">
               <div className="text-center">
                 <div
@@ -246,6 +301,7 @@ function FramedArtUploadPageContent() {
               <MobileImageEditor
                 imageUrl={pendingImage}
                 aspectRatio={1}
+                saveButtonLabel={t("framedArt.upload.createPreview")}
                 onSave={handleSaveCrop}
                 onCancel={() => {
                   URL.revokeObjectURL(pendingImage);

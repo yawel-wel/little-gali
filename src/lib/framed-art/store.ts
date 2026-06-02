@@ -55,3 +55,30 @@ export function resolveSelectedCandidate(
   const style = session.selectedStyle ?? DEFAULT_COLOR_STYLE;
   return getCandidateForStyle(session, style);
 }
+
+export function hasFramedArtPreviewReady(session: FramedArtSession): boolean {
+  if (!session.selectedStyle) return false;
+  const candidate = getCandidateForStyle(session, session.selectedStyle);
+  return Boolean(candidate?.previewUrl && session.generationStatus === "complete");
+}
+
+const STALE_IN_FLIGHT_MS = 5 * 60 * 1000;
+
+/** Reset sessions left inFlight after a crashed serverless invocation. */
+export async function recoverStaleFramedArtInFlight(
+  session: FramedArtSession,
+): Promise<FramedArtSession> {
+  if (!session.inFlight) {
+    return session;
+  }
+  const ageMs = Date.now() - new Date(session.updatedAt).getTime();
+  if (ageMs < STALE_IN_FLIGHT_MS) {
+    return session;
+  }
+  session.inFlight = false;
+  if (session.generationStatus === "running") {
+    session.generationStatus = "not_started";
+  }
+  await saveFramedArtSession(session);
+  return session;
+}

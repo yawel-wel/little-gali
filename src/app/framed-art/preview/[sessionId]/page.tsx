@@ -11,6 +11,8 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
+import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
+import { isFramedArtProhibitedContent } from "@/lib/framed-art/prohibited-content";
 import type {
   FramedArtSessionPublicView,
   FramedArtStyleCandidate,
@@ -36,6 +38,7 @@ export default function FramedArtPreviewPage() {
   const { addFramedArtToCart } = useCart();
 
   const [session, setSession] = useState<FramedArtSessionPublicView | null>(null);
+  const [sessionLoadError, setSessionLoadError] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
@@ -48,13 +51,28 @@ export default function FramedArtPreviewPage() {
   );
 
   const fetchSession = useCallback(async () => {
-    const res = await fetch(`/api/framed-art/session/${sessionId}`);
-    if (!res.ok) return;
+    const res = await fetch(`/api/framed-art/session/${sessionId}`, {
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (res.status === 403) {
+        setSessionLoadError(t("preview.sessionUnauthorized"));
+      } else if (res.status === 404) {
+        setSessionLoadError(t("preview.sessionNotFound"));
+      } else {
+        setSessionLoadError(
+          data.error || t("framedArt.preview.errorGeneric"),
+        );
+      }
+      return;
+    }
+    setSessionLoadError(null);
     const data = await res.json();
     if (data.session) {
       setSession(data.session);
     }
-  }, [sessionId]);
+  }, [sessionId, t]);
 
   useEffect(() => {
     void fetchSession();
@@ -73,9 +91,24 @@ export default function FramedArtPreviewPage() {
   const heroUrl = activeCandidate?.previewUrl;
 
   const isGenerating =
-    !heroUrl ||
-    session?.inFlight === true ||
-    session?.generationStatus === "running";
+    session?.generationStatus !== "failed" &&
+    (!heroUrl ||
+      session?.inFlight === true ||
+      session?.generationStatus === "running");
+
+  const generationFailed =
+    session?.generationStatus === "failed" && !heroUrl;
+
+  const prohibitedBlocked = useMemo(
+    () => (session ? isFramedArtProhibitedContent(session) : false),
+    [session],
+  );
+
+  const generationErrorMessage = useMemo(() => {
+    if (!generationFailed || !session?.selectedStyle) return null;
+    const candidate = getActiveCandidate(session, session.selectedStyle);
+    return candidate?.error?.message ?? null;
+  }, [generationFailed, session]);
 
   useEffect(() => {
     if (isGenerating) {
@@ -89,7 +122,8 @@ export default function FramedArtPreviewPage() {
     return () => clearTimeout(timeout);
   }, [isGenerating, keepLoadingVisible]);
 
-  const showLoadingScreen = isGenerating || keepLoadingVisible;
+  const showLoadingScreen =
+    !sessionLoadError && (isGenerating || keepLoadingVisible);
   const isLoadingExiting = !isGenerating && keepLoadingVisible;
 
   const loadingLines = useMemo(
@@ -164,7 +198,7 @@ export default function FramedArtPreviewPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F9F7EE" }}>
       <Header />
-      {showLoadingScreen ? (
+      {showLoadingScreen && !generationFailed ? (
         <PreviewInitialLoadingScreen
           variant="overlay"
           imageUrls={originalPhotoUrls}
@@ -179,6 +213,48 @@ export default function FramedArtPreviewPage() {
           title={t("framedArt.preview.loadingTitle")}
           locale={locale}
         />
+      ) : sessionLoadError ? (
+        <main
+          id="main-content"
+          className="container mx-auto max-w-2xl px-4 pb-16 pt-24 text-center"
+          style={{ paddingTop: "calc(72px + var(--banner-height, 0px) + 2rem)" }}
+        >
+          <p className="font-body text-dark-gray" role="alert">
+            {sessionLoadError}
+          </p>
+          <Link
+            href="/framed-art/upload"
+            className="mt-4 inline-block font-body-bold text-primary-orange"
+          >
+            {t("framedArt.preview.uploadDifferentPhoto")}
+          </Link>
+        </main>
+      ) : generationFailed ? (
+        <main
+          id="main-content"
+          className="container mx-auto max-w-2xl px-4 pb-16 pt-24 text-center"
+          style={{ paddingTop: "calc(72px + var(--banner-height, 0px) + 2rem)" }}
+        >
+          {prohibitedBlocked ? (
+            <div className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-white px-6 py-8 shadow-sm">
+              <PreviewSlotProhibitedContent
+                onUpload={() => router.push(uploadAgainHref)}
+              />
+            </div>
+          ) : (
+            <>
+              <p className="font-body text-dark-gray" role="alert">
+                {generationErrorMessage ?? t("framedArt.preview.errorGeneric")}
+              </p>
+              <Link
+                href={uploadAgainHref}
+                className="mt-4 inline-block font-body-bold text-primary-orange"
+              >
+                {t("framedArt.preview.uploadDifferentPhoto")}
+              </Link>
+            </>
+          )}
+        </main>
       ) : (
         <main
           id="main-content"

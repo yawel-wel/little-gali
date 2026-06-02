@@ -4,7 +4,7 @@ import { runFramedArtRegenerate } from "@/lib/framed-art/generation-runner";
 import { toPublicView } from "@/lib/framed-art/store";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(
   _request: NextRequest,

@@ -2,18 +2,17 @@ import { randomUUID } from "crypto";
 import type { StyleType } from "@/components/style-selector";
 import { generateColorImageBuffer } from "@/lib/preview-session/generate-color";
 import { toGenerationError } from "@/lib/preview-session/generate-bw";
-import {
-  framedArtColorOutputPublicId,
-  framedArtColorWatermarkedPublicId,
-} from "./cloudinary-paths";
+import { uploadFramedArtOutputs } from "./upload-outputs";
 import {
   getCandidateForStyle,
   loadFramedArtSession,
   saveFramedArtSession,
+  hasFramedArtPreviewReady,
+  recoverStaleFramedArtInFlight,
 } from "./store";
 import type { FramedArtSession, FramedArtStyleCandidate } from "./types";
-import { uploadBufferToCloudinaryPublicId } from "@/lib/preview-session/cloudinary";
-import { applyPreviewWatermark } from "@/lib/preview-session/watermark";
+import { logPreviewGenerationFailure } from "@/lib/preview-session/generation-log";
+import { maybeLogProhibitedContentEvent } from "@/lib/preview-session/prohibited-content-log";
 
 async function buildFramedStyleCandidate(
   sessionId: string,
@@ -37,21 +36,11 @@ async function buildFramedStyleCandidate(
       side: "color",
     });
 
-    const cleanPath = framedArtColorOutputPublicId(sessionId, style, version);
-    const previewPath = framedArtColorWatermarkedPublicId(
+    const { cleanUpload, previewUpload } = await uploadFramedArtOutputs(
+      cleanBuffer,
       sessionId,
       style,
       version,
-    );
-
-    const cleanUpload = await uploadBufferToCloudinaryPublicId(
-      cleanBuffer,
-      cleanPath,
-    );
-    const watermarkedBuffer = await applyPreviewWatermark(cleanBuffer);
-    const previewUpload = await uploadBufferToCloudinaryPublicId(
-      watermarkedBuffer,
-      previewPath,
     );
 
     candidate.cleanUrl = cleanUpload.secureUrl;
@@ -59,7 +48,37 @@ async function buildFramedStyleCandidate(
     candidate.previewUrl = previewUpload.secureUrl;
     candidate.previewPublicId = previewUpload.publicId;
   } catch (error) {
+    logPreviewGenerationFailure(
+      "color",
+      {
+        sessionId,
+        style,
+        version,
+        code: toGenerationError(error).code,
+        trigger: version > 1 ? "regenerate" : "initial",
+      },
+      error,
+      {
+        sessionId,
+        slot: 0,
+        trigger: version > 1 ? "regenerate" : "initial",
+        side: "color",
+        style,
+        candidateId: candidate.id,
+      },
+    );
     candidate.error = toGenerationError(error);
+    maybeLogProhibitedContentEvent({
+      sessionId,
+      slotIndex: 0,
+      side: "color",
+      candidateId: candidate.id,
+      sourceUrl,
+      trigger: version > 1 ? "regenerate" : "initial",
+      style,
+      error,
+      errorCode: candidate.error.code,
+    });
   }
 
   return candidate;
@@ -86,10 +105,21 @@ function upsertCandidate(
 export async function runFramedArtStyleGeneration(
   sessionId: string,
 ): Promise<FramedArtSession | null> {
-  const session = await loadFramedArtSession(sessionId);
+  let session = await loadFramedArtSession(sessionId);
   if (!session?.selectedStyle) return null;
 
+  session = await recoverStaleFramedArtInFlight(session);
+
+  if (session.inFlight) {
+    return session;
+  }
+  if (hasFramedArtPreviewReady(session)) {
+    return session;
+  }
+
   const style = session.selectedStyle;
+  if (!style) return null;
+
   session.inFlight = true;
   session.generationStatus = "running";
   session.phase = "preview";
