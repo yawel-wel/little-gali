@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import { useLanguage } from "./LanguageContext";
 import { trackAddToCart, trackInitiateCheckout } from "./meta-pixel-events";
 import { parseShopifyLineCost } from "./shopify/cart-line-cost";
@@ -77,6 +84,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   // Start in loading state to avoid initial empty-state flicker until we check localStorage
   const [isLoading, setIsLoading] = useState(true);
+  const fetchCartSeqRef = useRef(0);
 
   // Helper function to ensure checkoutUrl always has the current locale
   const ensureLocaleInCheckoutUrl = useCallback((checkoutUrl: string): string => {
@@ -93,6 +101,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [locale]);
 
   const fetchCart = useCallback(async (cartId: string) => {
+    const seq = ++fetchCartSeqRef.current;
     setIsLoading(true);
     try {
       const response = await fetch("/api/shopify/cart/get", {
@@ -285,6 +294,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             })
           );
 
+          if (seq !== fetchCartSeqRef.current) {
+            return;
+          }
+
           setCart({
             id: data.cart.id,
             checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
@@ -294,14 +307,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             items: cartItems,
           });
           localStorage.setItem("shopify_cart_id", data.cart.id);
-          // Clear optimistic adding flag if set
-          try {
-            if (typeof window !== "undefined") {
-              sessionStorage.removeItem("adding_to_cart");
-            }
-          } catch {}
         }
       } else {
+        if (seq !== fetchCartSeqRef.current) {
+          return;
+        }
         // Cart not found or expired, clear it
         localStorage.removeItem("shopify_cart_id");
         setCart(null);
@@ -309,7 +319,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error fetching cart:", error);
     } finally {
-      setIsLoading(false);
+      if (seq === fetchCartSeqRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [ensureLocaleInCheckoutUrl, locale]);
 
@@ -327,6 +339,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (savedCartId) {
+        try {
+          if (sessionStorage.getItem("adding_to_cart") === "1") {
+            // Avoid a stale fetch racing with add-to-cart; /cart refreshes when done.
+            return;
+          }
+        } catch {}
         void fetchCart(savedCartId);
       } else {
         setIsLoading(false);
@@ -520,17 +538,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         } catch (err) {
           console.error("Error tracking framed art AddToCart:", err);
         }
+        try {
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem("adding_to_cart");
+          }
+        } catch {}
       }
     } catch (error) {
       console.error("Error adding framed art to cart:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
       try {
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("adding_to_cart");
         }
       } catch {}
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 

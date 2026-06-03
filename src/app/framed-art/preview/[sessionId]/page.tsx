@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { RefreshCw, X } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+// import { X } from "lucide-react"; // fullscreen lightbox (disabled)
 import MuiButton from "@mui/material/Button";
 import type { StyleType } from "@/components/style-selector";
 import { Header } from "@/components/header";
@@ -23,7 +24,7 @@ import type {
 } from "@/lib/framed-art/types";
 import { useCart } from "@/lib/CartContext";
 import { useLanguage } from "@/lib/LanguageContext";
-import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+// import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy"; // fullscreen lightbox (disabled)
 import { cn } from "@/lib/utils";
 
 function getActiveCandidate(
@@ -58,7 +59,7 @@ export default function FramedArtPreviewPage() {
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
   const [keepLoadingVisible, setKeepLoadingVisible] = useState(false);
   const [skipInitialLoader, setSkipInitialLoader] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
+  // const [lightboxOpen, setLightboxOpen] = useState(false); // fullscreen lightbox (disabled)
   const [localLoadingPhotoUrls] = useState(() =>
     readFramedArtLoadingImageUrls(sessionId),
   );
@@ -117,21 +118,21 @@ export default function FramedArtPreviewPage() {
   };
 
   const heroUrl = activeCandidate?.previewUrl;
-  const lightboxImageUrl =
-    activeCandidate?.cleanUrl ?? activeCandidate?.previewUrl ?? null;
+  // const lightboxImageUrl =
+  //   activeCandidate?.cleanUrl ?? activeCandidate?.previewUrl ?? null;
 
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
-    };
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [lightboxOpen]);
+  // useEffect(() => {
+  //   if (!lightboxOpen) return;
+  //   const onKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === "Escape") setLightboxOpen(false);
+  //   };
+  //   document.body.style.overflow = "hidden";
+  //   window.addEventListener("keydown", onKeyDown);
+  //   return () => {
+  //     document.body.style.overflow = "";
+  //     window.removeEventListener("keydown", onKeyDown);
+  //   };
+  // }, [lightboxOpen]);
 
   const isGenerating =
     session?.generationStatus !== "failed" &&
@@ -362,14 +363,19 @@ export default function FramedArtPreviewPage() {
             </p>
           )}
 
+          {/* Fullscreen lightbox on image click — disabled for now
           <FramedArtFrameMockup
-            className="mt-3"
-            imageUrl={heroUrl}
-            isLoading={!heroUrl}
+            ...
             onImageClick={
               lightboxImageUrl ? () => setLightboxOpen(true) : undefined
             }
             imageClickLabel={t("accessibility.expandImage")}
+          />
+          */}
+          <FramedArtFrameMockup
+            className="mt-3"
+            imageUrl={heroUrl}
+            isLoading={!heroUrl}
           />
 
           <div className="mt-3 flex flex-col items-center gap-3">
@@ -404,6 +410,7 @@ export default function FramedArtPreviewPage() {
           </div>
         </main>
       ) : null}
+      {/* Fullscreen lightbox — disabled for now
       {lightboxOpen && lightboxImageUrl && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
@@ -431,6 +438,7 @@ export default function FramedArtPreviewPage() {
           />
         </div>
       )}
+      */}
       <Footer />
     </div>
   );

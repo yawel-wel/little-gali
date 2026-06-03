@@ -71,13 +71,31 @@ export default function CartPage() {
   const [giftMessage, setGiftMessage] = useState("");
   const [isUpdatingGiftMessage, setIsUpdatingGiftMessage] = useState(false);
   const giftMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isPendingAdd = isOptimisticAdding || readAddingToCartFlag();
 
-  // Refresh cart when opening /cart (fetchCart is stable unless locale changes).
+  // Refresh cart when opening /cart. Defer fetch while an add is in flight so we
+  // don't overwrite the cart with stale data or clear the pending UI too early.
   useEffect(() => {
     const savedCartId = localStorage.getItem("shopify_cart_id");
-    if (savedCartId) {
-      void fetchCart(savedCartId);
+    if (!savedCartId) {
+      return;
     }
+
+    const runFetch = () => {
+      void fetchCart(savedCartId);
+    };
+
+    if (readAddingToCartFlag()) {
+      const interval = window.setInterval(() => {
+        if (!readAddingToCartFlag()) {
+          window.clearInterval(interval);
+          runFetch();
+        }
+      }, 200);
+      return () => window.clearInterval(interval);
+    }
+
+    runFetch();
   }, [fetchCart]);
 
   useEffect(() => {
@@ -505,7 +523,7 @@ export default function CartPage() {
                         </div>
                       );
                     })}
-                    {isOptimisticAdding && (
+                    {isPendingAdd && (
                       <CartAddingItemRow label={t("cart.addingItem")} />
                     )}
                     <CartSuggestProducts />
@@ -520,7 +538,7 @@ export default function CartPage() {
                         addGiftMessage={addGiftMessage}
                         giftMessage={giftMessage}
                         isCheckingOut={isCheckingOut}
-                        isLoading={isLoading}
+                        isLoading={isLoading || isPendingAdd}
                         isUpdatingGiftMessage={isUpdatingGiftMessage}
                         onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
                         onGiftMessageChange={handleGiftMessageChange}
@@ -538,7 +556,7 @@ export default function CartPage() {
                       addGiftMessage={addGiftMessage}
                       giftMessage={giftMessage}
                       isCheckingOut={isCheckingOut}
-                      isLoading={isLoading}
+                      isLoading={isLoading || isPendingAdd}
                       isUpdatingGiftMessage={isUpdatingGiftMessage}
                       onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
                       onGiftMessageChange={handleGiftMessageChange}
@@ -547,7 +565,7 @@ export default function CartPage() {
                     />
                   </div>
                 </div>
-              ) : isOptimisticAdding ? (
+              ) : isPendingAdd ? (
                 <div className="py-8">
                   <CartAddingItemRow label={t("cart.addingItem")} />
                 </div>
