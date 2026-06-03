@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import MuiButton from "@mui/material/Button";
@@ -14,6 +15,13 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
 const easeOwlet = [0.16, 1, 0.3, 1] as const;
+
+/** Place in public/: framed-art-carousel-1.png … framed-art-carousel-3.png */
+const FRAMED_ART_CAROUSEL_IMAGES = [
+  "/framed-art-carousel-1.png",
+  "/framed-art-carousel-2.png",
+  "/framed-art-carousel-3.png",
+] as const;
 
 const PRICING_CARDS = [
   {
@@ -39,6 +47,27 @@ const PRICING_CARDS = [
 export function FramedArtHomeSection() {
   const { t, locale } = useLanguage();
   const reveal = useScrollReveal(easeOwlet);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const imageCount = FRAMED_ART_CAROUSEL_IMAGES.length;
+
+  const goToSlide = (index: number) => {
+    setCarouselIndex((index + imageCount) % imageCount);
+  };
+
+  const handleCarouselDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
+    const { offset, velocity } = info;
+    const swipeRight = offset.x > 40 || velocity.x > 300;
+    const swipeLeft = offset.x < -40 || velocity.x < -300;
+    if (!swipeRight && !swipeLeft) return;
+
+    if (locale === "he") {
+      if (swipeRight) goToSlide(carouselIndex + 1);
+      else goToSlide(carouselIndex - 1);
+    } else {
+      if (swipeLeft) goToSlide(carouselIndex - 1);
+      else goToSlide(carouselIndex + 1);
+    }
+  };
 
   return (
     <motion.section
@@ -131,15 +160,61 @@ export function FramedArtHomeSection() {
             </div>
           </div>
 
-          <div className="order-2 flex justify-center">
-            <div className="relative aspect-square w-full max-w-md overflow-hidden">
-              <Image
-                src="/framed-art-hero.png"
-                alt={t("home.framedArt.imageAlt")}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 90vw, 45vw"
-              />
+          <div className="order-2 flex flex-col items-center">
+            <motion.div
+              className="relative aspect-square w-full max-w-md overflow-hidden rounded-lg touch-pan-y cursor-grab active:cursor-grabbing"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.12}
+              onDragEnd={handleCarouselDragEnd}
+            >
+              {FRAMED_ART_CAROUSEL_IMAGES.map((src, i) => (
+                <motion.div
+                  key={src}
+                  className="absolute inset-0"
+                  initial={false}
+                  animate={{
+                    opacity: i === carouselIndex ? 1 : 0,
+                    pointerEvents: i === carouselIndex ? "auto" : "none",
+                  }}
+                  transition={{ duration: 0.45, ease: "easeInOut" }}
+                  aria-hidden={i !== carouselIndex}
+                >
+                  <Image
+                    src={src}
+                    alt={t("home.framedArt.imageAlt")}
+                    fill
+                    className="object-cover pointer-events-none select-none"
+                    sizes="(max-width: 768px) 90vw, 45vw"
+                    priority={i === 0}
+                    draggable={false}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <div
+              className="mt-4 flex justify-center gap-2"
+              role="tablist"
+              aria-label={t("home.framedArt.ariaLabel")}
+            >
+              {FRAMED_ART_CAROUSEL_IMAGES.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  role="tab"
+                  aria-selected={carouselIndex === i}
+                  onClick={() => setCarouselIndex(i)}
+                  className={`h-2.5 w-2.5 rounded-full transition-all duration-200 cursor-pointer ${
+                    carouselIndex === i
+                      ? "bg-primary-orange scale-110"
+                      : "bg-gray-300 hover:bg-primary-orange/50"
+                  }`}
+                  aria-label={t("home.framedArt.carouselDotAria")
+                    .replace("{num}", String(i + 1))
+                    .replace("{total}", String(imageCount))}
+                />
+              ))}
             </div>
           </div>
         </div>

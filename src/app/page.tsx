@@ -473,7 +473,12 @@ export default function Home() {
       ];
   const isMobile = useIsMobile();
   const reveal = useScrollReveal(easeOwlet);
-  const heroImages = ["/hero-image-1.jpeg", "/hero-image-2.jpg", "/hero-image-3.jpg", "/hero-image-4.jpg"];
+  const heroImages = [
+    "/hero-image-1.jpeg",
+    "/hero-image-2-framed.jpeg",
+    "/hero-image-3.jpg",
+    "/hero-image-4.jpg",
+  ];
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const bookImages = [
     { src: "/our-book-bw.jpg", labelKey: "home.book.bwSide" as const },
@@ -687,6 +692,9 @@ export default function Home() {
                     }
                   })()}
                 </div>
+                <p className="font-body text-base sm:text-lg text-white/95 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] px-4">
+                  {t("home.hero.subtitle")}
+                </p>
                 {/* CTA Button - All devices */}
                 <div className="pt-6">
                   <div className="relative w-auto">
