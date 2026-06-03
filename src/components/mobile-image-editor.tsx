@@ -38,6 +38,15 @@ type MobileImageEditorProps = {
   cropInstruction?: string;
   /** Slightly smaller save CTA on md+ (framed art upload). */
   compactSaveButtonOnDesktop?: boolean;
+  /** Crop export source (defaults to imageUrl). Use clean master when displaying watermarked preview. */
+  cropExportUrl?: string;
+  /** Larger crop viewport with upload-style overlay (full image visible around crop box). */
+  immersiveCropViewport?: boolean;
+  /** Send crop pixels only; parent uploads server-side (no client crop blob). */
+  deferCropExport?: boolean;
+  /** Parent is persisting the crop (disable save, show spinner on button). */
+  isSaving?: boolean;
+  saveError?: string | null;
 };
 
 export function MobileImageEditor({
@@ -61,6 +70,11 @@ export function MobileImageEditor({
   showZoomSlider = false,
   cropInstruction,
   compactSaveButtonOnDesktop = false,
+  cropExportUrl,
+  immersiveCropViewport = false,
+  deferCropExport = false,
+  isSaving = false,
+  saveError = null,
 }: MobileImageEditorProps) {
   const { t, locale } = useLanguage();
   const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
@@ -88,7 +102,7 @@ export function MobileImageEditor({
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels || isSaving) return;
 
     const faces = referenceFaceBoxes ?? [];
     const clipped =
@@ -102,16 +116,27 @@ export function MobileImageEditor({
 
     setFaceClipWarning(false);
     setAwaitingSecondDoneAfterFaceWarning(false);
-    const blob = await getCroppedBlob(imageUrl, croppedAreaPixels);
-    if (blob) onSave(URL.createObjectURL(blob), { crop, zoom });
+    const cropPayload: CropState = { crop, zoom, croppedAreaPixels };
+    if (deferCropExport) {
+      onSave("", cropPayload);
+      return;
+    }
+    const exportUrl = cropExportUrl ?? imageUrl;
+    const blob = await getCroppedBlob(exportUrl, croppedAreaPixels);
+    if (blob) {
+      onSave(URL.createObjectURL(blob), cropPayload);
+    }
   }, [
     imageUrl,
+    cropExportUrl,
     croppedAreaPixels,
     onSave,
     crop,
     zoom,
     referenceFaceBoxes,
     awaitingSecondDoneAfterFaceWarning,
+    deferCropExport,
+    isSaving,
   ]);
 
   useEffect(() => {
@@ -129,7 +154,10 @@ export function MobileImageEditor({
   const cropFrame = (
     <div
       className={cn(
-        "relative w-[85vw] md:w-[380px] flex-shrink-0 overflow-hidden rounded-lg bg-[#ebe6dc]",
+        "relative flex-shrink-0 overflow-hidden rounded-lg bg-[#ebe6dc]",
+        immersiveCropViewport
+          ? "w-[min(92vw,520px)] md:w-[min(80vw,560px)]"
+          : "w-[85vw] md:w-[380px]",
         SENTRY_REPLAY_BLOCK_USER_IMAGE,
       )}
       style={{ aspectRatio: aspectCss }}
@@ -163,6 +191,7 @@ export function MobileImageEditor({
           onCropComplete={onCropComplete}
           onCropAreaChange={onCropAreaChange}
           onInteractionStart={() => {
+            if (isSaving) return;
             setIsInteracting(true);
             clearFaceClipWarning();
           }}
@@ -175,15 +204,16 @@ export function MobileImageEditor({
               border: showFramedArtFrameOverlay
                 ? "2px dashed rgba(105, 52, 48, 0.55)"
                 : "3px solid rgba(255,255,255,0.85)",
-              color: isInteracting
-                ? "rgba(249, 247, 238, 0.82)"
-                : "#ebe6dc",
+              color:
+                immersiveCropViewport || isInteracting
+                  ? "rgba(249, 247, 238, 0.82)"
+                  : "#ebe6dc",
               transition: "color 0.2s ease",
             },
           }}
         />
       )}
-      {showFramedArtFrameOverlay && !isSmartCropLoading && (
+      {showFramedArtFrameOverlay && !isSmartCropLoading && !isSaving && (
         <div
           className="pointer-events-none absolute z-20 border-2 border-dashed border-primary-orange/80"
           style={{
@@ -195,6 +225,21 @@ export function MobileImageEditor({
           aria-hidden
         />
       )}
+      {isSaving && (
+        <div
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2 bg-white/75"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <Loader2
+            className="h-10 w-10 animate-spin text-primary-orange"
+            aria-hidden
+          />
+          <p className="font-body text-sm text-dark-gray">
+            {t("framedArt.preview.savingCrop")}
+          </p>
+        </div>
+      )}
     </div>
   );
 
@@ -204,8 +249,10 @@ export function MobileImageEditor({
       style={{ backgroundColor: "#F9F7EE" }}
     >
       <button
+        type="button"
         onClick={onCancel}
-        className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
+        disabled={isSaving}
+        className="absolute top-4 right-4 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
         aria-label={locale === "he" ? "ביטול חיתוך" : "Cancel cropping"}
       >
         <X className="w-6 h-6" />
@@ -226,8 +273,10 @@ export function MobileImageEditor({
             isSmartCropLoading
               ? "opacity-0 pointer-events-none select-none"
               : ""
-          } ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""}`}
-          aria-hidden={isSmartCropLoading || undefined}
+          } ${isInteracting ? "md:opacity-0 md:pointer-events-none" : ""} ${
+            isSaving ? "pointer-events-none opacity-70" : ""
+          }`}
+          aria-hidden={isSmartCropLoading || isSaving || undefined}
         >
           <div className="flex flex-col items-center gap-1.5 px-6 max-w-md">
             <p
@@ -259,6 +308,14 @@ export function MobileImageEditor({
                 </span>
               </div>
             )}
+            {saveError && (
+              <p
+                className="font-body text-center text-sm text-red-600"
+                role="alert"
+              >
+                {saveError}
+              </p>
+            )}
             {faceClipWarning && (
               <div className="flex flex-col gap-1.5 max-w-md">
                 <p
@@ -277,9 +334,11 @@ export function MobileImageEditor({
           </div>
           <div className="flex flex-col gap-1 items-center">
             <button
-              onClick={handleSave}
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={isSaving}
               className={cn(
-                "bg-primary-orange text-white font-body-bold rounded-xl px-7 py-2.5 text-base cursor-pointer lg:hover:opacity-85 transition-opacity",
+                "inline-flex items-center justify-center bg-primary-orange text-white font-body-bold rounded-xl px-7 py-2.5 text-base cursor-pointer lg:hover:opacity-85 transition-opacity disabled:cursor-not-allowed disabled:opacity-60",
                 compactSaveButtonOnDesktop
                   ? "md:px-[38px] md:py-[10px] md:text-base"
                   : "md:px-10 md:py-3 md:text-lg",

@@ -1,6 +1,10 @@
 import type { Area } from "react-easy-crop";
 
-export type CropState = { crop: { x: number; y: number }; zoom: number };
+export type CropState = {
+  crop: { x: number; y: number };
+  zoom: number;
+  croppedAreaPixels?: { x: number; y: number; width: number; height: number };
+};
 
 export async function getCroppedBlob(
   imageSrc: string,

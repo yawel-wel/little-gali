@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
-// import { X } from "lucide-react"; // fullscreen lightbox (disabled)
-import MuiButton from "@mui/material/Button";
+import { ImageIcon, RefreshCw } from "lucide-react";
+import {
+  MobileImageEditor,
+  type CropState,
+} from "@/components/mobile-image-editor";
 import type { StyleType } from "@/components/style-selector";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -18,13 +20,17 @@ import {
   clearFramedArtLoadingImageUrls,
   readFramedArtLoadingImageUrls,
 } from "@/lib/framed-art/loading-images-storage";
+import {
+  framedArtCropEditorImageUrl,
+  framedArtCropExportImageUrl,
+  framedArtMockupImageUrl,
+} from "@/lib/framed-art/display-urls";
 import type {
   FramedArtSessionPublicView,
   FramedArtStyleCandidate,
 } from "@/lib/framed-art/types";
 import { useCart } from "@/lib/CartContext";
 import { useLanguage } from "@/lib/LanguageContext";
-// import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy"; // fullscreen lightbox (disabled)
 import { cn } from "@/lib/utils";
 
 function getActiveCandidate(
@@ -59,7 +65,9 @@ export default function FramedArtPreviewPage() {
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
   const [keepLoadingVisible, setKeepLoadingVisible] = useState(false);
   const [skipInitialLoader, setSkipInitialLoader] = useState(false);
-  // const [lightboxOpen, setLightboxOpen] = useState(false); // fullscreen lightbox (disabled)
+  const [cropEditorOpen, setCropEditorOpen] = useState(false);
+  const [isSavingCrop, setIsSavingCrop] = useState(false);
+  const [cropSaveError, setCropSaveError] = useState<string | null>(null);
   const [localLoadingPhotoUrls] = useState(() =>
     readFramedArtLoadingImageUrls(sessionId),
   );
@@ -117,22 +125,9 @@ export default function FramedArtPreviewPage() {
     return t("cart.style.watercolor");
   };
 
-  const heroUrl = activeCandidate?.previewUrl;
-  // const lightboxImageUrl =
-  //   activeCandidate?.cleanUrl ?? activeCandidate?.previewUrl ?? null;
-
-  // useEffect(() => {
-  //   if (!lightboxOpen) return;
-  //   const onKeyDown = (e: KeyboardEvent) => {
-  //     if (e.key === "Escape") setLightboxOpen(false);
-  //   };
-  //   document.body.style.overflow = "hidden";
-  //   window.addEventListener("keydown", onKeyDown);
-  //   return () => {
-  //     document.body.style.overflow = "";
-  //     window.removeEventListener("keydown", onKeyDown);
-  //   };
-  // }, [lightboxOpen]);
+  const heroUrl = framedArtMockupImageUrl(activeCandidate);
+  const cropEditorImageUrl = framedArtCropEditorImageUrl(activeCandidate);
+  const cropExportImageUrl = framedArtCropExportImageUrl(activeCandidate);
 
   const isGenerating =
     session?.generationStatus !== "failed" &&
@@ -228,6 +223,49 @@ export default function FramedArtPreviewPage() {
     }, 3500);
     return () => clearInterval(interval);
   }, [loadingLines.length, showLoadingOverlay]);
+
+  const handleSaveIllustrationCrop = useCallback(
+    async (_croppedUrl: string, cropState: CropState) => {
+      if (!cropState.croppedAreaPixels || !selectedStyle || isSavingCrop) {
+        return;
+      }
+      setIsSavingCrop(true);
+      setCropSaveError(null);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/framed-art/session/${sessionId}/save-crop`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              croppedAreaPixels: cropState.croppedAreaPixels,
+              crop: cropState.crop,
+              zoom: cropState.zoom,
+              style: selectedStyle,
+            }),
+          },
+        );
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to save crop");
+        }
+        if (data.session) {
+          setSession(data.session);
+        }
+        setCropEditorOpen(false);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : t("framedArt.preview.errorGeneric");
+        setCropSaveError(message);
+        setError(message);
+      } finally {
+        setIsSavingCrop(false);
+      }
+    },
+    [isSavingCrop, selectedStyle, sessionId, t],
+  );
 
   const handleRegenerate = async () => {
     if (!session?.canRegenerate) return;
@@ -333,7 +371,7 @@ export default function FramedArtPreviewPage() {
         <main
           id="main-content"
           className={cn(
-            "container mx-auto max-w-2xl px-4 pb-16 pt-24",
+            "container mx-auto max-w-2xl px-4 pb-0 pt-24",
             showLoadingOverlay &&
               !isLoadingExiting &&
               "pointer-events-none invisible",
@@ -357,88 +395,148 @@ export default function FramedArtPreviewPage() {
             </p>
           )}
 
-          {error && (
+          {error && !cropEditorOpen && (
             <p className="mt-3 text-center text-sm text-red-600" role="alert">
               {error}
             </p>
           )}
 
-          {/* Fullscreen lightbox on image click — disabled for now
+          {heroUrl && (
+            <p
+              data-framed-art-crop-hint
+              className="m-0 text-center font-body leading-snug text-medium-gray"
+              style={{ marginTop: 16, marginBottom: 12, fontSize: 16 }}
+            >
+              {t("framedArt.preview.cropTapHint")}
+            </p>
+          )}
+
           <FramedArtFrameMockup
-            ...
+            className={heroUrl ? "mt-0" : "mt-3"}
+            imageUrl={heroUrl}
+            isLoading={!heroUrl}
             onImageClick={
-              lightboxImageUrl ? () => setLightboxOpen(true) : undefined
+              cropEditorImageUrl &&
+              cropExportImageUrl &&
+              !session?.inFlight &&
+              !isSavingCrop
+                ? () => {
+                    setCropSaveError(null);
+                    setCropEditorOpen(true);
+                  }
+                : undefined
             }
             imageClickLabel={t("accessibility.expandImage")}
           />
-          */}
-          <FramedArtFrameMockup
-            className="mt-3"
-            imageUrl={heroUrl}
-            isLoading={!heroUrl}
-          />
 
-          <div className="mt-3 flex flex-col items-center gap-3">
+          <div
+            className="mt-6 flex w-full flex-col items-center"
+            style={{ gap: 16 }}
+          >
             <button
               type="button"
-              disabled={!session?.canRegenerate || isRegenerating || session?.inFlight}
-              onClick={() => void handleRegenerate()}
-              className="inline-flex cursor-pointer items-center gap-2 font-body text-sm text-primary-orange disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`}
-              />
-              {t("framedArt.preview.regenerate")}
-            </button>
-
-            <MuiButton
-              variant="contained"
-              color="primary"
-              disabled={!heroUrl || session?.inFlight || !selectedStyle}
+              disabled={
+                !heroUrl ||
+                session?.inFlight ||
+                !selectedStyle ||
+                isSavingCrop ||
+                cropEditorOpen
+              }
               onClick={handleAddToCart}
-              sx={{ px: 5, py: 1.5, fontFamily: "var(--font-assistant)", fontWeight: 700 }}
+              className="w-full max-w-[280px] cursor-pointer rounded-full bg-[#CB8E75] px-8 py-3 font-body-bold text-base text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("framedArt.preview.addToCart")}
-            </MuiButton>
+            </button>
 
-            <Link
-              href={uploadAgainHref}
-              className="font-body text-sm text-medium-gray"
+            <div
+              className="flex items-center justify-center"
+              style={{ gap: 20, color: "#8B8178" }}
             >
-              {t("framedArt.preview.uploadDifferentPhoto")}
-            </Link>
+              <button
+                type="button"
+                disabled={
+                  !session?.canRegenerate ||
+                  isRegenerating ||
+                  session?.inFlight ||
+                  isSavingCrop
+                }
+                onClick={() => void handleRegenerate()}
+                className="inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 font-body text-sm transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ color: "#8B8178" }}
+              >
+                <span>{t("framedArt.preview.regenerate")}</span>
+                <RefreshCw
+                  className={`h-4 w-4 shrink-0 ${isRegenerating ? "animate-spin" : ""}`}
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </button>
+
+              <span
+                className="h-3.5 w-px shrink-0 bg-[#8B8178]/40"
+                aria-hidden
+              />
+
+              <Link
+                href={uploadAgainHref}
+                className="inline-flex items-center gap-1.5 font-body text-sm transition-opacity hover:opacity-80"
+                style={{ color: "#8B8178" }}
+              >
+                <span>{t("framedArt.preview.uploadDifferentPhoto")}</span>
+                <ImageIcon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+              </Link>
+            </div>
+
+            <p
+              className="m-0 text-center font-body"
+              style={{
+                paddingBottom: 16,
+                fontSize: 14,
+                color: "#8B8178",
+              }}
+            >
+              {t("framedArt.preview.specialRequestBefore")}
+              <Link
+                href={`/contact?previewSessionId=${sessionId}`}
+                className="font-body underline decoration-[#8B8178]/50 underline-offset-2 transition-opacity hover:opacity-80"
+                style={{ fontSize: 14, color: "#8B8178" }}
+              >
+                {t("framedArt.preview.specialRequestLink")}
+              </Link>
+            </p>
           </div>
         </main>
       ) : null}
-      {/* Fullscreen lightbox — disabled for now
-      {lightboxOpen && lightboxImageUrl && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t("preview.closeLightbox")}
-          onClick={() => setLightboxOpen(false)}
-        >
-          <button
-            type="button"
-            onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
-            aria-label={t("accessibility.close")}
-          >
-            <X className="h-6 w-6" aria-hidden />
-          </button>
-          <img
-            src={lightboxImageUrl}
-            alt=""
-            className={cn(
-              "max-h-[min(90vh,900px)] max-w-[min(92vw,900px)] object-contain",
-              SENTRY_REPLAY_BLOCK_USER_IMAGE,
-            )}
-            onClick={(e) => e.stopPropagation()}
+      {cropEditorOpen &&
+        cropEditorImageUrl &&
+        cropExportImageUrl &&
+        !session?.inFlight && (
+          <MobileImageEditor
+            key={`${cropEditorImageUrl}-${activeCandidate?.version ?? 0}`}
+            imageUrl={cropEditorImageUrl}
+            cropExportUrl={cropExportImageUrl}
+            aspectRatio={1}
+            initialCrop={activeCandidate?.cropState?.crop}
+            initialZoom={activeCandidate?.cropState?.zoom}
+            initialSmartCropPixels={activeCandidate?.cropState?.croppedAreaPixels}
+            saveButtonLabel={t("framedArt.preview.cropSave")}
+            compactSaveButtonOnDesktop
+            deferCropExport
+            isSaving={isSavingCrop}
+            saveError={cropSaveError}
+            onSave={(url, state) => {
+              if (url.startsWith("blob:")) {
+                URL.revokeObjectURL(url);
+              }
+              void handleSaveIllustrationCrop(url, state);
+            }}
+            onCancel={() => {
+              if (!isSavingCrop) {
+                setCropEditorOpen(false);
+              }
+            }}
           />
-        </div>
-      )}
-      */}
+        )}
       <Footer />
     </div>
   );

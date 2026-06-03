@@ -18,3 +18,19 @@ export function framedArtColorWatermarkedPublicId(
 ): string {
   return `${framedArtColorOutputPublicId(sessionId, style, version)}_wm`;
 }
+
+export function framedArtColorCroppedPublicId(
+  sessionId: string,
+  style: StyleType,
+  version: number,
+): string {
+  return `${framedArtColorOutputPublicId(sessionId, style, version)}_crop`;
+}
+
+export function framedArtColorCroppedWatermarkedPublicId(
+  sessionId: string,
+  style: StyleType,
+  version: number,
+): string {
+  return `${framedArtColorCroppedPublicId(sessionId, style, version)}_wm`;
+}

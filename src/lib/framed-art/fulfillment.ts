@@ -28,7 +28,7 @@ export function resolveFramedArtFulfillment(
   const candidate =
     getCandidateForStyle(session, style) ?? resolveSelectedCandidate(session);
 
-  const printImageUrl = candidate?.cleanUrl;
+  const printImageUrl = candidate?.croppedCleanUrl ?? candidate?.cleanUrl;
   if (!printImageUrl) {
     return {
       ok: false,
@@ -41,7 +41,9 @@ export function resolveFramedArtFulfillment(
     session.originalPublicId ??
     publicIdFromCloudinaryUrl(session.originalUrl);
   const printPublicId =
-    candidate?.cleanPublicId ?? publicIdFromCloudinaryUrl(printImageUrl);
+    candidate?.croppedCleanPublicId ??
+    candidate?.cleanPublicId ??
+    publicIdFromCloudinaryUrl(printImageUrl);
 
   return {
     ok: true,

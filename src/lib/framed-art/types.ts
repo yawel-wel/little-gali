@@ -9,6 +9,12 @@ export type FramedArtGenerationStatus =
 
 export type FramedArtPhase = "uploaded" | "preview" | "cart_added";
 
+export type FramedArtCropState = {
+  crop: { x: number; y: number };
+  zoom: number;
+  croppedAreaPixels: { x: number; y: number; width: number; height: number };
+};
+
 export interface FramedArtStyleCandidate {
   id: string;
   style: StyleType;
@@ -18,6 +24,12 @@ export interface FramedArtStyleCandidate {
   cleanPublicId?: string;
   previewUrl?: string;
   previewPublicId?: string;
+  /** User re-crop of the generated illustration (print). */
+  croppedCleanUrl?: string;
+  croppedCleanPublicId?: string;
+  croppedPreviewUrl?: string;
+  croppedPreviewPublicId?: string;
+  cropState?: FramedArtCropState;
   createdAt: string;
   error?: GenerationError;
 }
