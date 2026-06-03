@@ -10,6 +10,7 @@ import { MobileImageEditor, type CropState } from "@/components/mobile-image-edi
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
 import { isFramedArtProhibitedContent } from "@/lib/framed-art/prohibited-content";
+import { saveFramedArtLoadingImageUrls } from "@/lib/framed-art/loading-images-storage";
 import type { FramedArtSessionPublicView } from "@/lib/framed-art/types";
 import type { StyleType } from "@/components/style-selector";
 import { parseFramedArtStyleParam } from "@/lib/framed-art/parse-style-param";
@@ -53,6 +54,10 @@ function FramedArtUploadPageContent() {
       t("framedArt.preview.loadingLine2"),
       t("framedArt.preview.loadingLine3"),
       t("framedArt.preview.loadingLine4"),
+      t("framedArt.preview.loadingLine5"),
+      t("framedArt.preview.loadingLine6"),
+      t("framedArt.preview.loadingLine7"),
+      t("framedArt.preview.loadingLine8"),
     ],
     [t],
   );
@@ -183,6 +188,7 @@ function FramedArtUploadPageContent() {
           );
         }
 
+        saveFramedArtLoadingImageUrls(sessionId, [uploadData.imageUrls[0]]);
         router.push(`/framed-art/preview/${sessionId}`);
       } catch (err) {
         setShowSubmitLoading(false);
@@ -199,7 +205,7 @@ function FramedArtUploadPageContent() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F9F7EE" }}>
       <Header />
-      {showSubmitLoading && (
+      {showSubmitLoading ? (
         <PreviewInitialLoadingScreen
           variant="overlay"
           imageUrls={submitLoadingAvatar ? [submitLoadingAvatar] : []}
@@ -214,7 +220,8 @@ function FramedArtUploadPageContent() {
           title={t("framedArt.preview.loadingTitle")}
           locale={locale}
         />
-      )}
+      ) : (
+        <>
       <main
         id="main-content"
         className="container mx-auto px-4 pb-16 pt-24"
@@ -301,6 +308,7 @@ function FramedArtUploadPageContent() {
               <MobileImageEditor
                 imageUrl={pendingImage}
                 aspectRatio={1}
+                compactSaveButtonOnDesktop
                 saveButtonLabel={t("framedArt.upload.createPreview")}
                 onSave={handleSaveCrop}
                 onCancel={() => {
@@ -320,6 +328,8 @@ function FramedArtUploadPageContent() {
         </div>
       </main>
       <Footer />
+        </>
+      )}
     </div>
   );
 }

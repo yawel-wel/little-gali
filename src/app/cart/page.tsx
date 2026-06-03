@@ -31,11 +31,38 @@ import { CartLinePrice } from "@/components/cart-line-price";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 import { resolveCartLinePrice } from "@/components/cart-line-price";
 
+function CartAddingItemRow({ label }: { label: string }) {
+  return (
+    <div
+      className="flex min-h-[4.5rem] items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:min-h-[5rem] md:p-5"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <Loader2
+        className="h-5 w-5 shrink-0 animate-spin text-primary-orange"
+        aria-hidden
+      />
+      <p className="font-body text-sm text-medium-gray">{label}</p>
+    </div>
+  );
+}
+
+function readAddingToCartFlag(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    return sessionStorage.getItem("adding_to_cart") === "1";
+  } catch {
+    return false;
+  }
+}
+
 export default function CartPage() {
   const { cart, isLoading, removeFromCart, fetchCart } = useCart();
   const router = useRouter();
   const { t, locale } = useLanguage();
-  const [isOptimisticAdding, setIsOptimisticAdding] = useState(false);
+  const [isOptimisticAdding, setIsOptimisticAdding] = useState(readAddingToCartFlag);
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -47,14 +74,6 @@ export default function CartPage() {
 
   // Refresh cart when opening /cart (fetchCart is stable unless locale changes).
   useEffect(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const flag = sessionStorage.getItem("adding_to_cart");
-        if (flag === "1") {
-          setIsOptimisticAdding(true);
-        }
-      }
-    } catch {}
     const savedCartId = localStorage.getItem("shopify_cart_id");
     if (savedCartId) {
       void fetchCart(savedCartId);
@@ -62,11 +81,16 @@ export default function CartPage() {
   }, [fetchCart]);
 
   useEffect(() => {
-    // Clear optimistic state once cart is loaded
-    if (cart && cart.items.length > 0) {
+    if (!readAddingToCartFlag()) {
       setIsOptimisticAdding(false);
+      return;
     }
-  }, [cart]);
+    setIsOptimisticAdding(true);
+    const interval = window.setInterval(() => {
+      setIsOptimisticAdding(readAddingToCartFlag());
+    }, 200);
+    return () => window.clearInterval(interval);
+  }, []);
 
   // Load gift message from cart attributes
   useEffect(() => {
@@ -275,12 +299,15 @@ export default function CartPage() {
               </div>
 
               {/* Cart Content */}
-              {isOptimisticAdding || (isLoading && !cart) ? (
+              {isLoading && !cart ? (
                 <div
-                  className="min-h-[200px] flex items-center justify-center"
+                  className="flex min-h-[120px] items-center justify-center gap-3"
                   style={{ backgroundColor: "#F3EEE8" }}
                 >
-                  <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
+                  <Loader2 className="h-6 w-6 animate-spin text-primary-orange" />
+                  <span className="font-body text-sm text-medium-gray">
+                    {t("cart.loading")}
+                  </span>
                 </div>
               ) : cart && cart.items.length > 0 ? (
                 <div className="md:flex md:gap-6 md:items-start">
@@ -478,6 +505,9 @@ export default function CartPage() {
                         </div>
                       );
                     })}
+                    {isOptimisticAdding && (
+                      <CartAddingItemRow label={t("cart.addingItem")} />
+                    )}
                     <CartSuggestProducts />
                   </div>
 
@@ -516,6 +546,10 @@ export default function CartPage() {
                       giftCheckboxId="addGiftMessageMobile"
                     />
                   </div>
+                </div>
+              ) : isOptimisticAdding ? (
+                <div className="py-8">
+                  <CartAddingItemRow label={t("cart.addingItem")} />
                 </div>
               ) : (
                 <div className="text-center py-16">

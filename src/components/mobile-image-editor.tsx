@@ -36,6 +36,8 @@ type MobileImageEditorProps = {
   /** Pinch + slider zoom (framed art upload). */
   showZoomSlider?: boolean;
   cropInstruction?: string;
+  /** Slightly smaller save CTA on md+ (framed art upload). */
+  compactSaveButtonOnDesktop?: boolean;
 };
 
 export function MobileImageEditor({
@@ -58,6 +60,7 @@ export function MobileImageEditor({
   showFramedArtFrameOverlay = false,
   showZoomSlider = false,
   cropInstruction,
+  compactSaveButtonOnDesktop = false,
 }: MobileImageEditorProps) {
   const { t, locale } = useLanguage();
   const [crop, setCrop] = useState(initialCrop ?? { x: 0, y: 0 });
@@ -275,7 +278,12 @@ export function MobileImageEditor({
           <div className="flex flex-col gap-1 items-center">
             <button
               onClick={handleSave}
-              className="bg-primary-orange text-white font-body-bold rounded-xl px-7 py-2.5 text-base cursor-pointer md:px-10 md:py-3 md:text-lg lg:hover:opacity-85 transition-opacity"
+              className={cn(
+                "bg-primary-orange text-white font-body-bold rounded-xl px-7 py-2.5 text-base cursor-pointer lg:hover:opacity-85 transition-opacity",
+                compactSaveButtonOnDesktop
+                  ? "md:px-[38px] md:py-[10px] md:text-base"
+                  : "md:px-10 md:py-3 md:text-lg",
+              )}
             >
               {saveButtonLabel ?? t("upload.cropDone")}
             </button>

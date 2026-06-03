@@ -30,12 +30,26 @@ export function PreviewInitialLoadingScreen({
   variant = "inline",
 }: PreviewInitialLoadingScreenProps) {
   const [isTakingLonger, setIsTakingLonger] = useState(false);
+  const [displayLine, setDisplayLine] = useState(loadingLine);
+  const [lineVisible, setLineVisible] = useState(true);
   const avatarDir = locale === "he" ? "rtl" : "ltr";
 
   useEffect(() => {
     const timeout = setTimeout(() => setIsTakingLonger(true), 90000);
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (loadingLine === displayLine) {
+      return;
+    }
+    setLineVisible(false);
+    const timeout = setTimeout(() => {
+      setDisplayLine(loadingLine);
+      setLineVisible(true);
+    }, 180);
+    return () => clearTimeout(timeout);
+  }, [displayLine, loadingLine]);
 
   return (
     <section
@@ -52,30 +66,32 @@ export function PreviewInitialLoadingScreen({
       aria-busy={!isComplete}
     >
       <div className="flex w-full max-w-2xl flex-col items-center">
-        {imageUrls.length > 0 && (
-          <div className="mb-7 flex justify-center" dir={avatarDir}>
-            {imageUrls.slice(0, 5).map((url, index) => (
-              <div
-                key={`${url}-${index}`}
-                className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
-                style={{
-                  animationDelay: `${index * 140}ms`,
-                  marginInlineStart: index === 0 ? 0 : -18,
-                  zIndex: imageUrls.length - index,
-                }}
-              >
-                <img
-                  src={url}
-                  alt=""
-                  className={cn(
-                    SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                    "h-full w-full object-cover",
-                  )}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <div
+          className="mb-7 flex min-h-[4.5rem] justify-center md:min-h-20"
+          dir={avatarDir}
+          aria-hidden={imageUrls.length === 0}
+        >
+          {imageUrls.slice(0, 5).map((url, index) => (
+            <div
+              key={url}
+              className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
+              style={{
+                animationDelay: `${index * 140}ms`,
+                marginInlineStart: index === 0 ? 0 : -18,
+                zIndex: imageUrls.length - index,
+              }}
+            >
+              <img
+                src={url}
+                alt=""
+                className={cn(
+                  SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                  "h-full w-full object-cover",
+                )}
+              />
+            </div>
+          ))}
+        </div>
 
         <h1 className="max-w-xl font-heading text-2xl leading-[1.15] text-accent-burgundy md:text-3xl">
           {title}
@@ -94,10 +110,14 @@ export function PreviewInitialLoadingScreen({
 
         <div className="mt-8 flex min-h-8 items-center justify-center">
           <p
-            key={loadingLine}
-            className="preview-loading-subtitle-fade font-body-bold text-lg text-dark-gray md:text-xl"
+            className={cn(
+              "font-body-bold text-lg text-dark-gray transition-opacity duration-200 md:text-xl",
+              lineVisible ? "opacity-100" : "opacity-0",
+            )}
           >
-            {loadingLine.endsWith("...") ? loadingLine : `${loadingLine}...`}
+            {displayLine.endsWith("...")
+              ? displayLine
+              : `${displayLine}...`}
           </p>
         </div>
 

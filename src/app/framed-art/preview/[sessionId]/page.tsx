@@ -13,6 +13,10 @@ import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
 import { isFramedArtProhibitedContent } from "@/lib/framed-art/prohibited-content";
+import {
+  clearFramedArtLoadingImageUrls,
+  readFramedArtLoadingImageUrls,
+} from "@/lib/framed-art/loading-images-storage";
 import type {
   FramedArtSessionPublicView,
   FramedArtStyleCandidate,
@@ -32,6 +36,14 @@ function getActiveCandidate(
     .sort((a, b) => b.version - a.version)[0];
 }
 
+function isFramedArtSessionReady(session: FramedArtSessionPublicView): boolean {
+  if (!session.selectedStyle || session.generationStatus !== "complete") {
+    return false;
+  }
+  const candidate = getActiveCandidate(session, session.selectedStyle);
+  return Boolean(candidate?.previewUrl);
+}
+
 export default function FramedArtPreviewPage() {
   const params = useParams();
   const sessionId = params.sessionId as string;
@@ -45,7 +57,12 @@ export default function FramedArtPreviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
   const [keepLoadingVisible, setKeepLoadingVisible] = useState(false);
+  const [skipInitialLoader, setSkipInitialLoader] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [localLoadingPhotoUrls] = useState(() =>
+    readFramedArtLoadingImageUrls(sessionId),
+  );
+  const initialFetchDoneRef = useRef(false);
 
   const selectedStyle = session?.selectedStyle;
   const activeCandidate = useMemo(
@@ -73,7 +90,15 @@ export default function FramedArtPreviewPage() {
     setSessionLoadError(null);
     const data = await res.json();
     if (data.session) {
-      setSession(data.session);
+      const nextSession = data.session as FramedArtSessionPublicView;
+      setSession(nextSession);
+      if (!initialFetchDoneRef.current) {
+        initialFetchDoneRef.current = true;
+        if (isFramedArtSessionReady(nextSession)) {
+          setSkipInitialLoader(true);
+          setKeepLoadingVisible(false);
+        }
+      }
     }
   }, [sessionId, t]);
 
@@ -129,6 +154,9 @@ export default function FramedArtPreviewPage() {
   }, [generationFailed, session]);
 
   useEffect(() => {
+    if (skipInitialLoader) {
+      return;
+    }
     if (isGenerating) {
       setKeepLoadingVisible(true);
       return;
@@ -138,11 +166,35 @@ export default function FramedArtPreviewPage() {
     }
     const timeout = setTimeout(() => setKeepLoadingVisible(false), 400);
     return () => clearTimeout(timeout);
-  }, [isGenerating, keepLoadingVisible]);
+  }, [isGenerating, keepLoadingVisible, skipInitialLoader]);
 
-  const showLoadingScreen =
-    !sessionLoadError && (isGenerating || keepLoadingVisible);
-  const isLoadingExiting = !isGenerating && keepLoadingVisible;
+  const hideOverlayForReadySession =
+    skipInitialLoader &&
+    Boolean(session) &&
+    !session?.inFlight &&
+    session?.generationStatus === "complete";
+
+  const showLoadingOverlay =
+    !sessionLoadError &&
+    !generationFailed &&
+    !hideOverlayForReadySession &&
+    (isGenerating || keepLoadingVisible);
+  const isLoadingExiting =
+    !isGenerating && keepLoadingVisible && !hideOverlayForReadySession;
+
+  const loadingPhotoUrls =
+    session?.originalUrl != null
+      ? [session.originalUrl]
+      : localLoadingPhotoUrls;
+
+  useEffect(() => {
+    if (showLoadingOverlay || localLoadingPhotoUrls.length === 0) {
+      return;
+    }
+    clearFramedArtLoadingImageUrls(sessionId);
+  }, [localLoadingPhotoUrls.length, sessionId, showLoadingOverlay]);
+
+  const showReadyMain = Boolean(session) && !sessionLoadError && !generationFailed;
 
   const loadingLines = useMemo(
     () => [
@@ -150,27 +202,31 @@ export default function FramedArtPreviewPage() {
       t("framedArt.preview.loadingLine2"),
       t("framedArt.preview.loadingLine3"),
       t("framedArt.preview.loadingLine4"),
+      t("framedArt.preview.loadingLine5"),
+      t("framedArt.preview.loadingLine6"),
+      t("framedArt.preview.loadingLine7"),
+      t("framedArt.preview.loadingLine8"),
     ],
     [t],
   );
 
   const wasLoadingScreenRef = useRef(false);
   useEffect(() => {
-    if (showLoadingScreen && !wasLoadingScreenRef.current) {
+    if (showLoadingOverlay && !wasLoadingScreenRef.current) {
       setLoadingLineIndex(0);
     }
-    wasLoadingScreenRef.current = showLoadingScreen;
-  }, [showLoadingScreen]);
+    wasLoadingScreenRef.current = showLoadingOverlay;
+  }, [showLoadingOverlay]);
 
   useEffect(() => {
-    if (!showLoadingScreen || loadingLines.length === 0) {
+    if (!showLoadingOverlay || loadingLines.length === 0) {
       return;
     }
     const interval = setInterval(() => {
       setLoadingLineIndex((current) => (current + 1) % loadingLines.length);
     }, 3500);
     return () => clearInterval(interval);
-  }, [loadingLines.length, showLoadingScreen]);
+  }, [loadingLines.length, showLoadingOverlay]);
 
   const handleRegenerate = async () => {
     if (!session?.canRegenerate) return;
@@ -211,15 +267,13 @@ export default function FramedArtPreviewPage() {
     ? `/framed-art/upload?style=${selectedStyle}`
     : "/framed-art/upload";
 
-  const originalPhotoUrls = session?.originalUrl ? [session.originalUrl] : [];
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F9F7EE" }}>
       <Header />
-      {showLoadingScreen && !generationFailed ? (
+      {showLoadingOverlay && (
         <PreviewInitialLoadingScreen
           variant="overlay"
-          imageUrls={originalPhotoUrls}
+          imageUrls={loadingPhotoUrls}
           isExiting={isLoadingExiting}
           isComplete={!isGenerating}
           loadingLine={
@@ -231,7 +285,8 @@ export default function FramedArtPreviewPage() {
           title={t("framedArt.preview.loadingTitle")}
           locale={locale}
         />
-      ) : sessionLoadError ? (
+      )}
+      {sessionLoadError ? (
         <main
           id="main-content"
           className="container mx-auto max-w-2xl px-4 pb-16 pt-24 text-center"
@@ -273,11 +328,17 @@ export default function FramedArtPreviewPage() {
             </>
           )}
         </main>
-      ) : (
+      ) : showReadyMain ? (
         <main
           id="main-content"
-          className="container mx-auto max-w-2xl px-4 pb-16 pt-24"
+          className={cn(
+            "container mx-auto max-w-2xl px-4 pb-16 pt-24",
+            showLoadingOverlay &&
+              !isLoadingExiting &&
+              "pointer-events-none invisible",
+          )}
           style={{ paddingTop: "calc(72px + var(--banner-height, 0px) + 2rem)" }}
+          aria-hidden={showLoadingOverlay && !isLoadingExiting}
         >
           <Title
             highlightText={t("framedArt.preview.readyTitleHighlight")}
@@ -342,7 +403,7 @@ export default function FramedArtPreviewPage() {
             </Link>
           </div>
         </main>
-      )}
+      ) : null}
       {lightboxOpen && lightboxImageUrl && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
