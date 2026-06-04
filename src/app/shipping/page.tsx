@@ -5,8 +5,62 @@ import { Footer } from "@/components/footer";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useState, useEffect } from "react";
 
+function ShippingSection({
+  title,
+  paragraphs,
+  locale,
+}: {
+  title: string;
+  paragraphs: string[];
+  locale: string;
+}) {
+  const align = locale === "en" ? "text-left" : "text-right";
+
+  return (
+    <section>
+      <h2
+        className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${align}`}
+      >
+        {title}
+      </h2>
+      {paragraphs.map((text, index) => (
+        <p
+          key={index}
+          className={index < paragraphs.length - 1 ? "mb-4" : undefined}
+        >
+          {text}
+        </p>
+      ))}
+    </section>
+  );
+}
+
+function ShippingList({
+  items,
+  locale,
+  className,
+}: {
+  items: string[];
+  locale: string;
+  className?: string;
+}) {
+  const listMargin = locale === "en" ? "ml-4" : "mr-4";
+
+  return (
+    <ul
+      className={`list-disc list-inside space-y-2 ${listMargin} ${className ?? ""}`}
+    >
+      {items.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
 function ShippingPageContent() {
   const { t, locale } = useLanguage();
+  const textAlign = locale === "en" ? "text-left" : "text-right";
+
   return (
     <div
       className="min-h-screen overflow-x-hidden"
@@ -21,98 +75,109 @@ function ShippingPageContent() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             <div className="max-w-4xl mx-auto">
-              {/* Page Title */}
-              <div className="text-center mb-12">
-                <h1 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight mb-4 text-center">
+              <div className="mb-12 text-center">
+                <h1 className="mb-4 text-center font-heading text-3xl leading-tight text-dark-gray lg:text-4xl">
                   {t("shipping.title")}
                 </h1>
               </div>
 
-              {/* Content */}
               <div
-                className={`space-y-8 font-body text-medium-gray leading-relaxed ${
-                  locale === "en" ? "text-left" : "text-right"
-                }`}
+                className={`space-y-8 font-body leading-relaxed text-medium-gray ${textAlign}`}
               >
-                {/* זמן אספקה */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("shipping.deliveryTime.title")}
-                  </h2>
-                  <p className="mb-4">{t("shipping.deliveryTime.p1")}</p>
-                  <p className="mb-4">{t("shipping.deliveryTime.p2")}</p>
-                  <p>{t("shipping.deliveryTime.p3")}</p>
-                </div>
+                <ShippingSection
+                  locale={locale}
+                  title={t("shipping.deliveryTime.title")}
+                  paragraphs={[
+                    t("shipping.deliveryTime.p1"),
+                    t("shipping.deliveryTime.p2"),
+                    t("shipping.deliveryTime.p3"),
+                    t("shipping.deliveryTime.p4"),
+                    t("shipping.deliveryTime.p5"),
+                  ]}
+                />
 
-                {/* עלויות משלוח */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("shipping.costs.title")}
-                  </h2>
-                  <p className="mb-4">{t("shipping.costs.p1")}</p>
-                  <p>{t("shipping.costs.p2")}</p>
-                </div>
+                <ShippingSection
+                  locale={locale}
+                  title={t("shipping.costs.title")}
+                  paragraphs={[
+                    t("shipping.costs.p1"),
+                    t("shipping.costs.p2"),
+                    t("shipping.costs.p3"),
+                  ]}
+                />
 
-                {/* מעקב משלוח */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("shipping.tracking.title")}
-                  </h2>
-                  <p>{t("shipping.tracking.p1")}</p>
-                </div>
+                <ShippingSection
+                  locale={locale}
+                  title={t("shipping.details.title")}
+                  paragraphs={[
+                    t("shipping.details.p1"),
+                    t("shipping.details.p2"),
+                  ]}
+                />
 
-                {/* אזורי משלוח */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("shipping.deliveryAreas.title")}
-                  </h2>
-                  <p>{t("shipping.deliveryAreas.p1")}</p>
-                </div>
+                <ShippingSection
+                  locale={locale}
+                  title={t("shipping.tracking.title")}
+                  paragraphs={[
+                    t("shipping.tracking.p1"),
+                    t("shipping.tracking.p2"),
+                  ]}
+                />
 
-                {/* מוצר שניזוק במשלוח */}
-                <div>
+                <ShippingSection
+                  locale={locale}
+                  title={t("shipping.deliveryAreas.title")}
+                  paragraphs={[
+                    t("shipping.deliveryAreas.p1"),
+                    t("shipping.deliveryAreas.p2"),
+                  ]}
+                />
+
+                <section>
                   <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                    className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${textAlign}`}
                   >
                     {t("shipping.damaged.title")}
                   </h2>
+                  <p className="mb-4">{t("shipping.damaged.p1")}</p>
+                  <p className="mb-4">{t("shipping.damaged.intro")}</p>
+                  <ShippingList
+                    locale={locale}
+                    className="mb-4"
+                    items={[
+                      t("shipping.damaged.li1"),
+                      t("shipping.damaged.li2"),
+                      t("shipping.damaged.li3"),
+                      t("shipping.damaged.li4"),
+                    ]}
+                  />
+                  <p>{t("shipping.damaged.p2")}</p>
+                </section>
+
+                <ShippingSection
+                  locale={locale}
+                  title={t("shipping.undelivered.title")}
+                  paragraphs={[t("shipping.undelivered.p1")]}
+                />
+
+                <section>
+                  <h2
+                    className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${textAlign}`}
+                  >
+                    {t("shipping.contact.title")}
+                  </h2>
+                  <p className="mb-4">{t("shipping.contact.p1")}</p>
                   <p className="mb-4">
-                    {t("shipping.damaged.p1")}{" "}
+                    📧{" "}
                     <a
-                      href="/contact"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
+                      href="mailto:support@littlegali.com"
+                      className="text-primary-orange underline hover:text-primary-orange/80"
                     >
-                      {t("shipping.damaged.link")}
-                    </a>{" "}
-                    {t("shipping.damaged.p2")}{" "}
-                    <a
-                      href="mailto:yaelromashkano@gmail.com"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
-                    >
-                      yaelromashkano@gmail.com
+                      support@littlegali.com
                     </a>
-                    .
                   </p>
-                  <p>{t("shipping.damaged.p3")}</p>
-                </div>
+                  <p>{t("shipping.contact.lastUpdated")}</p>
+                </section>
               </div>
             </div>
           </div>
@@ -138,7 +203,7 @@ export default function ShippingPage() {
         style={{ backgroundColor: "#F3EEE8" }}
       >
         <Header />
-        <div className="min-h-screen"></div>
+        <div className="min-h-screen" />
         <Footer />
       </div>
     );

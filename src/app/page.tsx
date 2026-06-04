@@ -1220,17 +1220,17 @@ export default function Home() {
         <motion.section
           id="about"
           aria-labelledby="about-heading"
-          className={`relative bg-white ${locale === "en" ? "pb-16 md:pb-20" : "pb-6"}`}
+          className={`relative bg-white pt-0 lg:pt-4 ${locale === "en" ? "pb-16 md:pb-20" : "pb-6"}`}
           {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-4 lg:gap-16 items-stretch max-w-6xl mx-auto">
               {/* Left Column - Image */}
               <motion.div
-                className="relative rounded-3xl overflow-hidden"
+                className="relative h-full min-h-0 overflow-hidden rounded-3xl"
                 {...reveal.imageReveal}
               >
-                  <div className="w-full aspect-[4/3] relative">
+                <div className="relative aspect-[4/3] w-full lg:aspect-auto lg:h-full">
                   <Image
                     src="/about-us.jpg"
                     alt={t("home.about.imageAlt")}
@@ -1263,15 +1263,14 @@ export default function Home() {
 
                   {/* Body text */}
                   <div className="space-y-3 pt-2">
-                    <p className="font-body text-medium-gray leading-relaxed">
-                      {t("home.about.paragraph1")}
-                    </p>
-                    <p className="font-body text-medium-gray leading-relaxed">
-                      {t("home.about.paragraph2")}
-                    </p>
-                    <p className="font-body text-medium-gray leading-relaxed">
-                      {t("home.about.paragraph3")}
-                    </p>
+                    {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+                      <p
+                        key={n}
+                        className="font-body text-medium-gray leading-relaxed"
+                      >
+                        {t(`home.about.paragraph${n}`)}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </div>

@@ -222,141 +222,288 @@ const hebrewTranslations = {
 
   // Terms of Service
   "terms.title": "תנאי השירות",
-  "terms.intro":
-    "ברוכים הבאים לאתר Little Gali. השימוש באתר והשירותים הניתנים בו כפופים לתנאים המפורטים להלן. בעת גלישה באתר וביצוע הזמנה, אתם מאשרים כי קראתם והסכמתם לתנאים אלה במלואם.",
+  "terms.intro.p1": "ברוכים הבאים לאתר Little Gali.",
+  "terms.intro.p2":
+    "השימוש באתר והשירותים הניתנים בו כפופים לתנאים המפורטים להלן. בעת גלישה באתר, שימוש בשירותים או ביצוע הזמנה, אתם מאשרים כי קראתם והסכמתם לתנאים אלה במלואם.",
   "terms.useOfSite.title": "שימוש באתר",
   "terms.useOfSite.p1":
-    "האתר מאפשר הזמנת ספרונים אישיים לתינוקות המבוססים על תמונות שהמשתמש מעלה. השימוש באתר מותר למטרות אישיות ופרטיות בלבד.",
-  "terms.useOfSite.p2":
-    "חל איסור להשתמש באתר למטרות מסחריות שאינן באישורנו, להעלות תוכן פוגעני, לא חוקי, או תמונות שאינן בבעלות המשתמש.",
+    "האתר מאפשר הזמנת מוצרים מותאמים אישית המבוססים על תמונות שהמשתמש מעלה, לרבות ספרונים לתינוקות, איורים מודפסים ותמונות ממוסגרות.",
+  "terms.useOfSite.p2": "השימוש באתר מותר למטרות אישיות ופרטיות בלבד.",
+  "terms.useOfSite.p3":
+    "חל איסור להשתמש באתר למטרות מסחריות ללא אישור מראש, להעלות תוכן פוגעני, בלתי חוקי או תמונות שאינן בבעלות המשתמש.",
   "terms.userResponsibility.title": "אחריות המשתמש",
   "terms.userResponsibility.p1":
-    "המשתמש מצהיר כי יש לו זכויות מלאות על התמונות שהוא מעלה, וכי השימוש בהן לצורך הפקת הספרון אינו מפר זכויות יוצרים, פרטיות או כל דין אחר.",
+    "המשתמש מצהיר כי יש בידיו את כל הזכויות וההרשאות הנדרשות לשימוש בתמונות שהוא מעלה לאתר.",
   "terms.userResponsibility.p2":
-    "המשתמש מאשר כי לא יעלה תמונות של קטינים או צדדים שלישיים ללא הסכמתם, וכי כל האחריות המשפטית בגין התוכן שהועלה חלה עליו בלבד.",
+    "המשתמש אחראי לוודא כי השימוש בתמונות אינו מפר זכויות יוצרים, זכויות פרטיות או כל דין אחר.",
+  "terms.userResponsibility.p3":
+    "המשתמש אחראי לקבל את הסכמתם של כל האנשים המופיעים בתמונות, ככל שנדרש.",
+  "terms.userResponsibility.p4":
+    "כל האחריות המשפטית בגין התוכן שהועלה לאתר חלה על המשתמש בלבד.",
   "terms.ordersAndPayment.title": "הזמנות ותשלום",
   "terms.ordersAndPayment.p1":
-    "המחירים באתר מוצגים במטבע המצוין בעמוד ההזמנה וכוללים מע״מ בהתאם לחוק. התשלום מתבצע באמצעות מערכת סליקה מאובטחת, וההזמנה תיחשב סופית לאחר אישור התשלום.",
-  "terms.ordersAndPayment.p2":
-    "החברה שומרת לעצמה את הזכות לבטל הזמנה במקרה של טעות במחיר, תקלה טכנית, חוסר זמינות או שימוש שאינו תקין באתר.",
-  "terms.productProduction.title": "הפקת המוצר",
+    "המחירים באתר מוצגים במטבע המצוין בעמוד ההזמנה וכוללים מע״מ בהתאם לחוק, ככל שנדרש.",
+  "terms.ordersAndPayment.p2": "התשלום מתבצע באמצעות מערכת סליקה מאובטחת.",
+  "terms.ordersAndPayment.p3":
+    "ההזמנה תיחשב סופית לאחר אישור התשלום וקבלת אישור ההזמנה.",
+  "terms.ordersAndPayment.p4":
+    "Little Gali שומרת לעצמה את הזכות לבטל הזמנה במקרה של טעות במחיר, תקלה טכנית, חוסר זמינות של מוצר, חשש לשימוש בלתי תקין באתר או כל סיבה סבירה אחרת.",
+  "terms.productProduction.title": "הפקת המוצרים",
   "terms.productProduction.p1":
-    "כל ספרון מופק בהתאמה אישית על בסיס התמונות שהועלו.",
+    "המוצרים באתר מיוצרים בהתאמה אישית על בסיס התמונות שהועלו ואושרו על ידי הלקוח במהלך תהליך ההזמנה.",
   "terms.productProduction.p2":
-    "מאחר שמדובר במוצר ייחודי ומותאם אישית, לא ניתן לשנות, לבטל או לבקש החזר לאחר ביצוע ההזמנה, למעט בהתאם למדיניות ההחזרים של האתר.",
+    "חלק מהמוצרים כוללים עיבוד דיגיטלי או יצירת איורים המבוססים על התמונות שהועלו. למרות שאנו שואפים לשמור על דמיון מרבי לתמונות המקור, ייתכנו הבדלים מסוימים בין התמונה המקורית לבין התוצאה הסופית.",
+  "terms.productProduction.p3":
+    "התצוגה באתר נועדה להמחשה בלבד, וייתכנו הבדלים קלים בין התצוגה הדיגיטלית לבין המוצר המודפס בפועל.",
+  "terms.customProducts.title": "מוצרים מותאמים אישית",
+  "terms.customProducts.p1":
+    "מאחר שהמוצרים מיוצרים במיוחד עבור כל לקוח ובהתאם לתמונות שסופקו על ידו, לא ניתן לבטל, לשנות או להחזיר הזמנה לאחר אישור ההזמנה וביצוע התשלום, למעט במקרים המפורטים במדיניות ההחזרים של האתר או בהתאם להוראות הדין.",
   "terms.warrantyAndService.title": "אחריות ושירות",
-  "terms.warrantyAndService.p1":
-    "אנו מקפידות על איכות גבוהה של הדפסה וייצור, אך ייתכנו הבדלים קלים בגוון, חיתוך או ניגודיות בין התצוגה במסך לבין ההדפסה בפועל. הבדלים אלה נחשבים תקינים ואינם מהווים עילה לביטול עסקה.",
+  "terms.warrantyAndService.p1": "אנו מקפידות על איכות גבוהה של ייצור והדפסה.",
   "terms.warrantyAndService.p2":
-    "במקרה של מוצר פגום או נזק במשלוח, נטפל בכך בהתאם למדיניות ההחזרים שלנו.",
-  "terms.safeUse.title": "שימוש בטוח במוצרים לתינוקות",
-  "terms.safeUse.p1": "מוצרי Little Gali נועדו לשימוש הורי ולהשגחת מבוגר בלבד.",
-  "terms.safeUse.p2":
-    "הספרונים עשויים מנייר עבה (300 גרם) עם למינציה לשמירה על עמידות, אך אינם מיועדים לנשיכה, לעיסה או מגע ממושך עם רוק או נוזלים אחרים. אין להשאיר את המוצר ללא השגחה בקרבת תינוק או פעוט.",
-  "terms.safeUse.p3":
-    "החברה אינה אחראית לכל נזק, ישיר או עקיף, שייגרם עקב שימוש שאינו בהתאם להנחיות אלו. השימוש במוצר מהווה אישור לכך שהלקוח/ה קרא/ה את ההנחיות ומקבל/ת אחריות מלאה לשימוש בטוח ומושכל.",
+    "עם זאת, ייתכנו הבדלים קלים בגוונים, בצבעים, בחיתוך, במרקם, בניגודיות או במיקום האלמנטים בין התצוגה על מסכים שונים לבין המוצר המודפס בפועל.",
+  "terms.warrantyAndService.p3":
+    "הבדלים סבירים אלו אינם נחשבים לפגם ואינם מהווים עילה לביטול עסקה. במקרה של פגם בייצור או נזק שנגרם במהלך המשלוח, ניתן לפנות אלינו ונפעל בהתאם למדיניות ההחזרים של האתר.",
+  "terms.safeUse.title": "שימוש בטוח במוצרים",
+  "terms.safeUse.books.title": "ספרונים לתינוקות",
+  "terms.safeUse.books.p1": "הספרונים מיועדים לשימוש בהשגחת מבוגר בלבד.",
+  "terms.safeUse.books.p2":
+    "הספרונים עשויים מנייר עבה עם למינציה לשיפור העמידות, אך אינם מיועדים לנשיכה, לעיסה או לחשיפה ממושכת לנוזלים.",
+  "terms.safeUse.books.p3": "אין להשאיר את המוצר ללא השגחה בקרבת תינוק או פעוט.",
+  "terms.safeUse.framed.title": "תמונות ממוסגרות",
+  "terms.safeUse.framed.p1":
+    "התמונות הממוסגרות מסופקות עם אמצעי תלייה בהתאם לדגם.",
+  "terms.safeUse.framed.p2":
+    "בעת שימוש במדבקות התלייה, מומלץ שלא להדביקן על טפטים, צבע מתקלף, קירות סדוקים, משטחים עדינים או משטחים שאינם מתאימים להדבקה.",
+  "terms.safeUse.framed.p3":
+    "למרות שהמדבקות מיועדות להסרה, הסרתן עלולה במקרים מסוימים לגרום לפגיעה קלה בצבע, בציפוי או במשטח הקיר.",
+  "terms.safeUse.framed.p4":
+    "האחריות לבחירת מיקום התלייה, התאמת המשטח ואופן ההתקנה מוטלת על הלקוח בלבד.",
+  "terms.safeUse.framed.p5":
+    "ניתן לתלות את המסגרות גם באמצעות מסמר או אמצעי תלייה חלופי המתאים לסוג הקיר.",
+  "terms.safeUse.framed.p6":
+    "מטעמי בטיחות, מומלץ שלא לתלות מסגרות מעל מיטות תינוק, עריסות או אזורי שינה של ילדים.",
+  "terms.safeUse.framed.p7":
+    "Little Gali אינה אחראית לנזק שייגרם לקירות, למשטחים, לחפצים או לאנשים כתוצאה מהתקנה לא נכונה, שימוש שלא בהתאם להוראות או אי התאמה של משטח ההתקנה.",
   "terms.intellectualProperty.title": "קניין רוחני",
   "terms.intellectualProperty.p1":
-    "כל זכויות היוצרים, העיצוב, התמונות, התוכן והקוד באתר שייכים ל־Little Gali, ואין להעתיק, להפיץ, לשכפל או להשתמש בהם ללא אישור מראש ובכתב.",
+    "כל זכויות היוצרים, העיצובים, האיורים, התמונות, התוכן, סימני המסחר והקוד באתר שייכים ל-Little Gali או נמצאים בשימוש חוקי מטעמה.",
+  "terms.intellectualProperty.p2":
+    "אין להעתיק, להפיץ, לשכפל, לפרסם, למכור או לעשות כל שימוש בתוכן האתר ללא אישור מראש ובכתב.",
   "terms.liabilityLimitation.title": "הגבלת אחריות",
-  "terms.liabilityLimitation.p1":
-    "השימוש באתר ובמוצרים נעשה באחריות המשתמש בלבד. Little Gali אינה אחראית לנזקים עקיפים, אובדן מידע, הפסדים או כל נזק תוצאתי אחר שנגרם עקב שימוש באתר, בשירות או במוצרים.",
+  "terms.liabilityLimitation.p1": "השימוש באתר ובמוצרים נעשה באחריות המשתמש בלבד.",
+  "terms.liabilityLimitation.p2":
+    "Little Gali אינה אחראית לנזקים עקיפים, אובדן מידע, אובדן רווחים או כל נזק תוצאתי אחר הנובע מהשימוש באתר, בשירותים או במוצרים. בכל מקרה, אחריותה של Little Gali לא תעלה על סכום ההזמנה ששולם בפועל על ידי הלקוח.",
   "terms.termsChanges.title": "שינוי תנאים",
   "terms.termsChanges.p1":
-    "אנו שומרות לעצמנו את הזכות לעדכן או לשנות את תנאי השירות מעת לעת. הגרסה העדכנית תפורסם באתר, והמשך השימוש מהווה הסכמה לתנאים המעודכנים.",
+    "Little Gali שומרת לעצמה את הזכות לעדכן או לשנות את תנאי השירות מעת לעת. הגרסה העדכנית תפורסם באתר, והמשך השימוש באתר לאחר פרסום העדכון יהווה הסכמה לתנאים המעודכנים.",
   "terms.contact.title": "יצירת קשר",
   "terms.contact.p1":
-    "לשאלות או הבהרות בנושא תנאי השירות ניתן לפנות אלינו באמצעות עמוד",
-  "terms.contact.link": "צור קשר",
-  "terms.contact.p2": "או במייל:",
+    "לשאלות, הבהרות או פניות בנושא תנאי השירות ניתן ליצור קשר באמצעות עמוד",
+  "terms.contact.link": "צרו קשר",
+  "terms.contact.p2": "באתר או בדוא״ל:",
 
   // Privacy Policy
   "privacy.title": "מדיניות פרטיות",
-  "privacy.intro":
-    "אנו מכבדות את פרטיותכם ומתחייבות לשמור על המידע האישי שלכם ועל התמונות שתעלו לאתר. השימוש במידע ובתמונות נעשה אך ורק לצורך מתן השירות, הפקת הספרון האישי והשלמת ההזמנה – ולא לכל מטרה אחרת.",
-  "privacy.personalInfo.title": "מידע אישי",
-  "privacy.personalInfo.p1":
-    "בעת ביצוע הזמנה באתר נאסף מידע בסיסי כגון שם, כתובת, פרטי תשלום וכתובת דוא״ל. המידע משמש לצורך:",
-  "privacy.personalInfo.li1": "עיבוד ותיעוד ההזמנה,",
-  "privacy.personalInfo.li2": "משלוח המוצר,",
-  "privacy.personalInfo.li3": "ומתן שירות לקוחות.",
-  "privacy.personalInfo.p2":
-    "המידע נשמר בצורה מאובטחת ואינו נמסר לצדדים שלישיים, למעט במקרים הנדרשים לצורך ביצוע התשלום או משלוח המוצר, ובהתאם להסכמי סודיות ושמירת פרטיות.",
-  "privacy.imageUse.title": "שימוש בתמונות",
-  "privacy.imageUse.p1":
-    "התמונות שתעלו לאתר ישמשו אך ורק לצורך יצירת הספרון האישי שלכם.",
-  "privacy.imageUse.p2":
-    "התמונות נשמרות באופן מאובטח בענן לצורך הפקת המוצר, הצגת תצוגה מקדימה, מתן שירות לקוחות או שחזור במקרה של תקלה, גם אם לא הושלמה רכישה בפועל.",
-  "privacy.imageUse.p3":
-    "לא ייעשה בתמונות כל שימוש נוסף, פרסום או העברה לצדדים שלישיים.",
-  "privacy.imageUse.p4":
-    "ניתן לפנות אלינו בכל עת בבקשה למחיקת התמונות לאחר סיום ההפקה או במקרה של אי־רכישה, ואנו נטפל בכך בהתאם לשיקולים טכניים של גיבוי ותמיכה.",
-  "privacy.dataSecurity.title": "אבטחת מידע",
-  "privacy.dataSecurity.p1":
-    "האתר משתמש באמצעי אבטחה מתקדמים, לרבות הצפנת נתונים ואחסון בשרתים מאובטחים, לצורך הגנה על פרטיותכם. יחד עם זאת, יש לזכור כי אף מערכת אינטרנטית אינה חסינה לחלוטין, ואיננו יכולים להבטיח הגנה מוחלטת מפני חדירה או שימוש לא מורשה.",
-  "privacy.userRights.title": "זכויות המשתמש",
-  "privacy.userRights.p1":
-    "כל משתמש רשאי לפנות בכל עת בבקשה לעיון, עדכון, תיקון או מחיקה של המידע האישי שלו, בכפוף להוראות הדין ולצרכים תפעוליים של האתר.",
+  "privacy.intro.title": "מבוא",
+  "privacy.intro.p1":
+    "ב-Little Gali אנו מכבדים את פרטיות לקוחותינו ומחויבים להגן על המידע האישי שנמסר לנו.",
+  "privacy.intro.p2":
+    "מדיניות פרטיות זו מסבירה אילו סוגי מידע אנו אוספים, כיצד אנו משתמשים בהם, עם מי אנו עשויים לשתף אותם, ומהן זכויותיך בקשר למידע זה.",
+  "privacy.intro.p3": "השימוש באתר מהווה הסכמה למדיניות פרטיות זו.",
+  "privacy.collection.title": "איזה מידע אנו אוספים?",
+  "privacy.collection.youProvide.title": "מידע שאתה מוסר לנו",
+  "privacy.collection.youProvide.p1":
+    "בעת ביצוע הזמנה או יצירת קשר עם העסק, אנו עשויים לאסוף:",
+  "privacy.collection.youProvide.li1": "שם מלא",
+  "privacy.collection.youProvide.li2": "כתובת דואר אלקטרוני",
+  "privacy.collection.youProvide.li3": "מספר טלפון",
+  "privacy.collection.youProvide.li4": "כתובת למשלוח",
+  "privacy.collection.youProvide.li5": "פרטי ההזמנה",
+  "privacy.collection.youProvide.li6": "תמונות ותוכן שמועלים לאתר",
+  "privacy.collection.youProvide.p2":
+    "בעת שימוש בשירותי Little Gali, ניתן להעלות תמונות לצורך יצירת מוצרים מותאמים אישית, כגון ספרונים לתינוקות, איורים ותמונות ממוסגרות.",
+  "privacy.collection.youProvide.p3":
+    "התמונות משמשות לצורך הפקת המוצר שהוזמן בלבד.",
+  "privacy.collection.technical.title": "מידע טכני ונתוני שימוש",
+  "privacy.collection.technical.p1": "בעת הגלישה באתר אנו עשויים לאסוף מידע כגון:",
+  "privacy.collection.technical.li1": "כתובת IP",
+  "privacy.collection.technical.li2": "סוג הדפדפן והמכשיר",
+  "privacy.collection.technical.li3": "עמודים שנצפו באתר",
+  "privacy.collection.technical.li4": "זמן השהייה באתר",
+  "privacy.collection.technical.li5": "פעולות שבוצעו במהלך השימוש באתר",
+  "privacy.usage.title": "כיצד אנו משתמשים במידע?",
+  "privacy.usage.intro": "אנו משתמשים במידע שנאסף לצורך:",
+  "privacy.usage.li1": "עיבוד וייצור ההזמנות",
+  "privacy.usage.li2": "אספקת המוצרים והשירותים",
+  "privacy.usage.li3": "יצירת איורים ועיבוד התמונות שהועלו",
+  "privacy.usage.li4": "מתן שירות לקוחות ומענה לפניות",
+  "privacy.usage.li5": "שיפור האתר וחוויית המשתמש",
+  "privacy.usage.li6": "אבטחת האתר ומניעת שימוש לרעה",
+  "privacy.usage.li7": "שליחת עדכונים הקשורים להזמנה",
+  "privacy.usage.li8": "שליחת תוכן שיווקי, בכפוף להסכמה כאשר נדרשת",
+  "privacy.imageProcessing.title": "עיבוד תמונות ויצירת איורים",
+  "privacy.imageProcessing.p1":
+    "לצורך יצירת המוצרים המותאמים אישית, התמונות המועלות לאתר עשויות לעבור עיבוד דיגיטלי או שימוש בכלים מבוססי בינה מלאכותית (AI).",
+  "privacy.imageProcessing.p2":
+    "העיבוד מבוצע אך ורק לצורך יצירת המוצר שהוזמן ואינו מקנה ל-Little Gali כל בעלות על התמונות שהועלו על ידי הלקוח.",
+  "privacy.analytics.title": "כלי ניתוח ומעקב",
+  "privacy.analytics.intro":
+    "האתר משתמש בכלים המסייעים לנו להבין כיצד מבקרים משתמשים באתר ולשפר את השירותים שלנו.",
+  "privacy.analytics.ga.title": "Google Analytics",
+  "privacy.analytics.ga.p":
+    "Google Analytics מספק מידע סטטיסטי על תנועת הגולשים באתר, עמודים שנצפו, מקורות תנועה ופעולות שבוצעו באתר.",
+  "privacy.analytics.meta.title": "Meta Pixel",
+  "privacy.analytics.meta.p":
+    "Meta Pixel מאפשר למדוד את יעילות הפרסום שלנו בפייסבוק ובאינסטגרם, להבין אילו פעולות בוצעו באתר ולבצע אופטימיזציה של קמפיינים פרסומיים.",
+  "privacy.analytics.cookiesNote":
+    "כלים אלה עשויים לאסוף מידע באמצעות עוגיות (Cookies) וטכנולוגיות דומות.",
+  "privacy.cookies.title": "עוגיות (Cookies)",
+  "privacy.cookies.intro": "האתר משתמש בעוגיות ובטכנולוגיות דומות לצורך:",
+  "privacy.cookies.li1": "תפעול תקין של האתר",
+  "privacy.cookies.li2": "שמירת העדפות משתמש",
+  "privacy.cookies.li3": "מדידת ביצועים",
+  "privacy.cookies.li4": "ניתוח תנועה",
+  "privacy.cookies.li5": "שיווק ופרסום",
+  "privacy.cookies.note":
+    "ניתן לחסום או למחוק עוגיות באמצעות הגדרות הדפדפן, אולם פעולה זו עלולה להשפיע על חלק מפונקציות האתר.",
+  "privacy.sharing.title": "שיתוף מידע עם צדדים שלישיים",
+  "privacy.sharing.p1":
+    "איננו מוכרים או משכירים מידע אישי לצדדים שלישיים.",
+  "privacy.sharing.intro": "ייתכן שנשתף מידע עם:",
+  "privacy.sharing.li1": "ספקי שירות טכנולוגיים המסייעים בהפעלת האתר",
+  "privacy.sharing.li2": "ספקי אחסון ושירותי ענן",
+  "privacy.sharing.li3": "שירותי סליקה ותשלומים",
+  "privacy.sharing.li4": "חברות שילוח ואספקה",
+  "privacy.sharing.li5": "ספקי ניתוח ופרסום כגון Google ו-Meta",
+  "privacy.sharing.li6": "רשויות מוסמכות כאשר הדבר נדרש על פי דין",
+  "privacy.sharing.p2":
+    "כל שיתוף מידע יתבצע רק במידה הנדרשת לצורך מתן השירות.",
+  "privacy.retention.title": "שמירת מידע",
+  "privacy.retention.p1":
+    "אנו שומרים מידע אישי למשך הזמן הנדרש לצורך אספקת השירות, עמידה בדרישות חוקיות, טיפול בפניות לקוחות וניהול העסק.",
+  "privacy.retention.p2":
+    "תמונות שהועלו לאתר עשויות להישמר למשך תקופה סבירה לאחר השלמת ההזמנה לצורך טיפול בפניות שירות, תיקונים או הפקת הזמנות חוזרות.",
+  "privacy.security.title": "אבטחת מידע",
+  "privacy.security.p1":
+    "אנו נוקטים באמצעי אבטחה סבירים ומקובלים לצורך הגנה על המידע האישי שברשותנו.",
+  "privacy.security.p2":
+    "עם זאת, אין אפשרות להבטיח אבטחה מוחלטת של מידע המועבר דרך האינטרנט, ולכן איננו יכולים להבטיח חסינות מלאה מפני גישה בלתי מורשית.",
+  "privacy.rights.title": "הזכויות שלך",
+  "privacy.rights.intro": "בכפוף להוראות הדין, באפשרותך:",
+  "privacy.rights.li1": "לבקש גישה למידע אישי אודותיך",
+  "privacy.rights.li2": "לבקש תיקון של מידע שגוי או לא מעודכן",
+  "privacy.rights.li3": "לבקש מחיקת מידע אישי",
+  "privacy.rights.li4": "לבקש להפסיק קבלת הודעות שיווקיות",
+  "privacy.rights.li5": "למשוך הסכמה שניתנה בעבר, ככל שהדבר רלוונטי",
+  "privacy.rights.contact": "למימוש זכויות אלה ניתן לפנות אלינו בדוא״ל.",
+  "privacy.changes.title": "שינויים במדיניות הפרטיות",
+  "privacy.changes.p1": "אנו רשאים לעדכן מדיניות זו מעת לעת.",
+  "privacy.changes.p2":
+    "הגרסה העדכנית ביותר תפורסם באתר ותיכנס לתוקף במועד פרסומה.",
   "privacy.contact.title": "יצירת קשר",
   "privacy.contact.p1":
-    "לשאלות, בקשות או בירורים בנושא פרטיות ניתן לפנות אלינו בעמוד",
-  "privacy.contact.link": "צור קשר",
-  "privacy.contact.p2": "באתר או במייל:",
+    "לשאלות, בקשות או הבהרות בנוגע למדיניות הפרטיות ניתן לפנות אלינו:",
+  "privacy.contact.lastUpdated": "עודכן לאחרונה: יוני 2026",
 
   // Shipping Policy
   "shipping.title": "מדיניות משלוחים",
   "shipping.deliveryTime.title": "זמן אספקה",
   "shipping.deliveryTime.p1":
-    "הספרון האישי שלכם מופק במיוחד עבורכם בתהליך ייצור אישי וייחודי. זמן ההפקה והמשלוח המשוער הוא עד 14 ימי עסקים ממועד ביצוע ההזמנה.",
+    "כל מוצרי Little Gali מיוצרים בהתאמה אישית עבור כל לקוח לאחר ביצוע ההזמנה.",
   "shipping.deliveryTime.p2":
-    "אנו עושות את מירב המאמצים לעמוד בזמנים אלו, אך ייתכנו עיכובים שאינם בשליטתנו (כגון עיכובי דואר, תקלה טכנית או עומסים אצל חברת השילוח).",
+    "זמן ההפקה והאספקה המשוער הוא עד 14 ימי עסקים ממועד אישור ההזמנה והתשלום.",
   "shipping.deliveryTime.p3":
-    "במקרים חריגים של עיכוב ממושך, נעדכן אתכם במייל או בהודעה.",
+    "זמן האספקה המשוער כולל את זמן הייצור וההכנה של המוצר ואינו מהווה התחייבות למועד מסירה מדויק.",
+  "shipping.deliveryTime.p4":
+    "אנו עושות את מירב המאמצים לספק את ההזמנות מוקדם ככל האפשר, אולם ייתכנו עיכובים שאינם בשליטתנו, לרבות עומסים בתקופות חגים, עיכובים אצל ספקי שירות חיצוניים, תקלות טכניות או עיכובים מצד חברת השילוח.",
+  "shipping.deliveryTime.p5":
+    "במקרה של עיכוב חריג, ניצור קשר עם הלקוח ונעדכן לגבי סטטוס ההזמנה.",
   "shipping.costs.title": "עלויות משלוח",
   "shipping.costs.p1":
-    "עלות המשלוח מוצגת ללקוח בעת ההזמנה ומתווספת למחיר הספרון. המשלוחים מבוצעים באמצעות דואר ישראל או שליח עד הבית, בהתאם לאפשרויות הקיימות בעת ההזמנה.",
+    "עלות המשלוח מוצגת במהלך תהליך הרכישה ומתווספת למחיר המוצרים.",
   "shipping.costs.p2":
-    "במקרה של הזנה שגויה של כתובת או פרטים לא מדויקים, עלול להיגבות תשלום נוסף עבור משלוח חוזר.",
-  "shipping.tracking.title": "מעקב משלוח",
+    "המשלוחים מבוצעים באמצעות חברות שילוח חיצוניות בהתאם לאפשרויות הזמינות בעת ביצוע ההזמנה.",
+  "shipping.costs.p3":
+    "Little Gali שומרת לעצמה את הזכות לעדכן מעת לעת את אפשרויות המשלוח ואת עלויותיהן.",
+  "shipping.details.title": "פרטי משלוח",
+  "shipping.details.p1":
+    "הלקוח אחראי לוודא שכל פרטי ההזמנה וכתובת המשלוח הוזנו בצורה מדויקת ומלאה.",
+  "shipping.details.p2":
+    "במקרה של כתובת שגויה, כתובת חלקית, מספר טלפון שגוי, אי-זמינות לקבלת המשלוח או כל סיבה אחרת שאינה תלויה ב-Little Gali, ייתכן שייגבה תשלום נוסף עבור משלוח חוזר.",
+  "shipping.tracking.title": "מעקב אחר ההזמנה",
   "shipping.tracking.p1":
-    "לאחר שההזמנה נשלחת, תישלח אליכם הודעה עם פרטי מעקב או אישור משלוח. האחריות למעקב אחר סטטוס המשלוח לאחר יציאתו מהסטודיו חלה על הלקוח.",
+    "לאחר מסירת החבילה לחברת השילוח, יישלח ללקוח מספר מעקב או עדכון משלוח, בהתאם לשירות המשלוחים הרלוונטי.",
+  "shipping.tracking.p2":
+    "לאחר שהחבילה נמסרה לחברת השילוח, זמני האספקה בפועל נמצאים באחריות חברת המשלוחים.",
   "shipping.deliveryAreas.title": "אזורי משלוח",
-  "shipping.deliveryAreas.p1":
-    "נכון לעכשיו אנו מבצעות משלוחים בישראל בלבד. בהמשך נרחיב את השירות למדינות נוספות, והמידע יתעדכן בעמוד זה.",
-  "shipping.damaged.title": "מוצר שניזוק במשלוח",
+  "shipping.deliveryAreas.p1": "נכון לעכשיו אנו מבצעות משלוחים בישראל בלבד.",
+  "shipping.deliveryAreas.p2":
+    "ייתכן שבעתיד נרחיב את השירות למדינות נוספות, והמידע יעודכן באתר בהתאם.",
+  "shipping.damaged.title": "מוצר שניזוק במהלך המשלוח",
   "shipping.damaged.p1":
-    "אם הספרון הגיע פגום עקב תהליך המשלוח, יש ליצור קשר תוך 48 שעות מקבלת ההזמנה ולצרף תמונות ברורות של הנזק, באמצעות עמוד",
-  "shipping.damaged.link": "צור קשר",
-  "shipping.damaged.p2": "או במייל:",
-  "shipping.damaged.p3": "לאחר האימות נדאג להחליף את המוצר ללא עלות נוספת.",
+    "אם המוצר התקבל כשהוא פגום או ניזוק במהלך המשלוח, יש ליצור קשר בתוך 48 שעות ממועד קבלת ההזמנה.",
+  "shipping.damaged.intro": "בפנייה יש לצרף:",
+  "shipping.damaged.li1": "מספר הזמנה",
+  "shipping.damaged.li2": "תיאור הנזק",
+  "shipping.damaged.li3": "תמונות ברורות של המוצר",
+  "shipping.damaged.li4": "תמונות של האריזה החיצונית, ככל שניתן",
+  "shipping.damaged.p2":
+    "לאחר בדיקת הפנייה, ובהתאם לנסיבות, נדאג להחלפת המוצר או למתן פתרון מתאים ללא עלות נוספת.",
+  "shipping.undelivered.title": "מוצרים שלא נמסרו",
+  "shipping.undelivered.p1":
+    "אם חבילה הוחזרה אלינו עקב אי-איסוף, כתובת שגויה, פרטי קשר שגויים או חוסר זמינות של הלקוח, ניתן יהיה לתאם משלוח חוזר בכפוף לתשלום עלות משלוח נוספת.",
+  "shipping.contact.title": "יצירת קשר",
+  "shipping.contact.p1": "לשאלות או פניות בנושא משלוחים ניתן ליצור קשר באמצעות:",
+  "shipping.contact.lastUpdated": "עודכן לאחרונה: יוני 2026",
 
   // Returns Policy
-  "returns.title": "מדיניות החזרים",
+  "returns.title": "מדיניות החזרים וביטולים",
   "returns.intro":
-    "אנחנו רוצות שתהיו מרוצים לחלוטין מההזמנה שלכם — ואם משהו אינו תקין או לא עומד בציפיותיכם, אנחנו כאן כדי לעזור.",
-  "returns.customized.title": "ספרון אישי ומותאם אישית",
+    "אנו שואפות לספק מוצרים איכותיים ושירות מצוין. אם נתקלתם בבעיה בהזמנה, נשמח לעזור ולמצוא פתרון הוגן.",
+  "returns.customized.title": "מוצרים מותאמים אישית",
   "returns.customized.p1":
-    "כל ספרון מיוצר במיוחד עבורכם, בהתאם לתמונות שתעלו לאתר.\n\nמאחר שמדובר במוצר בהתאמה אישית, לא ניתן לבטל, לשנות או לבקש החזר לאחר ביצוע ההזמנה — למעט במקרים של פגם, נזק במשלוח או אי־שביעות רצון מהמוצר, כפי שמפורט להלן.",
-  "returns.damage.title": "פגמים או נזק במשלוח",
-  "returns.damage.p1":
-    "אנא בדקו את ההזמנה מיד עם קבלתה.\n\nאם הספרון הגיע פגום, ניזוק במשלוח או הודפס בצורה לא תקינה, יש לפנות אלינו תוך 48 שעות דרך עמוד",
-  "returns.damage.link": "צור קשר",
-  "returns.damage.p2": "או במייל:",
+    "כל מוצרי Little Gali מיוצרים בהתאמה אישית עבור כל לקוח, על בסיס התמונות שסופקו ואושרו במהלך תהליך ההזמנה.",
+  "returns.customized.p2":
+    "בהתאם לכך, לאחר אישור ההזמנה וביצוע התשלום לא ניתן לבטל, לשנות או להחזיר מוצרים שיוצרו במיוחד עבור הלקוח, למעט במקרים של פגם במוצר, נזק במהלך המשלוח או מקרים אחרים שבהם אנו מחויבים לכך על פי דין.",
+  "returns.damage.title": "פגם במוצר או נזק במשלוח",
+  "returns.damage.p1": "אנא בדקו את ההזמנה מיד עם קבלתה.",
+  "returns.damage.p2":
+    "אם המוצר התקבל פגום, ניזוק במהלך המשלוח או יוצר באופן שאינו תואם באופן מהותי את ההזמנה שאושרה על ידי הלקוח, יש ליצור קשר בתוך 48 שעות ממועד קבלת ההזמנה.",
+  "returns.damage.intro": "בפנייה יש לצרף:",
+  "returns.damage.li1": "מספר הזמנה",
+  "returns.damage.li2": "תיאור הבעיה",
+  "returns.damage.li3": "תמונות ברורות של המוצר",
+  "returns.damage.li4": "תמונות של האריזה החיצונית, ככל שניתן",
   "returns.damage.p3":
-    ", ולצרף תמונות ברורות של הפגם או הנזק.\n\nלאחר בדיקה, נחליף את המוצר ללא עלות נוספת.\n\nמוצרים שיוחזרו ללא תיאום מראש לא יתקבלו.",
-  "returns.damage.p4": "",
-  "returns.unsatisfied.title": "לא מרוצים מהמוצר?",
+    "לאחר בדיקת הפנייה, ובהתאם לנסיבות, נציע החלפה, תיקון, ייצור מחדש או החזר כספי מלא או חלקי, לפי שיקול דעתנו ובהתאם לדין.",
+  "returns.unsatisfied.title": "אי־שביעות רצון מהמוצר",
   "returns.unsatisfied.p1":
-    "אנחנו מבינות שלפעמים התוצאה הסופית אינה בדיוק כפי שדמיינתם.\n\nאם אינכם מרוצים מהמוצר שקיבלתם, תוכלו לפנות אלינו תוך 7 ימים מקבלת ההזמנה ולפרט את סיבת אי־שביעות הרצון.",
+    "מוצרי Little Gali מבוססים על תמונות המסופקות על ידי הלקוח ועל תהליך יצירה והפקה מותאם אישית.",
   "returns.unsatisfied.p2":
-    "לאחר בחינת הפנייה, אם תאושר, נבקש להחזיר את הספרון (באריזתו המקורית וללא נזק) לכתובת שתימסר.\n\nעם קבלת המוצר, יינתן החזר כספי מלא למחיר הספרון (לא כולל עלות המשלוח חזרה, אלא אם מדובר בפגם במוצר).",
-  "returns.variations.title": "שונות טבעית ודגשים טכניים",
+    "לפני השלמת ההזמנה, מוצגת ללקוח תצוגה מקדימה של האיור או העיצוב לצורך אישור.",
+  "returns.unsatisfied.p3":
+    "לפיכך, אי־שביעות רצון הנובעת מהעדפה אישית, טעם אישי או ציפייה שאינה תואמת את התצוגה שאושרה, אינה מהווה עילה להחזר כספי.",
+  "returns.unsatisfied.p4":
+    "עם זאת, אם קיימת בעיה חריגה במוצר, אנו מזמינים אתכם לפנות אלינו ונעשה מאמץ למצוא פתרון הוגן לשביעות רצונכם.",
+  "returns.variations.title": "שונות טבעית בין תצוגה להדפסה",
   "returns.variations.p1":
-    "ייתכנו הבדלים קלים בגוון, חיתוך או ניגודיות בין התמונה על המסך לבין ההדפסה בפועל.\n\nשונות זו נחשבת תקינה ואינה מהווה עילה להחזר או החלפה.",
-  "returns.variations.p2": "",
-  "returns.imageRights.title": "זכויות תמונה",
+    "ייתכנו הבדלים קלים בין התצוגה הדיגיטלית באתר לבין המוצר המודפס בפועל, לרבות הבדלים בגוונים, בצבעים, בחיתוך, בניגודיות, בחדות או באופן שבו צבעים מוצגים על מסכים שונים.",
+  "returns.variations.p2":
+    "הבדלים סבירים אלה אינם נחשבים לפגם ואינם מהווים עילה להחזר, החלפה או ביטול עסקה.",
+  "returns.orderErrors.title": "טעויות בפרטי ההזמנה",
+  "returns.orderErrors.p1":
+    "באחריות הלקוח לוודא שכל התמונות, הפרטים האישיים וכתובת המשלוח שהוזנו בעת ביצוע ההזמנה נכונים ומלאים.",
+  "returns.orderErrors.p2":
+    "Little Gali אינה אחראית לטעויות שנגרמו עקב מידע שגוי שסופק על ידי הלקוח.",
+  "returns.imageRights.title": "זכויות בתמונות",
   "returns.imageRights.p1":
-    "הלקוח מצהיר כי יש לו זכויות שימוש בתמונות שהועלו וכי הן אינן מפרות זכויות יוצרים או פרטיות של צד שלישי.",
+    "הלקוח מצהיר כי הוא בעל הזכויות בתמונות שהועלו או שקיבל את כל ההרשאות הנדרשות לשימוש בהן.",
+  "returns.imageRights.p2": "האחריות לכל תוכן שמועלה לאתר חלה על הלקוח בלבד.",
+  "returns.contact.title": "יצירת קשר",
+  "returns.contact.p1":
+    "לשאלות או פניות בנושא החזרים, ביטולים או בעיות בהזמנה ניתן ליצור קשר באמצעות:",
+  "returns.contact.lastUpdated": "עודכן לאחרונה: יוני 2026",
 
   // Language
   "lang.hebrew": "עברית",
@@ -558,11 +705,17 @@ const hebrewTranslations = {
   "home.about.titleHighlight": "אנחנו",
   "home.about.imageAlt": "תמונת צוות ליטל גלי",
   "home.about.paragraph1":
-    "את Little Gali פתחתי כחודשיים אחרי שגלי נולדה, בעיקר מתוך סקרנות ורצון ליצור משהו חדש. מצאתי את עצמי משקיעה בזה יותר ויותר: חושבת על המוצר, מעצבת, בונה את האתר, ובעיקר מתרגשת מכל הזמנה מחדש.",
+    "היי, קוראים לי יעל, אמא של גלי והיוצרת של Little Gali.",
   "home.about.paragraph2":
-    "מהר מאוד הבנתי שזה לא רק תהליך יצירתי בשבילי. התגובות של אמהות שקיבלו את הספרון חידדו שיש כאן משהו אחר - אישי ומיוחד. מוצר שגם אני הייתי בוחרת עבור גלי שלי, אולי בגלל זה היא ממשיכה לקבל עוד ועוד ספרונים עד עכשיו.",
+    "הרעיון ל-Little Gali נולד כמה חודשים אחרי שגלי נולדה, כמעט משום מקום. מה שהתחיל כרעיון קטן הפך במהרה לפרויקט שכבש אותי — כזה שגרם לי ליצור, ללמוד ולהקים משהו משלי.",
   "home.about.paragraph3":
-    "הספרון נולד כמוצר לתינוק, אבל גם כמתנה מקורית: כזו שיש בה מחשבה וקשר אישי, וכזו שרוצים להשאיר בבית לא רק לשימוש - אלא גם כחפץ שנעים לראות.",
+    "בהתחלה הכנתי ספרונים לחברות שילדו, פשוט כי חשבתי שזה מוצר מיוחד שלא קיים בשוק. ההתלהבות והפידבקים שקיבלתי נתנו לי את הדחיפה להפוך את הרעיון לעסק אמיתי.",
+  "home.about.paragraph4":
+    "מאז בניתי את האתר בעצמי, פיתחתי מוצרים חדשים ולמדתי המון דברים שלא הכרתי קודם. לא פעם יצאתי מאזור הנוחות שלי, קפצתי למים ולמדתי תוך כדי תנועה.",
+  "home.about.paragraph5":
+    "עד היום אני מתרגשת מכל הזמנה מחדש. אני אוהבת לראות את התמונות שאנשים בוחרים וליצור מהן מוצר אישי עם משמעות.",
+  "home.about.paragraph6":
+    "החזון שלי עבור Little Gali הוא ליצור מתנות אישיות ומרגשות — כאלה ששמחים לתת ושמחים לקבל.",
   "home.qa.title": "שאלו אותנו",
   "home.qa.titleHighlight": "אותנו",
   "home.qa.subtitle": "התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו",
@@ -1046,143 +1199,296 @@ const englishTranslations = {
 
   // Terms of Service
   "terms.title": "Terms of Service",
-  "terms.intro":
-    "Welcome to the Little Gali website. The use of the website and the services provided are subject to the terms detailed below. By browsing the website and placing an order, you confirm that you have read and fully agree to these terms.",
-  "terms.useOfSite.title": "Use of Site",
+  "terms.intro.p1": "Welcome to the Little Gali website.",
+  "terms.intro.p2":
+    "Use of the website and the services provided on it is subject to the terms set out below. By browsing the website, using the services, or placing an order, you confirm that you have read and fully agree to these terms.",
+  "terms.useOfSite.title": "Use of the Website",
   "terms.useOfSite.p1":
-    "The website allows ordering personalized baby books based on images uploaded by the user. Use of the website is permitted for personal and private purposes only.",
-  "terms.useOfSite.p2":
-    "It is prohibited to use the website for commercial purposes not approved by us, to upload offensive, illegal content, or images that are not owned by the user.",
+    "The website allows you to order personalized products based on images you upload, including baby books, printed illustrations, and framed pictures.",
+  "terms.useOfSite.p2": "Use of the website is permitted for personal and private purposes only.",
+  "terms.useOfSite.p3":
+    "You may not use the website for commercial purposes without prior approval, upload offensive or illegal content, or upload images you do not own.",
   "terms.userResponsibility.title": "User Responsibility",
   "terms.userResponsibility.p1":
-    "The user declares that they have full rights to the images they upload, and that their use for the production of the book does not violate copyright, privacy, or any other law.",
+    "You declare that you have all rights and permissions required to use the images you upload to the website.",
   "terms.userResponsibility.p2":
-    "The user confirms that they will not upload images of minors or third parties without their consent, and that all legal responsibility for the uploaded content rests solely with them.",
+    "You are responsible for ensuring that use of the images does not infringe copyright, privacy rights, or any other law.",
+  "terms.userResponsibility.p3":
+    "You are responsible for obtaining the consent of everyone appearing in the images, where required.",
+  "terms.userResponsibility.p4":
+    "All legal liability for content uploaded to the website rests solely with the user.",
   "terms.ordersAndPayment.title": "Orders and Payment",
   "terms.ordersAndPayment.p1":
-    "Prices on the website are displayed in the currency indicated on the order page and include VAT according to law. Payment is made through a secure payment system, and the order will be considered final after payment confirmation.",
-  "terms.ordersAndPayment.p2":
-    "The company reserves the right to cancel an order in case of a pricing error, technical failure, unavailability, or improper use of the website.",
+    "Prices on the website are shown in the currency indicated on the order page and include VAT as required by law.",
+  "terms.ordersAndPayment.p2": "Payment is processed through a secure payment system.",
+  "terms.ordersAndPayment.p3":
+    "An order is considered final after payment is confirmed and an order confirmation is received.",
+  "terms.ordersAndPayment.p4":
+    "Little Gali reserves the right to cancel an order in case of a pricing error, technical failure, product unavailability, concern about improper use of the website, or any other reasonable cause.",
   "terms.productProduction.title": "Product Production",
   "terms.productProduction.p1":
-    "Each book is produced on a personalized basis based on the uploaded images.",
+    "Products on the website are made to order based on images uploaded and approved by the customer during the ordering process.",
   "terms.productProduction.p2":
-    "Since this is a unique and personalized product, it cannot be changed, canceled, or refunded after placing the order, except in accordance with the website's returns policy.",
+    "Some products include digital processing or illustrations created from uploaded images. Although we strive for maximum similarity to the original photos, some differences between the original image and the final result may occur.",
+  "terms.productProduction.p3":
+    "On-screen previews are for illustration only; slight differences may occur between the digital preview and the printed product.",
+  "terms.customProducts.title": "Personalized Products",
+  "terms.customProducts.p1":
+    "Because products are made specifically for each customer based on images they provide, orders cannot be canceled, changed, or returned after the order is confirmed and payment is completed, except as set out in the website's returns policy or as required by law.",
   "terms.warrantyAndService.title": "Warranty and Service",
   "terms.warrantyAndService.p1":
-    "We maintain high quality of printing and production, but there may be slight differences in tone, cutting, or contrast between screen display and actual printing. These differences are considered normal and do not constitute grounds for transaction cancellation.",
+    "We maintain high standards of production and printing quality.",
   "terms.warrantyAndService.p2":
-    "In case of a defective product or shipping damage, we will handle it according to our returns policy.",
-  "terms.safeUse.title": "Safe Use of Baby Products",
-  "terms.safeUse.p1":
-    "Little Gali products are intended for parental use and adult supervision only.",
-  "terms.safeUse.p2":
-    "The books are made of thick paper (300 grams) with lamination for durability, but are not intended for biting, chewing, or prolonged contact with saliva or other liquids. Do not leave the product unsupervised near a baby or toddler.",
-  "terms.safeUse.p3":
-    "The company is not responsible for any damage, direct or indirect, caused by use not in accordance with these guidelines. Use of the product constitutes confirmation that the customer has read the guidelines and accepts full responsibility for safe and prudent use.",
+    "However, slight differences in shades, colors, trimming, texture, contrast, or element placement may occur between on-screen display and the printed product.",
+  "terms.warrantyAndService.p3":
+    "Such reasonable differences are not considered defects and are not grounds for canceling a transaction. If there is a production defect or damage during shipping, please contact us and we will act in accordance with the website's returns policy.",
+  "terms.safeUse.title": "Safe Use of Products",
+  "terms.safeUse.books.title": "Baby Books",
+  "terms.safeUse.books.p1": "Books are intended for use under adult supervision only.",
+  "terms.safeUse.books.p2":
+    "Books are made from thick laminated paper for durability, but are not intended for biting, chewing, or prolonged exposure to liquids.",
+  "terms.safeUse.books.p3":
+    "Do not leave the product unsupervised near a baby or toddler.",
+  "terms.safeUse.framed.title": "Framed Pictures",
+  "terms.safeUse.framed.p1":
+    "Framed pictures are supplied with hanging hardware according to the model.",
+  "terms.safeUse.framed.p2":
+    "When using adhesive hanging strips, we recommend not applying them to wallpaper, peeling paint, cracked walls, delicate surfaces, or surfaces unsuitable for adhesion.",
+  "terms.safeUse.framed.p3":
+    "Although the strips are designed to be removable, removal may in some cases cause minor damage to paint, coating, or the wall surface.",
+  "terms.safeUse.framed.p4":
+    "Responsibility for choosing the hanging location, surface suitability, and installation method rests solely with the customer.",
+  "terms.safeUse.framed.p5":
+    "Frames may also be hung using a nail or alternative hanging hardware suitable for the wall type.",
+  "terms.safeUse.framed.p6":
+    "For safety, we recommend not hanging frames above cribs, bassinets, or children's sleeping areas.",
+  "terms.safeUse.framed.p7":
+    "Little Gali is not responsible for damage to walls, surfaces, property, or people resulting from incorrect installation, use not in accordance with instructions, or unsuitable installation surfaces.",
   "terms.intellectualProperty.title": "Intellectual Property",
   "terms.intellectualProperty.p1":
-    "All copyrights, design, images, content, and code on the website belong to Little Gali, and may not be copied, distributed, reproduced, or used without prior written approval.",
-  "terms.liabilityLimitation.title": "Liability Limitation",
+    "All copyrights, designs, illustrations, images, content, trademarks, and code on the website belong to Little Gali or are used lawfully on its behalf.",
+  "terms.intellectualProperty.p2":
+    "You may not copy, distribute, reproduce, publish, sell, or otherwise use website content without prior written approval.",
+  "terms.liabilityLimitation.title": "Limitation of Liability",
   "terms.liabilityLimitation.p1":
-    "Use of the website and products is at the user's sole responsibility. Little Gali is not responsible for indirect damages, information loss, losses, or any consequential damage caused by use of the website, service, or products.",
-  "terms.termsChanges.title": "Terms Changes",
+    "Use of the website and products is at the user's sole responsibility.",
+  "terms.liabilityLimitation.p2":
+    "Little Gali is not liable for indirect damages, loss of information, loss of profits, or any other consequential damage arising from use of the website, services, or products. In any case, Little Gali's liability shall not exceed the amount actually paid by the customer for the order.",
+  "terms.termsChanges.title": "Changes to Terms",
   "terms.termsChanges.p1":
-    "We reserve the right to update or change the terms of service from time to time. The updated version will be published on the website, and continued use constitutes agreement to the updated terms.",
+    "Little Gali reserves the right to update or change these terms of service from time to time. The current version will be published on the website; continued use of the website after an update constitutes agreement to the updated terms.",
   "terms.contact.title": "Contact",
   "terms.contact.p1":
-    "For questions or clarifications regarding the terms of service, please contact us through the",
+    "For questions, clarifications, or inquiries about these terms of service, please contact us via the",
   "terms.contact.link": "Contact Us",
-  "terms.contact.p2": "page or by email:",
+  "terms.contact.p2": "page on the website or by email:",
 
   // Privacy Policy
   "privacy.title": "Privacy Policy",
-  "privacy.intro":
-    "We respect your privacy and are committed to protecting your personal information and the images you upload to the website. Use of information and images is solely for the purpose of providing the service, producing the personal book, and completing the order – and for no other purpose.",
-  "privacy.personalInfo.title": "Personal Information",
-  "privacy.personalInfo.p1":
-    "When placing an order on the website, basic information is collected such as name, address, payment details, and email address. The information is used for:",
-  "privacy.personalInfo.li1": "Processing and recording the order,",
-  "privacy.personalInfo.li2": "Shipping the product,",
-  "privacy.personalInfo.li3": "and providing customer service.",
-  "privacy.personalInfo.p2":
-    "The information is stored securely and is not shared with third parties, except in cases required for payment processing or product shipping, and in accordance with confidentiality and privacy agreements.",
-  "privacy.imageUse.title": "Image Use",
-  "privacy.imageUse.p1":
-    "Images you upload to the website will be used solely for creating your personal book.",
-  "privacy.imageUse.p2":
-    "Images are stored securely in the cloud for product production, preview display, customer service, or recovery in case of failure, even if a purchase was not completed.",
-  "privacy.imageUse.p3":
-    "No additional use, publication, or transfer to third parties will be made with the images.",
-  "privacy.imageUse.p4":
-    "You may contact us at any time to request deletion of images after production completion or in case of non-purchase, and we will handle it according to technical considerations of backup and support.",
-  "privacy.dataSecurity.title": "Data Security",
-  "privacy.dataSecurity.p1":
-    "The website uses advanced security measures, including data encryption and storage on secure servers, to protect your privacy. However, please remember that no internet system is completely immune, and we cannot guarantee absolute protection against intrusion or unauthorized use.",
-  "privacy.userRights.title": "User Rights",
-  "privacy.userRights.p1":
-    "Any user may contact us at any time with a request to view, update, correct, or delete their personal information, subject to legal requirements and operational needs of the website.",
+  "privacy.intro.title": "Introduction",
+  "privacy.intro.p1":
+    "At Little Gali, we respect our customers' privacy and are committed to protecting the personal information you provide to us.",
+  "privacy.intro.p2":
+    "This privacy policy explains what types of information we collect, how we use it, with whom we may share it, and your rights regarding that information.",
+  "privacy.intro.p3":
+    "Use of the website constitutes acceptance of this privacy policy.",
+  "privacy.collection.title": "What Information Do We Collect?",
+  "privacy.collection.youProvide.title": "Information You Provide to Us",
+  "privacy.collection.youProvide.p1":
+    "When placing an order or contacting the business, we may collect:",
+  "privacy.collection.youProvide.li1": "Full name",
+  "privacy.collection.youProvide.li2": "Email address",
+  "privacy.collection.youProvide.li3": "Phone number",
+  "privacy.collection.youProvide.li4": "Shipping address",
+  "privacy.collection.youProvide.li5": "Order details",
+  "privacy.collection.youProvide.li6": "Photos and content uploaded to the website",
+  "privacy.collection.youProvide.p2":
+    "When using Little Gali services, you may upload photos to create personalized products such as baby books, illustrations, and framed pictures.",
+  "privacy.collection.youProvide.p3":
+    "Photos are used solely to produce the ordered product.",
+  "privacy.collection.technical.title": "Technical Information and Usage Data",
+  "privacy.collection.technical.p1":
+    "When browsing the website, we may collect information such as:",
+  "privacy.collection.technical.li1": "IP address",
+  "privacy.collection.technical.li2": "Browser and device type",
+  "privacy.collection.technical.li3": "Pages viewed on the website",
+  "privacy.collection.technical.li4": "Time spent on the website",
+  "privacy.collection.technical.li5": "Actions taken while using the website",
+  "privacy.usage.title": "How Do We Use the Information?",
+  "privacy.usage.intro": "We use the collected information to:",
+  "privacy.usage.li1": "Process and produce orders",
+  "privacy.usage.li2": "Deliver products and services",
+  "privacy.usage.li3": "Create illustrations and process uploaded photos",
+  "privacy.usage.li4": "Provide customer service and respond to inquiries",
+  "privacy.usage.li5": "Improve the website and user experience",
+  "privacy.usage.li6": "Secure the website and prevent misuse",
+  "privacy.usage.li7": "Send order-related updates",
+  "privacy.usage.li8": "Send marketing content, subject to consent where required",
+  "privacy.imageProcessing.title": "Photo Processing and Illustration Creation",
+  "privacy.imageProcessing.p1":
+    "To create personalized products, photos uploaded to the website may undergo digital processing or use of AI-based tools.",
+  "privacy.imageProcessing.p2":
+    "Processing is performed solely to create the ordered product and does not grant Little Gali any ownership of photos uploaded by the customer.",
+  "privacy.analytics.title": "Analytics and Tracking Tools",
+  "privacy.analytics.intro":
+    "The website uses tools that help us understand how visitors use the site and improve our services.",
+  "privacy.analytics.ga.title": "Google Analytics",
+  "privacy.analytics.ga.p":
+    "Google Analytics provides statistical information about website traffic, pages viewed, traffic sources, and actions taken on the site.",
+  "privacy.analytics.meta.title": "Meta Pixel",
+  "privacy.analytics.meta.p":
+    "Meta Pixel allows us to measure the effectiveness of our advertising on Facebook and Instagram, understand which actions were taken on the website, and optimize advertising campaigns.",
+  "privacy.analytics.cookiesNote":
+    "These tools may collect information through cookies and similar technologies.",
+  "privacy.cookies.title": "Cookies",
+  "privacy.cookies.intro": "The website uses cookies and similar technologies for:",
+  "privacy.cookies.li1": "Proper operation of the website",
+  "privacy.cookies.li2": "Saving user preferences",
+  "privacy.cookies.li3": "Performance measurement",
+  "privacy.cookies.li4": "Traffic analysis",
+  "privacy.cookies.li5": "Marketing and advertising",
+  "privacy.cookies.note":
+    "You can block or delete cookies through your browser settings; however, doing so may affect some website functionality.",
+  "privacy.sharing.title": "Sharing Information with Third Parties",
+  "privacy.sharing.p1":
+    "We do not sell or rent personal information to third parties.",
+  "privacy.sharing.intro": "We may share information with:",
+  "privacy.sharing.li1": "Technology service providers that help operate the website",
+  "privacy.sharing.li2": "Storage and cloud service providers",
+  "privacy.sharing.li3": "Payment processing services",
+  "privacy.sharing.li4": "Shipping and delivery companies",
+  "privacy.sharing.li5": "Analytics and advertising providers such as Google and Meta",
+  "privacy.sharing.li6": "Authorized authorities when required by law",
+  "privacy.sharing.p2":
+    "Any sharing of information will be done only to the extent necessary to provide the service.",
+  "privacy.retention.title": "Data Retention",
+  "privacy.retention.p1":
+    "We retain personal information for as long as necessary to provide the service, comply with legal requirements, handle customer inquiries, and manage the business.",
+  "privacy.retention.p2":
+    "Photos uploaded to the website may be retained for a reasonable period after order completion for customer service, corrections, or repeat orders.",
+  "privacy.security.title": "Information Security",
+  "privacy.security.p1":
+    "We take reasonable and accepted security measures to protect the personal information in our possession.",
+  "privacy.security.p2":
+    "However, it is not possible to guarantee absolute security of information transmitted over the internet; therefore, we cannot guarantee complete immunity from unauthorized access.",
+  "privacy.rights.title": "Your Rights",
+  "privacy.rights.intro": "Subject to applicable law, you may:",
+  "privacy.rights.li1": "Request access to personal information about you",
+  "privacy.rights.li2": "Request correction of incorrect or outdated information",
+  "privacy.rights.li3": "Request deletion of personal information",
+  "privacy.rights.li4": "Request to stop receiving marketing messages",
+  "privacy.rights.li5": "Withdraw previously given consent, where applicable",
+  "privacy.rights.contact":
+    "To exercise these rights, please contact us by email.",
+  "privacy.changes.title": "Changes to the Privacy Policy",
+  "privacy.changes.p1": "We may update this policy from time to time.",
+  "privacy.changes.p2":
+    "The most current version will be published on the website and will take effect upon publication.",
   "privacy.contact.title": "Contact",
   "privacy.contact.p1":
-    "For questions, requests, or inquiries regarding privacy, please contact us through the",
-  "privacy.contact.link": "Contact Us",
-  "privacy.contact.p2": "page on the website or by email:",
+    "For questions, requests, or clarifications regarding this privacy policy, please contact us:",
+  "privacy.contact.lastUpdated": "Last updated: June 2026",
 
   // Shipping Policy
   "shipping.title": "Shipping Policy",
   "shipping.deliveryTime.title": "Delivery Time",
   "shipping.deliveryTime.p1":
-    "Your personal book is produced especially for you through a personal and unique production process. The estimated production and shipping time is up to 14 business days from the order date.",
+    "All Little Gali products are made to order for each customer after the order is placed.",
   "shipping.deliveryTime.p2":
-    "We make every effort to meet these deadlines, but there may be delays beyond our control (such as postal delays, technical failures, or shipping company overload).",
+    "The estimated production and delivery time is up to 14 business days from order confirmation and payment.",
   "shipping.deliveryTime.p3":
-    "In exceptional cases of prolonged delay, we will update you by email or message.",
+    "The estimated delivery time includes product manufacturing and preparation and does not constitute a commitment to an exact delivery date.",
+  "shipping.deliveryTime.p4":
+    "We make every effort to deliver orders as early as possible; however, delays beyond our control may occur, including holiday season volume, delays with external service providers, technical issues, or delays by the shipping company.",
+  "shipping.deliveryTime.p5":
+    "In the event of an unusual delay, we will contact the customer and provide an update on the order status.",
   "shipping.costs.title": "Shipping Costs",
   "shipping.costs.p1":
-    "Shipping costs are displayed to the customer at the time of order and are added to the book price. Shipping is done through Israel Post or courier to home, according to options available at the time of order.",
+    "Shipping cost is displayed during checkout and added to the product price.",
   "shipping.costs.p2":
-    "In case of incorrect address entry or inaccurate details, additional payment may be charged for return shipping.",
-  "shipping.tracking.title": "Shipping Tracking",
+    "Shipments are handled by external shipping companies according to the options available at the time of order.",
+  "shipping.costs.p3":
+    "Little Gali reserves the right to update shipping options and their costs from time to time.",
+  "shipping.details.title": "Shipping Details",
+  "shipping.details.p1":
+    "The customer is responsible for ensuring that all order details and the shipping address are entered accurately and in full.",
+  "shipping.details.p2":
+    "In case of an incorrect address, incomplete address, wrong phone number, unavailability to receive the shipment, or any other reason not attributable to Little Gali, an additional charge may apply for reshipment.",
+  "shipping.tracking.title": "Order Tracking",
   "shipping.tracking.p1":
-    "After the order is shipped, you will receive a message with tracking details or shipping confirmation. Responsibility for tracking shipping status after it leaves the studio rests with the customer.",
+    "After the package is handed over to the shipping company, the customer will receive a tracking number or shipping update, depending on the relevant shipping service.",
+  "shipping.tracking.p2":
+    "Once the package has been handed over to the shipping company, actual delivery times are the responsibility of the shipping company.",
   "shipping.deliveryAreas.title": "Delivery Areas",
-  "shipping.deliveryAreas.p1":
-    "Currently we ship to Israel only. In the future we will expand the service to additional countries, and information will be updated on this page.",
-  "shipping.damaged.title": "Product Damaged in Shipping",
+  "shipping.deliveryAreas.p1": "We currently ship within Israel only.",
+  "shipping.deliveryAreas.p2":
+    "We may expand service to additional countries in the future; information will be updated on the website accordingly.",
+  "shipping.damaged.title": "Product Damaged During Shipping",
   "shipping.damaged.p1":
-    "If the book arrived damaged due to the shipping process, please contact us within 48 hours of receiving the order and attach clear photos of the damage through the",
-  "shipping.damaged.link": "Contact Us",
-  "shipping.damaged.p2": "page or by email:",
-  "shipping.damaged.p3":
-    "After verification, we will replace the product at no additional cost.",
+    "If the product was received damaged during shipping, please contact us within 48 hours of receiving the order.",
+  "shipping.damaged.intro": "Your message should include:",
+  "shipping.damaged.li1": "Order number",
+  "shipping.damaged.li2": "Description of the damage",
+  "shipping.damaged.li3": "Clear photos of the product",
+  "shipping.damaged.li4": "Photos of the outer packaging, if possible",
+  "shipping.damaged.p2":
+    "After reviewing your request and depending on the circumstances, we will arrange a product replacement or another appropriate solution at no additional cost.",
+  "shipping.undelivered.title": "Undelivered Products",
+  "shipping.undelivered.p1":
+    "If a package is returned to us due to non-collection, an incorrect address, incorrect contact details, or customer unavailability, a reshipment can be arranged subject to payment of an additional shipping fee.",
+  "shipping.contact.title": "Contact",
+  "shipping.contact.p1":
+    "For questions or inquiries about shipping, please contact us at:",
+  "shipping.contact.lastUpdated": "Last updated: June 2026",
 
   // Returns Policy
-  "returns.title": "Returns & Refund Policy",
+  "returns.title": "Returns & Cancellation Policy",
   "returns.intro":
-    "We want you to be completely happy with your Little Gali book — and if something isn't right or doesn't meet your expectations, we're here to help.",
-  "returns.customized.title": "Personalized and Custom Product",
+    "We strive to provide quality products and excellent service. If you encounter a problem with your order, we will be happy to help and find a fair solution.",
+  "returns.customized.title": "Personalized Products",
   "returns.customized.p1":
-    "Each book is produced especially for you, based on the images you upload to the website.\n\nSince this is a personalized product, it cannot be canceled, changed, or refunded after placing the order — except in cases of defects, shipping damage, or customer dissatisfaction, as detailed below.",
-  "returns.damage.title": "Defects or Shipping Damage",
-  "returns.damage.p1":
-    "Please check your order immediately upon receipt.\n\nIf the book arrived damaged, was damaged during shipping, or was printed incorrectly, please contact us within 48 hours through the",
-  "returns.damage.link": "Contact Us",
-  "returns.damage.p2": "page or by email:",
+    "All Little Gali products are made to order for each customer, based on the photos provided and approved during the ordering process.",
+  "returns.customized.p2":
+    "Accordingly, after order confirmation and payment, products made specifically for the customer cannot be canceled, changed, or returned, except in cases of product defects, shipping damage, or other cases where we are required to do so by law.",
+  "returns.damage.title": "Product Defect or Shipping Damage",
+  "returns.damage.p1": "Please check your order immediately upon receipt.",
+  "returns.damage.p2":
+    "If the product was received damaged, damaged during shipping, or produced in a way that materially does not match the order approved by the customer, please contact us within 48 hours of receiving the order.",
+  "returns.damage.intro": "Your message should include:",
+  "returns.damage.li1": "Order number",
+  "returns.damage.li2": "Description of the issue",
+  "returns.damage.li3": "Clear photos of the product",
+  "returns.damage.li4": "Photos of the outer packaging, if possible",
   "returns.damage.p3":
-    ", and attach clear photos of the defect or damage.\n\nAfter inspection, we will replace the product at no additional cost.\n\nProducts returned without prior coordination will not be accepted.",
-  "returns.damage.p4": "",
-  "returns.unsatisfied.title": "Not Satisfied with the Product?",
+    "After reviewing your request and depending on the circumstances, we may offer a replacement, repair, re-production, or a full or partial refund, at our discretion and in accordance with applicable law.",
+  "returns.unsatisfied.title": "Dissatisfaction with the Product",
   "returns.unsatisfied.p1":
-    "We understand that sometimes the final result is not exactly as you imagined.\n\nIf you're not satisfied with the product you received, you may contact us within 7 days of receiving the order and specify the reason for dissatisfaction.",
+    "Little Gali products are based on photos provided by the customer and a personalized creation and production process.",
   "returns.unsatisfied.p2":
-    "After reviewing the request, if approved, we will ask you to return the book (in its original packaging and undamaged) to an address we will provide.\n\nUpon receipt of the product, a full refund will be issued for the book price (excluding return shipping costs, unless it's a product defect).",
-  "returns.variations.title": "Natural Variations and Technical Notes",
+    "Before completing the order, the customer is shown a preview of the illustration or design for approval.",
+  "returns.unsatisfied.p3":
+    "Therefore, dissatisfaction arising from personal preference, personal taste, or expectations that do not match the approved preview does not constitute grounds for a refund.",
+  "returns.unsatisfied.p4":
+    "However, if there is an unusual issue with the product, we invite you to contact us and we will make an effort to find a fair solution for your satisfaction.",
+  "returns.variations.title": "Natural Variations Between Preview and Print",
   "returns.variations.p1":
-    "There may be slight differences in tone, cropping, or contrast between the image on screen and the actual printing.\n\nThis variation is considered normal and does not constitute grounds for refund or replacement.",
-  "returns.variations.p2": "",
-  "returns.imageRights.title": "Image Rights",
+    "There may be minor differences between the digital preview on the website and the printed product, including differences in tones, colors, cropping, contrast, sharpness, or how colors appear on different screens.",
+  "returns.variations.p2":
+    "Reasonable differences of this kind are not considered defects and do not constitute grounds for a refund, replacement, or cancellation.",
+  "returns.orderErrors.title": "Order Detail Errors",
+  "returns.orderErrors.p1":
+    "It is the customer's responsibility to ensure that all photos, personal details, and shipping address entered when placing the order are correct and complete.",
+  "returns.orderErrors.p2":
+    "Little Gali is not responsible for errors caused by incorrect information provided by the customer.",
+  "returns.imageRights.title": "Photo Rights",
   "returns.imageRights.p1":
-    "By uploading images, you confirm that you hold full usage rights and that they do not infringe on copyright or privacy of any third party.",
+    "The customer declares that they own the rights to the uploaded photos or have obtained all required permissions to use them.",
+  "returns.imageRights.p2":
+    "Responsibility for all content uploaded to the website rests solely with the customer.",
+  "returns.contact.title": "Contact",
+  "returns.contact.p1":
+    "For questions or inquiries about returns, cancellations, or order issues, please contact us at:",
+  "returns.contact.lastUpdated": "Last updated: June 2026",
 
   // Language
   "lang.hebrew": "עברית",
@@ -1382,11 +1688,17 @@ const englishTranslations = {
   "home.about.titleHighlight": "We",
   "home.about.imageAlt": "Little Gali team photo",
   "home.about.paragraph1":
-    "I opened Little Gali about two months after Gali was born, mainly out of curiosity and a desire to create something new. I found myself investing more and more into it: thinking about the product, designing, building the website, and especially getting excited about every new order.",
+    "Hi, I'm Yael — Gali's mom and the creator of Little Gali.",
   "home.about.paragraph2":
-    "Very quickly I understood this wasn't just a creative process for me. The feedback from mothers who received the book highlighted that there's something else here - personal and special. A product that I would also choose for my Gali, maybe that's why she continues to receive more and more books until now.",
+    "The idea for Little Gali was born a few months after Gali was born, almost out of nowhere. What started as a small idea quickly became a project that took hold of me — one that made me create, learn, and build something of my own.",
   "home.about.paragraph3":
-    "The book was born as a product for babies, but also as an original gift: one with thought and personal connection, and one you want to keep at home not just for use — but also as an object that's pleasant to look at.",
+    "At first I made books for friends who had given birth, simply because I thought it was a special product that didn't exist in the market. The excitement and feedback I received gave me the push to turn the idea into a real business.",
+  "home.about.paragraph4":
+    "Since then I've built the website myself, developed new products, and learned so many things I didn't know before. More than once I stepped out of my comfort zone, jumped into the deep end, and learned as I went.",
+  "home.about.paragraph5":
+    "To this day I get excited about every new order. I love seeing the photos people choose and turning them into a meaningful personal product.",
+  "home.about.paragraph6":
+    "My vision for Little Gali is to create personal, emotional gifts — the kind people are happy to give and happy to receive.",
   "home.qa.title": "Ask Us",
   "home.qa.titleHighlight": "Us",
   "home.qa.subtitle":

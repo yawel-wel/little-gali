@@ -5,8 +5,40 @@ import { Footer } from "@/components/footer";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useState, useEffect } from "react";
 
+function TermsSection({
+  title,
+  paragraphs,
+  locale,
+}: {
+  title: string;
+  paragraphs: string[];
+  locale: string;
+}) {
+  const align = locale === "en" ? "text-left" : "text-right";
+
+  return (
+    <div>
+      <h2
+        className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${align}`}
+      >
+        {title}
+      </h2>
+      {paragraphs.map((text, index) => (
+        <p
+          key={index}
+          className={index < paragraphs.length - 1 ? "mb-4" : undefined}
+        >
+          {text}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 function TermsPageContent() {
   const { t, locale } = useLanguage();
+  const textAlign = locale === "en" ? "text-left" : "text-right";
+
   return (
     <div
       className="min-h-screen overflow-x-hidden"
@@ -21,149 +53,135 @@ function TermsPageContent() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             <div className="max-w-4xl mx-auto">
-              {/* Page Title */}
-              <div className="text-center mb-12">
-                <h1 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight mb-4 text-center">
+              <div className="mb-12 text-center">
+                <h1 className="mb-4 text-center font-heading text-3xl leading-tight text-dark-gray lg:text-4xl">
                   {t("terms.title")}
                 </h1>
               </div>
 
-              {/* Intro */}
               <div
-                className={`font-body text-medium-gray leading-relaxed mb-8 ${
-                  locale === "en" ? "text-left" : "text-right"
-                }`}
+                className={`mb-8 font-body leading-relaxed text-medium-gray ${textAlign}`}
               >
-                <p className="mb-4">{t("terms.intro")}</p>
+                <p className="mb-4">{t("terms.intro.p1")}</p>
+                <p>{t("terms.intro.p2")}</p>
               </div>
 
-              {/* Content */}
               <div
-                className={`space-y-8 font-body text-medium-gray leading-relaxed ${
-                  locale === "en" ? "text-left" : "text-right"
-                }`}
+                className={`space-y-8 font-body leading-relaxed text-medium-gray ${textAlign}`}
               >
-                {/* שימוש באתר */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("terms.useOfSite.title")}
-                  </h2>
-                  <p className="mb-4">{t("terms.useOfSite.p1")}</p>
-                  <p>{t("terms.useOfSite.p2")}</p>
-                </div>
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.useOfSite.title")}
+                  paragraphs={[
+                    t("terms.useOfSite.p1"),
+                    t("terms.useOfSite.p2"),
+                    t("terms.useOfSite.p3"),
+                  ]}
+                />
 
-                {/* אחריות המשתמש */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("terms.userResponsibility.title")}
-                  </h2>
-                  <p className="mb-4">{t("terms.userResponsibility.p1")}</p>
-                  <p>{t("terms.userResponsibility.p2")}</p>
-                </div>
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.userResponsibility.title")}
+                  paragraphs={[
+                    t("terms.userResponsibility.p1"),
+                    t("terms.userResponsibility.p2"),
+                    t("terms.userResponsibility.p3"),
+                    t("terms.userResponsibility.p4"),
+                  ]}
+                />
 
-                {/* הזמנות ותשלום */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("terms.ordersAndPayment.title")}
-                  </h2>
-                  <p className="mb-4">{t("terms.ordersAndPayment.p1")}</p>
-                  <p>{t("terms.ordersAndPayment.p2")}</p>
-                </div>
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.ordersAndPayment.title")}
+                  paragraphs={[
+                    t("terms.ordersAndPayment.p1"),
+                    t("terms.ordersAndPayment.p2"),
+                    t("terms.ordersAndPayment.p3"),
+                    t("terms.ordersAndPayment.p4"),
+                  ]}
+                />
 
-                {/* הפקת המוצר */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("terms.productProduction.title")}
-                  </h2>
-                  <p className="mb-4">{t("terms.productProduction.p1")}</p>
-                  <p>{t("terms.productProduction.p2")}</p>
-                </div>
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.productProduction.title")}
+                  paragraphs={[
+                    t("terms.productProduction.p1"),
+                    t("terms.productProduction.p2"),
+                    t("terms.productProduction.p3"),
+                  ]}
+                />
 
-                {/* אחריות ושירות */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("terms.warrantyAndService.title")}
-                  </h2>
-                  <p className="mb-4">{t("terms.warrantyAndService.p1")}</p>
-                  <p>{t("terms.warrantyAndService.p2")}</p>
-                </div>
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.customProducts.title")}
+                  paragraphs={[t("terms.customProducts.p1")]}
+                />
 
-                {/* שימוש בטוח במוצרים לתינוקות */}
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.warrantyAndService.title")}
+                  paragraphs={[
+                    t("terms.warrantyAndService.p1"),
+                    t("terms.warrantyAndService.p2"),
+                    t("terms.warrantyAndService.p3"),
+                  ]}
+                />
+
                 <div>
                   <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                    className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${textAlign}`}
                   >
                     {t("terms.safeUse.title")}
                   </h2>
-                  <p className="mb-4">{t("terms.safeUse.p1")}</p>
-                  <p className="mb-4">{t("terms.safeUse.p2")}</p>
-                  <p>{t("terms.safeUse.p3")}</p>
-                </div>
-
-                {/* קניין רוחני */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                  <h3
+                    className={`mb-3 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
                   >
-                    {t("terms.intellectualProperty.title")}
-                  </h2>
-                  <p>{t("terms.intellectualProperty.p1")}</p>
-                </div>
-
-                {/* הגבלת אחריות */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                    {t("terms.safeUse.books.title")}
+                  </h3>
+                  <p className="mb-4">{t("terms.safeUse.books.p1")}</p>
+                  <p className="mb-4">{t("terms.safeUse.books.p2")}</p>
+                  <p className="mb-6">{t("terms.safeUse.books.p3")}</p>
+                  <h3
+                    className={`mb-3 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
                   >
-                    {t("terms.liabilityLimitation.title")}
-                  </h2>
-                  <p>{t("terms.liabilityLimitation.p1")}</p>
+                    {t("terms.safeUse.framed.title")}
+                  </h3>
+                  <p className="mb-4">{t("terms.safeUse.framed.p1")}</p>
+                  <p className="mb-4">{t("terms.safeUse.framed.p2")}</p>
+                  <p className="mb-4">{t("terms.safeUse.framed.p3")}</p>
+                  <p className="mb-4">{t("terms.safeUse.framed.p4")}</p>
+                  <p className="mb-4">{t("terms.safeUse.framed.p5")}</p>
+                  <p className="mb-4">{t("terms.safeUse.framed.p6")}</p>
+                  <p>{t("terms.safeUse.framed.p7")}</p>
                 </div>
 
-                {/* שינוי תנאים */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("terms.termsChanges.title")}
-                  </h2>
-                  <p>{t("terms.termsChanges.p1")}</p>
-                </div>
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.intellectualProperty.title")}
+                  paragraphs={[
+                    t("terms.intellectualProperty.p1"),
+                    t("terms.intellectualProperty.p2"),
+                  ]}
+                />
 
-                {/* יצירת קשר */}
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.liabilityLimitation.title")}
+                  paragraphs={[
+                    t("terms.liabilityLimitation.p1"),
+                    t("terms.liabilityLimitation.p2"),
+                  ]}
+                />
+
+                <TermsSection
+                  locale={locale}
+                  title={t("terms.termsChanges.title")}
+                  paragraphs={[t("terms.termsChanges.p1")]}
+                />
+
                 <div>
                   <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                    className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${textAlign}`}
                   >
                     {t("terms.contact.title")}
                   </h2>
@@ -171,7 +189,7 @@ function TermsPageContent() {
                     {t("terms.contact.p1")}{" "}
                     <a
                       href="/contact"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
+                      className="text-primary-orange underline hover:text-primary-orange/80"
                     >
                       {t("terms.contact.link")}
                     </a>{" "}
@@ -181,7 +199,7 @@ function TermsPageContent() {
                     📧{" "}
                     <a
                       href="mailto:support@littlegali.com"
-                      className="text-primary-orange hover:text-primary-orange/80 underline"
+                      className="text-primary-orange underline hover:text-primary-orange/80"
                     >
                       support@littlegali.com
                     </a>

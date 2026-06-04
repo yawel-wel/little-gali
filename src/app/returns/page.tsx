@@ -2,11 +2,67 @@
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useState, useEffect } from "react";
 
+function ReturnsSection({
+  title,
+  paragraphs,
+  locale,
+}: {
+  title: string;
+  paragraphs: string[];
+  locale: string;
+}) {
+  const align = locale === "en" ? "text-left" : "text-right";
+
+  return (
+    <section>
+      <h2
+        className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${align}`}
+      >
+        {title}
+      </h2>
+      {paragraphs.map((text, index) => (
+        <p
+          key={index}
+          className={index < paragraphs.length - 1 ? "mb-4" : undefined}
+        >
+          {text}
+        </p>
+      ))}
+    </section>
+  );
+}
+
+function ReturnsList({
+  items,
+  locale,
+  className,
+}: {
+  items: string[];
+  locale: string;
+  className?: string;
+}) {
+  const listMargin = locale === "en" ? "ml-4" : "mr-4";
+
+  return (
+    <ul
+      className={`list-disc list-inside space-y-2 ${listMargin} ${className ?? ""}`}
+    >
+      {items.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
 function ReturnsPageContent() {
   const { t, locale } = useLanguage();
+  const textAlign = locale === "en" ? "text-left" : "text-right";
+  const isHebrew = locale === "he";
+
   return (
     <div
       className="min-h-screen overflow-x-hidden"
@@ -21,107 +77,108 @@ function ReturnsPageContent() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             <div className="max-w-4xl mx-auto">
-              {/* Page Title */}
-              <div className="text-center mb-12">
-                <h1 className="text-3xl lg:text-4xl font-heading text-dark-gray leading-tight mb-4 text-center">
+              <div className="mb-12 text-center">
+                <Title
+                  as="h1"
+                  highlightText={isHebrew ? "החזרים" : "Returns"}
+                  size="lg"
+                >
                   {t("returns.title")}
-                </h1>
+                </Title>
               </div>
 
-              {/* Content */}
               <div
-                className={`space-y-8 font-body text-medium-gray leading-relaxed ${
-                  locale === "en" ? "text-left" : "text-right"
-                }`}
+                className={`space-y-8 font-body leading-relaxed text-medium-gray ${textAlign}`}
               >
-                <div>
-                  <p className="mb-4">{t("returns.intro")}</p>
-                </div>
+                <p>{t("returns.intro")}</p>
 
-                {/* ספרון אישי ומותאם אישית */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("returns.customized.title")}
-                  </h2>
-                  <div className="whitespace-pre-line">
-                    <p>{t("returns.customized.p1")}</p>
-                  </div>
-                </div>
+                <ReturnsSection
+                  locale={locale}
+                  title={t("returns.customized.title")}
+                  paragraphs={[
+                    t("returns.customized.p1"),
+                    t("returns.customized.p2"),
+                  ]}
+                />
 
-                {/* פגמים או נזק במשלוח */}
-                <div>
+                <section>
                   <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                    className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${textAlign}`}
                   >
                     {t("returns.damage.title")}
                   </h2>
-                  <div className="whitespace-pre-line">
-                    <p className="mb-4">
-                      {t("returns.damage.p1")}{" "}
-                      <a
-                        href="/contact"
-                        className="text-primary-orange hover:text-primary-orange/80 underline"
-                      >
-                        {t("returns.damage.link")}
-                      </a>{" "}
-                      {t("returns.damage.p2")}{" "}
-                      <a
-                        href="mailto:yaelromashkano@gmail.com"
-                        className="text-primary-orange hover:text-primary-orange/80 underline"
-                      >
-                        yaelromashkano@gmail.com
-                      </a>
-                      {t("returns.damage.p3")}
-                    </p>
-                  </div>
-                </div>
+                  <p className="mb-4">{t("returns.damage.p1")}</p>
+                  <p className="mb-4">{t("returns.damage.p2")}</p>
+                  <p className="mb-4">{t("returns.damage.intro")}</p>
+                  <ReturnsList
+                    locale={locale}
+                    className="mb-4"
+                    items={[
+                      t("returns.damage.li1"),
+                      t("returns.damage.li2"),
+                      t("returns.damage.li3"),
+                      t("returns.damage.li4"),
+                    ]}
+                  />
+                  <p>{t("returns.damage.p3")}</p>
+                </section>
 
-                {/* לא מרוצים מהמוצר? */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("returns.unsatisfied.title")}
-                  </h2>
-                  <div className="whitespace-pre-line">
-                    <p className="mb-4">{t("returns.unsatisfied.p1")}</p>
-                    <p>{t("returns.unsatisfied.p2")}</p>
-                  </div>
-                </div>
+                <ReturnsSection
+                  locale={locale}
+                  title={t("returns.unsatisfied.title")}
+                  paragraphs={[
+                    t("returns.unsatisfied.p1"),
+                    t("returns.unsatisfied.p2"),
+                    t("returns.unsatisfied.p3"),
+                    t("returns.unsatisfied.p4"),
+                  ]}
+                />
 
-                {/* שונות טבעית ודגשים טכניים */}
-                <div>
-                  <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("returns.variations.title")}
-                  </h2>
-                  <div className="whitespace-pre-line">
-                    <p>{t("returns.variations.p1")}</p>
-                  </div>
-                </div>
+                <ReturnsSection
+                  locale={locale}
+                  title={t("returns.variations.title")}
+                  paragraphs={[
+                    t("returns.variations.p1"),
+                    t("returns.variations.p2"),
+                  ]}
+                />
 
-                {/* Image Rights */}
-                <div>
+                <ReturnsSection
+                  locale={locale}
+                  title={t("returns.orderErrors.title")}
+                  paragraphs={[
+                    t("returns.orderErrors.p1"),
+                    t("returns.orderErrors.p2"),
+                  ]}
+                />
+
+                <ReturnsSection
+                  locale={locale}
+                  title={t("returns.imageRights.title")}
+                  paragraphs={[
+                    t("returns.imageRights.p1"),
+                    t("returns.imageRights.p2"),
+                  ]}
+                />
+
+                <section>
                   <h2
-                    className={`text-2xl font-heading text-dark-gray mb-4 font-bold ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
+                    className={`mb-4 text-2xl font-heading font-bold text-dark-gray ${textAlign}`}
                   >
-                    {t("returns.imageRights.title")}
+                    {t("returns.contact.title")}
                   </h2>
-                  <p>{t("returns.imageRights.p1")}</p>
-                </div>
+                  <p className="mb-4">{t("returns.contact.p1")}</p>
+                  <p className="mb-4">
+                    📧{" "}
+                    <a
+                      href="mailto:support@littlegali.com"
+                      className="text-primary-orange underline hover:text-primary-orange/80"
+                    >
+                      support@littlegali.com
+                    </a>
+                  </p>
+                  <p>{t("returns.contact.lastUpdated")}</p>
+                </section>
               </div>
             </div>
           </div>
@@ -147,7 +204,7 @@ export default function ReturnsPage() {
         style={{ backgroundColor: "#F3EEE8" }}
       >
         <Header />
-        <div className="min-h-screen"></div>
+        <div className="min-h-screen" />
         <Footer />
       </div>
     );
