@@ -1,16 +1,14 @@
 "use client";
 
-import { Plus, Minus, Trash, Loader2 } from "lucide-react";
+import { Plus, Minus, Trash } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface QuantityControlsProps {
   quantity: number;
   onIncrease: () => void;
   onDecrease: () => void;
   onDelete: () => void;
-  isLoading?: boolean;
-  isDeleting?: boolean;
   disabled?: boolean;
-  size?: "sm" | "md" | "lg";
 }
 
 export function QuantityControls({
@@ -18,71 +16,60 @@ export function QuantityControls({
   onIncrease,
   onDecrease,
   onDelete,
-  isLoading = false,
-  isDeleting = false,
   disabled = false,
-  size = "md",
 }: QuantityControlsProps) {
+  const { t } = useLanguage();
   const isQuantityOne = quantity === 1;
 
-  // Size variants
-  const sizeClasses = {
-    sm: {
-      button: "px-2.5 py-1.5",
-      icon: "w-3.5 h-3.5",
-      quantity: "px-3 py-1.5 text-sm",
-    },
-    md: {
-      button: "px-3 md:px-4 py-2",
-      icon: "w-4 h-4 md:w-5 md:h-5",
-      quantity: "px-4 md:px-6 py-2 text-base md:text-lg",
-    },
-    lg: {
-      button: "px-4 py-2.5",
-      icon: "w-5 h-5",
-      quantity: "px-6 py-2.5 text-lg",
-    },
-  };
-
-  const classes = sizeClasses[size];
+  const buttonClass =
+    "flex h-5 w-5 shrink-0 items-center justify-center text-[#693430] transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40 md:cursor-pointer";
 
   return (
-    <div className="inline-flex items-center border border-gray-300 rounded overflow-hidden">
-      {/* Left Button: Trash (if qty=1) or Minus (if qty>1) */}
+    <div
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
+      style={{ backgroundColor: "#F3EEE8" }}
+    >
       <button
-        onClick={isQuantityOne ? onDelete : onDecrease}
-        disabled={disabled || isLoading || (isQuantityOne && isDeleting)}
-        className={`${classes.button} disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer hover:bg-gray-50 text-dark-gray`}
-        aria-label={isQuantityOne ? "Delete item" : "Decrease quantity"}
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isQuantityOne) {
+            onDelete();
+          } else {
+            onDecrease();
+          }
+        }}
+        disabled={disabled}
+        className={buttonClass}
+        aria-label={
+          isQuantityOne ? t("cart.removeItem") : t("cart.decreaseQuantity")
+        }
       >
-        {isQuantityOne && isDeleting ? (
-          <Loader2 className={`${classes.icon} animate-spin`} />
-        ) : isQuantityOne ? (
-          <Trash className={classes.icon} />
+        {isQuantityOne ? (
+          <Trash className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
         ) : (
-          <Minus className={classes.icon} />
+          <Minus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
         )}
       </button>
 
-      {/* Quantity Number */}
       <span
-        className={`${
-          classes.quantity
-        } font-body text-dark-gray border-x border-gray-300 ${
-          size === "sm" ? "min-w-[2rem]" : "min-w-[3rem]"
-        } text-center`}
+        className="min-w-[1rem] text-center font-body-bold text-sm text-[#693430]"
+        aria-live="polite"
       >
         {quantity}
       </span>
 
-      {/* Plus Button */}
       <button
-        onClick={onIncrease}
-        disabled={disabled || isLoading}
-        className={`${classes.button} disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer hover:bg-gray-50`}
-        aria-label="Increase quantity"
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onIncrease();
+        }}
+        disabled={disabled}
+        className={buttonClass}
+        aria-label={t("cart.increaseQuantity")}
       >
-        <Plus className={classes.icon} />
+        <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
       </button>
     </div>
   );

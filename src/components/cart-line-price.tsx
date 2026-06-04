@@ -11,7 +11,12 @@ export function resolveCartLinePrice(
       compare: item.lineCompareAmount,
     };
   }
-  return fallback;
+  const qty = item.quantity > 0 ? item.quantity : 1;
+  return {
+    total: fallback.total * qty,
+    compare:
+      fallback.compare != null ? fallback.compare * qty : undefined,
+  };
 }
 
 type CartLinePriceProps = {

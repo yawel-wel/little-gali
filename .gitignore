@@ -45,3 +45,6 @@ next-env.d.ts
 
 .cursor/mcp.json
 .claude/mcp.json
+
+# Agent skills (Shopify AI Toolkit, etc.)
+.agents/

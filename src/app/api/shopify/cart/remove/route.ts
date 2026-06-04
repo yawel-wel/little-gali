@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { deleteCartImages } from "@/lib/cart-images-store";
+import { expandLineIdsToGroupMembers } from "@/lib/shopify/cart-line-group";
+import { SHOPIFY_CART_LINES_FIRST } from "@/lib/shopify/cart-lines-limit";
+import { normalizeCartLineIds } from "@/lib/shopify/normalize-cart-line-id";
+import { fetchCartLinesForUpdate } from "@/lib/shopify/update-cart-line-quantity";
 
 export const runtime = "nodejs";
 
@@ -28,6 +33,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const cartSnapshot = await fetchCartLinesForUpdate(
+      storeDomain,
+      accessToken,
+      cartId,
+    );
+    const normalizedLineIds = normalizeCartLineIds(
+      expandLineIdsToGroupMembers(cartSnapshot.lines, lineIds),
+    );
+
     const cartLinesRemoveMutation = `
       mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
         cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
@@ -41,7 +55,7 @@ export async function POST(request: NextRequest) {
                 currencyCode
               }
             }
-            lines(first: 10) {
+            lines(first: ${SHOPIFY_CART_LINES_FIRST}) {
               edges {
                 node {
                   id
@@ -80,7 +94,7 @@ export async function POST(request: NextRequest) {
           query: cartLinesRemoveMutation,
           variables: {
             cartId: cartId,
-            lineIds: lineIds,
+            lineIds: normalizedLineIds,
           },
         }),
       }
@@ -118,25 +132,12 @@ export async function POST(request: NextRequest) {
 
     const cart = result.data.cartLinesRemove.cart;
 
-    // Clean up images from our separate storage for removed line items
-    if (lineIds && lineIds.length > 0) {
-      try {
-        await Promise.all(
-          lineIds.map((lineId: string) =>
-            fetch(
-              `${
-                process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-              }/api/cart-images?${new URLSearchParams({ cartId, lineId })}`,
-              {
-                method: "DELETE",
-              }
-            )
-          )
-        );
-      } catch (error) {
-        console.error("Error cleaning up cart images:", error);
-        // Continue even if cleanup fails
-      }
+    try {
+      await Promise.all(
+        normalizedLineIds.map((lineId) => deleteCartImages(cartId, lineId)),
+      );
+    } catch (error) {
+      console.error("Error cleaning up cart images:", error);
     }
 
     // Append locale to checkout URL if provided

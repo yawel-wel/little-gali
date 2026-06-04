@@ -61,6 +61,7 @@ export default function FramedArtPreviewPage() {
   const [session, setSession] = useState<FramedArtSessionPublicView | null>(null);
   const [sessionLoadError, setSessionLoadError] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isRetryingGeneration, setIsRetryingGeneration] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingLineIndex, setLoadingLineIndex] = useState(0);
   const [keepLoadingVisible, setKeepLoadingVisible] = useState(false);
@@ -143,11 +144,7 @@ export default function FramedArtPreviewPage() {
     [session],
   );
 
-  const generationErrorMessage = useMemo(() => {
-    if (!generationFailed || !session?.selectedStyle) return null;
-    const candidate = getActiveCandidate(session, session.selectedStyle);
-    return candidate?.error?.message ?? null;
-  }, [generationFailed, session]);
+  const showGenerationError = generationFailed && !isRetryingGeneration;
 
   useEffect(() => {
     if (skipInitialLoader) {
@@ -172,9 +169,9 @@ export default function FramedArtPreviewPage() {
 
   const showLoadingOverlay =
     !sessionLoadError &&
-    !generationFailed &&
+    !showGenerationError &&
     !hideOverlayForReadySession &&
-    (isGenerating || keepLoadingVisible);
+    (isRetryingGeneration || isGenerating || keepLoadingVisible);
   const isLoadingExiting =
     !isGenerating && keepLoadingVisible && !hideOverlayForReadySession;
 
@@ -190,7 +187,8 @@ export default function FramedArtPreviewPage() {
     clearFramedArtLoadingImageUrls(sessionId);
   }, [localLoadingPhotoUrls.length, sessionId, showLoadingOverlay]);
 
-  const showReadyMain = Boolean(session) && !sessionLoadError && !generationFailed;
+  const showReadyMain =
+    Boolean(session) && !sessionLoadError && !showGenerationError;
 
   const loadingLines = useMemo(
     () => [
@@ -267,6 +265,34 @@ export default function FramedArtPreviewPage() {
     [isSavingCrop, selectedStyle, sessionId, t],
   );
 
+  const handleRetryGeneration = useCallback(async () => {
+    setIsRetryingGeneration(true);
+    setKeepLoadingVisible(true);
+    setSkipInitialLoader(false);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/framed-art/session/${sessionId}/generate`,
+        { method: "POST", credentials: "include" },
+      );
+      const data = (await res.json()) as {
+        session?: FramedArtSessionPublicView;
+        error?: string;
+      };
+      if (data.session) {
+        setSession(data.session);
+        if (isFramedArtSessionReady(data.session)) {
+          setSkipInitialLoader(true);
+          setKeepLoadingVisible(false);
+        }
+      }
+    } catch (err) {
+      console.error("Framed art generation retry failed:", err);
+    } finally {
+      setIsRetryingGeneration(false);
+    }
+  }, [sessionId]);
+
   const handleRegenerate = async () => {
     if (!session?.canRegenerate) return;
     setIsRegenerating(true);
@@ -341,7 +367,7 @@ export default function FramedArtPreviewPage() {
             {t("framedArt.preview.uploadDifferentPhoto")}
           </Link>
         </main>
-      ) : generationFailed ? (
+      ) : showGenerationError ? (
         <main
           id="main-content"
           className="container mx-auto max-w-2xl px-4 pb-16 pt-24 text-center"
@@ -354,17 +380,25 @@ export default function FramedArtPreviewPage() {
               />
             </div>
           ) : (
-            <>
+            <div className="mx-auto flex max-w-md flex-col items-center gap-4">
               <p className="font-body text-dark-gray" role="alert">
-                {generationErrorMessage ?? t("framedArt.preview.errorGeneric")}
+                {t("framedArt.preview.errorGeneric")}
               </p>
+              <button
+                type="button"
+                disabled={isRetryingGeneration}
+                onClick={() => void handleRetryGeneration()}
+                className="w-full max-w-[280px] cursor-pointer rounded-full bg-[#CB8E75] px-8 py-3 font-body-bold text-base text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t("preview.slotRetryAgain")}
+              </button>
               <Link
                 href={uploadAgainHref}
-                className="mt-4 inline-block font-body-bold text-primary-orange"
+                className="font-body text-sm text-medium-gray transition-opacity hover:opacity-80"
               >
                 {t("framedArt.preview.uploadDifferentPhoto")}
               </Link>
-            </>
+            </div>
           )}
         </main>
       ) : showReadyMain ? (

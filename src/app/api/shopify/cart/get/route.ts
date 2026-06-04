@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  extractImagesFromLineAttributes,
+  representativeLineIdsForImageLoad,
+} from "@/lib/cart-line-images";
+import { loadCartImagesBatch } from "@/lib/cart-images-store";
 import { CART_LINE_COST_FIELDS } from "@/lib/shopify/cart-line-cost";
-import { nudgeShopifyCartDiscounts } from "@/lib/shopify/nudge-cart-discounts";
+import { SHOPIFY_CART_LINES_FIRST } from "@/lib/shopify/cart-lines-limit";
+import { getLineGroupId } from "@/lib/shopify/cart-line-group";
 
 export const runtime = "nodejs";
 
@@ -40,7 +46,7 @@ export async function POST(request: NextRequest) {
               currencyCode
             }
           }
-          lines(first: 20) {
+          lines(first: ${SHOPIFY_CART_LINES_FIRST}) {
             edges {
               node {
                 id
@@ -106,92 +112,79 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Cart not found" }, { status: 404 });
     }
 
-    const lineCount = result.data.cart.lines?.edges?.length ?? 0;
-    if (lineCount >= 2) {
-      await nudgeShopifyCartDiscounts(cartId);
-      result = await fetchCartFromShopify();
-      if (result.errors || !result.data?.cart) {
-        return NextResponse.json(
-          { error: "Cart not found after discount refresh" },
-          { status: 404 },
-        );
-      }
-    }
-
     const cart = result.data.cart;
+    const cartAttributes = cart.attributes || [];
 
-    // DO NOT extract image URLs from Shopify attributes - they show on checkout
-    // Images are now stored separately in /api/cart-images and will be fetched by CartContext
-    // For backward compatibility, we still check Shopify attributes as fallback (but won't store new ones there)
-    const lines =
-      cart.lines?.edges?.map((edge: any) => {
-        const node = edge.node;
-        const imageUrls: string[] = [];
+    type RawCartLine = {
+      id: string;
+      quantity: number;
+      title?: string;
+      imageUrls: string[];
+      attributes?: Array<{ key: string; value: string }>;
+      cost?: unknown;
+    };
 
-        // Backward compatibility: check old Shopify attributes (for existing carts)
-        // But we no longer store new images in Shopify attributes
-        const productTypeAttr = node.attributes?.find(
-          (attr: any) => attr.key === "_product_type",
+    const rawLines: RawCartLine[] =
+      cart.lines?.edges?.map((edge: { node: Record<string, unknown> }) => {
+        const node = edge.node as {
+          id: string;
+          quantity: number;
+          attributes?: Array<{ key: string; value: string }>;
+          merchandise?: { product?: { title?: string }; title?: string };
+          cost?: unknown;
+        };
+        const { imageUrls } = extractImagesFromLineAttributes(
+          node.attributes,
+          cartAttributes,
         );
-        const isFramedArt = productTypeAttr?.value === "framed_art";
-        if (isFramedArt) {
-          const framedImage = node.attributes?.find(
-            (attr: any) => attr.key === "_image",
-          );
-          if (framedImage?.value) {
-            imageUrls.push(framedImage.value);
-          }
-        } else {
-          for (let i = 1; i <= 5; i++) {
-            const imageAttr = node.attributes?.find(
-              (attr: any) =>
-                attr.key === `_image_${i}` || attr.key === `image_${i}`,
-            );
-            if (imageAttr?.value) {
-              imageUrls.push(imageAttr.value);
-            }
-          }
-        }
-
-        // Also check cart-level attributes for backward compatibility
-        if (imageUrls.length === 0) {
-          const bookImagesAttr = cart.attributes?.find(
-            (attr: any) => attr.key === "_book_images"
-          );
-          if (bookImagesAttr?.value) {
-            try {
-              const parsed = JSON.parse(bookImagesAttr.value);
-              if (Array.isArray(parsed)) {
-                imageUrls.push(...parsed);
-              }
-            } catch (e) {
-              // Ignore parse errors
-            }
-          }
-        }
-
-        // If still no images, check old cart-level format
-        if (imageUrls.length === 0) {
-          for (let i = 1; i <= 5; i++) {
-            const imageAttr = cart.attributes?.find(
-              (attr: any) =>
-                attr.key === `_image_${i}` || attr.key === `image_${i}`
-            );
-            if (imageAttr?.value) {
-              imageUrls.push(imageAttr.value);
-            }
-          }
-        }
 
         return {
           id: node.id,
           quantity: node.quantity,
           title: node.merchandise?.product?.title || node.merchandise?.title,
-          imageUrls: imageUrls, // Empty for new carts, populated for old carts (backward compatibility)
-          attributes: node.attributes, // Include attributes for fallback in CartContext
+          imageUrls,
+          attributes: node.attributes,
           cost: node.cost,
         };
-      }) || [];
+      }) ?? [];
+
+    const repLineIds = representativeLineIdsForImageLoad(rawLines);
+    const storedByRepId = await loadCartImagesBatch(cartId, repLineIds);
+
+    const groupToRepId = new Map<string, string>();
+    for (const repId of repLineIds) {
+      const repLine = rawLines.find((l) => l.id === repId);
+      const groupId =
+        getLineGroupId({
+          id: repId,
+          quantity: 1,
+          attributes: repLine?.attributes,
+        }) ?? repId;
+      groupToRepId.set(groupId, repId);
+    }
+
+    const storedImagesByLineId: Record<
+      string,
+      (typeof storedByRepId)[string]
+    > = {};
+    for (const line of rawLines) {
+      const groupId =
+        getLineGroupId({
+          id: line.id,
+          quantity: line.quantity,
+          attributes: line.attributes,
+        }) ?? line.id;
+      const repId = groupToRepId.get(groupId) ?? line.id;
+      const stored = storedByRepId[repId] ?? null;
+      if (stored) {
+        storedImagesByLineId[line.id] = stored;
+      }
+    }
+
+    const lines = rawLines.map((line) => ({
+      ...line,
+      storedImages: storedImagesByLineId[line.id] ?? null,
+    }));
 
     // Append locale to checkout URL if provided
     let checkoutUrl = cart.checkoutUrl;

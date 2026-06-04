@@ -11,6 +11,14 @@ import React, {
 import { useLanguage } from "./LanguageContext";
 import { trackAddToCart, trackInitiateCheckout } from "./meta-pixel-events";
 import { parseShopifyLineCost } from "./shopify/cart-line-cost";
+import { cartLineIdsMatch } from "./shopify/cart-line-id-match";
+import {
+  extractColorUrlsFromAttributes,
+  extractImagesFromLineAttributes,
+} from "./cart-line-images";
+import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
+import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
+import type { StoredCartImages } from "./cart-images-store";
 
 export interface CartItem {
   id: string;
@@ -31,6 +39,10 @@ export interface CartItem {
   lineTotalAmount?: number;
   /** Line subtotal before discounts, when greater than lineTotalAmount. */
   lineCompareAmount?: number;
+  /** Merged row: all underlying Shopify line ids when quantity > 1. */
+  lineIds?: string[];
+  lineGroupId?: string;
+  attributes?: Array<{ key: string; value: string }>;
 }
 
 export interface PreviewGenerationStats {
@@ -73,8 +85,10 @@ interface CartContextType {
   ) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
-  fetchCart: (cartId: string) => Promise<void>;
+  fetchCart: (cartId: string, options?: { silent?: boolean }) => Promise<void>;
   clearCart: () => void;
+  /** Wipes local cart immediately; best-effort Shopify line cleanup in background. */
+  resetCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -100,9 +114,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [locale]);
 
-  const fetchCart = useCallback(async (cartId: string) => {
+  const fetchCart = useCallback(async (cartId: string, options?: { silent?: boolean }) => {
     const seq = ++fetchCartSeqRef.current;
-    setIsLoading(true);
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     try {
       const response = await fetch("/api/shopify/cart/get", {
         method: "POST",
@@ -116,183 +132,108 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         if (data.cart) {
-          // Helper to fetch line images and style with small retries to avoid race with server-side storage
-          const fetchLineDataWithRetry = async (
-            cId: string,
-            lId: string,
-            attempts = 3,
-            delayMs = 200
-          ): Promise<{
-            imageUrls: string[];
-            originalUrls?: string[];
-            generatedBwUrls?: string[];
-            generatedColorUrls?: string[];
-            previewSessionId?: string;
-            style?: "cartoon" | "pencil" | "watercolor";
-            isFramedArt?: boolean;
-            framedImageUrl?: string;
-          }> => {
-            for (let i = 0; i < attempts; i++) {
-              try {
-                const res = await fetch(
-                  `/api/cart-images?${new URLSearchParams({
-                    cartId: cId,
-                    lineId: lId,
-                  })}`,
-                );
-                if (res.ok) {
-                  const json = await res.json();
-                  if (
-                    Array.isArray(json.imageUrls) &&
-                    (json.imageUrls.length === 5 ||
-                      (json.productType === "framed_art" &&
-                        json.imageUrls.length >= 1))
-                  ) {
-                    return {
-                      imageUrls: json.imageUrls,
-                      originalUrls: json.originalUrls,
-                      generatedBwUrls: json.generatedBwUrls,
-                      generatedColorUrls: json.generatedColorUrls,
-                      previewSessionId: json.previewSessionId,
-                      style: json.style,
-                      isFramedArt: json.productType === "framed_art",
-                      framedImageUrl: json.framedImageUrl ?? json.imageUrls[0],
-                    };
-                  }
-                }
-              } catch {
-                // ignore and retry
+          const cartAttributes = data.cart.attributes as
+            | Array<{ key: string; value: string }>
+            | undefined;
+
+          const cartItems: CartItem[] = data.cart.lines.map((line: {
+            id: string;
+            quantity: number;
+            title?: string;
+            imageUrls?: string[];
+            attributes?: Array<{ key: string; value: string }>;
+            cost?: Parameters<typeof parseShopifyLineCost>[0];
+            storedImages?: StoredCartImages | null;
+          }) => {
+            const stored = line.storedImages;
+            const attrExtract = extractImagesFromLineAttributes(
+              line.attributes,
+              cartAttributes,
+            );
+            let imageUrls =
+              line.imageUrls?.length ? line.imageUrls : attrExtract.imageUrls;
+            let isFramedArt = attrExtract.isFramedArt;
+
+            if (stored?.imageUrls?.length) {
+              const validBook = stored.imageUrls.length === 5;
+              const validFramed =
+                stored.productType === "framed_art" &&
+                stored.imageUrls.length >= 1;
+              if (validBook || validFramed) {
+                imageUrls = stored.imageUrls;
+                isFramedArt = validFramed;
               }
-              await new Promise((r) => setTimeout(r, delayMs));
             }
-            return { imageUrls: [] };
-          };
 
-          // Fetch images and style from our separate storage for each line item
-          // Fallback to Shopify attributes if in-memory store is empty (production issue)
-          // Also check Shopify attributes for style (fallback)
-          const cartItems: CartItem[] = await Promise.all(
-            data.cart.lines.map(async (line: any) => {
-              const isFramedArtCheck = line.attributes?.find(
-                (attr: any) =>
-                  attr.key === "_product_type" && attr.value === "framed_art",
+            let generatedColorUrls =
+              stored?.generatedColorUrls ??
+              extractColorUrlsFromAttributes(line.attributes);
+
+            const isGiftCard = Boolean(
+              line.attributes?.some(
+                (attr) => attr.key === "_type" && attr.value === "gift_card",
+              ),
+            );
+
+            let giftCardAmount: number | undefined;
+            if (isGiftCard && line.attributes) {
+              const amountAttr = line.attributes.find(
+                (attr) => attr.key === "_gift_card_amount",
               );
-              // Check if this is a gift card first (skip image fetch for gift cards)
-              const isGiftCardCheck = line.attributes?.find(
-                (attr: any) => attr.key === "_type" && attr.value === "gift_card"
-              );
-              
-              const lineData = isGiftCardCheck 
-                ? { imageUrls: [] } 
-                : await fetchLineDataWithRetry(cartId, line.id);
-              
-              // Fallback to Shopify attributes if cart-images API returned empty (production issue)
-              // This happens because in-memory storage doesn't work across serverless instances
-              let imageUrls = lineData.imageUrls;
-              let generatedColorUrls = lineData.generatedColorUrls;
-              const isFramedArt = Boolean(isFramedArtCheck);
-              if (imageUrls.length === 0) {
-                // First try the imageUrls already extracted by the get route (from Shopify attributes)
-                if (line.imageUrls && Array.isArray(line.imageUrls) && line.imageUrls.length > 0) {
-                  imageUrls = line.imageUrls;
-                } else if (line.attributes) {
-                  // Extract images from Shopify line item attributes (backward compatibility)
-                  const shopifyImageUrls: string[] = [];
-                  for (let i = 1; i <= 5; i++) {
-                    const imageAttr = line.attributes.find(
-                      (attr: any) =>
-                        attr.key === `_image_${i}` || attr.key === `image_${i}`
-                    );
-                    if (imageAttr?.value) {
-                      shopifyImageUrls.push(imageAttr.value);
-                    }
-                  }
-                  if (shopifyImageUrls.length > 0) {
-                    imageUrls = shopifyImageUrls;
-                  }
-                }
+              if (amountAttr?.value) {
+                giftCardAmount = parseFloat(amountAttr.value);
+              } else {
+                const cost = line.cost as { totalAmount?: { amount?: string } };
+                giftCardAmount = cost?.totalAmount?.amount
+                  ? parseFloat(cost.totalAmount.amount)
+                  : undefined;
               }
+            }
+
+            let style = stored?.style;
+            if (!style && line.attributes && !isGiftCard) {
+              const styleAttr = line.attributes.find(
+                (attr) => attr.key === "style" || attr.key === "_style",
+              );
               if (
-                (!generatedColorUrls || generatedColorUrls.length === 0) &&
-                line.attributes
+                styleAttr &&
+                (styleAttr.value === "cartoon" ||
+                  styleAttr.value === "pencil" ||
+                  styleAttr.value === "watercolor")
               ) {
-                const shopifyColorUrls: string[] = [];
-                for (let i = 1; i <= 5; i++) {
-                  const colorAttr = line.attributes.find(
-                    (attr: any) => attr.key === `_color_image_${i}`,
-                  );
-                  if (colorAttr?.value) {
-                    shopifyColorUrls.push(colorAttr.value);
-                  }
-                }
-                if (shopifyColorUrls.length === 5) {
-                  generatedColorUrls = shopifyColorUrls;
-                }
+                style = styleAttr.value;
               }
-              
-              // Check if this is a gift card
-              let isGiftCard = false;
-              let giftCardAmount = undefined;
-              if (line.attributes) {
-                const typeAttr = line.attributes.find(
-                  (attr: any) => attr.key === "_type"
-                );
-                if (typeAttr?.value === "gift_card") {
-                  isGiftCard = true;
-                  
-                  // Try to extract gift card amount from stored attribute first
-                  const amountAttr = line.attributes.find(
-                    (attr: any) => attr.key === "_gift_card_amount"
-                  );
-                  if (amountAttr?.value) {
-                    giftCardAmount = parseFloat(amountAttr.value);
-                  } else {
-                    // Fallback: Extract from line cost
-                    giftCardAmount = line.cost?.totalAmount?.amount ? 
-                      parseFloat(line.cost.totalAmount.amount) : undefined;
-                  }
-                }
-              }
-              
-              // Check Shopify attributes for style (fallback if not in our storage)
-              // Check both "style" (visible) and "_style" (hidden) attributes
-              let style = lineData.style;
-              if (!style && line.attributes && !isGiftCard) {
-                const styleAttr = line.attributes.find(
-                  (attr: any) => attr.key === "style" || attr.key === "_style"
-                );
-                if (styleAttr && (styleAttr.value === "cartoon" || styleAttr.value === "pencil" || styleAttr.value === "watercolor")) {
-                  style = styleAttr.value;
-                }
-              }
-              
-              const framedImageUrl =
-                isFramedArt && imageUrls[0]
-                  ? imageUrls[0]
-                  : lineData.framedImageUrl;
+            }
 
-              const linePricing = parseShopifyLineCost(line.cost);
+            const framedImageUrl =
+              isFramedArt && imageUrls[0]
+                ? (stored?.framedImageUrl ?? imageUrls[0])
+                : stored?.framedImageUrl;
 
-              return {
-                id: line.id,
-                lineId: line.id,
-                quantity: line.quantity,
-                title: line.title,
-                imageUrls: isGiftCard ? [] : imageUrls,
-                originalUrls: isGiftCard ? undefined : lineData.originalUrls,
-                generatedBwUrls: isGiftCard ? undefined : lineData.generatedBwUrls,
-                generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
-                previewSessionId: isGiftCard ? undefined : lineData.previewSessionId,
-                style: isGiftCard ? undefined : style,
-                isGiftCard,
-                giftCardAmount,
-                isFramedArt: isFramedArt || lineData.isFramedArt,
-                framedImageUrl,
-                lineTotalAmount: linePricing?.total,
-                lineCompareAmount: linePricing?.compare,
-              };
-            })
-          );
+            const linePricing = parseShopifyLineCost(line.cost);
+
+            return {
+              id: line.id,
+              lineId: line.id,
+              quantity: line.quantity,
+              title: line.title,
+              imageUrls: isGiftCard ? [] : imageUrls,
+              originalUrls: isGiftCard ? undefined : stored?.originalUrls,
+              generatedBwUrls: isGiftCard ? undefined : stored?.generatedBwUrls,
+              generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
+              previewSessionId: isGiftCard ? undefined : stored?.previewSessionId,
+              style: isGiftCard ? undefined : style,
+              isGiftCard,
+              giftCardAmount,
+              isFramedArt,
+              framedImageUrl,
+              lineTotalAmount: linePricing?.total,
+              lineCompareAmount: linePricing?.compare,
+              attributes: line.attributes,
+            };
+          });
+
+          const displayItems = mergeCartItemsByLineGroup(cartItems);
 
           if (seq !== fetchCartSeqRef.current) {
             return;
@@ -304,7 +245,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             totalQuantity: data.cart.totalQuantity,
             totalAmount: data.cart.totalAmount,
             currencyCode: data.cart.currencyCode,
-            items: cartItems,
+            items: displayItems,
           });
           localStorage.setItem("shopify_cart_id", data.cart.id);
         }
@@ -532,7 +473,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json();
       if (data.cart) {
-        await fetchCart(data.cart.id);
+        await fetchCart(data.cart.id, { silent: true });
         try {
           trackAddToCart("איור ממוסגר", sessionId, 129, 1);
         } catch (err) {
@@ -575,8 +516,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         if (data.cart) {
-          await fetchCart(data.cart.id);
-          
+          await fetchCart(data.cart.id, { silent: true });
+
           // Track Meta Pixel AddToCart event for gift card
           try {
             // Extract gift card value from optionId (format: gid://shopify/ProductVariant/...)
@@ -607,12 +548,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!cart?.id) return;
 
     if (quantity <= 0) {
-      // If quantity is 0 or less, remove the item
       await removeFromCart([lineId]);
       return;
     }
 
-    setIsLoading(true);
+    const previousCart = cart;
+    const nextItems = cart.items.map((item) => {
+      const id = item.lineId || item.id;
+      return cartLineIdsMatch(id, lineId) ? { ...item, quantity } : item;
+    });
+    const nextTotalQuantity = nextItems.reduce(
+      (sum, item) => sum + (item.quantity > 0 ? item.quantity : 1),
+      0,
+    );
+
+    setCart({
+      ...cart,
+      items: nextItems,
+      totalQuantity: nextTotalQuantity,
+    });
+
     try {
       const response = await fetch("/api/shopify/cart/update", {
         method: "POST",
@@ -621,34 +576,66 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
         body: JSON.stringify({
           cartId: cart.id,
-          lineId,
+          lineId: normalizeCartLineId(lineId),
           quantity,
           locale,
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.cart) {
-          // Fetch updated cart
-          await fetchCart(data.cart.id);
-        }
-      } else {
+      if (!response.ok) {
         const error = await response.json();
+        setCart(previousCart);
         throw new Error(error.error || "Failed to update quantity");
       }
+
+      const data = await response.json();
+      if (data.cart?.id) {
+        await fetchCart(data.cart.id, { silent: true });
+      }
     } catch (error) {
+      setCart(previousCart);
       console.error("Error updating quantity:", error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const removeFromCart = async (lineIds: string[]) => {
     if (!cart?.id) return;
 
-    setIsLoading(true);
+    const expanded = new Set<string>();
+    for (const id of lineIds) {
+      const item = cart.items.find((i) =>
+        cartLineIdsMatch(i.lineId || i.id, id),
+      );
+      if (item?.lineIds?.length) {
+        for (const lid of item.lineIds) {
+          expanded.add(normalizeCartLineId(lid));
+        }
+      } else {
+        expanded.add(normalizeCartLineId(id));
+      }
+    }
+    const normalizedLineIds = [...expanded];
+    const lineIdSet = new Set(normalizedLineIds);
+    const previousCart = cart;
+
+    const nextItems = cart.items.filter((item) => {
+      const ids = item.lineIds?.length
+        ? item.lineIds.map(normalizeCartLineId)
+        : [normalizeCartLineId(item.lineId || item.id)];
+      return !ids.some((id) => lineIdSet.has(id));
+    });
+    const nextTotalQuantity = nextItems.reduce(
+      (sum, item) => sum + (item.quantity > 0 ? item.quantity : 1),
+      0,
+    );
+
+    setCart({
+      ...cart,
+      items: nextItems,
+      totalQuantity: nextTotalQuantity,
+    });
+
     try {
       const response = await fetch("/api/shopify/cart/remove", {
         method: "POST",
@@ -657,32 +644,62 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
         body: JSON.stringify({
           cartId: cart.id,
-          lineIds,
+          lineIds: normalizedLineIds,
           locale,
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.cart) {
-          // Fetch updated cart
-          await fetchCart(data.cart.id);
-        }
-      } else {
+      if (!response.ok) {
         const error = await response.json();
+        setCart(previousCart);
         throw new Error(error.error || "Failed to remove from cart");
       }
+
+      const data = await response.json();
+      if (data.cart?.id) {
+        if (nextTotalQuantity === 0) {
+          clearCart();
+          return;
+        }
+        await fetchCart(data.cart.id, { silent: true });
+      }
     } catch (error) {
+      setCart(previousCart);
       console.error("Error removing from cart:", error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const clearCart = () => {
     setCart(null);
-    localStorage.removeItem("shopify_cart_id");
+    try {
+      localStorage.removeItem("shopify_cart_id");
+    } catch {
+      // ignore
+    }
+  };
+
+  const resetCart = async () => {
+    const cartId = cart?.id;
+    const lineIds =
+      cart?.items.map((item) => normalizeCartLineId(item.lineId || item.id)) ??
+      [];
+
+    clearCart();
+
+    if (!cartId || lineIds.length === 0) {
+      return;
+    }
+
+    try {
+      await fetch("/api/shopify/cart/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartId, lineIds, locale }),
+      });
+    } catch {
+      // Local cart is already cleared; stale Shopify carts expire on their own.
+    }
   };
 
   return (
@@ -697,6 +714,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         fetchCart,
         clearCart,
+        resetCart,
       }}
     >
       {children}

@@ -34,6 +34,20 @@ export async function loadCartImages(
   return (await kvGet<StoredCartImages>(cartImagesKey(cartId, lineId))) ?? null;
 }
 
+export async function loadCartImagesBatch(
+  cartId: string,
+  lineIds: string[],
+): Promise<Record<string, StoredCartImages | null>> {
+  const unique = [...new Set(lineIds)];
+  const pairs = await Promise.all(
+    unique.map(
+      async (lineId) =>
+        [lineId, await loadCartImages(cartId, lineId)] as const,
+    ),
+  );
+  return Object.fromEntries(pairs);
+}
+
 export async function deleteCartImages(
   cartId: string,
   lineId: string,

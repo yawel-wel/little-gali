@@ -178,14 +178,18 @@ function FramedArtUploadPageContent() {
           return;
         }
 
-        if (!generateRes.ok) {
+        const generationFailed =
+          !generateRes.ok ||
+          generateData.session?.generationStatus === "failed";
+
+        if (generationFailed) {
+          if (failedSession && !isFramedArtProhibitedContent(failedSession)) {
+            saveFramedArtLoadingImageUrls(sessionId, [uploadData.imageUrls[0]]);
+            router.push(`/framed-art/preview/${sessionId}`);
+            return;
+          }
           console.error("Framed art generate failed:", generateData);
-          throw new Error(generateData.error || t("framedArt.upload.errorGeneric"));
-        }
-        if (generateData.session?.generationStatus === "failed") {
-          throw new Error(
-            generateData.error || t("framedArt.upload.errorGeneric"),
-          );
+          throw new Error(t("framedArt.upload.errorGeneric"));
         }
 
         saveFramedArtLoadingImageUrls(sessionId, [uploadData.imageUrls[0]]);

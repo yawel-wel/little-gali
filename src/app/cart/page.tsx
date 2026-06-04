@@ -12,14 +12,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
-import {
-  BOOK_PRICE,
-  DISCOUNTED_BOOK_PRICE,
-  FRAMED_ART_UNIT_PRICE,
-} from "@/lib/constants";
-import { ArrowRight, Loader2, ShoppingCart, Trash2 } from "lucide-react";
+import type { CartItem } from "@/lib/CartContext";
+import { ArrowRight, Loader2, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
@@ -27,9 +23,26 @@ import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avata
 import { CartSuggestProducts } from "@/components/cart-suggest-products";
 import { CartOrderSummary } from "@/components/cart-order-summary";
 import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
-import { CartLinePrice } from "@/components/cart-line-price";
+import { QuantityControls } from "@/components/quantity-controls";
+import { CartLineItemHeader } from "@/components/cart-line-item-header";
+import { CartLineItemDetails } from "@/components/cart-line-item-details";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
-import { resolveCartLinePrice } from "@/components/cart-line-price";
+import { getCartItemLinePricing } from "@/lib/cart-line-pricing";
+import { cartLineIdsMatch } from "@/lib/shopify/cart-line-id-match";
+
+function getLineId(item: CartItem): string {
+  return item.lineId || item.id;
+}
+
+function getStyleLabel(
+  style: CartItem["style"],
+  t: (key: string) => string,
+): string {
+  if (style === "cartoon") return t("cart.style.cartoon");
+  if (style === "pencil") return t("cart.style.pencil");
+  if (style === "watercolor") return t("cart.style.watercolor");
+  return t("cart.style.cartoon");
+}
 
 function CartAddingItemRow({ label }: { label: string }) {
   return (
@@ -59,14 +72,18 @@ function readAddingToCartFlag(): boolean {
 }
 
 export default function CartPage() {
-  const { cart, isLoading, removeFromCart, fetchCart } = useCart();
+  const { cart, isLoading, removeFromCart, updateQuantity, fetchCart, resetCart } =
+    useCart();
   const router = useRouter();
   const { t, locale } = useLanguage();
   const [isOptimisticAdding, setIsOptimisticAdding] = useState(readAddingToCartFlag);
-  const [isRemoving, setIsRemoving] = useState<string | null>(null);
+  const [busyLineId, setBusyLineId] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [quantityError, setQuantityError] = useState<string | null>(null);
+  const [isResettingCart, setIsResettingCart] = useState(false);
   const [addGiftMessage, setAddGiftMessage] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
   const [isUpdatingGiftMessage, setIsUpdatingGiftMessage] = useState(false);
@@ -237,27 +254,92 @@ export default function CartPage() {
 
   const handleRemoveClick = (lineId: string) => {
     setItemToRemove(lineId);
+    setRemoveError(null);
     setShowConfirmDialog(true);
   };
 
   const handleConfirmRemove = async () => {
     if (!itemToRemove) return;
 
-    setIsRemoving(itemToRemove);
+    setBusyLineId(itemToRemove);
     setShowConfirmDialog(false);
+    setRemoveError(null);
     try {
       await removeFromCart([itemToRemove]);
     } catch (error) {
       console.error("Error removing item:", error);
+      setRemoveError(
+        error instanceof Error ? error.message : t("cart.removeFailed"),
+      );
     } finally {
-      setIsRemoving(null);
+      setBusyLineId(null);
       setItemToRemove(null);
     }
+  };
+
+  const handleQuantityChange = async (lineId: string, nextQuantity: number) => {
+    setBusyLineId(lineId);
+    setQuantityError(null);
+    try {
+      await updateQuantity(lineId, nextQuantity);
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+      setQuantityError(
+        error instanceof Error ? error.message : t("cart.quantityUpdateFailed"),
+      );
+    } finally {
+      setBusyLineId(null);
+    }
+  };
+
+  const quantityUpdateInFlightRef = useRef<string | null>(null);
+
+  const adjustQuantity = (lineId: string, delta: number) => {
+    if (quantityUpdateInFlightRef.current === lineId) return;
+    const item = cart?.items.find((i) => cartLineIdsMatch(getLineId(i), lineId));
+    if (!item) return;
+    const current = item.quantity > 0 ? item.quantity : 1;
+    const next = current + delta;
+    if (next < 1) return;
+    quantityUpdateInFlightRef.current = lineId;
+    void handleQuantityChange(lineId, next).finally(() => {
+      if (quantityUpdateInFlightRef.current === lineId) {
+        quantityUpdateInFlightRef.current = null;
+      }
+    });
+  };
+
+  const renderQuantityControls = (item: CartItem) => {
+    const lineId = getLineId(item);
+    const quantity = item.quantity > 0 ? item.quantity : 1;
+    const isBusy = busyLineId === lineId;
+
+    return (
+      <QuantityControls
+        quantity={quantity}
+        disabled={isBusy || isPendingAdd}
+        onIncrease={() => adjustQuantity(lineId, 1)}
+        onDecrease={() => adjustQuantity(lineId, -1)}
+        onDelete={() => handleRemoveClick(lineId)}
+      />
+    );
   };
 
   const handleCancelRemove = () => {
     setShowConfirmDialog(false);
     setItemToRemove(null);
+  };
+
+  const handleResetCart = async () => {
+    setIsResettingCart(true);
+    setRemoveError(null);
+    try {
+      await resetCart();
+    } catch (error) {
+      console.error("Error resetting cart:", error);
+    } finally {
+      setIsResettingCart(false);
+    }
   };
 
   // Edit functionality removed: books can only be created via normal flow and not edited from cart
@@ -316,6 +398,15 @@ export default function CartPage() {
                 </Title>
               </div>
 
+              {(removeError || quantityError) && (
+                <p
+                  className="text-center text-sm font-body text-red-600"
+                  role="alert"
+                >
+                  {removeError ?? quantityError}
+                </p>
+              )}
+
               {/* Cart Content */}
               {isLoading && !cart ? (
                 <div
@@ -338,13 +429,14 @@ export default function CartPage() {
                         .slice(0, reversedIndex + 1)
                         .filter((i) => !i.isGiftCard && !i.isFramedArt).length;
                       const displayIndex = paperBooksBeforeThis;
+                      const lineId = getLineId(item);
+                      const isLineBusy = busyLineId === lineId;
                       return (
                         <div
                           key={item.id}
-                          className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 shadow-sm relative"
+                          className="bg-white border border-gray-200 rounded-lg p-4 md:px-5 md:pt-5 md:pb-4 shadow-sm relative"
                         >
-                          {/* Loader Overlay - Show only on the item being removed */}
-                          {isRemoving === (item.lineId || item.id) && (
+                          {isLineBusy && (
                             <div className="absolute inset-0 bg-white/80 rounded-lg flex items-center justify-center z-50">
                               <Loader2 className="w-8 h-8 animate-spin text-primary-orange" />
                             </div>
@@ -358,95 +450,62 @@ export default function CartPage() {
                             />
                           )}
 
-                          {/* Title, Style, and Price */}
-                          <div className="mb-4">
-                            {item.isGiftCard ? (
-                              <>
-                                {/* Gift Card Title */}
-                                <h3
-                                  className={`text-sm md:text-base font-body-bold text-dark-gray mb-1 ${
-                                    locale === "en" ? "text-left" : "text-right"
-                                  }`}
-                                >
-                                  {t("cart.giftCardTitle")}
-                                </h3>
-                                <div
-                                  className="flex items-center justify-between w-full"
-                                  dir="ltr"
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveClick(item.lineId || item.id);
-                                    }}
-                                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
-                                    disabled={
-                                      isLoading ||
-                                      isRemoving === (item.lineId || item.id)
-                                    }
-                                    aria-label={t("cart.removeItem")}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                  <CartLinePrice
-                                    {...resolveCartLinePrice(item, {
-                                      total: item.giftCardAmount ?? 0,
-                                    })}
-                                  />
-                                </div>
-                              </>
-                            ) : item.isFramedArt ? (
-                              <>
-                                <div className="flex items-start gap-4" dir="ltr">
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveClick(item.lineId || item.id);
-                                    }}
-                                    className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
-                                    disabled={
-                                      isLoading ||
-                                      isRemoving === (item.lineId || item.id)
-                                    }
-                                    aria-label={t("cart.removeItem")}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
+                          <div>
+                            {(() => {
+                              const pricing = getCartItemLinePricing(
+                                item,
+                                item.isGiftCard || item.isFramedArt
+                                  ? undefined
+                                  : displayIndex,
+                              );
+                              const quantity =
+                                item.quantity > 0 ? item.quantity : 1;
+                              const details = (
+                                <CartLineItemDetails
+                                  locale={locale}
+                                  styleValue={
+                                    item.isGiftCard
+                                      ? undefined
+                                      : getStyleLabel(item.style, t)
+                                  }
+                                  showStyleRow={!item.isGiftCard}
+                                  quantity={quantity}
+                                  unitPrice={pricing.unitPrice}
+                                  lineTotal={pricing.lineTotal}
+                                  quantityControls={renderQuantityControls(item)}
+                                />
+                              );
 
-                                  <div className="flex flex-1 items-start justify-end gap-3">
-                                    <div
-                                      className={`min-w-0 ${
-                                        locale === "en" ? "text-left" : "text-right"
-                                      }`}
-                                    >
-                                      <h3 className="text-sm md:text-base font-body-bold text-dark-gray">
-                                        {t("cart.framedArtTitle")}
-                                      </h3>
-                                      <div className="mt-1 text-sm text-medium-gray font-body">
-                                        <span>{t("cart.style")} </span>
-                                        <span className="font-body text-dark-gray">
-                                          {item.style === "cartoon"
-                                            ? t("cart.style.cartoon")
-                                            : item.style === "pencil"
-                                              ? t("cart.style.pencil")
-                                              : item.style === "watercolor"
-                                                ? t("cart.style.watercolor")
-                                                : t("cart.style.cartoon")}
-                                        </span>
-                                      </div>
-                                      <CartLinePrice
-                                        className="mt-3"
-                                        {...resolveCartLinePrice(item, {
-                                          total: FRAMED_ART_UNIT_PRICE,
-                                        })}
+                              if (item.isGiftCard) {
+                                return (
+                                  <>
+                                    <CartLineItemHeader
+                                      title={t("cart.giftCardTitle")}
+                                      unitPrice={pricing.unitPrice}
+                                      locale={locale}
+                                    />
+                                    {details}
+                                  </>
+                                );
+                              }
+
+                              if (item.isFramedArt) {
+                                return (
+                                  <div
+                                    className="flex items-start gap-3"
+                                    dir={locale === "he" ? "rtl" : "ltr"}
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <CartLineItemHeader
+                                        title={t("cart.framedArtTitle")}
+                                        unitPrice={pricing.unitPrice}
+                                        locale={locale}
                                       />
+                                      {details}
                                     </div>
-
                                     {(item.framedImageUrl ??
                                       item.imageUrls?.[0]) && (
-                                      <div className="shrink-0 w-[5.4rem]">
+                                      <div className="shrink-0 w-[5.4rem] md:self-start">
                                         <FramedArtFrameMockup
                                           imageUrl={
                                             item.framedImageUrl ??
@@ -456,69 +515,27 @@ export default function CartPage() {
                                         />
                                       </div>
                                     )}
+                                    {locale === "he" ? (
+                                      <div
+                                        className="hidden min-w-0 flex-1 md:block"
+                                        aria-hidden
+                                      />
+                                    ) : null}
                                   </div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                {/* Title - Smaller size, regular weight */}
-                                <h3
-                                  className={`text-sm md:text-base font-body-bold text-dark-gray mb-1 ${
-                                    locale === "en" ? "text-left" : "text-right"
-                                  }`}
-                                >
-                                  {t("cart.book")} {displayIndex}
-                                </h3>
-                                {/* Color Style - Above price */}
-                                <div
-                                  className={`text-sm text-medium-gray font-body mb-1 ${
-                                    locale === "en" ? "text-left" : "text-right"
-                                  }`}
-                                >
-                                  <span>{t("cart.colorStyle")} </span>
-                                  <span className="font-body text-dark-gray">
-                                    {item.style === "cartoon"
-                                      ? t("cart.style.cartoon")
-                                      : item.style === "pencil"
-                                      ? t("cart.style.pencil")
-                                      : item.style === "watercolor"
-                                      ? t("cart.style.watercolor")
-                                      : t("cart.style.cartoon")}
-                                  </span>
-                                </div>
-                                <div
-                                  className="flex items-center justify-between w-full"
-                                  dir="ltr"
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveClick(item.lineId || item.id);
-                                    }}
-                                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700 md:cursor-pointer md:transition-opacity md:hover:opacity-70"
-                                    disabled={
-                                      isLoading ||
-                                      isRemoving === (item.lineId || item.id)
-                                    }
-                                    aria-label={t("cart.removeItem")}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                  <CartLinePrice
-                                    {...resolveCartLinePrice(
-                                      item,
-                                      displayIndex % 2 === 0
-                                        ? {
-                                            total: DISCOUNTED_BOOK_PRICE,
-                                            compare: BOOK_PRICE,
-                                          }
-                                        : { total: BOOK_PRICE },
-                                    )}
+                                );
+                              }
+
+                              return (
+                                <>
+                                  <CartLineItemHeader
+                                    title={t("cart.book")}
+                                    unitPrice={pricing.unitPrice}
+                                    locale={locale}
                                   />
-                                </div>
-                              </>
-                            )}
+                                  {details}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       );
@@ -527,6 +544,16 @@ export default function CartPage() {
                       <CartAddingItemRow label={t("cart.addingItem")} />
                     )}
                     <CartSuggestProducts />
+                    <div className="pt-2 text-center">
+                      <button
+                        type="button"
+                        disabled={isResettingCart || isPendingAdd}
+                        onClick={() => void handleResetCart()}
+                        className="font-body text-sm text-medium-gray underline decoration-medium-gray/50 underline-offset-2 transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {t("cart.clearAll")}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Right Column: Order Summary (Desktop) - Sticky */}

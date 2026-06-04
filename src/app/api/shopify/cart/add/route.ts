@@ -162,6 +162,7 @@ export async function POST(request: NextRequest) {
           attributes: [
             // Ensure this line stays distinct (prevents quantity merge)
             { key: "_uid", value: lineUid },
+            { key: "_line_group", value: lineUid },
             // Line item attributes with underscore prefix are hidden from checkout
             { key: "_image_1", value: urls[0] },
             { key: "_image_2", value: urls[1] },

@@ -78,6 +78,7 @@ export function framedArtShopifyLineAttributes(
 ): Array<{ key: string; value: string }> {
   const attrs = [
     { key: "_uid", value: lineUid },
+    { key: "_line_group", value: lineUid },
     { key: "_product_type", value: "framed_art" },
     { key: "_framed_art_session_id", value: fulfillment.sessionId },
     shopifyLineAttr("_original_public_id", fulfillment.originalPublicId),
