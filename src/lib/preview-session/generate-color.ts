@@ -70,6 +70,7 @@ async function generateWithGemini(
 
   const { base64, mimeType } = await downloadImageAsBase64ForGemini(imageUrl);
   const ai = new GoogleGenAI({ apiKey });
+  // Would be sent to the API as systemInstruction (disabled for prompt testing).
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 
   let lastError: unknown;
@@ -93,7 +94,7 @@ async function generateWithGemini(
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
-          systemInstruction,
+          // systemInstruction, // would send GENERATION_SYSTEM_INSTRUCTION (disabled for prompt testing)
           imageConfig: {
             aspectRatio: "1:1",
           },

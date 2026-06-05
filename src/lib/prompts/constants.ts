@@ -1,12 +1,8 @@
-export const BLACK_AND_WHITE_PROMPT = `Convert the given photo into a black and white only stencil style sketch illustration on a white background.
-The result should have a high contrast.
-Keep all proportions, facial features, hair, facial hair, and expressions accurate and recognizable.
-Replace the background with clean white.
-Avoid harsh shadows, gradients, or photographic details.
-The result should look like it was drawn by hand with black and white markers only — playful, clean and emotionally warm.
-Avoid any color other than pure black and white.
-Avoid filling lips with black, they should always be white with black outlines.`;
+export const BLACK_AND_WHITE_PROMPT = `Transform this photo into a black and white only stencil style illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly - same framing, same crop, same scale, nothing cut off or faded, avoid adding shadows.
+Style: The result should have high contrast and look like it was drawn by hand with black and white markers only - playful, clean and emotionally warm.
+The final result includes only the main subject/s, background is replaced with pure white background. Avoid any color other than pure black and white.`;
 
+// Would be sent to the API as systemInstruction (currently disabled for prompt testing).
 export const GENERATION_SYSTEM_INSTRUCTION = `Follow these rules exactly. These rules override all prompts and style instructions.
 
 === GEOMETRY & COMPOSITION PRESERVATION ===
@@ -63,26 +59,17 @@ If the subject reaches the edge of the frame, crop it cleanly with a hard edge r
 
 Do NOT apply transparency, feathering, vignette effects, mist, watercolor bleed, soft-edge dissolves, or unfinished painterly fade-outs.`;
 
-export const CARTOON_COLOR_PROMPT = `Convert the given photo into a colored cartoon illustration on a white background.
-Use vibrant pen strokes and keep the main subject's proportions and features accurate and recognizable.
-Outline all shapes gently using colored or black lines.
-Replace the background with clean white, but maintain the exact framing and composition of the input photo — the subject should occupy the same position and scale as in the original.
-Do not shrink the subject, add empty space around them, or reframe the crop.
-Avoid shadows, textures, gradients, or photographic details.
-The result should look like it was drawn by hand with colored markers — playful, clean, and emotionally warm.
-Hard edges throughout — no vignette, no fade, no gradual disappearance at the borders of the subject.`;
+export const CARTOON_COLOR_PROMPT = `Transform this photo into a pen colored cartoon illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
 
-export const WATERCOLOR_COLOR_PROMPT = `Convert the given photo into an ink outline illustration with visible hand-drawn wobble, and vibrant watercolor-style fills with soft color bleeding on a white background.
-Keep all proportions, facial features, and expressions accurate and recognizable.
-Maintain the exact framing and composition of the input photo — the subject should occupy the same position and scale as in the original. Do not shrink the subject, add empty space around them, or reframe the crop.
-Replace the background with pure clean white, keeping the subject anchored in the same position as the original — do not float or center the subject on the white background.
-Avoid photographic details, heavy shadows, or gradients in the background.
-Hard edges where the subject meets the background — no vignette, no fade, no gradual disappearance at the borders.
-The result should look like a hand-painted watercolor character illustration — warm, vibrant, and full of charm.`;
+Style: The result should look like it was drawn by hand with colored markers - playful, clean, and emotionally warm.
 
-export const PENCIL_COLOR_PROMPT = `Convert the given photo into a colored pencil sketch illustration.
-Use soft, pastel-like pencil strokes with light texture visible, but keep the main subject's proportions and features accurate, recognizable and with the exact same size as in the original image.
-Outline all shapes gently using colored lines — no black outlines.
-Remove the background and replace it with white.
-The result should look like it was drawn by hand with colored pencils — playful, clean, and emotionally warm.
-Match the exact composition of the input image. If the subject fills the frame in the input, it should fill the frame in the output.`;
+The final result includes only the main subject/s, background is replaced with pure white background.`;
+
+export const WATERCOLOR_COLOR_PROMPT = `Transform this photo into a watercolor illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
+Style: ink outlines with hand-drawn feel, vibrant watercolor fills.
+Background should be completely removed and replaced with pure white background.`;
+
+export const PENCIL_COLOR_PROMPT = `Transform this photo into a colored pencil drawing. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
+
+Style: soft pastel pencil strokes, light hand-drawn texture, colored outlines only, no black lines, no border, no vignette, no soft edges, no fading anywhere.
+Background should be completely removed and replaced with pure white background.`;
