@@ -15,7 +15,6 @@ const nextConfig: NextConfig = {
     "@vercel/analytics",
     "@vercel/speed-insights",
     "framer-motion",
-    "heic2any",
     "react-easy-crop",
     "swiper",
   ],

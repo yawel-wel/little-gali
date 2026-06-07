@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 import { after, NextRequest, NextResponse } from "next/server";
+import { findDisallowedUploadImage } from "@/lib/allowed-image-types";
 import { logPreviewFullGenerationRateLimited } from "@/lib/preview-session/log-preview-rate-limit";
 import { isPreviewEnabled, requirePreviewSession } from "@/lib/preview-session/auth";
 import { isAllowedCloudinaryUrl } from "@/lib/preview-session/cloudinary";
@@ -239,6 +240,13 @@ export async function POST(request: NextRequest) {
       if (files.length !== 5) {
         return NextResponse.json(
           { error: "Exactly five images are required" },
+          { status: 400 },
+        );
+      }
+
+      if (findDisallowedUploadImage(files)) {
+        return NextResponse.json(
+          { error: "Only JPG and PNG images are allowed" },
           { status: 400 },
         );
       }

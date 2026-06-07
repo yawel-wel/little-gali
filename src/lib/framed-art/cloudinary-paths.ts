@@ -8,7 +8,7 @@ export function framedArtColorOutputPublicId(
   style: StyleType,
   version: number,
 ): string {
-  return `${FRAMED_ART_ROOT}/${sessionId}/outputs/${sessionId}_color_${style}_v${version}`;
+  return `${FRAMED_ART_ROOT}/${sessionId}/outputs/color/${style}/${sessionId}_color_${style}_v${version}`;
 }
 
 export function framedArtColorWatermarkedPublicId(
@@ -16,7 +16,7 @@ export function framedArtColorWatermarkedPublicId(
   style: StyleType,
   version: number,
 ): string {
-  return `${framedArtColorOutputPublicId(sessionId, style, version)}_wm`;
+  return `${FRAMED_ART_ROOT}/${sessionId}/outputs/watermark/color/${style}/${sessionId}_color_${style}_v${version}`;
 }
 
 export function framedArtColorCroppedPublicId(
@@ -32,5 +32,5 @@ export function framedArtColorCroppedWatermarkedPublicId(
   style: StyleType,
   version: number,
 ): string {
-  return `${framedArtColorCroppedPublicId(sessionId, style, version)}_wm`;
+  return `${framedArtColorWatermarkedPublicId(sessionId, style, version)}_crop`;
 }

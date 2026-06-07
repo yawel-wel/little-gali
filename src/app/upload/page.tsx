@@ -22,6 +22,10 @@ import { useRouter } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import {
+  isAllowedUploadImageType,
+  UPLOAD_IMAGE_ACCEPT,
+} from "@/lib/allowed-image-types";
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
 import { arrayMove } from "@dnd-kit/sortable";
 import {
@@ -405,9 +409,20 @@ function UploadPageContent() {
     const files = event.target.files;
     if (!files) return;
 
-    const imageFiles = Array.from(files).filter((file) =>
-      file.type.startsWith("image/"),
+    const selectedFiles = Array.from(files);
+    const imageFiles = selectedFiles.filter((file) =>
+      isAllowedUploadImageType(file),
     );
+    if (imageFiles.length !== selectedFiles.length) {
+      setSubmitStatus({
+        type: "error",
+        message: t("upload.invalidType"),
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
     const currentCount = images.length;
     const availableSlots = 5 - currentCount;
     if (availableSlots <= 0) return;
@@ -583,7 +598,16 @@ function UploadPageContent() {
       if (!files || files.length === 0 || !isInCroppingFlow) return;
 
       const file = files[0];
-      if (!file.type.startsWith("image/")) return;
+      if (!isAllowedUploadImageType(file)) {
+        setSubmitStatus({
+          type: "error",
+          message: t("upload.invalidType"),
+        });
+        if (replaceImageInputRef.current) {
+          replaceImageInputRef.current.value = "";
+        }
+        return;
+      }
 
       const oldUrl = pendingCropImages[currentCropIndex];
       if (oldUrl && oldUrl.startsWith("blob:")) {
@@ -1079,7 +1103,7 @@ function UploadPageContent() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept={UPLOAD_IMAGE_ACCEPT}
                 multiple
                 onChange={handleFileChange}
                 className="hidden"
@@ -1089,7 +1113,7 @@ function UploadPageContent() {
               <input
                 ref={replaceImageInputRef}
                 type="file"
-                accept="image/*"
+                accept={UPLOAD_IMAGE_ACCEPT}
                 onChange={handleReplaceImageChange}
                 className="hidden"
               />

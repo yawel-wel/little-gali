@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { findDisallowedUploadImage } from "@/lib/allowed-image-types";
 import { Resend } from "resend";
 
 export const runtime = "nodejs";
@@ -85,6 +86,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "כתובת אימייל לא תקינה" },
         { status: 400 }
+      );
+    }
+
+    if (findDisallowedUploadImage(imageFiles)) {
+      return NextResponse.json(
+        { error: "ניתן להעלות קובצי JPG או PNG בלבד" },
+        { status: 400 },
       );
     }
 

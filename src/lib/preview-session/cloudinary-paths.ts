@@ -59,7 +59,10 @@ export function watermarkedOutputPublicId(
   slotIndex: number,
   version: number,
 ): string {
-  return `${outputPublicId(sessionId, kind, slotIndex, version)}_wm`;
+  return `${PREVIEW_SESSION_ROOT}/${sessionId}/outputs/watermark/${kind}/${slotFilePrefix(
+    sessionId,
+    slotIndex,
+  )}_${kind}_v${version}`;
 }
 
 export function colorOutputPublicId(
@@ -68,7 +71,7 @@ export function colorOutputPublicId(
   style: StyleType,
   version: number,
 ): string {
-  return `${PREVIEW_SESSION_ROOT}/${sessionId}/outputs/color/${slotFilePrefix(
+  return `${PREVIEW_SESSION_ROOT}/${sessionId}/outputs/color/${style}/${slotFilePrefix(
     sessionId,
     slotIndex,
   )}_color_${style}_v${version}`;
@@ -80,7 +83,43 @@ export function watermarkedColorOutputPublicId(
   style: StyleType,
   version: number,
 ): string {
-  return `${colorOutputPublicId(sessionId, slotIndex, style, version)}_wm`;
+  return `${PREVIEW_SESSION_ROOT}/${sessionId}/outputs/watermark/color/${style}/${slotFilePrefix(
+    sessionId,
+    slotIndex,
+  )}_color_${style}_v${version}`;
+}
+
+/** True for new folder-based watermarks and legacy `_wm` suffix paths. */
+export function isWatermarkedPublicId(publicId: string): boolean {
+  return publicId.includes("/watermark/") || publicId.endsWith("_wm");
+}
+
+/** Derive the clean (print) public id from a watermarked asset, including legacy paths. */
+export function cleanPublicIdFromWatermarked(publicId: string): string {
+  if (publicId.includes("/outputs/watermark/bw/")) {
+    return publicId.replace("/outputs/watermark/bw/", "/outputs/bw/");
+  }
+  if (publicId.includes("/outputs/watermark/color/")) {
+    return publicId.replace("/outputs/watermark/color/", "/outputs/color/");
+  }
+  if (publicId.endsWith("_wm")) {
+    return publicId.slice(0, -3);
+  }
+  return publicId;
+}
+
+/** Derive the watermarked preview public id from a clean asset, including legacy paths. */
+export function previewPublicIdFromClean(cleanPublicId: string): string {
+  if (cleanPublicId.includes("/outputs/watermark/")) {
+    return cleanPublicId;
+  }
+  if (cleanPublicId.includes("/outputs/bw/")) {
+    return cleanPublicId.replace("/outputs/bw/", "/outputs/watermark/bw/");
+  }
+  if (/\/outputs\/color\/(cartoon|pencil|watercolor)\//.test(cleanPublicId)) {
+    return cleanPublicId.replace("/outputs/color/", "/outputs/watermark/color/");
+  }
+  return `${cleanPublicId}_wm`;
 }
 
 export function nextBwVersion(slot: PreviewSession["slots"][number]): number {

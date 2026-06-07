@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAllowedUploadImageType } from "@/lib/allowed-image-types";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import { applyCropUploadToCandidate } from "@/lib/preview-session/apply-crop";
 import {
@@ -8,8 +9,11 @@ import {
   uploadBufferToCloudinaryPublicId,
 } from "@/lib/preview-session/cloudinary";
 import {
+  cleanPublicIdFromWatermarked,
   cropRevisionPublicId,
   cropRevisionWatermarkedPublicId,
+  isWatermarkedPublicId,
+  previewPublicIdFromClean,
 } from "@/lib/preview-session/cloudinary-paths";
 import {
   assetPathFromPublicId,
@@ -37,16 +41,6 @@ function sessionAllowsCrop(phase: PreviewPhase): boolean {
 export const maxDuration = 60;
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/jpg", "image/png"]);
-
-function isAllowedImage(file: File): boolean {
-  const mime = file.type.toLowerCase();
-  if (ALLOWED_TYPES.has(mime)) {
-    return true;
-  }
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  return ext === "jpg" || ext === "jpeg" || ext === "png";
-}
 
 export async function POST(
   request: NextRequest,
@@ -72,7 +66,7 @@ export async function POST(
     return NextResponse.json({ error: "Image is required" }, { status: 400 });
   }
 
-  if (!isAllowedImage(image)) {
+  if (!isAllowedUploadImageType(image)) {
     return NextResponse.json(
       { error: "Only JPG or PNG images are allowed" },
       { status: 400 },
@@ -121,8 +115,8 @@ export async function POST(
 
   const cleanPublicId =
     candidate.cleanPublicId ??
-    (candidate.previewPublicId?.endsWith("_wm")
-      ? candidate.previewPublicId.slice(0, -3)
+    (candidate.previewPublicId && isWatermarkedPublicId(candidate.previewPublicId)
+      ? cleanPublicIdFromWatermarked(candidate.previewPublicId)
       : candidate.previewPublicId);
   if (!cleanPublicId || !candidate.previewUrl) {
     return NextResponse.json(
@@ -134,9 +128,10 @@ export async function POST(
   try {
     const croppedBuffer = Buffer.from(await image.arrayBuffer());
     const cleanAssetPath = assetPathFromPublicId(cleanPublicId);
-    const previewAssetPath = candidate.previewPublicId?.endsWith("_wm")
-      ? assetPathFromPublicId(candidate.previewPublicId)
-      : `${cleanAssetPath}_wm`;
+    const previewAssetPath =
+      candidate.previewPublicId && isWatermarkedPublicId(candidate.previewPublicId)
+        ? assetPathFromPublicId(candidate.previewPublicId)
+        : assetPathFromPublicId(previewPublicIdFromClean(cleanPublicId));
     const watermarkedBuffer = await applyPreviewWatermark(croppedBuffer);
 
     let cleanUpload;

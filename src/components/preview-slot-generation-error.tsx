@@ -1,18 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
 import { cn } from "@/lib/utils";
 
 type PreviewSlotGenerationErrorProps = {
   message: string;
-  onRetry: () => void;
+  onRetry?: () => void;
   disabled?: boolean;
+  showContactFallback?: boolean;
 };
 
 export function PreviewSlotGenerationError({
   message,
   onRetry,
   disabled = false,
+  showContactFallback = false,
 }: PreviewSlotGenerationErrorProps) {
   const { t } = useLanguage();
 
@@ -21,22 +24,34 @@ export function PreviewSlotGenerationError({
       <p className="max-w-full font-body text-[10px] leading-snug text-dark-gray md:text-sm md:leading-relaxed">
         {message}
       </p>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={(event) => {
-          event.stopPropagation();
-          onRetry();
-        }}
-        className={cn(
-          "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-accent-burgundy bg-white px-2.5 py-1 font-body-bold text-[10px] whitespace-nowrap text-accent-burgundy transition-colors",
-          "md:rounded-lg md:px-3 md:py-1.5 md:text-xs",
-          "hover:bg-[#EFE7DF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-burgundy",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-        )}
-      >
-        {t("preview.slotRetryAgain")}
-      </button>
+      {showContactFallback ? (
+        <p className="max-w-full font-body text-[10px] leading-snug text-dark-gray md:text-sm md:leading-relaxed">
+          {t("preview.imageLoadFailedNoCredits")}{" "}
+          <Link
+            href="/contact"
+            className="font-body-bold text-accent-burgundy underline underline-offset-2 hover:opacity-80"
+          >
+            {t("nav.contact")}
+          </Link>
+        </p>
+      ) : onRetry ? (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={(event) => {
+            event.stopPropagation();
+            onRetry();
+          }}
+          className={cn(
+            "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-accent-burgundy bg-white px-2.5 py-1 font-body-bold text-[10px] whitespace-nowrap text-accent-burgundy transition-colors",
+            "md:rounded-lg md:px-3 md:py-1.5 md:text-xs",
+            "hover:bg-[#EFE7DF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-burgundy",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+        >
+          {t("preview.slotRetryAgain")}
+        </button>
+      ) : null}
     </div>
   );
 }

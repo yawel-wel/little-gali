@@ -2,21 +2,10 @@ export const CONTACT_ATTACHMENT_MAX_FILES = 5;
 export const CONTACT_ATTACHMENT_MAX_FILE_BYTES = 2 * 1024 * 1024;
 export const CONTACT_ATTACHMENT_MAX_TOTAL_BYTES = 10 * 1024 * 1024;
 
-const ALLOWED_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-]);
-
-const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png"]);
+import { isAllowedUploadImageType } from "./allowed-image-types";
 
 export function isAllowedContactImageType(file: File): boolean {
-  const mime = file.type.toLowerCase();
-  if (ALLOWED_MIME_TYPES.has(mime)) {
-    return true;
-  }
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  return Boolean(ext && ALLOWED_EXTENSIONS.has(ext));
+  return isAllowedUploadImageType(file);
 }
 
 export function validateContactAttachments(

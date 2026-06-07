@@ -40,6 +40,10 @@ import {
 import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
+import {
+  isAllowedUploadImageType,
+  UPLOAD_IMAGE_ACCEPT,
+} from "@/lib/allowed-image-types";
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
 import { logPreviewColorStyleSelected } from "@/lib/preview-session/generation-log";
 import { buildPreviewGenerationStats } from "@/lib/preview-session/generation-stats";
@@ -121,6 +125,27 @@ function isStalePolledSession(
   }
   const incomingMs = sessionUpdatedAtMs(incoming);
   return incomingMs > 0 && incomingMs < lastAppliedMs;
+}
+
+function clearFailedPreviewUrlsForSlot(
+  urls: Set<string>,
+  slot: PreviewSessionPublicView["slots"][number] | undefined,
+): Set<string> {
+  if (!slot) {
+    return urls;
+  }
+  const next = new Set(urls);
+  for (const candidate of slot.candidates) {
+    if (candidate.previewUrl) {
+      next.delete(candidate.previewUrl);
+    }
+  }
+  for (const candidate of slot.colorCandidates ?? []) {
+    if (candidate.previewUrl) {
+      next.delete(candidate.previewUrl);
+    }
+  }
+  return next;
 }
 
 function getColorVersionsForStyle(
@@ -983,6 +1008,12 @@ export default function PreviewPage() {
       }
       const updatedSession = data.session as PreviewSessionPublicView;
       applySession(updatedSession);
+      setFailedPreviewUrls((current) =>
+        clearFailedPreviewUrlsForSlot(
+          current,
+          updatedSession.slots.find((item) => item.index === slotIndex),
+        ),
+      );
     } catch (err) {
       setGenerationError(err);
     } finally {
@@ -1028,7 +1059,14 @@ export default function PreviewPage() {
         throwIfGenerationRateLimited(response, data);
         throw new Error(data.error || t("preview.sessionError"));
       }
-      applySession(data.session as PreviewSessionPublicView);
+      const updatedSession = data.session as PreviewSessionPublicView;
+      applySession(updatedSession);
+      setFailedPreviewUrls((current) =>
+        clearFailedPreviewUrlsForSlot(
+          current,
+          updatedSession.slots.find((item) => item.index === slotIndex),
+        ),
+      );
       setSlotsPendingColorRegen((current) => {
         const next = new Set(current);
         next.delete(slotIndex);
@@ -1146,6 +1184,12 @@ export default function PreviewPage() {
       slotIndex === null ||
       !canReplacePreviewSlot(session, slotIndex, activeColorStyle)
     ) {
+      return;
+    }
+
+    if (!isAllowedUploadImageType(file)) {
+      setError(t("upload.invalidType"));
+      replaceSlotRef.current = null;
       return;
     }
 
@@ -2046,11 +2090,18 @@ export default function PreviewPage() {
                                         {t("preview.slotBusy")}
                                       </p>
                                     </div>
-                                  ) : active?.previewUrl ? (
+                                  ) : active?.previewUrl && !previewUrlFailed ? (
                                     <PreviewSlotFadeImage
                                       key={`${slot.index}-${slot.activeCandidateId}`}
                                       src={active.previewUrl}
                                       alt={`${t("preview.title")} ${pageNum}`}
+                                      onLoadError={(url) => {
+                                        setFailedPreviewUrls((current) => {
+                                          const next = new Set(current);
+                                          next.add(url);
+                                          return next;
+                                        });
+                                      }}
                                     />
                                   ) : active?.error?.code === "prohibited_content" ? (
                                     <PreviewSlotProhibitedContent
@@ -2072,6 +2123,19 @@ export default function PreviewPage() {
                                       }
                                       onRetry={() =>
                                         handleRetryBwSlot(slot.index)
+                                      }
+                                    />
+                                  ) : previewUrlFailed ? (
+                                    <PreviewSlotGenerationError
+                                      message={t("preview.imageLoadFailed")}
+                                      showContactFallback={!session.canRegenerate}
+                                      disabled={
+                                        isVisibleSideBusy || isSubmitting
+                                      }
+                                      onRetry={
+                                        session.canRegenerate
+                                          ? () => handleRegenerate(slot.index)
+                                          : undefined
                                       }
                                     />
                                   ) : (
@@ -2128,11 +2192,17 @@ export default function PreviewPage() {
                                 ) : previewUrlFailed ? (
                                   <PreviewSlotGenerationError
                                     message={t("preview.imageLoadFailed")}
+                                    showContactFallback={
+                                      !session.canRegenerateColor
+                                    }
                                     disabled={
                                       isVisibleSideBusy || isSubmitting
                                     }
-                                    onRetry={() =>
-                                      handleRegenerateColor(slot.index)
+                                    onRetry={
+                                      session.canRegenerateColor
+                                        ? () =>
+                                            handleRegenerateColor(slot.index)
+                                        : undefined
                                     }
                                   />
                                 ) : (
@@ -2263,7 +2333,7 @@ export default function PreviewPage() {
             <input
               ref={replaceInputRef}
               type="file"
-              accept="image/*"
+              accept={UPLOAD_IMAGE_ACCEPT}
               className="hidden"
               onChange={handleReplaceFile}
             />

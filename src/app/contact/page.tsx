@@ -10,6 +10,7 @@ import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/LanguageContext";
+import { UPLOAD_IMAGE_ACCEPT } from "@/lib/allowed-image-types";
 import {
   CONTACT_ATTACHMENT_MAX_FILES,
   validateContactAttachments,
@@ -388,7 +389,7 @@ function ContactPageContent() {
                         <input
                           ref={attachmentInputRef}
                           type="file"
-                          accept="image/jpeg,image/jpg,image/png,.jpg,.jpeg,.png"
+                          accept={UPLOAD_IMAGE_ACCEPT}
                           multiple
                           className="hidden"
                           onChange={handleAttachmentChange}

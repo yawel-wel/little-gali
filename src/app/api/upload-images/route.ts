@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { findDisallowedUploadImage } from "@/lib/allowed-image-types";
 import { uploadImageFileToCloudinary } from "@/lib/preview-session/cloudinary";
 
 export const runtime = "nodejs";
@@ -12,6 +13,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "No images provided" },
         { status: 400 }
+      );
+    }
+
+    if (findDisallowedUploadImage(files)) {
+      return NextResponse.json(
+        { error: "Only JPG and PNG images are allowed" },
+        { status: 400 },
       );
     }
 

@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
+import { isAllowedUploadImageType } from "@/lib/allowed-image-types";
 import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import {
@@ -81,6 +82,13 @@ export async function POST(
 
   if (originalUrl && !isAllowedCloudinaryUrl(originalUrl)) {
     return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+  }
+
+  if (replacementFile && !isAllowedUploadImageType(replacementFile)) {
+    return NextResponse.json(
+      { error: "Only JPG and PNG images are allowed" },
+      { status: 400 },
+    );
   }
 
   const cached = await readIdempotentResponse(sessionId, idempotencyKey);

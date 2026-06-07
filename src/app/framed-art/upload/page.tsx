@@ -14,6 +14,10 @@ import { saveFramedArtLoadingImageUrls } from "@/lib/framed-art/loading-images-s
 import type { FramedArtSessionPublicView } from "@/lib/framed-art/types";
 import type { StyleType } from "@/components/style-selector";
 import { parseFramedArtStyleParam } from "@/lib/framed-art/parse-style-param";
+import {
+  isAllowedUploadImageType,
+  UPLOAD_IMAGE_ACCEPT,
+} from "@/lib/allowed-image-types";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Loader2, Upload } from "lucide-react";
 
@@ -85,8 +89,8 @@ function FramedArtUploadPageContent() {
       setError(t("framedArt.upload.selectStyleFirst"));
       return;
     }
-    if (!file.type.match(/^image\/(jpeg|jpg|png)$/i)) {
-      setError(t("framedArt.upload.invalidType"));
+    if (!isAllowedUploadImageType(file)) {
+      setError(t("upload.invalidType"));
       return;
     }
     setError(null);
@@ -257,7 +261,7 @@ function FramedArtUploadPageContent() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png"
+            accept={UPLOAD_IMAGE_ACCEPT}
             className="hidden"
             onChange={handleFileChange}
           />
