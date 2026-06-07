@@ -33,6 +33,26 @@ export function QuantityControls({
         type="button"
         onClick={(e) => {
           e.stopPropagation();
+          onIncrease();
+        }}
+        disabled={disabled}
+        className={buttonClass}
+        aria-label={t("cart.increaseQuantity")}
+      >
+        <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+      </button>
+
+      <span
+        className="min-w-[1rem] text-center font-body-bold text-sm text-[#693430]"
+        aria-live="polite"
+      >
+        {quantity}
+      </span>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
           if (isQuantityOne) {
             onDelete();
           } else {
@@ -50,26 +70,6 @@ export function QuantityControls({
         ) : (
           <Minus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
         )}
-      </button>
-
-      <span
-        className="min-w-[1rem] text-center font-body-bold text-sm text-[#693430]"
-        aria-live="polite"
-      >
-        {quantity}
-      </span>
-
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onIncrease();
-        }}
-        disabled={disabled}
-        className={buttonClass}
-        aria-label={t("cart.increaseQuantity")}
-      >
-        <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
       </button>
     </div>
   );
