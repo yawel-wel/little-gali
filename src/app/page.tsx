@@ -30,7 +30,7 @@ import {
 import { BOOK_PRICE } from "@/lib/constants";
 import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
 import { FramedArtHomeSection } from "@/components/framed-art-home-section";
-import { QaTabsSection, HOME_FRAMED_IDS } from "@/components/qa-tabs-section";
+import { QaTabsSection, HOME_BOOK_IDS, HOME_FRAMED_IDS } from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import MuiButton from "@mui/material/Button";
 import { trackSubscribe, trackViewContent } from "@/lib/meta-pixel-events";
@@ -1311,6 +1311,7 @@ export default function Home() {
             {framedOn ? (
               <QaTabsSection
                 className="max-w-4xl mx-auto"
+                bookItemIds={[...HOME_BOOK_IDS]}
                 framedItemIds={[...HOME_FRAMED_IDS]}
                 previewOn={previewOn}
               />
@@ -1380,7 +1381,7 @@ export default function Home() {
                 )}
 
                 <AccordionItem
-                  value="item-3"
+                  value="item-4"
                   className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
                 >
                   <AccordionTrigger
@@ -1388,14 +1389,14 @@ export default function Home() {
                       locale === "en" ? "text-left" : "text-right"
                     }`}
                   >
-                    {t("qa.question3")}
+                    {t("qa.question4")}
                   </AccordionTrigger>
                   <AccordionContent
                     className={`font-body text-medium-gray leading-relaxed pt-4 ${
                       locale === "en" ? "text-left" : "text-right"
                     }`}
                   >
-                    {t("qa.answer3")}
+                    {t("qa.answer4")}
                   </AccordionContent>
                 </AccordionItem>
 

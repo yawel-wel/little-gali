@@ -20,6 +20,8 @@ type QaItem = {
 };
 
 type QaTabsSectionProps = {
+  /** Subset of book Q&A keys for home (shorter list). */
+  bookItemIds?: string[];
   /** Subset of framed Q&A keys for home (shorter list). */
   framedItemIds?: string[];
   className?: string;
@@ -52,9 +54,18 @@ const FRAMED_ITEMS: QaItem[] = [
   { id: "f10", questionKey: "qa.framed.q10", answerKey: "qa.framed.a10" },
 ];
 
+const HOME_BOOK_IDS = ["1", "2", "preview", "4", "9"];
 const HOME_FRAMED_IDS = ["f1", "f4", "f5", "f8", "f9"];
 
+function filterBookItems(items: QaItem[], bookItemIds: string[] | undefined, previewOn: boolean) {
+  const filtered = bookItemIds
+    ? items.filter((item) => bookItemIds.includes(item.id))
+    : items;
+  return previewOn ? filtered : filtered.filter((item) => item.id !== "preview");
+}
+
 export function QaTabsSection({
+  bookItemIds,
   framedItemIds,
   className,
   previewOn = false,
@@ -62,11 +73,13 @@ export function QaTabsSection({
   const { t, locale } = useLanguage();
   const [tab, setTab] = useState<QaTab>("books");
 
+  const bookItems = filterBookItems(BOOK_ITEMS, bookItemIds, previewOn);
+
   const framedItems = framedItemIds
     ? FRAMED_ITEMS.filter((item) => framedItemIds.includes(item.id))
     : FRAMED_ITEMS;
 
-  const items = tab === "books" ? BOOK_ITEMS : framedItems;
+  const items = tab === "books" ? bookItems : framedItems;
 
   return (
     <div className={className}>
@@ -75,7 +88,7 @@ export function QaTabsSection({
           type="button"
           onClick={() => setTab("books")}
           className={cn(
-            "rounded-full px-5 py-2 text-sm font-body-bold transition-colors",
+            "cursor-pointer rounded-full px-5 py-2 text-sm font-body-bold transition-[colors,opacity] md:hover:opacity-80",
             tab === "books"
               ? "bg-primary-orange text-white"
               : "bg-gray-100 text-gray-900",
@@ -87,7 +100,7 @@ export function QaTabsSection({
           type="button"
           onClick={() => setTab("framed")}
           className={cn(
-            "rounded-full px-5 py-2 text-sm font-body-bold transition-colors",
+            "cursor-pointer rounded-full px-5 py-2 text-sm font-body-bold transition-[colors,opacity] md:hover:opacity-80",
             tab === "framed"
               ? "bg-primary-orange text-white"
               : "bg-gray-100 text-gray-900",
@@ -114,7 +127,7 @@ export function QaTabsSection({
             </AccordionTrigger>
             <AccordionContent
               className={cn(
-                "pt-4 font-body leading-relaxed text-medium-gray",
+                "whitespace-pre-line pt-4 font-body leading-relaxed text-medium-gray",
                 locale === "en" ? "text-left" : "text-right",
               )}
             >
@@ -154,4 +167,4 @@ export function QaTabsSection({
   );
 }
 
-export { HOME_FRAMED_IDS };
+export { HOME_BOOK_IDS, HOME_FRAMED_IDS };

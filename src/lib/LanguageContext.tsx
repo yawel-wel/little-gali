@@ -563,9 +563,9 @@ const hebrewTranslations = {
   "qa.framed.q3": "האם צריך לקדוח בקיר?",
   "qa.framed.a3":
     "לא. המסגרת מגיעה עם מערכת תלייה מגנטית ללא קידוח, כך שניתן לתלות אותה בקלות ללא מסמרים או ברגים.",
-  "qa.framed.q4": "האם ניתן להסיר את המסגרת ללא נזק לקיר?",
+  "qa.framed.q4": "האם ניתן להסיר את התמונה ללא נזק לקיר?",
   "qa.framed.a4":
-    "כן. המסגרת מגיעה עם מערכת תלייה מגנטית ייחודית ללא קידוח, המאפשרת להסיר ולהחזיר את המסגרת בקלות. ברוב סוגי הקירות ההסרה אינה משאירה סימנים או גורמת לנזק לקיר.",
+    "כן. המסגרת מגיעה עם מערכת תלייה מגנטית ייחודית ללא קידוח, המאפשרת להסיר ולהחזיר את המסגרת בקלות. ברוב סוגי הקירות ההסרה אינה משאירה סימנים או גורמת לנזק לקיר.\nכדי להימנע מנזק מומלץ לא להדביק את המדבקות על משטחים עדינים, טפטים וקירות סדוקים.",
   "qa.framed.q5": "האם אפשר להזמין סט של 2 או 3 תמונות?",
   "qa.framed.a5":
     "בהחלט. ניתן להזמין תמונה בודדת או סט של 2–3 תמונות וליצור קיר גלריה אישי ומיוחד.",
@@ -1548,9 +1548,9 @@ const englishTranslations = {
   "qa.framed.q3": "Do I need to drill the wall?",
   "qa.framed.a3":
     "No. The frame includes a no-drill magnetic hanging system.",
-  "qa.framed.q4": "Can I remove the frame without damaging the wall?",
+  "qa.framed.q4": "Can I remove the photo without damaging the wall?",
   "qa.framed.a4":
-    "Yes. The magnetic system lets you remove and rehang easily; on most walls it leaves little or no mark.",
+    "Yes. The frame comes with a unique no-drill magnetic hanging system that lets you remove and rehang easily. On most wall types, removal leaves no marks or damage.\nTo avoid damage, we recommend not sticking the adhesive on delicate surfaces, wallpaper, or cracked walls.",
   "qa.framed.q5": "Can I order a set of 2 or 3?",
   "qa.framed.a5":
     "Yes. Order one frame at a time and build a gallery wall of 2–3 pieces.",
