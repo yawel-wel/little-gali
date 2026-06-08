@@ -13,7 +13,7 @@ import {
 import type { FramedArtSession, FramedArtStyleCandidate } from "./types";
 import { logPreviewGenerationFailure } from "@/lib/preview-session/generation-log";
 import { maybeLogProhibitedContentEvent } from "@/lib/preview-session/prohibited-content-log";
-import { trackGenerationDuration } from "@/lib/analytics-server";
+import { trackGenerationStepDuration } from "@/lib/analytics-server";
 
 async function buildFramedStyleCandidate(
   sessionId: string,
@@ -28,8 +28,6 @@ async function buildFramedStyleCandidate(
     version,
     createdAt: new Date().toISOString(),
   };
-
-  const startedAt = Date.now();
 
   try {
     const cleanBuffer = await generateColorImageBuffer(sourceUrl, style, {
@@ -83,12 +81,6 @@ async function buildFramedStyleCandidate(
       errorCode: candidate.error.code,
       productType: "frame",
     });
-  } finally {
-    trackGenerationDuration({
-      generation_type: "frame",
-      duration_seconds: (Date.now() - startedAt) / 1000,
-      success: Boolean(candidate.cleanUrl),
-    });
   }
 
   return candidate;
@@ -135,6 +127,7 @@ export async function runFramedArtStyleGeneration(
   session.phase = "preview";
   await saveFramedArtSession(session);
 
+  const startedAt = Date.now();
   const version = nextVersionForStyle(session, style);
   const candidate = await buildFramedStyleCandidate(
     sessionId,
@@ -149,6 +142,11 @@ export async function runFramedArtStyleGeneration(
   upsertCandidate(updated, candidate);
   updated.inFlight = false;
   updated.generationStatus = candidate.cleanUrl ? "complete" : "failed";
+  trackGenerationStepDuration({
+    generation_type: "frame",
+    startedAt,
+    results: [candidate],
+  });
   await saveFramedArtSession(updated);
   return updated;
 }
@@ -173,6 +171,7 @@ export async function runFramedArtRegenerate(
   const latest = await loadFramedArtSession(sessionId);
   if (!latest?.selectedStyle) return null;
 
+  const startedAt = Date.now();
   const version = nextVersionForStyle(latest, style);
   const candidate = await buildFramedStyleCandidate(
     sessionId,
@@ -187,6 +186,11 @@ export async function runFramedArtRegenerate(
   upsertCandidate(updated, candidate);
   updated.inFlight = false;
   updated.generationStatus = candidate.cleanUrl ? "complete" : "failed";
+  trackGenerationStepDuration({
+    generation_type: "frame",
+    startedAt,
+    results: [candidate],
+  });
   await saveFramedArtSession(updated);
   return updated;
 }

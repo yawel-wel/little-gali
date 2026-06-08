@@ -60,6 +60,34 @@ export function trackGenerationDuration(params: {
   void trackServerEvent(SERVER_EVENTS.GENERATION_DURATION, params);
 }
 
+type GenerationResultLike = {
+  previewUrl?: string | null;
+  cleanUrl?: string | null;
+  error?: unknown;
+};
+
+/** One analytics event per generation step (batch), not per slot/image. */
+export function trackGenerationStepDuration(params: {
+  generation_type: ServerGenerationType;
+  startedAt: number;
+  results: ReadonlyArray<GenerationResultLike>;
+}): void {
+  if (params.results.length === 0) {
+    return;
+  }
+
+  const succeeded = params.results.filter(
+    (result) => Boolean(result.previewUrl || result.cleanUrl),
+  ).length;
+  const failed = params.results.filter((result) => result.error).length;
+
+  trackGenerationDuration({
+    generation_type: params.generation_type,
+    duration_seconds: (Date.now() - params.startedAt) / 1000,
+    success: failed === 0 && succeeded > 0,
+  });
+}
+
 export function trackServerError(params: {
   step: string;
   error_message: string;

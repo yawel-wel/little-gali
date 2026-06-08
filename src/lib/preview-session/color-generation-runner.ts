@@ -27,10 +27,7 @@ import {
   type PreviewGenerationTrigger,
 } from "./generation-log";
 import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
-import {
-  trackGenerationDuration,
-  type ServerGenerationType,
-} from "@/lib/analytics-server";
+import { trackGenerationStepDuration } from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type {
   FrozenStyleStripThumbnail,
@@ -96,10 +93,6 @@ async function buildColorPreview(
     createdAt: new Date().toISOString(),
   };
 
-  const generationType: ServerGenerationType =
-    trigger === "initial" ? "booklet_color" : "booklet_regen";
-  const startedAt = Date.now();
-
   try {
     const cleanBuffer = await generateColorImageBuffer(
       sourceUrl,
@@ -154,12 +147,6 @@ async function buildColorPreview(
       style,
       error,
       errorCode: candidate.error.code,
-    });
-  } finally {
-    trackGenerationDuration({
-      generation_type: generationType,
-      duration_seconds: (Date.now() - startedAt) / 1000,
-      success: Boolean(candidate.previewUrl),
     });
   }
 
@@ -220,6 +207,7 @@ export async function runColorGeneration(
   }
   await savePreviewSession(session);
 
+  const startedAt = Date.now();
   const results = await Promise.all(
     slotsToGenerate.map(({ slot, index }) => {
       const version = nextColorVersionForStyle(slot, style);
@@ -275,6 +263,11 @@ export async function runColorGeneration(
   } else {
     syncColorPreviewForSlots(latest, style, uniqueIndexes);
   }
+  trackGenerationStepDuration({
+    generation_type: trigger === "initial" ? "booklet_color" : "booklet_regen",
+    startedAt,
+    results,
+  });
   await savePreviewSession(latest);
   return latest;
 }
@@ -329,6 +322,7 @@ export async function runSlotAllStylesColorGeneration(
   slot.colorInFlight = true;
   await savePreviewSession(session);
 
+  const startedAt = Date.now();
   const results = await Promise.all(
     stylesToGenerate.map(async (style) => {
       const latestForUrl = await loadPreviewSession(sessionId);
@@ -378,6 +372,11 @@ export async function runSlotAllStylesColorGeneration(
     },
     { sessionId, slot: slotIndex, trigger, side: "color" },
   );
+  trackGenerationStepDuration({
+    generation_type: "booklet_regen",
+    startedAt,
+    results: results.map(({ candidate }) => candidate),
+  });
 
   await savePreviewSession(latest);
   return latest;
@@ -422,6 +421,7 @@ export async function runInitialParallelColorBundle(
   }
   await savePreviewSession(session);
 
+  const startedAt = Date.now();
   const results = await Promise.all(
     tasks.map(({ index, style }) => {
       const slot = session.slots[index];
@@ -470,6 +470,11 @@ export async function runInitialParallelColorBundle(
     },
     { sessionId, trigger: "initial", side: "color" },
   );
+  trackGenerationStepDuration({
+    generation_type: "booklet_color",
+    startedAt,
+    results: results.map(({ candidate }) => candidate),
+  });
 
   syncColorPreviewToStyle(latest, DEFAULT_COLOR_STYLE);
   freezeStyleStripThumbnailsIfNeeded(latest);

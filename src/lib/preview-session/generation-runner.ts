@@ -10,10 +10,7 @@ import {
   type PreviewGenerationTrigger,
 } from "./generation-log";
 import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
-import {
-  trackGenerationDuration,
-  type ServerGenerationType,
-} from "@/lib/analytics-server";
+import { trackGenerationStepDuration } from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewCandidate, PreviewSession } from "./types";
 
@@ -38,10 +35,6 @@ async function buildCandidate(
     version,
     createdAt: new Date().toISOString(),
   };
-
-  const generationType: ServerGenerationType =
-    trigger === "initial" ? "booklet_bw" : "booklet_regen";
-  const startedAt = Date.now();
 
   try {
     const cleanBuffer = await generateBwImageBuffer(sourceUrl, generationContext);
@@ -90,12 +83,6 @@ async function buildCandidate(
       error,
       errorCode: candidate.error.code,
     });
-  } finally {
-    trackGenerationDuration({
-      generation_type: generationType,
-      duration_seconds: (Date.now() - startedAt) / 1000,
-      success: Boolean(candidate.previewUrl),
-    });
   }
 
   return candidate;
@@ -116,6 +103,7 @@ export async function runSlotGeneration(
   slot.inFlight = true;
   await savePreviewSession(session);
 
+  const startedAt = Date.now();
   const version = nextBwVersion(slot);
   const candidate = await buildCandidate(
     session.id,
@@ -130,6 +118,15 @@ export async function runSlotGeneration(
   slot.inFlight = false;
   slot.pendingIdempotencyKey = undefined;
   await savePreviewSession(session);
+
+  if (trigger !== "initial") {
+    trackGenerationStepDuration({
+      generation_type: "booklet_regen",
+      startedAt,
+      results: [candidate],
+    });
+  }
+
   return session;
 }
 
@@ -145,6 +142,7 @@ export async function runInitialParallelGeneration(
   }));
   await savePreviewSession(session);
 
+  const startedAt = Date.now();
   const results = await Promise.all(
     session.slots.map((slot, index) => {
       const version = nextBwVersion(slot);
@@ -179,6 +177,11 @@ export async function runInitialParallelGeneration(
     },
     { sessionId, trigger: "initial", side: "bw" },
   );
+  trackGenerationStepDuration({
+    generation_type: "booklet_bw",
+    startedAt,
+    results,
+  });
   await savePreviewSession(latest);
   return latest;
 }
