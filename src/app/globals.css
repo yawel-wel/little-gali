@@ -183,6 +183,10 @@
     --banner-height: 0px;
   }
 
+  main [id] {
+    scroll-margin-top: calc(72px + var(--banner-height, 0px) + 1rem);
+  }
+
   /* Accessibility: Focus styles for keyboard navigation */
   a:focus-visible,
   button:focus-visible,

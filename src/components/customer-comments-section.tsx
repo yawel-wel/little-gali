@@ -134,6 +134,7 @@ export function CustomerCommentsSection() {
 
   return (
     <section
+      id="customer-comments"
       className="pb-16 lg:pb-24 bg-warm-cream"
       aria-labelledby="customer-comments-heading"
     >

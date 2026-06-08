@@ -173,6 +173,7 @@ export function StyleExamplesSection() {
 
   return (
     <motion.section
+      id="style-examples"
       aria-label={t("home.styleExamples.ariaLabel")}
       className="relative bg-[#F9F7EE] pb-16 lg:pb-24"
       {...reveal.section}

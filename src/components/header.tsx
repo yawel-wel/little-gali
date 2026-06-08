@@ -21,41 +21,33 @@ export function Header() {
   const pathname = usePathname();
   const { t, locale } = useLanguage();
 
+  const scrollToHash = (hash: string) => {
+    const element = document.querySelector(hash);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
+    href: string,
+    isAnchor: boolean
   ) => {
-    if (href.startsWith("/#")) {
+    if (isAnchor) {
       e.preventDefault();
-      const hash = href.substring(1); // Remove the leading "/"
+      const hash = href.substring(1);
 
       if (pathname !== "/") {
-        // If not on home page, navigate first
         router.push(href);
-        // Scroll after navigation - wait a bit longer for page to load
-        setTimeout(() => {
-          const element = document.querySelector(hash);
-          if (element) {
-            const yOffset = -80; // Offset for header
-            const y =
-              element.getBoundingClientRect().top +
-              window.pageYOffset +
-              yOffset;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 300);
+        setTimeout(() => scrollToHash(hash), 300);
       } else {
-        // If already on home page, just scroll
-        const element = document.querySelector(hash);
-        if (element) {
-          const yOffset = -80; // Offset for header
-          const y =
-            element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
+        window.history.pushState(null, "", href);
+        scrollToHash(hash);
       }
-    } else if (href.startsWith("/") && !href.startsWith("/#")) {
-      // Regular page navigation
+      return;
+    }
+
+    if (href.startsWith("/")) {
       e.preventDefault();
       router.push(href);
     }
@@ -63,17 +55,17 @@ export function Header() {
 
   // Navigation items for hamburger menu (mobile and desktop)
   const mobileNavigationItems = [
-    { nameKey: "nav.home", href: "/" },
-    { nameKey: "nav.about", href: "/#about" },
-    { nameKey: "nav.giftCard", href: "/#gift-card" },
-    { nameKey: "nav.qa", href: "/qa" },
-    { nameKey: "nav.inspiration", href: "/inspiration" },
-    { nameKey: "nav.fabricBook", href: "/#fabric-book-signup" },
-    { nameKey: "nav.contact", href: "/contact" },
+    { nameKey: "nav.home", href: "/", isAnchor: false },
+    { nameKey: "nav.about", href: "/#about", isAnchor: true },
+    { nameKey: "nav.giftCard", href: "/#gift-card", isAnchor: true },
+    { nameKey: "nav.qa", href: "/qa", isAnchor: false },
+    { nameKey: "nav.inspiration", href: "/inspiration", isAnchor: false },
+    { nameKey: "nav.fabricBook", href: "/#fabric-book-signup", isAnchor: true },
+    { nameKey: "nav.contact", href: "/contact", isAnchor: false },
   ].map((item) => ({
     ...item,
     name: t(item.nameKey),
-    active: pathname === item.href,
+    active: !item.isAnchor && pathname === item.href,
   }));
 
   return (
@@ -142,7 +134,7 @@ export function Header() {
                           href={item.href}
                           onClick={(e) => {
                             setIsOpen(false);
-                            handleNavClick(e, item.href);
+                            handleNavClick(e, item.href, item.isAnchor);
                           }}
                           className={`block text-lg font-body-bold transition-colors duration-200 ${
                             item.active

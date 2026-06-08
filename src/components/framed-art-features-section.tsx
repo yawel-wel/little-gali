@@ -77,6 +77,7 @@ export function FramedArtFeaturesSection() {
 
   return (
     <motion.section
+      id="framed-art-features"
       aria-label={t("home.framedArt.features.ariaLabel")}
       className="bg-warm-light py-10 lg:py-12"
       {...reveal.section}

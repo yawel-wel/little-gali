@@ -534,17 +534,23 @@ export default function Home() {
     animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   };
 
-  // Handle hash scrolling on page load
+  // Handle hash scrolling on page load and when hash changes
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      setTimeout(() => {
-        const element = document.querySelector(hash);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 100);
-    }
+    const scrollToHash = () => {
+      const hash = window.location.hash;
+      if (!hash) return;
+      const element = document.querySelector(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+
+    const timeoutId = window.setTimeout(scrollToHash, 100);
+    window.addEventListener("hashchange", scrollToHash);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("hashchange", scrollToHash);
+    };
   }, []);
 
   // Explicitly reset scroll after mount
@@ -567,7 +573,7 @@ export default function Home() {
 
       <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
-        <section aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
+        <section id="hero" aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
           {/* Background Images - all rendered in DOM so they preload; opacity controls which is visible */}
           <div className="absolute inset-0" aria-hidden="true">
             {heroImages.map((src, i) => (
@@ -726,6 +732,7 @@ export default function Home() {
         </section>
         {/* הספרון שלנו Section */}
         <motion.section
+          id="book"
           aria-label={t("home.book.ariaLabel")}
           className="relative -mt-0 pt-8 lg:pt-0 pb-12 lg:pb-16 bg-white"
           {...reveal.section}
@@ -1075,6 +1082,7 @@ export default function Home() {
 
         {/* Choose Your Path Section */}
         <motion.section
+          id="special"
           aria-label={t("home.special.ariaLabel")}
           className="relative bg-[#F3EEE8] pb-16 lg:pb-24"
           {...reveal.section}

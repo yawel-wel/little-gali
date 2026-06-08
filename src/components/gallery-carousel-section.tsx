@@ -16,6 +16,7 @@ export function GalleryCarouselSection() {
 
   return (
     <section
+      id="gallery"
       aria-label={t("home.gallery.ariaLabel")}
       className="pt-8 pb-12 lg:pt-10 lg:pb-20 bg-white"
     >
