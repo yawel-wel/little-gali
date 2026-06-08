@@ -13,6 +13,7 @@ import {
 import type { FramedArtSession, FramedArtStyleCandidate } from "./types";
 import { logPreviewGenerationFailure } from "@/lib/preview-session/generation-log";
 import { maybeLogProhibitedContentEvent } from "@/lib/preview-session/prohibited-content-log";
+import { trackGenerationDuration } from "@/lib/analytics-server";
 
 async function buildFramedStyleCandidate(
   sessionId: string,
@@ -27,6 +28,8 @@ async function buildFramedStyleCandidate(
     version,
     createdAt: new Date().toISOString(),
   };
+
+  const startedAt = Date.now();
 
   try {
     const cleanBuffer = await generateColorImageBuffer(sourceUrl, style, {
@@ -78,6 +81,13 @@ async function buildFramedStyleCandidate(
       style,
       error,
       errorCode: candidate.error.code,
+      productType: "frame",
+    });
+  } finally {
+    trackGenerationDuration({
+      generation_type: "frame",
+      duration_seconds: (Date.now() - startedAt) / 1000,
+      success: Boolean(candidate.cleanUrl),
     });
   }
 

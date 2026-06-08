@@ -1,0 +1,97 @@
+import mixpanel from "mixpanel-browser";
+
+// ─── Event names ─────────────────────────────────────────────────────────────
+
+export const ANALYTICS_EVENTS = {
+  // Booklet flow
+  BOOKLET_UPLOAD_STARTED: "booklet_upload_started",
+  BOOKLET_UPLOAD_COMPLETED: "booklet_upload_completed",
+  BOOKLET_BW_PREVIEW_VIEWED: "booklet_bw_preview_viewed",
+  BOOKLET_COLOR_PREVIEW_VIEWED: "booklet_color_preview_viewed",
+  BOOKLET_STYLE_SELECTED: "booklet_style_selected",
+  BOOKLET_IMAGE_REPLACED: "booklet_image_replaced",
+  BOOKLET_REGENERATED: "booklet_regenerated",
+  BOOKLET_LIMIT_REACHED: "booklet_limit_reached",
+  BOOKLET_ADDED_TO_CART: "booklet_added_to_cart",
+  // Framed photo flow
+  FRAME_UPLOAD_STARTED: "frame_upload_started",
+  FRAME_UPLOAD_COMPLETED: "frame_upload_completed",
+  FRAME_PREVIEW_VIEWED: "frame_preview_viewed",
+  FRAME_STYLE_SELECTED: "frame_style_selected",
+  FRAME_REGENERATED: "frame_regenerated",
+  FRAME_ADDED_TO_CART: "frame_added_to_cart",
+  // General
+  PURCHASE_COMPLETED: "purchase_completed",
+  CART_ABANDONED: "cart_abandoned",
+} as const;
+
+export type AnalyticsEvent =
+  (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
+
+export type ProductType = "booklet" | "frame";
+
+export type EventProperties = {
+  booklet_upload_started: Record<string, never>;
+  booklet_upload_completed: { image_count: number };
+  booklet_bw_preview_viewed: Record<string, never>;
+  booklet_color_preview_viewed: Record<string, never>;
+  booklet_style_selected: { style_name: string };
+  booklet_image_replaced: Record<string, never>;
+  booklet_regenerated: Record<string, never>;
+  booklet_limit_reached: Record<string, never>;
+  booklet_added_to_cart: Record<string, never>;
+  frame_upload_started: Record<string, never>;
+  frame_upload_completed: { image_count: number };
+  frame_preview_viewed: Record<string, never>;
+  frame_style_selected: { style_name: string };
+  frame_regenerated: Record<string, never>;
+  frame_added_to_cart: Record<string, never>;
+  purchase_completed: { product_type: ProductType; amount: number };
+  cart_abandoned: Record<string, never>;
+};
+
+let initialized = false;
+
+export function initMixpanel(): void {
+  if (typeof window === "undefined" || initialized) {
+    return;
+  }
+
+  const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
+  if (!token) {
+    return;
+  }
+
+  const apiHost =
+    process.env.NEXT_PUBLIC_MIXPANEL_API_HOST ?? "https://api.mixpanel.com";
+
+  try {
+    mixpanel.init(token, {
+      debug: process.env.NODE_ENV === "development",
+      track_pageview: true,
+      persistence: "localStorage",
+      api_host: apiHost,
+    });
+    initialized = true;
+  } catch (error) {
+    console.error("Mixpanel init failed:", error);
+  }
+}
+
+export function track<E extends AnalyticsEvent>(
+  event: E,
+  properties?: EventProperties[E],
+): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    if (!initialized) {
+      initMixpanel();
+    }
+    mixpanel.track(event, properties);
+  } catch (error) {
+    console.error("Analytics track failed:", error);
+  }
+}

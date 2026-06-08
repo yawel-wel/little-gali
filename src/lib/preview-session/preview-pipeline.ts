@@ -1,3 +1,4 @@
+import { trackServerError } from "@/lib/analytics-server";
 import {
   copyCloudinaryUrlToPublicId,
   uploadFileToCloudinaryPublicId,
@@ -65,6 +66,10 @@ export async function markSessionPipelineFailed(
     colorInFlight: false,
   }));
   await savePreviewSession(session);
+  trackServerError({
+    step: "booklet_generation",
+    error_message: message,
+  });
 }
 
 async function applyOriginalUploads(

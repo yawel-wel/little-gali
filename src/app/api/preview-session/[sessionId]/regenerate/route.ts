@@ -14,6 +14,7 @@ import { slotBwActiveHasRetryableError } from "@/lib/preview-session/retryable-s
 import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
 import { runSlotGeneration } from "@/lib/preview-session/generation-runner";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
+import { trackServerError } from "@/lib/analytics-server";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -141,6 +142,10 @@ export async function POST(
     });
     Sentry.metrics.count("image_regeneration_failed", 1, {
       attributes: { sessionId, slot: slotTag, side },
+    });
+    trackServerError({
+      step: "booklet_generation",
+      error_message: errorMessage,
     });
     throw error;
   }

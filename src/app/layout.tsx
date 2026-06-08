@@ -11,6 +11,7 @@ import { MuiThemeProvider } from "@/theme/MuiThemeProvider";
 import { TopBanner } from "@/components/top-banner";
 import { CookieConsent } from "@/components/cookie-consent";
 import { ConditionalTrackingScripts } from "@/components/conditional-tracking-scripts";
+import { MixpanelProvider } from "@/components/mixpanel-provider";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -102,14 +103,16 @@ export default function RootLayout({
         <MuiThemeProvider>
           <LanguageProvider>
             <CartProvider>
-              <PreviewLimitsProvider>
-                <UploadImagesProvider>
-                <TopBanner />
-                {children}
-                <CookieConsent />
-                <ConditionalTrackingScripts metaPixelId={metaPixelId} />
-                </UploadImagesProvider>
-              </PreviewLimitsProvider>
+              <MixpanelProvider>
+                <PreviewLimitsProvider>
+                  <UploadImagesProvider>
+                    <TopBanner />
+                    {children}
+                    <CookieConsent />
+                    <ConditionalTrackingScripts metaPixelId={metaPixelId} />
+                  </UploadImagesProvider>
+                </PreviewLimitsProvider>
+              </MixpanelProvider>
             </CartProvider>
           </LanguageProvider>
         </MuiThemeProvider>

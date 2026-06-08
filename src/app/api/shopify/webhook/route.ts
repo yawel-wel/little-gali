@@ -1,8 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createHmac } from "crypto";
+import {
+  trackPurchaseCompleted,
+  type ServerProductType,
+} from "@/lib/analytics-server";
 
 export const runtime = "nodejs";
+
+function resolveOrderProductType(orderData: {
+  line_items?: Array<{
+    properties?: Array<{ name: string; value: string }>;
+    properties_object?: Record<string, string>;
+  }>;
+}): ServerProductType {
+  const lineItems = orderData.line_items ?? [];
+  for (const item of lineItems) {
+    const props = item.properties ?? [];
+    const productTypeProp = props.find((p) => p.name === "_product_type");
+    if (productTypeProp?.value === "framed_art") {
+      return "frame";
+    }
+    if (item.properties_object?._product_type === "framed_art") {
+      return "frame";
+    }
+  }
+  return "booklet";
+}
+
+async function trackMixpanelPurchase(orderData: {
+  total_price?: string;
+  line_items?: Array<{
+    properties?: Array<{ name: string; value: string }>;
+    properties_object?: Record<string, string>;
+  }>;
+  name?: string;
+  id?: string | number;
+}) {
+  const amount = parseFloat(orderData.total_price || "0");
+  trackPurchaseCompleted({
+    product_type: resolveOrderProductType(orderData),
+    amount,
+    order_id: String(orderData.name ?? orderData.id ?? ""),
+  });
+}
 
 // Track purchase via Meta Conversions API
 async function trackMetaPurchase(orderData: any) {
@@ -162,8 +203,9 @@ export async function POST(request: NextRequest) {
     console.log("Order ID:", webhookData.id);
     console.log("Order name:", webhookData.name);
 
-    // Track purchase with Meta Conversions API
+    // Track purchase with Meta Conversions API and Mixpanel
     await trackMetaPurchase(webhookData);
+    await trackMixpanelPurchase(webhookData);
 
     console.log("Purchase tracked successfully");
     return NextResponse.json({ status: "success" });

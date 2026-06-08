@@ -59,6 +59,7 @@ import {
   type UploadPreviewBlockedCode,
 } from "@/lib/preview-session/upload-preview-blocked-storage";
 import Button from "@mui/material/Button";
+import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
 
@@ -428,6 +429,7 @@ function UploadPageContent() {
     if (availableSlots <= 0) return;
 
     const filesToProcess = imageFiles.slice(0, availableSlots);
+    track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_STARTED);
     setSmartCropLoading(true);
     setSmartCropArea(undefined);
     setIsInCroppingFlow(true);
@@ -710,6 +712,7 @@ function UploadPageContent() {
       return;
     }
     setPreviewBlockedCode("preview_rate_limit");
+    track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED);
     setSubmitStatus({
       type: "error",
       errorCode: "preview_rate_limit",
@@ -775,6 +778,12 @@ function UploadPageContent() {
       setPreviewBlockedCode(blockedCode);
       persistUploadPreviewBlocked(blockedCode);
       void refreshLimits();
+      if (
+        blockedCode === "preview_rate_limit" ||
+        blockedCode === "generation_rate_limit"
+      ) {
+        track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED);
+      }
     }
     setSubmitStatus({
       type: "error",
@@ -875,6 +884,7 @@ function UploadPageContent() {
       setUploadingImages(new Set());
       setPreviewBlockedCode(null);
       persistUploadPreviewBlocked(null);
+      track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_COMPLETED, { image_count: 5 });
       if (typeof window !== "undefined") {
         persistLgSessionId(previewData.session.id);
         recordPreviewSessionId(previewData.session.id);
@@ -967,6 +977,8 @@ function UploadPageContent() {
       }
 
       console.log("Uploaded images, adding to cart:", imageUrls);
+      track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_COMPLETED, { image_count: 5 });
+      track(ANALYTICS_EVENTS.BOOKLET_ADDED_TO_CART);
       // Mark optimistic adding to avoid empty-state flash
       try {
         if (typeof window !== "undefined") {
@@ -1179,7 +1191,12 @@ function UploadPageContent() {
                         <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
                           <StyleSelector
                             selectedStyle={selectedStyle}
-                            onStyleChange={setSelectedStyle}
+                            onStyleChange={(style) => {
+                              setSelectedStyle(style);
+                              track(ANALYTICS_EVENTS.BOOKLET_STYLE_SELECTED, {
+                                style_name: style,
+                              });
+                            }}
                           />
                         </div>
                       )}

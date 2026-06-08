@@ -32,6 +32,7 @@ import type {
 import { useCart } from "@/lib/CartContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { cn } from "@/lib/utils";
+import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 function getActiveCandidate(
   session: FramedArtSessionPublicView | null,
@@ -73,6 +74,7 @@ export default function FramedArtPreviewPage() {
     readFramedArtLoadingImageUrls(sessionId),
   );
   const initialFetchDoneRef = useRef(false);
+  const previewViewedTrackedRef = useRef(false);
 
   const selectedStyle = session?.selectedStyle;
   const activeCandidate = useMemo(
@@ -190,6 +192,13 @@ export default function FramedArtPreviewPage() {
   const showReadyMain =
     Boolean(session) && !sessionLoadError && !showGenerationError;
 
+  useEffect(() => {
+    if (heroUrl && !isGenerating && !previewViewedTrackedRef.current) {
+      previewViewedTrackedRef.current = true;
+      track(ANALYTICS_EVENTS.FRAME_PREVIEW_VIEWED);
+    }
+  }, [heroUrl, isGenerating]);
+
   const loadingLines = useMemo(
     () => [
       t("framedArt.preview.loadingLine1"),
@@ -295,6 +304,7 @@ export default function FramedArtPreviewPage() {
 
   const handleRegenerate = async () => {
     if (!session?.canRegenerate) return;
+    track(ANALYTICS_EVENTS.FRAME_REGENERATED);
     setIsRegenerating(true);
     setError(null);
     try {
@@ -315,6 +325,7 @@ export default function FramedArtPreviewPage() {
   const handleAddToCart = () => {
     if (!selectedStyle) return;
     setError(null);
+    track(ANALYTICS_EVENTS.FRAME_ADDED_TO_CART);
     try {
       if (typeof window !== "undefined") {
         sessionStorage.setItem("adding_to_cart", "1");

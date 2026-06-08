@@ -38,6 +38,7 @@ import {
 import { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
 import type { PreviewSession } from "@/lib/preview-session/types";
 import { resolveSessionIdForGenerationLimit } from "@/lib/preview-session/resolve-session-id-for-limit";
+import { trackServerError } from "@/lib/analytics-server";
 
 export { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
 
@@ -387,6 +388,10 @@ export async function POST(request: NextRequest) {
     return respondWithSession(sessionForPipeline);
   } catch (error) {
     console.error("Preview session start error:", error);
+    trackServerError({
+      step: "booklet_generation",
+      error_message: error instanceof Error ? error.message : "Internal server error",
+    });
     if (error instanceof Error && error.message === "Invalid session ID") {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }

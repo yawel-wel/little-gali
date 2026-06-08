@@ -20,6 +20,7 @@ import {
 } from "@/lib/allowed-image-types";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Loader2, Upload } from "lucide-react";
+import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 function FramedArtUploadPageContent() {
   const router = useRouter();
@@ -79,6 +80,7 @@ function FramedArtUploadPageContent() {
   const handleSelectStyle = (style: StyleType) => {
     setSelectedStyle(style);
     setError(null);
+    track(ANALYTICS_EVENTS.FRAME_STYLE_SELECTED, { style_name: style });
     router.replace(`/framed-art/upload?style=${style}`, { scroll: false });
   };
 
@@ -95,6 +97,7 @@ function FramedArtUploadPageContent() {
     }
     setError(null);
     setProhibitedBlocked(false);
+    track(ANALYTICS_EVENTS.FRAME_UPLOAD_STARTED);
     if (pendingImage) {
       URL.revokeObjectURL(pendingImage);
     }
@@ -132,6 +135,8 @@ function FramedArtUploadPageContent() {
         if (!uploadRes.ok || !uploadData.imageUrls?.[0]) {
           throw new Error(uploadData.error || "Upload failed");
         }
+
+        track(ANALYTICS_EVENTS.FRAME_UPLOAD_COMPLETED, { image_count: 1 });
 
         const sessionRes = await fetch("/api/framed-art/session", {
           method: "POST",

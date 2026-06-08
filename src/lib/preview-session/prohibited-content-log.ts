@@ -1,6 +1,7 @@
 import { prohibitedContentErrorPublicId } from "./cloudinary-paths";
 import { uploadJsonToCloudinaryPublicId } from "./cloudinary";
 import { isProhibitedContentErrorMessage } from "./generation-errors";
+import { trackSensitiveContentError } from "@/lib/analytics-server";
 import { logPreviewProhibitedContent } from "./generation-log";
 import type { PreviewGenerationTrigger } from "./generation-log";
 import type { PreviewOutputKind } from "./cloudinary-paths";
@@ -15,6 +16,7 @@ export type ProhibitedContentLogParams = {
   trigger: PreviewGenerationTrigger;
   style?: StyleType;
   error: unknown;
+  productType?: "booklet" | "frame";
 };
 
 function parseFinishReason(error: unknown): string | undefined {
@@ -86,6 +88,13 @@ export async function logProhibitedContentEvent(
       candidateId: params.candidateId,
     },
   );
+
+  const productType = params.productType ?? "booklet";
+  trackSensitiveContentError({
+    step:
+      productType === "frame" ? "frame_generation" : "booklet_generation",
+    product_type: productType,
+  });
 }
 
 export function maybeLogProhibitedContentEvent(

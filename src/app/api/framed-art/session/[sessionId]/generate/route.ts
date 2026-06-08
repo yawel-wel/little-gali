@@ -12,6 +12,7 @@ import {
   consumeFramedUploadSlot,
   peekFramedUploadLimit,
 } from "@/lib/framed-art/upload-limits";
+import { trackServerError } from "@/lib/analytics-server";
 import { getRequestIp, hashClientIp } from "@/lib/preview-session/hash";
 
 export const runtime = "nodejs";
@@ -70,6 +71,10 @@ export async function POST(
       const detail =
         getFramedArtGenerationErrorMessage(updated) ?? "Generation failed";
       console.error("Framed art generation failed:", sessionId, detail);
+      trackServerError({
+        step: "frame_generation",
+        error_message: detail,
+      });
       return NextResponse.json(
         { error: detail, session: toPublicView(updated), uploadsRemaining },
         { status: 500 },
@@ -82,6 +87,10 @@ export async function POST(
     });
   } catch (error: unknown) {
     console.error("Framed art generate route error:", sessionId, error);
+    trackServerError({
+      step: "frame_generation",
+      error_message: error instanceof Error ? error.message : "Internal server error",
+    });
     const peek = await peekFramedUploadLimit(ipHash);
     return NextResponse.json(
       {

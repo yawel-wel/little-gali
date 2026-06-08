@@ -61,6 +61,7 @@ import type { PreviewSessionPublicView } from "@/lib/preview-session/types";
 import type { Area } from "react-easy-crop";
 import Button from "@mui/material/Button";
 import { Expand, Loader2, MoreHorizontal, X } from "lucide-react";
+import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 type PreviewBookSide = "bw" | "color";
 type CompareOutputImage = {
@@ -321,6 +322,7 @@ export default function PreviewPage() {
   const setGenerationError = useCallback(
     (err: unknown, fallback = t("preview.sessionError")) => {
       if (err instanceof GenerationRateLimitError) {
+        track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED);
         setError(getGenerationRateLimitMessage(t));
         return;
       }
@@ -328,6 +330,8 @@ export default function PreviewPage() {
     },
     [t],
   );
+  const bwPreviewTrackedRef = useRef(false);
+  const colorPreviewTrackedRef = useRef(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [failureDetail, setFailureDetail] = useState("");
   const [failureStatus, setFailureStatus] = useState<number | undefined>();
@@ -650,6 +654,26 @@ export default function PreviewPage() {
     (session.phase === "bw_approved" ||
       session.phase === "style_selected" ||
       session.phase === "cart_added");
+
+  useEffect(() => {
+    if (!showInitialLoadingScreen && session && !bwPreviewTrackedRef.current) {
+      bwPreviewTrackedRef.current = true;
+      track(ANALYTICS_EVENTS.BOOKLET_BW_PREVIEW_VIEWED);
+    }
+  }, [showInitialLoadingScreen, session]);
+
+  useEffect(() => {
+    if (
+      displayedBookSide === "color" &&
+      session &&
+      isColorPhase &&
+      !colorPreviewTrackedRef.current
+    ) {
+      colorPreviewTrackedRef.current = true;
+      track(ANALYTICS_EVENTS.BOOKLET_COLOR_PREVIEW_VIEWED);
+    }
+  }, [displayedBookSide, isColorPhase, session]);
+
   const sessionInitialPhotoUrls =
     session?.slots
       ? sortSlotsByDisplayOrder(session.slots, session.displayOrder)
@@ -917,6 +941,7 @@ export default function PreviewPage() {
         previousStyle,
         allSlotsCached,
       });
+      track(ANALYTICS_EVENTS.BOOKLET_STYLE_SELECTED, { style_name: style });
 
       setSelectedStyle(style);
       setActiveColorStyle(style);
@@ -981,6 +1006,9 @@ export default function PreviewPage() {
 
   const runBwRegenerate = async (slotIndex: number, freeRetry: boolean) => {
     if (!freeRetry && !session?.canRegenerate) return;
+    if (!freeRetry) {
+      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED);
+    }
     markSlotBusy(slotIndex);
     mutationInProgressRef.current = true;
     setIsSubmitting(true);
@@ -1034,6 +1062,9 @@ export default function PreviewPage() {
   const runColorRegenerate = async (slotIndex: number, freeRetry: boolean) => {
     if (!session) return;
     if (!freeRetry && !session.canRegenerateColor) return;
+    if (!freeRetry) {
+      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED);
+    }
     markSlotBusy(slotIndex);
     mutationInProgressRef.current = true;
     setIsSubmitting(true);
@@ -1253,6 +1284,9 @@ export default function PreviewPage() {
       }
       const updatedSession = data.session as PreviewSessionPublicView;
       applySession(updatedSession);
+      if (bookSide === "bw") {
+        track(ANALYTICS_EVENTS.BOOKLET_IMAGE_REPLACED);
+      }
       setFailedPreviewUrls((current) => {
         const next = new Set(current);
         const previousSlot = session?.slots.find((item) => item.index === slotIndex);
@@ -1435,6 +1469,8 @@ export default function PreviewPage() {
           sessionStorage.setItem("adding_to_cart", "1");
         }
       } catch {}
+
+      track(ANALYTICS_EVENTS.BOOKLET_ADDED_TO_CART);
 
       const addPromise = addToCart(
         generatedBwUrls,

@@ -10,6 +10,10 @@ import {
   type PreviewGenerationTrigger,
 } from "./generation-log";
 import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
+import {
+  trackGenerationDuration,
+  type ServerGenerationType,
+} from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewCandidate, PreviewSession } from "./types";
 
@@ -34,6 +38,10 @@ async function buildCandidate(
     version,
     createdAt: new Date().toISOString(),
   };
+
+  const generationType: ServerGenerationType =
+    trigger === "initial" ? "booklet_bw" : "booklet_regen";
+  const startedAt = Date.now();
 
   try {
     const cleanBuffer = await generateBwImageBuffer(sourceUrl, generationContext);
@@ -81,6 +89,12 @@ async function buildCandidate(
       trigger,
       error,
       errorCode: candidate.error.code,
+    });
+  } finally {
+    trackGenerationDuration({
+      generation_type: generationType,
+      duration_seconds: (Date.now() - startedAt) / 1000,
+      success: Boolean(candidate.previewUrl),
     });
   }
 
