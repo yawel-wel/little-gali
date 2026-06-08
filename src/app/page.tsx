@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
 import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
+import { FramedArtFeaturesSection } from "@/components/framed-art-features-section";
 import { FramedArtHomeSection } from "@/components/framed-art-home-section";
 import { QaTabsSection, HOME_BOOK_IDS, HOME_FRAMED_IDS } from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -927,7 +928,12 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {framedOn && <FramedArtHomeSection />}
+        {framedOn && (
+          <>
+            <FramedArtHomeSection />
+            <FramedArtFeaturesSection />
+          </>
+        )}
 
         {/* Gallery Carousel Section */}
         <GalleryCarouselSection />

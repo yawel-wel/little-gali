@@ -22,7 +22,7 @@ export function GalleryCarouselSection() {
       <div className="text-center mb-8 lg:mb-12 px-4">
         {isHebrew ? (
           <Title as="h2" highlightText="בבית" size="lg">
-            אצלכם בבית
+            הספרון אצלכם בבית
           </Title>
         ) : (
           <Title as="h2" highlightText="Home" size="lg">

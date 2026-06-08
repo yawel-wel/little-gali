@@ -552,6 +552,16 @@ const hebrewTranslations = {
   "home.framedArt.ariaLabel": "איור ממוסגר - מוצר חדש",
   "home.framedArt.imageAlt": "דוגמה לאיור ממוסגר",
   "home.framedArt.carouselDotAria": "עבור לתמונה {num} מתוך {total}",
+  "home.framedArt.features.ariaLabel": "יתרונות האיור הממוסגר",
+  "home.framedArt.features.noDrill.title": "ללא קידוחים וחורים",
+  "home.framedArt.features.noDrill.subtitle":
+    "התמונות מגיעות עם מדבקות מגנט מיוחדות להדבקה והזזה קלה",
+  "home.framedArt.features.style.title": "איור לבחירתם",
+  "home.framedArt.features.style.subtitle":
+    "תוכלו לבחור בין שלושת סגנונות האיור שלנו - עפרונות צבעוניים, קריקטורה וצבעי מים",
+  "home.framedArt.features.preview.title": "תצוגה מקדימה",
+  "home.framedArt.features.preview.subtitle":
+    "תוכלו לראות את האיור שלכם מוכן לפני ההזמנה ולוודא שהוא מוצא חן בעיניכם",
   "qa.tabs.books": "ספרוני תינוקות",
   "qa.tabs.framed": "איור ממוסגר",
   "qa.framed.q1": "מה הגודל של המסגרות?",
@@ -1539,6 +1549,16 @@ const englishTranslations = {
   "home.framedArt.ariaLabel": "Framed illustration product",
   "home.framedArt.imageAlt": "Framed illustration example",
   "home.framedArt.carouselDotAria": "Go to image {num} of {total}",
+  "home.framedArt.features.ariaLabel": "Framed art benefits",
+  "home.framedArt.features.noDrill.title": "No drilling or holes",
+  "home.framedArt.features.noDrill.subtitle":
+    "Frames come with special magnetic stickers for easy mounting and repositioning.",
+  "home.framedArt.features.style.title": "Illustration of your choice",
+  "home.framedArt.features.style.subtitle":
+    "Choose from our three illustration styles — colored pencils, cartoon, and watercolor.",
+  "home.framedArt.features.preview.title": "Preview first",
+  "home.framedArt.features.preview.subtitle":
+    "See your finished illustration before you order and make sure you love it.",
   "qa.tabs.books": "Baby books",
   "qa.tabs.framed": "Framed illustration",
   "qa.framed.q1": "What size are the frames?",
