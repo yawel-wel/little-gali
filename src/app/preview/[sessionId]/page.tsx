@@ -17,6 +17,7 @@ import { Title } from "@/components/title";
 import { StyleSelector, type StyleType } from "@/components/style-selector";
 import { MobileImageEditor } from "@/components/mobile-image-editor";
 import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
+import { PreviewBookColorPicker } from "@/components/preview-book-color-picker";
 import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
 import { PreviewPhaseFooter } from "@/components/preview-phase-footer";
 import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternate-versions";
@@ -37,6 +38,7 @@ import {
   displayPosition,
   sortSlotsByDisplayOrder,
 } from "@/lib/preview-session/display-order";
+import type { BookColor } from "@/lib/book-color";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
@@ -307,6 +309,9 @@ export default function PreviewPage() {
   const [isTabCardsVisible, setIsTabCardsVisible] = useState(true);
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
   const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
+  const [selectedBookColor, setSelectedBookColor] =
+    useState<BookColor | null>(null);
+  const [bookColorError, setBookColorError] = useState(false);
   const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
     () => new Set(),
   );
@@ -1422,6 +1427,11 @@ export default function PreviewPage() {
 
   const handleContinueToCart = async () => {
     if (!session) return;
+    if (!selectedBookColor) {
+      setBookColorError(true);
+      return;
+    }
+    setBookColorError(false);
     setIsSubmitting(true);
     setError(null);
     try {
@@ -1478,6 +1488,7 @@ export default function PreviewPage() {
         undefined,
         undefined,
         activeColorStyle,
+        selectedBookColor,
         {
           originalUrls,
           generatedBwUrls,
@@ -2272,19 +2283,34 @@ export default function PreviewPage() {
                           </div>
                         </div>
                       </div>
-                        {displayedBookSide === "color" && session ? (
-                          <div className="flex justify-center">
-                            <PreviewColorStyleStrip
-                              session={session}
-                              frozenThumbnails={session.frozenStyleStripThumbnails}
-                              activeStyle={activeColorStyle}
-                              loadingStyles={styleStripLoadingSet}
-                              onSelectStyle={(style) => {
-                                void handleSelectColorStyle(style);
+                        {session && isColorPhase ? (
+                          <div className="flex flex-col items-center">
+                            {displayedBookSide === "color" ? (
+                              <PreviewColorStyleStrip
+                                session={session}
+                                frozenThumbnails={session.frozenStyleStripThumbnails}
+                                activeStyle={activeColorStyle}
+                                loadingStyles={styleStripLoadingSet}
+                                onSelectStyle={(style) => {
+                                  void handleSelectColorStyle(style);
+                                }}
+                                getStyleLabel={getColorStyleLabel}
+                                title={t("preview.colorStyleStrip.title")}
+                                disabled={isSubmitting}
+                              />
+                            ) : null}
+                            <PreviewBookColorPicker
+                              selectedColor={selectedBookColor}
+                              onSelectColor={(color) => {
+                                setSelectedBookColor(color);
+                                setBookColorError(false);
                               }}
-                              getStyleLabel={getColorStyleLabel}
-                              title={t("preview.colorStyleStrip.title")}
                               disabled={isSubmitting}
+                              errorMessage={
+                                bookColorError
+                                  ? t("preview.bookColor.required")
+                                  : undefined
+                              }
                             />
                           </div>
                         ) : null}

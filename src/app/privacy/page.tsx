@@ -196,6 +196,14 @@ function PrivacyPageContent() {
                   <h3
                     className={`mb-2 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
                   >
+                    {t("privacy.analytics.mixpanel.title")}
+                  </h3>
+                  <p className="mb-4">{t("privacy.analytics.mixpanel.p1")}</p>
+                  <p className="mb-4">{t("privacy.analytics.mixpanel.p2")}</p>
+                  <p className="mb-4">{t("privacy.analytics.mixpanel.p3")}</p>
+                  <h3
+                    className={`mb-2 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
+                  >
                     {t("privacy.analytics.meta.title")}
                   </h3>
                   <p className="mb-4">{t("privacy.analytics.meta.p")}</p>
@@ -241,6 +249,7 @@ function PrivacyPageContent() {
                       t("privacy.sharing.li4"),
                       t("privacy.sharing.li5"),
                       t("privacy.sharing.li6"),
+                      t("privacy.sharing.li7"),
                     ]}
                   />
                   <p>{t("privacy.sharing.p2")}</p>
@@ -282,8 +291,9 @@ function PrivacyPageContent() {
                       t("privacy.rights.li5"),
                     ]}
                   />
+                  <p className="mb-2">{t("privacy.rights.contact")}</p>
                   <p>
-                    {t("privacy.rights.contact")}{" "}
+                    📧{" "}
                     <a
                       href="mailto:support@littlegali.com"
                       className="text-primary-orange hover:underline"

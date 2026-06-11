@@ -10,6 +10,14 @@ import {
 } from "@/components/ui/accordion";
 import { useLanguage } from "@/lib/LanguageContext";
 import { cn } from "@/lib/utils";
+import {
+  QA_ACCORDION_CLASS,
+  QA_ACCORDION_ITEM_CLASS,
+  QA_TABS_ROW_CLASS,
+  qaAccordionContentClass,
+  qaAccordionTriggerClass,
+  qaTabClass,
+} from "@/components/qa-shared-styles";
 
 type QaTab = "books" | "framed";
 
@@ -17,6 +25,7 @@ type QaItem = {
   id: string;
   questionKey: string;
   answerKey: string;
+  hasContactLink?: boolean;
 };
 
 type QaTabsSectionProps = {
@@ -25,20 +34,28 @@ type QaTabsSectionProps = {
   /** Subset of framed Q&A keys for home (shorter list). */
   framedItemIds?: string[];
   className?: string;
-  previewOn?: boolean;
+  /** Hide books/framed tabs and show book Q&A only. */
+  hideTabs?: boolean;
 };
 
 const BOOK_ITEMS: QaItem[] = [
-  { id: "1", questionKey: "qa.question1", answerKey: "qa.answer1" },
-  { id: "2", questionKey: "qa.question2", answerKey: "qa.answer2" },
   { id: "preview", questionKey: "qa.questionPreview", answerKey: "qa.answerPreview" },
-  { id: "3", questionKey: "qa.question3", answerKey: "qa.answer3" },
-  { id: "4", questionKey: "qa.question4", answerKey: "qa.answer4" },
-  { id: "5", questionKey: "qa.question5", answerKey: "qa.answer5" },
-  { id: "6", questionKey: "qa.question6", answerKey: "qa.answer6" },
-  { id: "7", questionKey: "qa.question7", answerKey: "qa.answer7" },
-  { id: "8", questionKey: "qa.question8", answerKey: "qa.answer8" },
-  { id: "9", questionKey: "qa.question9", answerKey: "qa.answer9" },
+  { id: "safety", questionKey: "qa.questionSafety", answerKey: "qa.answerSafety" },
+  { id: "photos", questionKey: "qa.questionPhotos", answerKey: "qa.answerPhotos" },
+  { id: "fromBirth", questionKey: "qa.questionFromBirth", answerKey: "qa.answerFromBirth" },
+  { id: "delivery", questionKey: "qa.questionDelivery", answerKey: "qa.answerDelivery" },
+  { id: "special", questionKey: "qa.questionSpecial", answerKey: "qa.answerSpecial" },
+  { id: "photoCount", questionKey: "qa.questionPhotoCount", answerKey: "qa.answerPhotoCount" },
+  { id: "peopleCount", questionKey: "qa.questionPeopleCount", answerKey: "qa.answerPeopleCount" },
+  { id: "gift", questionKey: "qa.questionGift", answerKey: "qa.answerGift" },
+  { id: "similarity", questionKey: "qa.questionSimilarity", answerKey: "qa.answerSimilarity" },
+  { id: "cleaning", questionKey: "qa.questionCleaning", answerKey: "qa.answerCleaning" },
+  {
+    id: "unsatisfied",
+    questionKey: "qa.questionUnsatisfied",
+    answerKey: "qa.answerUnsatisfied",
+    hasContactLink: true,
+  },
 ];
 
 const FRAMED_ITEMS: QaItem[] = [
@@ -54,111 +71,98 @@ const FRAMED_ITEMS: QaItem[] = [
   { id: "f10", questionKey: "qa.framed.q10", answerKey: "qa.framed.a10" },
 ];
 
-const HOME_BOOK_IDS = ["1", "2", "preview", "4", "9"];
+const HOME_BOOK_IDS = ["preview", "safety", "photos", "fromBirth", "delivery"];
 const HOME_FRAMED_IDS = ["f1", "f4", "f5", "f8", "f9"];
 
-function filterBookItems(items: QaItem[], bookItemIds: string[] | undefined, previewOn: boolean) {
-  const filtered = bookItemIds
-    ? items.filter((item) => bookItemIds.includes(item.id))
-    : items;
-  return previewOn ? filtered : filtered.filter((item) => item.id !== "preview");
+function filterBookItems(items: QaItem[], bookItemIds: string[] | undefined) {
+  return bookItemIds ? items.filter((item) => bookItemIds.includes(item.id)) : items;
+}
+
+function QaAnswerText({ text }: { text: string }) {
+  const paragraphs = text.split("\n\n");
+
+  return (
+    <span className="block space-y-1">
+      {paragraphs.map((paragraph, index) => (
+        <span key={index} className="block whitespace-pre-line">
+          {paragraph}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function renderAnswer(item: QaItem, t: (key: string) => string) {
+  if (item.hasContactLink) {
+    return (
+      <span className="block space-y-1">
+        <span className="block">{t("qa.answerUnsatisfied.line1")}</span>
+        <span className="block">
+          {t("qa.answerUnsatisfied.beforeLink")}
+          <Link
+            href="/contact"
+            className="underline underline-offset-2 decoration-current hover:opacity-80"
+          >
+            {t("qa.answerUnsatisfied.linkText")}
+          </Link>
+        </span>
+      </span>
+    );
+  }
+
+  return <QaAnswerText text={t(item.answerKey)} />;
 }
 
 export function QaTabsSection({
   bookItemIds,
   framedItemIds,
   className,
-  previewOn = false,
+  hideTabs = false,
 }: QaTabsSectionProps) {
   const { t, locale } = useLanguage();
   const [tab, setTab] = useState<QaTab>("books");
 
-  const bookItems = filterBookItems(BOOK_ITEMS, bookItemIds, previewOn);
+  const bookItems = filterBookItems(BOOK_ITEMS, bookItemIds);
 
   const framedItems = framedItemIds
     ? FRAMED_ITEMS.filter((item) => framedItemIds.includes(item.id))
     : FRAMED_ITEMS;
 
-  const items = tab === "books" ? bookItems : framedItems;
+  const items = hideTabs || tab === "books" ? bookItems : framedItems;
 
   return (
     <div className={className}>
-      <div className="mb-8 flex justify-center gap-2">
-        <button
-          type="button"
-          onClick={() => setTab("books")}
-          className={cn(
-            "cursor-pointer rounded-full px-5 py-2 text-sm font-body-bold transition-[colors,opacity] md:hover:opacity-80",
-            tab === "books"
-              ? "bg-primary-orange text-white"
-              : "bg-gray-100 text-gray-900",
-          )}
-        >
-          {t("qa.tabs.books")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("framed")}
-          className={cn(
-            "cursor-pointer rounded-full px-5 py-2 text-sm font-body-bold transition-[colors,opacity] md:hover:opacity-80",
-            tab === "framed"
-              ? "bg-primary-orange text-white"
-              : "bg-gray-100 text-gray-900",
-          )}
-        >
-          {t("qa.tabs.framed")}
-        </button>
-      </div>
-
-      <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
-        {items.map((item) => (
-          <AccordionItem
-            key={item.id}
-            value={item.id}
-            className="cursor-pointer rounded-lg border border-soft-peach-light bg-white px-6 py-1.5 shadow-sm md:py-4"
+      {!hideTabs && (
+        <div className={QA_TABS_ROW_CLASS}>
+          <button
+            type="button"
+            onClick={() => setTab("books")}
+            className={qaTabClass(tab === "books")}
           >
-            <AccordionTrigger
-              className={cn(
-                "cursor-pointer font-body-bold text-dark-gray transition-colors hover:text-primary-orange",
-                locale === "en" ? "text-left" : "text-right",
-              )}
-            >
+            {t("qa.tabs.books")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("framed")}
+            className={qaTabClass(tab === "framed")}
+          >
+            {t("qa.tabs.framed")}
+          </button>
+        </div>
+      )}
+
+      <Accordion
+        type="single"
+        collapsible
+        className={cn(QA_ACCORDION_CLASS, !hideTabs && "mt-6")}
+      >
+        {items.map((item) => (
+          <AccordionItem key={item.id} value={item.id} className={QA_ACCORDION_ITEM_CLASS}>
+            <AccordionTrigger className={qaAccordionTriggerClass(locale)}>
               {t(item.questionKey)}
             </AccordionTrigger>
-            <AccordionContent
-              className={cn(
-                "whitespace-pre-line pt-4 font-body leading-relaxed text-medium-gray",
-                locale === "en" ? "text-left" : "text-right",
-              )}
-            >
-              {item.id === "9" ? (
-                previewOn ? (
-                  <span className="block space-y-4">
-                    <span className="block">{t("qa.answer9.previewLine1")}</span>
-                    <span className="block">
-                      {t("qa.answer9.previewLine2Before")}
-                      <Link
-                        href="/contact"
-                        className="underline underline-offset-2 decoration-current hover:opacity-80"
-                      >
-                        {t("qa.answer9.linkText")}
-                      </Link>
-                    </span>
-                  </span>
-                ) : (
-                  <span>
-                    {t("qa.answer9.beforeLink")}
-                    <Link
-                      href="/contact"
-                      className="underline underline-offset-2 decoration-current hover:opacity-80"
-                    >
-                      {t("qa.answer9.linkText")}
-                    </Link>
-                  </span>
-                )
-              ) : (
-                t(item.answerKey)
-              )}
+            <AccordionContent className={qaAccordionContentClass(locale, "pt-2")}>
+              {renderAnswer(item, t)}
             </AccordionContent>
           </AccordionItem>
         ))}

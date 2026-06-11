@@ -13,6 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { useCart } from "@/lib/CartContext";
 import type { CartItem } from "@/lib/CartContext";
+import {
+  BOOK_COLOR_LABEL_KEYS,
+  BOOK_COLOR_SWATCHES,
+  type BookColor,
+} from "@/lib/book-color";
 import { ArrowRight, Loader2, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -42,6 +47,19 @@ function getStyleLabel(
   if (style === "pencil") return t("cart.style.pencil");
   if (style === "watercolor") return t("cart.style.watercolor");
   return t("cart.style.cartoon");
+}
+
+function getBookColorDisplay(
+  bookColor: BookColor | undefined,
+  t: (key: string) => string,
+): { label?: string; swatch?: string } {
+  if (!bookColor) {
+    return {};
+  }
+  return {
+    label: t(BOOK_COLOR_LABEL_KEYS[bookColor]),
+    swatch: BOOK_COLOR_SWATCHES[bookColor],
+  };
 }
 
 function CartAddingItemRow({ label }: { label: string }) {
@@ -460,9 +478,18 @@ export default function CartPage() {
                               );
                               const quantity =
                                 item.quantity > 0 ? item.quantity : 1;
+                              const bookColorDisplay = getBookColorDisplay(
+                                item.bookColor,
+                                t,
+                              );
                               const details = (
                                 <CartLineItemDetails
                                   locale={locale}
+                                  colorValue={bookColorDisplay.label}
+                                  colorSwatchSrc={bookColorDisplay.swatch}
+                                  showColorRow={
+                                    !item.isGiftCard && !item.isFramedArt
+                                  }
                                   styleValue={
                                     item.isGiftCard
                                       ? undefined

@@ -1,169 +1,207 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
+import { isFramedArtEnabled } from "@/lib/feature-flags";
+
+const INSTAGRAM_URL = "https://www.instagram.com/little.gali/";
+const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61583927914508";
+
+type FooterLink = {
+  labelKey: string;
+  href: string;
+};
+
+type FooterColumnProps = {
+  titleKey: string;
+  links: FooterLink[];
+  t: (key: string) => string;
+  isRtl: boolean;
+};
+
+const footerLinkClass =
+  "font-body text-sm font-normal text-warm-taupe transition-colors hover:text-white";
+
+function FooterColumn({ titleKey, links, t, isRtl }: FooterColumnProps) {
+  return (
+    <div className="text-start" dir={isRtl ? "rtl" : "ltr"}>
+      <h3 className="mb-3 font-heading text-base font-bold text-warm-taupe">
+        {t(titleKey)}
+      </h3>
+      <ul className="space-y-1">
+        {links.map((link) => (
+          <li key={link.labelKey}>
+            <a href={link.href} className={footerLinkClass}>
+              {t(link.labelKey)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SocialIconLink({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-[#CABCB3]/50 text-warm-taupe transition-colors hover:border-[#CABCB3] hover:text-white"
+    >
+      {children}
+    </a>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.75" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+      <path d="M14 8.5h2.5l-.5 3H14v9h-3.5v-9H9v-3h1.5V7.5c0-2.2 1.3-3.5 3.4-3.5H14v3h-1.6c-.6 0-.9.3-.9.9V8.5z" />
+    </svg>
+  );
+}
+
+function ContactChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M7 9h10M7 13h6" strokeLinecap="round" />
+      <path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 3V6a2 2 0 0 1 2-2z" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export function Footer() {
   const { t, locale } = useLanguage();
+  const framedOn = isFramedArtEnabled();
+  const isRtl = locale === "he";
+
+  const productLinks: FooterLink[] = [
+    { labelKey: "footer.babyBooks", href: "/upload" },
+    ...(framedOn
+      ? [{ labelKey: "footer.framedArt", href: "/framed-art/upload" }]
+      : []),
+    { labelKey: "nav.giftCard", href: "/#gift-card" },
+  ];
+
   return (
-    <footer className="bg-white">
-      {/* Upper Section - White Background with Columns */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-          {/* Column 1: Logo/Brand (Right side) */}
-          <div className="col-span-2 lg:col-span-1 order-1 lg:order-1">
-            <div className="mb-4 lg:mb-0 flex justify-center">
-              <Image src="/footer-logo.svg" alt="Little Gali" width={1440} height={432} className="h-24 lg:h-48 w-auto" />
-            </div>
-            <p
-              className={`font-body text-medium-gray text-sm leading-relaxed mb-2 lg:mb-6 text-center`}
-            >
-              {t("footer.description")}
-            </p>
-            {/* Social Media Icons - temporarily disabled */}
-            {/**
-            <div className="flex gap-3">
-              ... icons ...
-            </div>
-            **/}
-          </div>
-
-          {/* Column 2: Platform */}
-          <div className="order-2 lg:order-2 mt-1 lg:mt-[50px]">
-            <h3
-              className={`font-heading text-dark-gray text-lg font-bold mb-4 text-center ${
-                locale === "en" ? "lg:text-left" : "lg:text-right"
-              }`}
-            >
-              {t("footer.platform")}
-            </h3>
-            <ul className={`space-y-3 text-center ${locale === "en" ? "lg:text-left" : "lg:text-right"}`}>
-              <li>
-                <a
-                  href="/#how-it-works"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.howItWorks")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/inspiration"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.inspiration")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/qa"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("nav.qa")}
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Policies */}
-          <div className="order-3 lg:order-3 mt-1 lg:mt-[50px]">
-            <h3
-              className={`font-heading text-dark-gray text-lg font-bold mb-4 text-center ${
-                locale === "en" ? "lg:text-left" : "lg:text-right"
-              }`}
-            >
-              {t("footer.policies")}
-            </h3>
-            <ul className={`space-y-3 text-center ${locale === "en" ? "lg:text-left" : "lg:text-right"}`}>
-              <li>
-                <a
-                  href="/terms"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.terms")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/privacy"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.privacy")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/shipping"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.shipping")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/returns"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.returns")}
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 4: About */}
-          <div className="order-4 lg:order-4 mt-4 lg:mt-[50px]">
-            <h3
-              className={`font-heading text-dark-gray text-lg font-bold mb-4 text-center ${
-                locale === "en" ? "lg:text-left" : "lg:text-right"
-              }`}
-            >
-              {t("footer.about")}
-            </h3>
-            <ul className={`space-y-3 text-center ${locale === "en" ? "lg:text-left" : "lg:text-right"}`}>
-              <li>
-                <a
-                  href="/#about"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.whoWeAre")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/contact"
-                  className="font-body text-medium-gray hover:text-dark-gray transition-colors text-sm"
-                >
-                  {t("footer.contact")}
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 5: Contact US (Left side) */}
-          <div className="order-5 lg:order-5 mt-4 lg:mt-[50px] flex flex-col items-center lg:items-start">
-            <h3
-              className={`font-heading text-dark-gray text-lg font-bold mb-4 text-center ${
-                locale === "en" ? "lg:text-left" : "lg:text-right"
-              }`}
-            >
-              {t("footer.contact")}
-            </h3>
-            <a href="/contact" aria-label={t("footer.contactUsAriaLabel")}>
-              <Button className="cursor-pointer text-white px-6 py-2 rounded-md font-body-bold text-sm transition-all duration-200 bg-accent-burgundy hover:opacity-90">
+    <footer className="bg-[#2F1C11]">
+      <div className="container mx-auto px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div
+          dir={isRtl ? "rtl" : "ltr"}
+          className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-16"
+        >
+          {/* Brand — first in DOM, appears on the right in RTL */}
+          <div className="-translate-y-8 lg:col-span-5">
+            <div className="mx-auto flex w-max max-w-[17rem] flex-col items-center [direction:ltr]">
+              <div className="mb-5 flex justify-center">
+                <Image
+                  src="/footer-logo-white.svg"
+                  alt="Little Gali"
+                  width={488}
+                  height={420}
+                  className="h-28 w-auto object-contain lg:h-32"
+                />
+              </div>
+              <p
+                className="mb-6 w-full whitespace-pre-line text-center font-body text-sm font-normal leading-relaxed text-warm-taupe"
+                dir={isRtl ? "rtl" : "ltr"}
+              >
+                {t("footer.description")}
+              </p>
+              <div className="mb-5 flex items-center justify-center gap-3">
+                <SocialIconLink href={INSTAGRAM_URL} label="Instagram">
+                  <InstagramIcon />
+                </SocialIconLink>
+                <SocialIconLink href={FACEBOOK_URL} label="Facebook">
+                  <FacebookIcon />
+                </SocialIconLink>
+              </div>
+              <Link
+                href="/contact"
+                aria-label={t("footer.contactUsAriaLabel")}
+                className="inline-flex items-center justify-center gap-2 font-body-bold text-sm text-primary-orange transition-opacity hover:opacity-80"
+                dir={isRtl ? "rtl" : "ltr"}
+              >
+                <ContactChatIcon />
                 {t("footer.contactUs")}
-              </Button>
-            </a>
+              </Link>
+            </div>
+          </div>
+
+          {/* Link columns — mobile: platform | products+info stacked */}
+          <div className="grid grid-cols-2 gap-x-10 gap-y-8 [direction:ltr] lg:col-span-7 lg:grid-cols-3 lg:gap-8">
+            <FooterColumn
+              titleKey="footer.platform"
+              links={[
+                { labelKey: "footer.howItWorks", href: "/#how-it-works" },
+                { labelKey: "footer.inspiration", href: "/inspiration" },
+                { labelKey: "nav.qa", href: "/qa" },
+              ]}
+              t={t}
+              isRtl={isRtl}
+            />
+            <div className="flex flex-col gap-10 lg:contents">
+              <FooterColumn
+                titleKey="footer.products"
+                links={productLinks}
+                t={t}
+                isRtl={isRtl}
+              />
+              <FooterColumn
+                titleKey="footer.information"
+                links={[
+                  { labelKey: "footer.whoWeAre", href: "/#about" },
+                  { labelKey: "footer.terms", href: "/terms" },
+                  { labelKey: "footer.shipping", href: "/shipping" },
+                  { labelKey: "footer.returns", href: "/returns" },
+                ]}
+                t={t}
+                isRtl={isRtl}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Section - Dark Gray Bar */}
-      <div className="py-4" style={{ backgroundColor: "#424744" }}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center font-body text-white/80 text-sm">
+      {/* Copyright bar */}
+      <div className="border-t border-[#CABCB3]/15 bg-[#2F1C11]">
+        <div
+          dir={isRtl ? "rtl" : "ltr"}
+          className="container mx-auto flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8"
+        >
+          <p className="font-body text-xs font-normal text-warm-taupe sm:text-sm">
             {t("footer.copyright")}
           </p>
+          <div className="flex shrink-0 gap-6">
+            <a href="/privacy" className={footerLinkClass}>
+              {t("footer.privacy")}
+            </a>
+            <a href="/terms" className={footerLinkClass}>
+              {t("footer.termsOfUse")}
+            </a>
+          </div>
         </div>
       </div>
     </footer>

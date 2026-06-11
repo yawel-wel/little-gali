@@ -18,6 +18,8 @@ import {
 } from "./cart-line-images";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
 import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
+import type { BookColor } from "./book-color";
+import { bookColorFromVariantId } from "./book-color";
 import type { StoredCartImages } from "./cart-images-store";
 
 export interface CartItem {
@@ -31,6 +33,8 @@ export interface CartItem {
   title?: string;
   lineId?: string;
   style?: "cartoon" | "pencil" | "watercolor";
+  bookColor?: BookColor;
+  variantId?: string;
   isGiftCard?: boolean;
   giftCardAmount?: number;
   isFramedArt?: boolean;
@@ -76,6 +80,7 @@ interface CartContextType {
     bookId?: string,
     phoneNumber?: string,
     style?: "cartoon" | "pencil" | "watercolor",
+    bookColor?: BookColor,
     fulfillment?: BookFulfillmentImages
   ) => Promise<void>;
   addGiftCardToCart: (optionId: string) => Promise<void>;
@@ -144,6 +149,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             attributes?: Array<{ key: string; value: string }>;
             cost?: Parameters<typeof parseShopifyLineCost>[0];
             storedImages?: StoredCartImages | null;
+            variantId?: string;
+            bookColor?: BookColor;
           }) => {
             const stored = line.storedImages;
             const attrExtract = extractImagesFromLineAttributes(
@@ -205,6 +212,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               }
             }
 
+            const bookColor =
+              line.bookColor ??
+              bookColorFromVariantId(line.variantId) ??
+              undefined;
+
             const framedImageUrl =
               isFramedArt && imageUrls[0]
                 ? (stored?.framedImageUrl ?? imageUrls[0])
@@ -223,6 +235,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
               previewSessionId: isGiftCard ? undefined : stored?.previewSessionId,
               style: isGiftCard ? undefined : style,
+              bookColor: isGiftCard || isFramedArt ? undefined : bookColor,
+              variantId: line.variantId,
               isGiftCard,
               giftCardAmount,
               isFramedArt,
@@ -321,6 +335,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     bookId?: string,
     phoneNumber?: string,
     style?: "cartoon" | "pencil" | "watercolor",
+    bookColor?: BookColor,
     fulfillment?: BookFulfillmentImages
   ) => {
     setIsLoading(true);
@@ -341,6 +356,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             bookId,
             phoneNumber,
             style: style || "cartoon",
+            bookColor,
             locale,
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
@@ -362,6 +378,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             bookId,
             phoneNumber,
             style: style || "cartoon",
+            bookColor,
             locale,
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
@@ -386,6 +403,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               ...item,
               imageUrls: isNewItem ? item.imageUrls : (existingItem?.imageUrls ?? []),
               style: isNewItem ? (style ?? "cartoon") : (item.style ?? existingItem?.style),
+              bookColor: isNewItem
+                ? (bookColor ?? item.bookColor)
+                : (item.bookColor ?? existingItem?.bookColor),
+              variantId: item.variantId ?? existingItem?.variantId,
               isGiftCard: item.isGiftCard ?? existingItem?.isGiftCard,
               giftCardAmount: item.giftCardAmount ?? existingItem?.giftCardAmount,
               originalUrls: existingItem?.originalUrls ?? item.originalUrls,

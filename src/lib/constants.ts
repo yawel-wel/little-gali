@@ -2,18 +2,24 @@
  * Application-wide constants
  */
 
-export const BOOK_PRICE = 145;
-export const DISCOUNTED_BOOK_PRICE = 99;
+export const BOOK_PRICE = 190;
+export const DISCOUNTED_BOOK_PRICE = 139;
 
 /** Single framed-art line item (Shopify discount may reduce multi-item carts). */
 export const FRAMED_ART_UNIT_PRICE = 129;
 export const FRAMED_ART_TWO_PRICE = 218;
 export const FRAMED_ART_THREE_PRICE = 289;
 
+/** Soft book Shopify variant IDs (numeric strings). */
+export const BOOK_VARIANT_IDS = {
+  light: "43869379821671",
+  dark: "43869379854439",
+} as const;
+
 // Gift Card Configuration
 export const GIFT_CARD_OPTIONS = [
-  { id: 'one_with_shipping', price: 175, labelKey: 'giftCard.option2' },
-  { id: 'two_with_shipping', price: 274, labelKey: 'giftCard.option4' },
+  { id: 'one_with_shipping', price: 220, labelKey: 'giftCard.option2' },
+  { id: 'two_with_shipping', price: 358, labelKey: 'giftCard.option4' },
 ] as const;
 
 // Environment variables

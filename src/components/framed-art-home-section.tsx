@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import MuiButton from "@mui/material/Button";
+import { HomeCtaButton } from "@/components/home-cta-button";
 import { motion } from "framer-motion";
 import { Title } from "@/components/title";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
+import { FreePreviewNote } from "@/components/feature-pill";
 
 const easeOwlet = [0.16, 1, 0.3, 1] as const;
 
@@ -84,24 +85,33 @@ export function FramedArtHomeSection() {
             }`}
           >
             <div
-              className={`flex w-full flex-col gap-2 items-center lg:items-start`}
+              dir="ltr"
+              className={`flex w-full flex-col items-center gap-2 ${
+                locale === "en" ? "lg:items-start" : "lg:items-end"
+              }`}
             >
-              <span className="w-fit shrink-0 rounded-full border border-primary-orange/60 bg-primary-orange/10 px-3 py-1 text-sm font-body-bold text-primary-orange">
+              <span
+                dir={locale === "he" ? "rtl" : "ltr"}
+                className="w-fit shrink-0 rounded-full border border-primary-orange/60 bg-primary-orange/10 px-3 py-1 text-sm font-body-bold text-primary-orange"
+              >
                 {t("home.framedArt.badge")}
               </span>
-              <Title
-                highlightText={t("home.framedArt.titleHighlight")}
-                className="text-3xl lg:text-4xl"
-              >
-                {t("home.framedArt.title")}
-              </Title>
+              <div dir={locale === "he" ? "rtl" : "ltr"} className="w-full">
+                <Title
+                  highlightText={t("home.framedArt.titleHighlight")}
+                  className="text-3xl lg:text-4xl"
+                >
+                  {t("home.framedArt.title")}
+                </Title>
+              </div>
             </div>
+
             <p className="font-body text-medium-gray leading-relaxed">
               {t("home.framedArt.subtitle")}
             </p>
 
-            <div className="mx-auto w-full space-y-2 lg:w-3/4">
-              <div className="px-2 pb-2.5 pt-4">
+            <div dir="ltr" className="w-full">
+              <div className="px-2 pb-2.5 pt-2">
                 <div
                   className="grid grid-cols-3 gap-1.5 sm:gap-2"
                   dir={locale === "he" ? "rtl" : "ltr"}
@@ -112,7 +122,10 @@ export function FramedArtHomeSection() {
                       className="relative flex flex-col items-center rounded-lg border border-[#E8DFD4] bg-white px-1.5 py-3 text-center sm:px-2"
                     >
                       {card.bestValue && (
-                        <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary-orange px-2 py-0.5 text-[10px] font-body-bold leading-none text-white">
+                        <span
+                          dir={locale === "he" ? "rtl" : "ltr"}
+                          className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary-orange px-2 py-0.5 text-[10px] font-body-bold leading-none text-white"
+                        >
                           {t("home.framedArt.bestValue")}
                         </span>
                       )}
@@ -120,7 +133,7 @@ export function FramedArtHomeSection() {
                         {t(card.labelKey)}
                       </p>
                       <p
-                        className="mt-1 font-heading text-xl font-light leading-none text-dark-gray tabular-nums sm:text-2xl"
+                        className="mt-1 font-heading text-xl font-bold leading-none text-dark-gray tabular-nums sm:text-2xl"
                         dir="ltr"
                       >
                         ₪{card.total}
@@ -135,27 +148,24 @@ export function FramedArtHomeSection() {
                   ))}
                 </div>
               </div>
-              <p className="-mt-1 text-center text-xs text-medium-gray">
-                {t("home.framedArt.discountNote")}
-              </p>
 
-              <div className="mt-10 flex justify-center">
+              <div
+                className={`mt-9 flex w-full flex-col items-center gap-2 ${
+                  locale === "en" ? "lg:items-start" : "lg:items-end"
+                }`}
+              >
                 <Link href="/framed-art/upload" aria-label={t("home.framedArt.ctaAriaLabel")}>
-                  <MuiButton
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      px: 4,
-                      py: 1.5,
-                      fontFamily: "var(--font-assistant)",
-                      fontWeight: 700,
-                      fontSize: "0.95rem",
-                      textTransform: "none",
-                    }}
-                  >
-                    {t("home.framedArt.cta")}
-                  </MuiButton>
+                  <HomeCtaButton>{t("home.framedArt.cta")}</HomeCtaButton>
                 </Link>
+                <FreePreviewNote
+                  label={t("home.framedArt.freePreview")}
+                  locale={locale}
+                  className={
+                    locale === "en"
+                      ? "text-center lg:text-left"
+                      : "text-center lg:text-right"
+                  }
+                />
               </div>
             </div>
           </div>

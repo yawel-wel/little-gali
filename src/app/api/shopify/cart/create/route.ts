@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  bookColorFromVariantId,
+  isValidBookColor,
+  resolveBookVariantGid,
+  type BookColor,
+} from "@/lib/book-color";
+import {
   formatSelectedGenerationBySlot,
   generatedColorUrlsShopifyAttributes,
   hasInvalidHttpImageUrls,
@@ -25,12 +31,14 @@ export async function POST(request: NextRequest) {
       generatedColorUrls,
       previewSessionId,
       generationStats,
+      bookColor,
     } = body as {
       imageUrls: string[];
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
       style?: "cartoon" | "pencil" | "watercolor";
+      bookColor?: BookColor;
       locale?: string;
       originalUrls?: string[];
       generatedBwUrls?: string[];
@@ -48,29 +56,17 @@ export async function POST(request: NextRequest) {
 
     const storeDomain = process.env.SHOPIFY_STORE_DOMAIN;
     const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-    let productVariantId = process.env.SHOPIFY_PRODUCT_VARIANT_ID;
 
-    if (!storeDomain || !accessToken || !productVariantId) {
+    if (!storeDomain || !accessToken) {
       return NextResponse.json(
         { error: "Shopify credentials not configured" },
         { status: 500 }
       );
     }
 
-    // Ensure variant ID is in GraphQL format
-    if (!productVariantId.startsWith("gid://shopify/ProductVariant/")) {
-      if (/^\d+$/.test(productVariantId)) {
-        productVariantId = `gid://shopify/ProductVariant/${productVariantId}`;
-      } else {
-        return NextResponse.json(
-          {
-            error:
-              "Invalid SHOPIFY_PRODUCT_VARIANT_ID format. Use either 'gid://shopify/ProductVariant/XXXXX' or just the numeric ID 'XXXXX'",
-          },
-          { status: 500 }
-        );
-      }
-    }
+    const productVariantId = resolveBookVariantGid(
+      isValidBookColor(bookColor) ? bookColor : undefined,
+    );
 
     // Validate image URLs
     const urls = imageUrls as string[];
@@ -350,6 +346,9 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        const variantId = node.merchandise?.id;
+        const itemBookColor = bookColorFromVariantId(variantId);
+
         return {
           id: node.id,
           lineId: node.id,
@@ -361,6 +360,8 @@ export async function POST(request: NextRequest) {
           imageUrls: isNewLine ? urls : [], // Include images for the newly created line
           style:
             itemStyle || (isNewLine ? styleToStore || "cartoon" : undefined), // Include style for new line
+          variantId: variantId ?? undefined,
+          bookColor: itemBookColor ?? undefined,
         };
       }) || [];
 

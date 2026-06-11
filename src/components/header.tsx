@@ -73,9 +73,9 @@ export function Header() {
       <SkipToMain />
       <motion.header
         role="banner"
-        className="fixed left-0 right-0 z-50 transition-[top] duration-300 ease-in-out"
+        className="fixed left-0 right-0 z-50 border-0 shadow-none transition-[top] duration-300 ease-in-out"
         style={{ 
-          backgroundColor: "#F9F7EE",
+          backgroundColor: "#FAF7F4",
           top: "var(--banner-height, 0px)"
         }}
         initial={prefersReducedMotion ? false : { y: -100 }}
@@ -83,7 +83,7 @@ export function Header() {
         transition={{ duration: 1.1, ease: easeOwlet }}
       >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-3 md:py-2 relative">
+        <div className="relative flex min-h-[72px] items-center justify-between py-3 md:py-2">
           {/* Left Side - Hamburger Menu (Both languages) */}
           <div className="flex-shrink-0 flex items-center gap-4">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>

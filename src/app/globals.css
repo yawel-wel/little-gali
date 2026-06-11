@@ -318,6 +318,9 @@
   .bg-warm-taupe {
     background-color: #CABCB3;
   }
+  .text-warm-taupe {
+    color: #CABCB3;
+  }
 
   /* Text Colors */
   .text-dark-gray {

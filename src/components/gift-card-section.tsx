@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
-import MuiButton from "@mui/material/Button";
+import { HomeCtaButton } from "@/components/home-cta-button";
 import { GIFT_CARD_OPTIONS } from "@/lib/constants";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
@@ -18,7 +18,7 @@ export function GiftCardSection() {
   const { addGiftCardToCart } = useCart();
   
   const [selectedOption, setSelectedOption] = useState<string>(
-    GIFT_CARD_OPTIONS[0].id // Pre-select ₪175
+    GIFT_CARD_OPTIONS[0].id // Pre-select ₪220
   );
   const [isAdding, setIsAdding] = useState(false);
 
@@ -39,7 +39,7 @@ export function GiftCardSection() {
   return (
     <motion.section
       id="gift-card"
-      className="relative pb-16 lg:pb-24 bg-white"
+      className="relative bg-[#FAF7F4] pb-16 lg:pb-24"
       {...reveal.section}
       transition={{ duration: 0.9, ease: easeOwlet }}
     >
@@ -98,7 +98,7 @@ export function GiftCardSection() {
               },
             }}
           >
-            <p className="text-base font-body text-medium-gray text-center max-w-2xl mx-auto whitespace-pre-line">
+            <p className="mx-auto max-w-2xl text-center font-body text-base leading-relaxed text-medium-gray">
               {t("giftCard.description")}
             </p>
           </motion.div>
@@ -115,40 +115,50 @@ export function GiftCardSection() {
               },
             }}
           >
-            <div className="text-center mb-4">
-              <p className="text-sm font-body text-primary-orange mb-0.5">
-                {t("giftCard.feature4")}
-              </p>
-              <h3 className="text-xl font-heading font-bold text-dark-gray">
+            <div
+              dir={locale === "he" ? "rtl" : "ltr"}
+              className="mx-auto mb-2 grid max-w-md grid-cols-2 gap-3"
+            >
+              <span className="text-start text-sm font-body text-medium-gray">
                 {t("giftCard.selectOption")}
-              </h3>
+              </span>
+              <span className="text-end text-sm font-body text-primary-orange">
+                {t("giftCard.feature4")}
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-              {GIFT_CARD_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => setSelectedOption(option.id)}
-                  className={`px-4 py-3 rounded-lg transition-all cursor-pointer hover:opacity-80 ${
-                    selectedOption === option.id
-                      ? "bg-primary-orange text-white shadow-lg"
-                      : "bg-white text-dark-gray border-2 border-gray-300 hover:border-primary-orange"
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-xl md:text-2xl font-heading font-bold">
-                      ₪{option.price}
-                    </span>
-                    <span className={`text-xs font-body leading-tight ${
-                      selectedOption === option.id
-                        ? "text-white/90"
-                        : "text-medium-gray"
-                    }`}>
-                      {t(option.labelKey)}
-                    </span>
-                  </div>
-                </button>
-              ))}
+            <div
+              dir={locale === "he" ? "rtl" : "ltr"}
+              className="mx-auto grid max-w-md grid-cols-2 gap-3"
+            >
+              {GIFT_CARD_OPTIONS.map((option) => {
+                const isSelected = selectedOption === option.id;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setSelectedOption(option.id)}
+                    className={`cursor-pointer rounded-xl bg-white px-4 py-4 transition-all hover:opacity-90 ${
+                      isSelected
+                        ? "border-2 border-primary-orange"
+                        : "border border-[#E8DFD4]"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className="font-heading text-2xl font-bold text-dark-gray tabular-nums"
+                        dir="ltr"
+                      >
+                        ₪{option.price}
+                      </span>
+                      <span className="text-center font-body text-xs leading-tight text-medium-gray">
+                        {t(option.labelKey)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
 
@@ -164,23 +174,53 @@ export function GiftCardSection() {
               },
             }}
           >
-            <MuiButton
+            <HomeCtaButton
               onClick={handleAddToCart}
               disabled={isAdding}
-              variant="contained"
-              color="primary"
               aria-label={t("giftCard.ariaLabel")}
-              sx={{
-                px: 6,
-                py: 1.5,
-                fontFamily: "var(--font-assistant)",
-                fontWeight: 700,
-                fontSize: "1rem",
-                textTransform: "none",
-              }}
             >
               {isAdding ? t("giftCard.adding") : t("giftCard.addToCart")}
-            </MuiButton>
+            </HomeCtaButton>
+
+            <p className="mt-4 text-center text-sm font-body text-medium-gray">
+              <span dir="ltr" className="inline-flex items-center gap-1.5">
+                {locale === "he" ? (
+                  <>
+                    <span dir="rtl">{t("giftCard.emailNote")}</span>
+                    <svg
+                      className="h-4 w-4 shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <path d="m2 7 10 6 10-6" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="h-4 w-4 shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <path d="m2 7 10 6 10-6" />
+                    </svg>
+                    <span>{t("giftCard.emailNote")}</span>
+                  </>
+                )}
+              </span>
+            </p>
           </motion.div>
         </motion.div>
       </div>

@@ -79,7 +79,7 @@ export function FramedArtFeaturesSection() {
     <motion.section
       id="framed-art-features"
       aria-label={t("home.framedArt.features.ariaLabel")}
-      className="bg-warm-light py-10 lg:py-12"
+      className="bg-[#FAF7F4] py-10 lg:py-12"
       {...reveal.section}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

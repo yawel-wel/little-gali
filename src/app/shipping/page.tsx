@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useState, useEffect } from "react";
 
@@ -60,6 +61,7 @@ function ShippingList({
 function ShippingPageContent() {
   const { t, locale } = useLanguage();
   const textAlign = locale === "en" ? "text-left" : "text-right";
+  const isHebrew = locale === "he";
 
   return (
     <div
@@ -76,9 +78,13 @@ function ShippingPageContent() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             <div className="max-w-4xl mx-auto">
               <div className="mb-12 text-center">
-                <h1 className="mb-4 text-center font-heading text-3xl leading-tight text-dark-gray lg:text-4xl">
+                <Title
+                  as="h1"
+                  highlightText={isHebrew ? "משלוחים" : "Shipping"}
+                  size="lg"
+                >
                   {t("shipping.title")}
-                </h1>
+                </Title>
               </div>
 
               <div

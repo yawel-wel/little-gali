@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { bookColorFromVariantId } from "@/lib/book-color";
 import {
   extractImagesFromLineAttributes,
   representativeLineIdsForImageLoad,
@@ -122,6 +123,8 @@ export async function POST(request: NextRequest) {
       imageUrls: string[];
       attributes?: Array<{ key: string; value: string }>;
       cost?: unknown;
+      variantId?: string;
+      bookColor?: "dark" | "light";
     };
 
     const rawLines: RawCartLine[] =
@@ -130,13 +133,19 @@ export async function POST(request: NextRequest) {
           id: string;
           quantity: number;
           attributes?: Array<{ key: string; value: string }>;
-          merchandise?: { product?: { title?: string }; title?: string };
+          merchandise?: {
+            id?: string;
+            product?: { title?: string };
+            title?: string;
+          };
           cost?: unknown;
         };
         const { imageUrls } = extractImagesFromLineAttributes(
           node.attributes,
           cartAttributes,
         );
+        const variantId = node.merchandise?.id;
+        const bookColor = bookColorFromVariantId(variantId);
 
         return {
           id: node.id,
@@ -145,6 +154,8 @@ export async function POST(request: NextRequest) {
           imageUrls,
           attributes: node.attributes,
           cost: node.cost,
+          variantId: variantId ?? undefined,
+          bookColor: bookColor ?? undefined,
         };
       }) ?? [];
 

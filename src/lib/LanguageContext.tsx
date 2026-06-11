@@ -150,6 +150,7 @@ const hebrewTranslations = {
   "cart.cancel": "ביטול",
   "cart.quantity": "כמות:",
   "cart.styleLabel": "סגנון:",
+  "cart.colorLabel": "צבע:",
   "cart.lineTotal": "סך הכל:",
   "cart.discountApplied": "הנחה חלה על המוצר 🎉",
   "cart.itemTotal": "סה״כ לפריט:",
@@ -169,7 +170,7 @@ const hebrewTranslations = {
   "cart.readyMessage": "הודעה תשלח כשהספרון מוכן בשביל תיאום משלוח",
   "cart.checkoutProgress": "מעבר לתשלום...",
   "cart.addBook": "הוסף ספרון",
-  "cart.secondBook": "כל ספרון שני ב-99 ₪ 🎉",
+  "cart.secondBook": "כל ספרון שני ב-139 ₪ 🎉",
   "cart.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
   "cart.startCreating": "התחל ליצור ספרון מותאם אישית",
   "cart.giftCardTitle": "גיפט קארד",
@@ -227,7 +228,7 @@ const hebrewTranslations = {
     "השימוש באתר והשירותים הניתנים בו כפופים לתנאים המפורטים להלן. בעת גלישה באתר, שימוש בשירותים או ביצוע הזמנה, אתם מאשרים כי קראתם והסכמתם לתנאים אלה במלואם.",
   "terms.useOfSite.title": "שימוש באתר",
   "terms.useOfSite.p1":
-    "האתר מאפשר הזמנת מוצרים מותאמים אישית המבוססים על תמונות שהמשתמש מעלה, לרבות ספרונים לתינוקות, איורים מודפסים ותמונות ממוסגרות.",
+    "האתר מאפשר הזמנת מוצרים מותאמים אישית המבוססים על תמונות שהמשתמש מעלה, לרבות ספרוני בד לתינוקות, איורים מודפסים ותמונות ממוסגרות.",
   "terms.useOfSite.p2": "השימוש באתר מותר למטרות אישיות ופרטיות בלבד.",
   "terms.useOfSite.p3":
     "חל איסור להשתמש באתר למטרות מסחריות ללא אישור מראש, להעלות תוכן פוגעני, בלתי חוקי או תמונות שאינן בבעלות המשתמש.",
@@ -259,17 +260,24 @@ const hebrewTranslations = {
   "terms.customProducts.p1":
     "מאחר שהמוצרים מיוצרים במיוחד עבור כל לקוח ובהתאם לתמונות שסופקו על ידו, לא ניתן לבטל, לשנות או להחזיר הזמנה לאחר אישור ההזמנה וביצוע התשלום, למעט במקרים המפורטים במדיניות ההחזרים של האתר או בהתאם להוראות הדין.",
   "terms.warrantyAndService.title": "אחריות ושירות",
-  "terms.warrantyAndService.p1": "אנו מקפידות על איכות גבוהה של ייצור והדפסה.",
+  "terms.warrantyAndService.p1":
+    "אנו משקיעים מאמצים רבים כדי לספק מוצרים איכותיים והדפסות באיכות גבוהה.",
   "terms.warrantyAndService.p2":
     "עם זאת, ייתכנו הבדלים קלים בגוונים, בצבעים, בחיתוך, במרקם, בניגודיות או במיקום האלמנטים בין התצוגה על מסכים שונים לבין המוצר המודפס בפועל.",
   "terms.warrantyAndService.p3":
-    "הבדלים סבירים אלו אינם נחשבים לפגם ואינם מהווים עילה לביטול עסקה. במקרה של פגם בייצור או נזק שנגרם במהלך המשלוח, ניתן לפנות אלינו ונפעל בהתאם למדיניות ההחזרים של האתר.",
+    "הבדלים סבירים אלו אינם נחשבים לפגם ואינם מהווים עילה לביטול עסקה.",
+  "terms.warrantyAndService.p4":
+    "במקרה של פגם בייצור או נזק שנגרם במהלך המשלוח, ניתן לפנות אלינו ונפעל בהתאם למדיניות ההחזרים של האתר.",
   "terms.safeUse.title": "שימוש בטוח במוצרים",
-  "terms.safeUse.books.title": "ספרונים לתינוקות",
+  "terms.safeUse.books.title": "ספרוני בד לתינוקות",
   "terms.safeUse.books.p1": "הספרונים מיועדים לשימוש בהשגחת מבוגר בלבד.",
   "terms.safeUse.books.p2":
-    "הספרונים עשויים מנייר עבה עם למינציה לשיפור העמידות, אך אינם מיועדים לנשיכה, לעיסה או לחשיפה ממושכת לנוזלים.",
-  "terms.safeUse.books.p3": "אין להשאיר את המוצר ללא השגחה בקרבת תינוק או פעוט.",
+    "הספרונים עשויים מבד וכוללים תמונות מודפסות המוכנסות לכיסים ייעודיים.",
+  "terms.safeUse.books.p3":
+    "למרות שהספרונים מיועדים לשימוש על ידי תינוקות וילדים צעירים, מומלץ לבדוק את תקינותם מעת לעת ולהפסיק את השימוש במקרה של בלאי, קרע או נזק כלשהו.",
+  "terms.safeUse.books.p4":
+    "התמונות המודפסות מיועדות לשימוש כחלק מהספרון, ומומלץ להחזירן לכיסים הייעודיים לאחר השימוש.",
+  "terms.safeUse.books.p5": "אין להשאיר את המוצר ללא השגחה בקרבת תינוק או פעוט.",
   "terms.safeUse.framed.title": "תמונות ממוסגרות",
   "terms.safeUse.framed.p1":
     "התמונות הממוסגרות מסופקות עם אמצעי תלייה בהתאם לדגם.",
@@ -293,10 +301,14 @@ const hebrewTranslations = {
   "terms.liabilityLimitation.title": "הגבלת אחריות",
   "terms.liabilityLimitation.p1": "השימוש באתר ובמוצרים נעשה באחריות המשתמש בלבד.",
   "terms.liabilityLimitation.p2":
-    "Little Gali אינה אחראית לנזקים עקיפים, אובדן מידע, אובדן רווחים או כל נזק תוצאתי אחר הנובע מהשימוש באתר, בשירותים או במוצרים. בכל מקרה, אחריותה של Little Gali לא תעלה על סכום ההזמנה ששולם בפועל על ידי הלקוח.",
+    "Little Gali אינה אחראית לנזקים עקיפים, אובדן מידע, אובדן רווחים או כל נזק תוצאתי אחר הנובע מהשימוש באתר, בשירותים או במוצרים.",
+  "terms.liabilityLimitation.p3":
+    "בכל מקרה, אחריותה של Little Gali לא תעלה על סכום ההזמנה ששולם בפועל על ידי הלקוח.",
   "terms.termsChanges.title": "שינוי תנאים",
   "terms.termsChanges.p1":
-    "Little Gali שומרת לעצמה את הזכות לעדכן או לשנות את תנאי השירות מעת לעת. הגרסה העדכנית תפורסם באתר, והמשך השימוש באתר לאחר פרסום העדכון יהווה הסכמה לתנאים המעודכנים.",
+    "Little Gali שומרת לעצמה את הזכות לעדכן או לשנות את תנאי השירות מעת לעת.",
+  "terms.termsChanges.p2":
+    "הגרסה העדכנית תפורסם באתר, והמשך השימוש באתר לאחר פרסום העדכון יהווה הסכמה לתנאים המעודכנים.",
   "terms.contact.title": "יצירת קשר",
   "terms.contact.p1":
     "לשאלות, הבהרות או פניות בנושא תנאי השירות ניתן ליצור קשר באמצעות עמוד",
@@ -309,7 +321,7 @@ const hebrewTranslations = {
   "privacy.intro.p1":
     "ב-Little Gali אנו מכבדים את פרטיות לקוחותינו ומחויבים להגן על המידע האישי שנמסר לנו.",
   "privacy.intro.p2":
-    "מדיניות פרטיות זו מסבירה אילו סוגי מידע אנו אוספים, כיצד אנו משתמשים בהם, עם מי אנו עשויים לשתף אותם, ומהן זכויותיך בקשר למידע זה.",
+    "מדיניות פרטיות זו מסבירה אילו סוגי מידע אנו אוספים, כיצד אנו משתמשים בו, עם מי אנו עשויים לשתף אותו ומהן זכויותיך בקשר למידע זה.",
   "privacy.intro.p3": "השימוש באתר מהווה הסכמה למדיניות פרטיות זו.",
   "privacy.collection.title": "איזה מידע אנו אוספים?",
   "privacy.collection.youProvide.title": "מידע שאתה מוסר לנו",
@@ -322,7 +334,7 @@ const hebrewTranslations = {
   "privacy.collection.youProvide.li5": "פרטי ההזמנה",
   "privacy.collection.youProvide.li6": "תמונות ותוכן שמועלים לאתר",
   "privacy.collection.youProvide.p2":
-    "בעת שימוש בשירותי Little Gali, ניתן להעלות תמונות לצורך יצירת מוצרים מותאמים אישית, כגון ספרונים לתינוקות, איורים ותמונות ממוסגרות.",
+    "בעת שימוש בשירותי Little Gali, ניתן להעלות תמונות לצורך יצירת מוצרים מותאמים אישית, כגון ספרוני בד לתינוקות, איורים ותמונות ממוסגרות.",
   "privacy.collection.youProvide.p3":
     "התמונות משמשות לצורך הפקת המוצר שהוזמן בלבד.",
   "privacy.collection.technical.title": "מידע טכני ונתוני שימוש",
@@ -331,10 +343,11 @@ const hebrewTranslations = {
   "privacy.collection.technical.li2": "סוג הדפדפן והמכשיר",
   "privacy.collection.technical.li3": "עמודים שנצפו באתר",
   "privacy.collection.technical.li4": "זמן השהייה באתר",
-  "privacy.collection.technical.li5": "פעולות שבוצעו במהלך השימוש באתר",
+  "privacy.collection.technical.li5":
+    "פעולות שבוצעו במהלך השימוש באתר, כגון צפייה בעמודים, לחיצות על כפתורים, העלאת תמונות, התחלת תהליך הזמנה, השלמת הזמנה ושימוש בפיצ'רים שונים באתר",
   "privacy.usage.title": "כיצד אנו משתמשים במידע?",
   "privacy.usage.intro": "אנו משתמשים במידע שנאסף לצורך:",
-  "privacy.usage.li1": "עיבוד וייצור ההזמנות",
+  "privacy.usage.li1": "עיבוד והפקת ההזמנות",
   "privacy.usage.li2": "אספקת המוצרים והשירותים",
   "privacy.usage.li3": "יצירת איורים ועיבוד התמונות שהועלו",
   "privacy.usage.li4": "מתן שירות לקוחות ומענה לפניות",
@@ -349,15 +362,22 @@ const hebrewTranslations = {
     "העיבוד מבוצע אך ורק לצורך יצירת המוצר שהוזמן ואינו מקנה ל-Little Gali כל בעלות על התמונות שהועלו על ידי הלקוח.",
   "privacy.analytics.title": "כלי ניתוח ומעקב",
   "privacy.analytics.intro":
-    "האתר משתמש בכלים המסייעים לנו להבין כיצד מבקרים משתמשים באתר ולשפר את השירותים שלנו.",
+    "האתר משתמש בכלים המסייעים לנו להבין כיצד מבקרים משתמשים באתר ולשפר את השירותים והמוצרים שלנו.",
   "privacy.analytics.ga.title": "Google Analytics",
   "privacy.analytics.ga.p":
     "Google Analytics מספק מידע סטטיסטי על תנועת הגולשים באתר, עמודים שנצפו, מקורות תנועה ופעולות שבוצעו באתר.",
+  "privacy.analytics.mixpanel.title": "Mixpanel",
+  "privacy.analytics.mixpanel.p1":
+    "Mixpanel הוא כלי ניתוח התנהגות משתמשים המסייע לנו להבין כיצד מבקרים משתמשים באתר ובתהליך ההזמנה.",
+  "privacy.analytics.mixpanel.p2":
+    "באמצעות Mixpanel אנו עשויים למדוד פעולות כגון צפייה בעמודים, לחיצות על כפתורים, התקדמות בשלבי ההזמנה, העלאת תמונות, יצירת תצוגות מקדימות ופעולות נוספות המתבצעות באתר.",
+  "privacy.analytics.mixpanel.p3":
+    "המידע משמש לצורך ניתוח ביצועים, זיהוי תקלות, שיפור חוויית המשתמש ושיפור תהליך ההזמנה.",
   "privacy.analytics.meta.title": "Meta Pixel",
   "privacy.analytics.meta.p":
     "Meta Pixel מאפשר למדוד את יעילות הפרסום שלנו בפייסבוק ובאינסטגרם, להבין אילו פעולות בוצעו באתר ולבצע אופטימיזציה של קמפיינים פרסומיים.",
   "privacy.analytics.cookiesNote":
-    "כלים אלה עשויים לאסוף מידע באמצעות עוגיות (Cookies) וטכנולוגיות דומות.",
+    "כלים אלה עשויים לאסוף מידע באמצעות עוגיות (Cookies), מזהי מכשיר וטכנולוגיות דומות.",
   "privacy.cookies.title": "עוגיות (Cookies)",
   "privacy.cookies.intro": "האתר משתמש בעוגיות ובטכנולוגיות דומות לצורך:",
   "privacy.cookies.li1": "תפעול תקין של האתר",
@@ -375,15 +395,17 @@ const hebrewTranslations = {
   "privacy.sharing.li2": "ספקי אחסון ושירותי ענן",
   "privacy.sharing.li3": "שירותי סליקה ותשלומים",
   "privacy.sharing.li4": "חברות שילוח ואספקה",
-  "privacy.sharing.li5": "ספקי ניתוח ופרסום כגון Google ו-Meta",
-  "privacy.sharing.li6": "רשויות מוסמכות כאשר הדבר נדרש על פי דין",
+  "privacy.sharing.li5": "ספקי ניתוח, מדידה ופרסום כגון Google, Mixpanel ו-Meta",
+  "privacy.sharing.li6":
+    "ספקי שירות המשמשים לעיבוד תמונות ויצירת איורים כחלק מתהליך הפקת המוצרים",
+  "privacy.sharing.li7": "רשויות מוסמכות כאשר הדבר נדרש על פי דין",
   "privacy.sharing.p2":
     "כל שיתוף מידע יתבצע רק במידה הנדרשת לצורך מתן השירות.",
   "privacy.retention.title": "שמירת מידע",
   "privacy.retention.p1":
     "אנו שומרים מידע אישי למשך הזמן הנדרש לצורך אספקת השירות, עמידה בדרישות חוקיות, טיפול בפניות לקוחות וניהול העסק.",
   "privacy.retention.p2":
-    "תמונות שהועלו לאתר עשויות להישמר למשך תקופה סבירה לאחר השלמת ההזמנה לצורך טיפול בפניות שירות, תיקונים או הפקת הזמנות חוזרות.",
+    "תמונות שהועלו לאתר עשויות להישמר למשך תקופה סבירה לאחר השלמת ההזמנה לצורך טיפול בפניות שירות, תיקונים, הפקת הזמנות חוזרות או אספקת עותקים נוספים לבקשת הלקוח.",
   "privacy.security.title": "אבטחת מידע",
   "privacy.security.p1":
     "אנו נוקטים באמצעי אבטחה סבירים ומקובלים לצורך הגנה על המידע האישי שברשותנו.",
@@ -396,7 +418,7 @@ const hebrewTranslations = {
   "privacy.rights.li3": "לבקש מחיקת מידע אישי",
   "privacy.rights.li4": "לבקש להפסיק קבלת הודעות שיווקיות",
   "privacy.rights.li5": "למשוך הסכמה שניתנה בעבר, ככל שהדבר רלוונטי",
-  "privacy.rights.contact": "למימוש זכויות אלה ניתן לפנות אלינו בדוא״ל.",
+  "privacy.rights.contact": "למימוש זכויות אלה ניתן לפנות אלינו בדוא״ל:",
   "privacy.changes.title": "שינויים במדיניות הפרטיות",
   "privacy.changes.p1": "אנו רשאים לעדכן מדיניות זו מעת לעת.",
   "privacy.changes.p2":
@@ -510,32 +532,41 @@ const hebrewTranslations = {
   "lang.english": "English",
 
   // Home Page
-  "home.hero.title": "הופכים את התמונות שלכם|למשהו מיוחד",
-  "home.hero.titleHighlight": "מיוחד",
-  "home.hero.subtitle": "ספרונים לתינוקות ואיורים מעוצבים לבית",
-  "home.hero.cta": "צרו ספרון עכשיו",
+  "home.hero.badge": "ספרון לתינוק מותאם אישית",
+  "home.hero.title": "המתנה שתגדל איתם",
+  "home.hero.titleHighlight": "איתם",
+  "home.hero.subtitle":
+    "ספרון אישי שנוצר מהתמונות שלכם - מהחודשים הראשונים ועד שלבי ההתפתחות הבאים",
+  "home.hero.cta": "התחילו ליצור",
   "home.hero.ariaLabel": "קטע פתיחה",
-  "home.hero.imageAlt": "דוגמאות למוצרים - ספרון ואיור ממוסגר",
+  "home.hero.imageAlt": "דוגמאות לספרוני תינוקות",
   "home.hero.ctaAriaLabel": "עבור לעמוד יצירת ספרון",
   "home.gallery.ariaLabel": "גלריית תמונות מלקוחות",
   "home.gallery.imageAlt": "תמונת לקוח {num}",
-  "home.book.bwSide": "צד שחור לבן",
-  "home.book.colorSide": "צד צבעוני",
-  "home.book.title": "ספרון הנייר שלנו",
-  "home.book.titleHighlight": "הנייר",
-  "home.book.subtitle": "ספרון לתינוק - מהתמונות שאתם בוחרים",
+  "home.book.bwSide": "ספרון בהיר",
+  "home.book.colorSide": "ספרון כהה",
+  "home.book.title": "הספרון שלנו",
+  "home.book.titleHighlight": "שלנו",
+  "home.book.subtitle": "ספרון אישי שנוצר מהאנשים|החשובים לכם",
   "home.book.description":
-    "ספרון דו־צדדי עם תמונות מעובדות ב־AI שנוצרות מהתמונות המשפחתיות שלכם.\nצד אחד בשחור־לבן לגירוי ראייה לתינוקות בני 0–3 חודשים, וצד שני צבעוני, להמשך ההתפתחות.\nמושלם לזמן בטן, לשידת ההחתלה או למתנה אישית במיוחד.",
+    "חיפשנו ספרון שיציג לתינוק את האנשים שאוהבים אותו - וכשלא מצאנו, יצרנו אחד. מעלים תמונות, אנחנו הופכים אותן לאיורים.",
+  "home.book.pill.birthGift": "מתנת לידה",
+  "home.book.pill.ai": "טכנולוגית AI",
+  "home.book.pill.standards": "באישור מכון התקנים",
+  "home.book.pill.stroller": "מתאים לעגלה",
+  "home.book.pill.tummyTime": "זמן בטן",
   "home.book.price": "מחיר לספרון",
-  "home.book.secondBook": "ספר שני ב-₪99 בלבד",
-  "home.book.discountNote": "* ההנחה מתעדכנת אוטומטית בעמוד התשלום",
-  "home.book.cta": "צרו עכשיו את הספרון האישי שלכם",
-  "home.book.ariaLabel": "פרטי המוצר - ספרון הנייר שלנו",
-  "home.book.imageAlt": "תמונה של ספרון הנייר",
+  "home.book.secondBook": "ספר שני ב-₪139",
+  "home.book.discountNote": "הנחה אוטומטית בתשלום",
+  "home.book.freePreview": "תצוגה מקדימה חינם לפני הרכישה",
+  "home.book.promoLine": "ספר שני ב-₪{price} · הנחה אוטומטית בתשלום",
+  "home.book.cta": "צרו את הספרון האישי שלכם",
+  "home.book.ariaLabel": "פרטי המוצר - הספרון שלנו",
+  "home.book.imageAlt": "תמונה של ספרון הבד",
   "home.book.ctaAriaLabel": "עבור לעמוד יצירת ספרון אישי",
   "home.framedArt.badge": "חדש!",
   "home.framedArt.title": "הפכו תמונה אהובה ליצירת אמנות אישית",
-  "home.framedArt.titleHighlight": "אמנות",
+  "home.framedArt.titleHighlight": "אהובה",
   "home.framedArt.subtitle":
     "העלו תמונה, בחרו את סגנון האיור המועדף עליכם, ואנחנו נהפוך אותה לתמונה ממוסגרת ומוכנה לתלייה - ללא קידוח וללא נזק לקיר.",
   "home.framedArt.priceSingle": "תמונה בודדת:",
@@ -552,6 +583,12 @@ const hebrewTranslations = {
   "home.framedArt.ariaLabel": "איור ממוסגר - מוצר חדש",
   "home.framedArt.imageAlt": "דוגמה לאיור ממוסגר",
   "home.framedArt.carouselDotAria": "עבור לתמונה {num} מתוך {total}",
+  "home.framedArt.pill.patent": "פטנט ללא קידוח",
+  "home.framedArt.pill.removable": "הסרה והזזה קלים",
+  "home.framedArt.pill.illustrated": "תמונות מאוירות",
+  "home.framedArt.pill.ai": "טכנולוגית AI",
+  "home.framedArt.pill.gift": "מתנה מקורית",
+  "home.framedArt.freePreview": "תצוגה מקדימה חינם לפני הרכישה",
   "home.framedArt.features.ariaLabel": "יתרונות האיור הממוסגר",
   "home.framedArt.features.noDrill.title": "ללא קידוחים וחורים",
   "home.framedArt.features.noDrill.subtitle":
@@ -645,7 +682,7 @@ const hebrewTranslations = {
   "cart.suggest.subtitle": "השלימו את ההזמנה עם מוצרים נוספים",
   "cart.suggest.bookTitle": "ספרון",
   "cart.suggest.framedArtTitle": "איור ממוסגר",
-  "cart.suggest.bookPromo": "שני ב-99₪",
+  "cart.suggest.bookPromo": "שני ב-139₪",
   "cart.suggest.framedArtPromo": "שני ב89₪",
   "home.howItWorks.title": "איך זה עובד",
   "home.howItWorks.titleHighlight": "עובד",
@@ -666,12 +703,12 @@ const hebrewTranslations = {
   "home.howItWorks.previewStep2.label": "אנחנו עושים",
   "home.howItWorks.previewStep2.title": "יוצרים את האיורים",
   "home.howItWorks.previewStep2.description":
-    "אתם רואים את האיורים ובוחרים סגנון לפני הקניה",
+    "רואים את האיורים, בוחרים סגנון וצבע לספרון",
   "home.howItWorks.previewStep2.imageAlt": "דוגמה לתמונות בתצוגה מקדימה",
   "home.howItWorks.previewStep3.label": "אנחנו עושים",
   "home.howItWorks.previewStep3.title": "מדפיסים ושולחים",
   "home.howItWorks.previewStep3.description":
-    "אנחנו מדפיסים את הספרון ושולחים אליכם הביתה",
+    "מדפיסים, מרכיבים ושולחים את הספרון אליכם",
   "home.howItWorks.previewStep3.imageAlt": "דוגמה לספרון מודפס",
   "home.howItWorks.step3.label": "אנחנו עושים",
   "home.howItWorks.step3.title": "מדפיסים את הספרון",
@@ -691,41 +728,38 @@ const hebrewTranslations = {
     "הצד הצבעוני מושלם לגיל 3 חודשים ומעלה – כשהראייה מתפתחת והעולם סביבם מתחיל להתמלא בצבעים.",
   "home.dualDesign.moreExamples": "רוצים לראות עוד דוגמאות?",
   "home.dualDesign.moreExamplesLink": "גלו כאן",
-  "home.special.title": "מה הופך את הספרון שלנו למיוחד",
-  "home.special.titleHighlight": "למיוחד",
-  "home.special.ariaLabel": "מה מיוחד בספרון שלנו",
-  "home.special.item1.title": "להסתכל על הקרובים ביותר",
+  "home.special.title": "למה little gali",
+  "home.special.titleHighlight": "little gali",
+  "home.special.subtitleLine1": "חיפשנו ולא מצאנו - אז המצאנו.",
+  "home.special.ariaLabel": "למה little gali",
+  "home.special.item1.title": "מבוסס על מה שמעניין תינוקות",
   "home.special.item1.description":
-    "הפנים של המטפלים העיקריים מוכרות לתינוק ומרגיעות אותו כבר מימיו הראשונים",
-  "home.special.item1.imageAlt": "זוג צעיר",
-  "home.special.item2.title": "להכיר את המשפחה",
+    "פנים מוכרות מושכות את תשומת הלב של תינוקות כבר מגיל צעיר.",
+  "home.special.item1.imageAlt": "איור מדע",
+  "home.special.item2.title": "כיף לתת, כיף לקבל",
   "home.special.item2.description":
-    "הזדמנות להיחשף ולהסתכל על המשפחה אליה נכנס התינוק",
-  "home.special.item2.imageAlt": "אחות צעירה",
-  "home.special.item3.title": "מזכרת מתוקה",
+    "מתנה אישית שנשארת כמזכרת גם הרבה אחרי החודשים הראשונים.",
+  "home.special.item2.imageAlt": "איור מתנה",
+  "home.special.item3.title": "זמן בטן עם הקרובים",
   "home.special.item3.description":
-    "ספרון שהוא אישי ומהווה מזכרת לתקופה קצרה ומופלאה בחיי התינוק",
-  "home.special.item3.imageAlt": "הורה ובן",
-  "home.special.item4.title": "לא עוד מוצר גנרי",
+    "האנשים שהוא אוהב, גם בזמן הבטן ובטיול בעגלה.",
+  "home.special.item3.imageAlt": "איור עגלה",
+  "home.special.item4.title": "בטוח מהיום הראשון",
   "home.special.item4.description":
-    "במקום להסתכל על צורות ותבניות, תנו לתינוק להסתכל על המשפחה",
-  "home.special.item4.imageAlt": "אבא ובן",
-  "home.about.brand": "ליטל גלי",
+    "נבדק ואושר על ידי מכון התקנים הישראלי לשימוש מגיל לידה.",
+  "home.special.item4.imageAlt": "איור אישור בטיחות",
+  "home.about.brand": "little gali",
   "home.about.title": "מי אנחנו",
   "home.about.titleHighlight": "אנחנו",
-  "home.about.imageAlt": "תמונת צוות ליטל גלי",
+  "home.about.imageAlt": "תמונת צוות little gali",
   "home.about.paragraph1":
-    "היי, קוראים לי יעל, אמא של גלי והיוצרת של Little Gali.",
+    "היי, אני יעל, אמא של גלי והיוצרת של Little Gali.",
   "home.about.paragraph2":
-    "הרעיון ל-Little Gali נולד כמה חודשים אחרי שגלי נולדה, כמעט משום מקום. מה שהתחיל כרעיון קטן הפך במהרה לפרויקט שכבש אותי — כזה שגרם לי ליצור, ללמוד ולהקים משהו משלי.",
+    "כמה חודשים אחרי שגלי נולדה, עלה לי רעיון שלא עזב אותי. התחלתי לעבוד עליו מהצד, בעיקר בזמן שהיא ישנה עליי במנשא, רק כדי לראות אם אצליח להפוך אותו למשהו אמיתי.",
   "home.about.paragraph3":
-    "בהתחלה הכנתי ספרונים לחברות שילדו, פשוט כי חשבתי שזה מוצר מיוחד שלא קיים בשוק. ההתלהבות והפידבקים שקיבלתי נתנו לי את הדחיפה להפוך את הרעיון לעסק אמיתי.",
+    "התגובות שקיבלתי מחברות שילדו היו הרבה מעבר למה שציפיתי, ונתנו לי את הדחיפה להפוך את הרעיון לעסק.",
   "home.about.paragraph4":
-    "מאז בניתי את האתר בעצמי, פיתחתי מוצרים חדשים ולמדתי המון דברים שלא הכרתי קודם. לא פעם יצאתי מאזור הנוחות שלי, קפצתי למים ולמדתי תוך כדי תנועה.",
-  "home.about.paragraph5":
-    "עד היום אני מתרגשת מכל הזמנה מחדש. אני אוהבת לראות את התמונות שאנשים בוחרים וליצור מהן מוצר אישי עם משמעות.",
-  "home.about.paragraph6":
-    "החזון שלי עבור Little Gali הוא ליצור מתנות אישיות ומרגשות — כאלה ששמחים לתת ושמחים לקבל.",
+    "היום Little Gali הוא המקום שבו אני יוצרת מוצרים אישיים ומקוריים, מתוך רצון להציע מתנות מיוחדות שמרגישות קצת אחרת.",
   "home.qa.title": "שאלו אותנו",
   "home.qa.titleHighlight": "אותנו",
   "home.qa.subtitle": "התשובות לשאלות הנפוצות ביותר על הספרון והשירותים שלנו",
@@ -769,51 +803,63 @@ const hebrewTranslations = {
   "home.customerComments.showMore": "הראה עוד",
   "home.testimonials.title": "מה אומרים עלינו",
   "home.testimonials.titleHighlight": "עלינו",
-  "qa.question1": "ממה הספרון עשוי?",
-  "qa.answer1":
-    "הספרון עשוי מנייר איכותי ועבה שעבר למינציה ומודפס בבית דפוס. הספרון יציב וניתן להעמיד אותו בקלות.",
-  "qa.question2": "כמה תמונות צריך לבחור?",
-  "qa.answer2":
-    "5 תמונות בלבד. אותן תמונות מופיעות בצד אחד בשחור לבן ובצד השני בצבעוני.",
-  "qa.questionPreview": "האם אפשר לראות את התוצאה לפני הקניה?",
+  "qa.questionPreview": "האם אפשר לראות את האיורים לפני ההזמנה?",
   "qa.answerPreview":
-    "כן, אנחנו מאפשרים לראות את התוצאה המלאה של הספרון לפני הקניה, כולל את התמונות בשחור לבן ואת התמונות הצבעוניות בכל הסגנונות.",
-  "qa.question3": "מי כדאי שיהיה בספרון?",
-  "qa.answer3":
-    "כל מי שאתם רוצים להראות לתינוק. כמה רעיונות: משפחה קרובה, משפחה רחוקה, חברים, חיות מחמד.",
-  "qa.question4": "איזה תמונה מתאימה?",
-  "qa.answer4":
-    "מבחינה טכנית, התמונות הטובות ביותר הן אלו שרואים בהן בבירור את הפנים, לא בפרופיל ובתאורה טובה. מבחינה לא טכנית, התמונות שיוצאות הכי יפה הן אלו ש״תופסות״ רגע מיוחד, תמונות של חיוך ושל כיף. מסוג הדברים שקשה להסביר במילים אבל קל להרגיש.",
-  "qa.question5": "אפשר לשים כמה אנשים בתמונה אחת?",
-  "qa.answer5":
-    "כן בהחלט. רק שימו לב שכל הפנים של האנשים בתמונה נראים באופן ברור ושהיא לא עמוסה מדיי כי זה יכול לפגוע באיכות התוצאה.",
-  "qa.question6": "האם הרקע משנה?",
-  "qa.answer6": "לא. הרקע מוסר אוטומטית ומוחלף בלבן.",
-  "qa.question7": "איך מנקים את הספרון?",
-  "qa.answer7": "אפשר לנגב בעדינות עם מטלית לחה. יש להימנע ממגע ישיר עם מים.",
-  "qa.question8": "כמה זמן לוקח להכין את הספרון?",
-  "qa.answer8":
-    "אנו תמיד משתדלים לספק את הספרונים בזמן הקצר ביותר אך יש לקחת בחשבון שזמן ההכנה יכול לקחת עד 14 ימי עסקים, זאת מאחר ותהליך הכנת התמונות והדפסתן בבית דפוס יכולים לקחת זמן.",
-  "qa.question9": "מה אם אני לא מרוצה מהספרון?",
-  "qa.answer9.beforeLink":
-    "המטרה שלנו היא שתאהבו ותהיו מרוצים מהספרון שלכם. אם קיבלתם את הספרון ומשהו בו לא עבד לכם כמו שציפיתם, מוזמנים לפנות ",
-  "qa.answer9.previewLine1":
+    "כן.\n\nלאחר העלאת התמונות תוכלו לראות את האיורים שנוצרו עבורכם ואת תצוגת הספרון לפני השלמת ההזמנה.\n\nאם תרצו, תוכלו ליצור מחדש איורים או ליצור איתנו קשר אם יש משהו שתרצו לשפר.",
+  "qa.questionSafety": "האם הספרון בטיחותי לשימוש?",
+  "qa.answerSafety":
+    "כן.\n\nהספרון נבדק ואושר על ידי מכון התקנים הישראלי ועומד בדרישות הבטיחות למוצרים המיועדים לתינוקות וילדים.\n\nהוא מיוצר מחומרים איכותיים ועמידים, כדי שתוכלו ליהנות ממנו בביטחון ובשקט נפשי.\n\nכמו בכל מוצר המיועד לתינוקות, מומלץ להשתמש בו בהשגחת מבוגר.",
+  "qa.questionPhotos": "אילו תמונות מתאימות ליצירת הספרון?",
+  "qa.answerPhotos":
+    "לקבלת התוצאה הטובה ביותר מומלץ לבחור תמונות חדות וברורות שבהן הפנים נראות היטב.\n\nתמונות קרובות בדרך כלל יניבו את התוצאות הטובות ביותר, אך ניתן להשתמש גם בתמונות של מספר אנשים יחד, כל עוד הפנים גלויות וברורות.",
+  "qa.questionFromBirth": "האם הספרון מתאים מגיל לידה?",
+  "qa.answerFromBirth":
+    "כן.\n\nהספרון תוכנן במיוחד עבור תינוקות מגיל לידה. צד אחד כולל איורים בשחור־לבן עם ניגודיות גבוהה, המותאמים ליכולת הראייה של תינוקות בחודשים הראשונים, והצד השני כולל איורים צבעוניים שילוו את התינוק גם בהמשך.",
+  "qa.questionDelivery": "כמה זמן לוקח לקבל את הספרון?",
+  "qa.answerDelivery":
+    "כל ספרון מיוצר באופן אישי לאחר ביצוע ההזמנה.\n\nזמן הייצור והמשלוח הוא עד 7 ימי עסקים.",
+  "qa.questionSpecial": "מה הופך את הספרון של Little Gali למיוחד?",
+  "qa.answerSpecial":
+    "ספרון התינוקות של Little Gali נוצר במיוחד עבור התינוק שלכם.\n\nבמקום דמויות או איורים גנריים, הספרון מציג את האנשים שהוא מכיר ואוהב – הורים, אחים, סבים, סבתות ואנשים משמעותיים נוספים בחייו.\n\nהוא משלב בין התאמה לראיית תינוקות בחודשים הראשונים לבין חוויה אישית ורגשית, והופך למתנה ייחודית שנוצרה במיוחד עבור המשפחה שלכם.",
+  "qa.questionPhotoCount": "כמה תמונות צריך לבחור?",
+  "qa.answerPhotoCount":
+    "כדי ליצור את הספרון יש לבחור 5 תמונות.\n\nאפשר לבחור אנשים שונים או מספר תמונות של אותו אדם – הבחירה לגמרי שלכם.",
+  "qa.questionPeopleCount": "כמה אנשים יכולים להופיע בכל תמונה?",
+  "qa.answerPeopleCount":
+    "אין מגבלה על מספר האנשים בתמונה.\n\nהדבר החשוב ביותר הוא שהפנים יהיו ברורות וניתנות לזיהוי. ככל שהפנים גדולות וברורות יותר, כך התוצאה תהיה טובה יותר.",
+  "qa.questionGift":
+    "אני רוצה לקנות את הספרון כמתנה. האם חייבים לבחור את התמונות בעצמי?",
+  "qa.answerGift":
+    "לא.\n\nאפשר לרכוש כרטיס מתנה, וההורים יבחרו בעצמם את התמונות, ייצרו את האיורים ויזמינו את הספרון בזמן שמתאים להם.\n\nכך אפשר להעניק מתנה אישית ומרגשת, בלי לבחור עבורם את התמונות.",
+  "qa.questionSimilarity": "האם האיורים באמת דומים לאנשים שבתמונות?",
+  "qa.answerSimilarity":
+    "כן.\n\nמערכת האיור שלנו נועדה לשמור על המאפיינים הייחודיים של כל אדם – תווי פנים, הבעות ושיער – תוך התאמת התמונה לסגנון האיור של הספרון.\n\nהמטרה היא ליצור איורים פשוטים וברורים לתינוקות, מבלי לאבד את המאפיינים שהופכים כל אדם למיוחד.",
+  "qa.questionCleaning": "איך מנקים את הספרון?",
+  "qa.answerCleaning":
+    "ניתן לנגב את הספרון בעדינות באמצעות מטלית לחה.\n\nאין לכבס במכונה, להשרות במים או להשתמש בחומרי ניקוי חזקים.",
+  "qa.questionUnsatisfied": "מה אם אני לא מרוצה מהספרון?",
+  "qa.answerUnsatisfied.line1":
     "הספרון הסופי יהיה זהה בדיוק לספרון שתאשרו לפני הקניה.",
-  "qa.answer9.previewLine2Before":
+  "qa.answerUnsatisfied.beforeLink":
     "אם בכל זאת משהו לא עבד לכם כמו שציפיתם אתם מוזמנים לפנות ",
-  "qa.answer9.linkText": "אלינו",
+  "qa.answerUnsatisfied.linkText": "אלינו",
   "qa.notFound": "לא מצאתם את התשובה שחיפשתם?",
   "qa.contact": "צרו איתנו קשר",
 
   // Footer
   "footer.description":
-    "Little Gali הופך תמונות רגילות ליצירות שחור-לבן עדינות שמתאימות במיוחד לראיית תינוקות. נולד מאמא שאהבה לראות את התינוקת שלה נמשכת לפנים מוכרות.",
+    "ספרוני תינוקות מותאמים אישית\nעם איורים של האנשים שהתינוק\nשלכם הכי אוהב.",
   "footer.platform": "פלטפורמה",
+  "footer.products": "מוצרים",
+  "footer.information": "מידע",
+  "footer.babyBooks": "ספרוני תינוקות",
+  "footer.framedArt": "איור ממוסגר",
   "footer.howItWorks": "איך זה עובד",
   "footer.photoGuide": "מדריך בחירת תמונה",
   "footer.inspiration": "גלריית השראה",
   "footer.policies": "תקנונים",
   "footer.terms": "תנאי שירות",
+  "footer.termsOfUse": "תנאי שימוש",
   "footer.privacy": "פרטיות",
   "footer.shipping": "משלוחים",
   "footer.returns": "החזרות",
@@ -822,7 +868,7 @@ const hebrewTranslations = {
   "footer.contact": "צרו קשר",
   "footer.contactUs": "צרו איתנו קשר",
   "footer.contactUsAriaLabel": "עבור לעמוד צור קשר",
-  "footer.copyright": "© Copyright Little Gali. כל הזכויות שמורות.",
+  "footer.copyright": "© Little Gali. כל הזכויות שמורות.",
 
   // Contact Page
   "contact.title": "צרו איתנו קשר",
@@ -948,6 +994,10 @@ const hebrewTranslations = {
   "preview.lightboxNext": "עמוד הבא",
   "preview.colorLoadingTitle": "יוצרים את הצד הצבעוני",
   "preview.colorStyleStrip.title": "3 סגנונות · לחצו להשוואה",
+  "preview.bookColor.title": "בחרו את צבע הספרון",
+  "preview.bookColor.dark": "שחור עם מסגרת מנומרת",
+  "preview.bookColor.light": "בהיר עם מסגרת נקודות",
+  "preview.bookColor.required": "איזה צבע ספרון בד תרצו?",
   "preview.changesLeft": "שינויים שנותרו",
   "preview.changesRemainingBadge": "נותרו לכם {count} שינויים",
   "preview.changesExhaustedLine1":
@@ -1059,10 +1109,12 @@ const hebrewTranslations = {
   "uploadModal.goodExample2": "דוגמה טובה 2",
 
   // Gift Cards
-  "giftCard.title": "גיפט קארד לספרון אישי",
-  "giftCard.titleHighlight": "גיפט קארד",
-  "giftCard.description": "רוצים לתת את הספרון שלנו בתור מתנה אבל מעדיפים לאפשר להם לבחור תמונות וסגנון בעצמם?\nבדיוק בשביל זה יש לנו את הגיפט קארד שלנו.\nבסיום התשלום תקבלו למייל את פרטי הגיפט קארד אותו תוכלו להעביר כמתנה אישית ומיוחדת.",
-  "giftCard.selectOption": "בחרו אפשרות:",
+  "giftCard.title": "גיפט קארד",
+  "giftCard.titleHighlight": "גיפט",
+  "giftCard.description":
+    "רוצים לתת מתנה אבל מעדיפים שהם יבחרו את התמונות בעצמם? הגיפט קארד שלנו מאפשר בדיוק את זה",
+  "giftCard.selectOption": "בחרו אפשרות",
+  "giftCard.emailNote": "הגיפט קארד יישלח במייל מיד לאחר הרכישה",
   "giftCard.addToCart": "הוסף לעגלה",
   "giftCard.adding": "מוסיף...",
   "giftCard.ariaLabel": "הוסף גיפט קארד לעגלה",
@@ -1070,7 +1122,7 @@ const hebrewTranslations = {
   "giftCard.option2": "ספרון אישי אחד כולל משלוח",
   "giftCard.option3": "שני ספרונים אישיים ללא משלוח",
   "giftCard.option4": "שני ספרונים אישיים כולל משלוח",
-  "giftCard.feature1": "הספרון השני ב99₪",
+  "giftCard.feature1": "הספרון השני ב139₪",
   "giftCard.feature2": "בחירת 5 תמונות",
   "giftCard.feature3": "בחירת סגנון",
   "giftCard.feature4": "תוקף ללא הגבלה",
@@ -1138,6 +1190,7 @@ const englishTranslations = {
   "cart.cancel": "Cancel",
   "cart.quantity": "Quantity:",
   "cart.styleLabel": "Style:",
+  "cart.colorLabel": "Color:",
   "cart.lineTotal": "Total:",
   "cart.discountApplied": "A discount applies to this item 🎉",
   "cart.itemTotal": "Item Total:",
@@ -1158,7 +1211,7 @@ const englishTranslations = {
     "A message will be sent when the book is ready for pickup coordination",
   "cart.checkoutProgress": "Redirecting to payment...",
   "cart.addBook": "Add Book",
-  "cart.secondBook": "Every second book for ₪99 🎉",
+  "cart.secondBook": "Every second book for ₪139 🎉",
   "cart.discountNote": "* Discount is automatically applied at checkout",
   "cart.startCreating": "Start creating a personalized book",
   "cart.giftCardTitle": "Gift Card",
@@ -1216,7 +1269,7 @@ const englishTranslations = {
     "Use of the website and the services provided on it is subject to the terms set out below. By browsing the website, using the services, or placing an order, you confirm that you have read and fully agree to these terms.",
   "terms.useOfSite.title": "Use of the Website",
   "terms.useOfSite.p1":
-    "The website allows you to order personalized products based on images you upload, including baby books, printed illustrations, and framed pictures.",
+    "The website allows you to order personalized products based on images you upload, including fabric baby books, printed illustrations, and framed pictures.",
   "terms.useOfSite.p2": "Use of the website is permitted for personal and private purposes only.",
   "terms.useOfSite.p3":
     "You may not use the website for commercial purposes without prior approval, upload offensive or illegal content, or upload images you do not own.",
@@ -1249,17 +1302,23 @@ const englishTranslations = {
     "Because products are made specifically for each customer based on images they provide, orders cannot be canceled, changed, or returned after the order is confirmed and payment is completed, except as set out in the website's returns policy or as required by law.",
   "terms.warrantyAndService.title": "Warranty and Service",
   "terms.warrantyAndService.p1":
-    "We maintain high standards of production and printing quality.",
+    "We invest significant effort to provide quality products and high-quality prints.",
   "terms.warrantyAndService.p2":
     "However, slight differences in shades, colors, trimming, texture, contrast, or element placement may occur between on-screen display and the printed product.",
   "terms.warrantyAndService.p3":
-    "Such reasonable differences are not considered defects and are not grounds for canceling a transaction. If there is a production defect or damage during shipping, please contact us and we will act in accordance with the website's returns policy.",
+    "Such reasonable differences are not considered defects and are not grounds for canceling a transaction.",
+  "terms.warrantyAndService.p4":
+    "If there is a production defect or damage during shipping, please contact us and we will act in accordance with the website's returns policy.",
   "terms.safeUse.title": "Safe Use of Products",
-  "terms.safeUse.books.title": "Baby Books",
+  "terms.safeUse.books.title": "Fabric Baby Books",
   "terms.safeUse.books.p1": "Books are intended for use under adult supervision only.",
   "terms.safeUse.books.p2":
-    "Books are made from thick laminated paper for durability, but are not intended for biting, chewing, or prolonged exposure to liquids.",
+    "The books are made of fabric and include printed photos inserted into dedicated pockets.",
   "terms.safeUse.books.p3":
+    "Although the books are intended for use by babies and young children, we recommend checking them periodically and discontinuing use if there is wear, tearing, or any damage.",
+  "terms.safeUse.books.p4":
+    "The printed photos are intended for use as part of the book; we recommend returning them to their dedicated pockets after use.",
+  "terms.safeUse.books.p5":
     "Do not leave the product unsupervised near a baby or toddler.",
   "terms.safeUse.framed.title": "Framed Pictures",
   "terms.safeUse.framed.p1":
@@ -1285,10 +1344,14 @@ const englishTranslations = {
   "terms.liabilityLimitation.p1":
     "Use of the website and products is at the user's sole responsibility.",
   "terms.liabilityLimitation.p2":
-    "Little Gali is not liable for indirect damages, loss of information, loss of profits, or any other consequential damage arising from use of the website, services, or products. In any case, Little Gali's liability shall not exceed the amount actually paid by the customer for the order.",
+    "Little Gali is not liable for indirect damages, loss of information, loss of profits, or any other consequential damage arising from use of the website, services, or products.",
+  "terms.liabilityLimitation.p3":
+    "In any case, Little Gali's liability shall not exceed the amount actually paid by the customer for the order.",
   "terms.termsChanges.title": "Changes to Terms",
   "terms.termsChanges.p1":
-    "Little Gali reserves the right to update or change these terms of service from time to time. The current version will be published on the website; continued use of the website after an update constitutes agreement to the updated terms.",
+    "Little Gali reserves the right to update or change these terms of service from time to time.",
+  "terms.termsChanges.p2":
+    "The current version will be published on the website; continued use of the website after an update constitutes agreement to the updated terms.",
   "terms.contact.title": "Contact",
   "terms.contact.p1":
     "For questions, clarifications, or inquiries about these terms of service, please contact us via the",
@@ -1315,7 +1378,7 @@ const englishTranslations = {
   "privacy.collection.youProvide.li5": "Order details",
   "privacy.collection.youProvide.li6": "Photos and content uploaded to the website",
   "privacy.collection.youProvide.p2":
-    "When using Little Gali services, you may upload photos to create personalized products such as baby books, illustrations, and framed pictures.",
+    "When using Little Gali services, you may upload photos to create personalized products such as fabric baby books, illustrations, and framed pictures.",
   "privacy.collection.youProvide.p3":
     "Photos are used solely to produce the ordered product.",
   "privacy.collection.technical.title": "Technical Information and Usage Data",
@@ -1325,10 +1388,11 @@ const englishTranslations = {
   "privacy.collection.technical.li2": "Browser and device type",
   "privacy.collection.technical.li3": "Pages viewed on the website",
   "privacy.collection.technical.li4": "Time spent on the website",
-  "privacy.collection.technical.li5": "Actions taken while using the website",
+  "privacy.collection.technical.li5":
+    "Actions taken while using the website, such as viewing pages, clicking buttons, uploading photos, starting the ordering process, completing an order, and using various website features",
   "privacy.usage.title": "How Do We Use the Information?",
   "privacy.usage.intro": "We use the collected information to:",
-  "privacy.usage.li1": "Process and produce orders",
+  "privacy.usage.li1": "Process and fulfill orders",
   "privacy.usage.li2": "Deliver products and services",
   "privacy.usage.li3": "Create illustrations and process uploaded photos",
   "privacy.usage.li4": "Provide customer service and respond to inquiries",
@@ -1343,15 +1407,22 @@ const englishTranslations = {
     "Processing is performed solely to create the ordered product and does not grant Little Gali any ownership of photos uploaded by the customer.",
   "privacy.analytics.title": "Analytics and Tracking Tools",
   "privacy.analytics.intro":
-    "The website uses tools that help us understand how visitors use the site and improve our services.",
+    "The website uses tools that help us understand how visitors use the site and improve our services and products.",
   "privacy.analytics.ga.title": "Google Analytics",
   "privacy.analytics.ga.p":
     "Google Analytics provides statistical information about website traffic, pages viewed, traffic sources, and actions taken on the site.",
+  "privacy.analytics.mixpanel.title": "Mixpanel",
+  "privacy.analytics.mixpanel.p1":
+    "Mixpanel is a user behavior analytics tool that helps us understand how visitors use the website and the ordering process.",
+  "privacy.analytics.mixpanel.p2":
+    "Through Mixpanel, we may measure actions such as page views, button clicks, progress through ordering steps, photo uploads, preview generation, and other actions performed on the website.",
+  "privacy.analytics.mixpanel.p3":
+    "The information is used for performance analysis, issue detection, improving user experience, and improving the ordering process.",
   "privacy.analytics.meta.title": "Meta Pixel",
   "privacy.analytics.meta.p":
     "Meta Pixel allows us to measure the effectiveness of our advertising on Facebook and Instagram, understand which actions were taken on the website, and optimize advertising campaigns.",
   "privacy.analytics.cookiesNote":
-    "These tools may collect information through cookies and similar technologies.",
+    "These tools may collect information through cookies, device identifiers, and similar technologies.",
   "privacy.cookies.title": "Cookies",
   "privacy.cookies.intro": "The website uses cookies and similar technologies for:",
   "privacy.cookies.li1": "Proper operation of the website",
@@ -1369,15 +1440,18 @@ const englishTranslations = {
   "privacy.sharing.li2": "Storage and cloud service providers",
   "privacy.sharing.li3": "Payment processing services",
   "privacy.sharing.li4": "Shipping and delivery companies",
-  "privacy.sharing.li5": "Analytics and advertising providers such as Google and Meta",
-  "privacy.sharing.li6": "Authorized authorities when required by law",
+  "privacy.sharing.li5":
+    "Analytics, measurement, and advertising providers such as Google, Mixpanel, and Meta",
+  "privacy.sharing.li6":
+    "Service providers used for photo processing and illustration creation as part of the product production process",
+  "privacy.sharing.li7": "Authorized authorities when required by law",
   "privacy.sharing.p2":
     "Any sharing of information will be done only to the extent necessary to provide the service.",
   "privacy.retention.title": "Data Retention",
   "privacy.retention.p1":
     "We retain personal information for as long as necessary to provide the service, comply with legal requirements, handle customer inquiries, and manage the business.",
   "privacy.retention.p2":
-    "Photos uploaded to the website may be retained for a reasonable period after order completion for customer service, corrections, or repeat orders.",
+    "Photos uploaded to the website may be retained for a reasonable period after order completion for customer service, corrections, repeat orders, or providing additional copies at the customer's request.",
   "privacy.security.title": "Information Security",
   "privacy.security.p1":
     "We take reasonable and accepted security measures to protect the personal information in our possession.",
@@ -1391,7 +1465,7 @@ const englishTranslations = {
   "privacy.rights.li4": "Request to stop receiving marketing messages",
   "privacy.rights.li5": "Withdraw previously given consent, where applicable",
   "privacy.rights.contact":
-    "To exercise these rights, please contact us by email.",
+    "To exercise these rights, please contact us by email:",
   "privacy.changes.title": "Changes to the Privacy Policy",
   "privacy.changes.p1": "We may update this policy from time to time.",
   "privacy.changes.p2":
@@ -1507,34 +1581,43 @@ const englishTranslations = {
   "lang.english": "English",
 
   // Home Page
-  "home.hero.title": "Turn your photos into something|special",
-  "home.hero.titleHighlight": "special",
-  "home.hero.subtitle": "Baby books and framed illustrations for your home",
-  "home.hero.cta": "Create Your Book Now",
+  "home.hero.badge": "Personalized baby book",
+  "home.hero.title": "The gift that grows with them",
+  "home.hero.titleHighlight": "them",
+  "home.hero.subtitle":
+    "A personal book created from your photos — from the first months through later developmental stages",
+  "home.hero.cta": "Start creating",
   "home.hero.ariaLabel": "Hero section",
-  "home.hero.imageAlt": "Product examples - baby book and framed art",
+  "home.hero.imageAlt": "Baby book examples",
   "home.hero.ctaAriaLabel": "Go to book creation page",
   "home.gallery.ariaLabel": "Customer photo gallery",
   "home.gallery.imageAlt": "Customer photo {num}",
-  "home.book.bwSide": "Black and white side",
-  "home.book.colorSide": "Colorful side",
-  "home.book.title": "Our Paper Book",
-  "home.book.titleHighlight": "Paper",
-  "home.book.subtitle": "Personal baby book – with your family photos",
+  "home.book.bwSide": "Light booklet",
+  "home.book.colorSide": "Dark booklet",
+  "home.book.title": "Our Book",
+  "home.book.titleHighlight": "Our",
+  "home.book.subtitle": "A personal book created from the people|who matter to you",
   "home.book.description":
-    "A double-sided book with AI-processed images created from your family photos.\nOne side in black and white for visual stimulation for babies 0-3 months old, and a colorful side for continued development.\nPerfect for tummy time, the changing table, or as a special personalized gift.",
+    "We looked for a book that would show your baby the people who love them — when we couldn't find one, we made one. Upload photos, we turn them into illustrations.",
+  "home.book.pill.birthGift": "Birth gift",
+  "home.book.pill.ai": "AI technology",
+  "home.book.pill.standards": "Standards Institute approved",
+  "home.book.pill.stroller": "Stroller-friendly",
+  "home.book.pill.tummyTime": "Tummy time",
   "home.book.price": "Price per book",
-  "home.book.secondBook": "Every second book for only ₪99",
-  "home.book.discountNote": "* Discount is automatically applied at checkout",
-  "home.book.cta": "Create Your Personal Book Now",
-  "home.book.ariaLabel": "Product details - Our paper book",
-  "home.book.imageAlt": "Image of the paper book",
+  "home.book.secondBook": "Second book for ₪139",
+  "home.book.discountNote": "Automatic discount at checkout",
+  "home.book.freePreview": "Free preview before purchase",
+  "home.book.promoLine": "Second book for ₪{price} · Automatic discount at checkout",
+  "home.book.cta": "Create your personal book",
+  "home.book.ariaLabel": "Product details - Our book",
+  "home.book.imageAlt": "Image of the fabric book",
   "home.book.ctaAriaLabel": "Go to personal book creation page",
   "home.framedArt.badge": "New!",
   "home.framedArt.title": "Turn a cherished photo into personal wall art",
-  "home.framedArt.titleHighlight": "art",
+  "home.framedArt.titleHighlight": "cherished photo",
   "home.framedArt.subtitle":
-    "Upload a photo, pick your illustration style, and we will turn it into a framed piece ready to hang — no drilling, no wall damage.",
+    "Upload a photo, choose your favorite illustration style, and we'll turn it into a framed photo ready to hang — no drilling and no damage to your wall.",
   "home.framedArt.priceSingle": "Single frame:",
   "home.framedArt.priceTwo": "2 frames:",
   "home.framedArt.priceThree": "3 frames:",
@@ -1549,6 +1632,12 @@ const englishTranslations = {
   "home.framedArt.ariaLabel": "Framed illustration product",
   "home.framedArt.imageAlt": "Framed illustration example",
   "home.framedArt.carouselDotAria": "Go to image {num} of {total}",
+  "home.framedArt.pill.patent": "Patented, no drilling",
+  "home.framedArt.pill.removable": "Easy to remove and reposition",
+  "home.framedArt.pill.illustrated": "Illustrated photos",
+  "home.framedArt.pill.ai": "AI technology",
+  "home.framedArt.pill.gift": "Original gift",
+  "home.framedArt.freePreview": "Free preview before purchase",
   "home.framedArt.features.ariaLabel": "Framed art benefits",
   "home.framedArt.features.noDrill.title": "No drilling or holes",
   "home.framedArt.features.noDrill.subtitle":
@@ -1640,7 +1729,7 @@ const englishTranslations = {
   "cart.suggest.subtitle": "Complete your order with additional products",
   "cart.suggest.bookTitle": "Booklet",
   "cart.suggest.framedArtTitle": "Framed illustration",
-  "cart.suggest.bookPromo": "2 for ₪99",
+  "cart.suggest.bookPromo": "2 for ₪139",
   "cart.suggest.framedArtPromo": "2 for ₪89",
   "home.howItWorks.title": "How it works",
   "home.howItWorks.titleHighlight": "works",
@@ -1661,12 +1750,12 @@ const englishTranslations = {
   "home.howItWorks.previewStep2.label": "We do",
   "home.howItWorks.previewStep2.title": "We create the images",
   "home.howItWorks.previewStep2.description":
-    "You see the illustrations and choose a style before purchasing.",
+    "You can preview the illustrations and choose the style and book color before purchasing.",
   "home.howItWorks.previewStep2.imageAlt": "Example of preview images",
   "home.howItWorks.previewStep3.label": "We do",
   "home.howItWorks.previewStep3.title": "We print and ship",
   "home.howItWorks.previewStep3.description":
-    "We print your book and ship it to your home.",
+    "We print the images and assemble the book that will be shipped to your home.",
   "home.howItWorks.previewStep3.imageAlt": "Example of a printed book",
   "home.howItWorks.step3.label": "We do",
   "home.howItWorks.step3.title": "Print the book",
@@ -1686,25 +1775,26 @@ const englishTranslations = {
     "The colorful side is perfect for 3 months and up – when vision develops and the world around them begins to fill with colors.",
   "home.dualDesign.moreExamples": "Want to see more examples?",
   "home.dualDesign.moreExamplesLink": "Discover here",
-  "home.special.title": "What Makes Our Book Special",
-  "home.special.titleHighlight": "Special",
-  "home.special.ariaLabel": "What makes our book special",
-  "home.special.item1.title": "Look at the closest ones",
+  "home.special.title": "Why Little Gali",
+  "home.special.titleHighlight": "Little Gali",
+  "home.special.subtitleLine1": "We searched and couldn't find it - so we invented it.",
+  "home.special.ariaLabel": "Why Little Gali",
+  "home.special.item1.title": "Based on what interests babies",
   "home.special.item1.description":
-    "The faces of the primary caregivers are familiar to the baby and soothe them from their first days",
-  "home.special.item1.imageAlt": "Young couple",
-  "home.special.item2.title": "Meet the family",
+    "Familiar faces capture babies' attention from a young age.",
+  "home.special.item1.imageAlt": "Science illustration",
+  "home.special.item2.title": "Fun to give, fun to receive",
   "home.special.item2.description":
-    "An opportunity to be exposed to and look at the family the baby is joining",
-  "home.special.item2.imageAlt": "Young sister",
-  "home.special.item3.title": "Sweet keepsake",
+    "A personal gift that remains a keepsake long after the first months.",
+  "home.special.item2.imageAlt": "Gift illustration",
+  "home.special.item3.title": "Tummy time with loved ones",
   "home.special.item3.description":
-    "A book that is personal and serves as a keepsake for a short and wonderful period in the baby's life",
-  "home.special.item3.imageAlt": "Parent and son",
-  "home.special.item4.title": "No more generic products",
+    "The people they love, during tummy time and stroller walks too.",
+  "home.special.item3.imageAlt": "Stroller illustration",
+  "home.special.item4.title": "Safe from day one",
   "home.special.item4.description":
-    "Instead of looking at shapes and patterns, let your baby look at the family",
-  "home.special.item4.imageAlt": "Dad and son",
+    "Tested and approved by the Israel Standards Institute for use from birth.",
+  "home.special.item4.imageAlt": "Safety certification illustration",
   "home.about.brand": "Little Gali",
   "home.about.title": "Who We Are",
   "home.about.titleHighlight": "We",
@@ -1712,15 +1802,11 @@ const englishTranslations = {
   "home.about.paragraph1":
     "Hi, I'm Yael — Gali's mom and the creator of Little Gali.",
   "home.about.paragraph2":
-    "The idea for Little Gali was born a few months after Gali was born, almost out of nowhere. What started as a small idea quickly became a project that took hold of me — one that made me create, learn, and build something of my own.",
+    "A few months after Gali was born, an idea came to me that wouldn't let go. I started working on it on the side, mostly while she slept on me in the carrier, just to see if I could turn it into something real.",
   "home.about.paragraph3":
-    "At first I made books for friends who had given birth, simply because I thought it was a special product that didn't exist in the market. The excitement and feedback I received gave me the push to turn the idea into a real business.",
+    "The responses I got from friends who had given birth went far beyond what I expected, and gave me the push to turn the idea into a business.",
   "home.about.paragraph4":
-    "Since then I've built the website myself, developed new products, and learned so many things I didn't know before. More than once I stepped out of my comfort zone, jumped into the deep end, and learned as I went.",
-  "home.about.paragraph5":
-    "To this day I get excited about every new order. I love seeing the photos people choose and turning them into a meaningful personal product.",
-  "home.about.paragraph6":
-    "My vision for Little Gali is to create personal, emotional gifts — the kind people are happy to give and happy to receive.",
+    "Today Little Gali is where I create personal, original products, with a desire to offer special gifts that feel a little different.",
   "home.qa.title": "Ask Us",
   "home.qa.titleHighlight": "Us",
   "home.qa.subtitle":
@@ -1765,53 +1851,63 @@ const englishTranslations = {
   "home.customerComments.showMore": "Show More",
   "home.testimonials.title": "What People Say About Us",
   "home.testimonials.titleHighlight": "Say",
-  "qa.question1": "What is the book made of?",
-  "qa.answer1":
-    "The book is made from high-quality, thick laminated paper and printed at a professional print house. It’s sturdy and can easily stand on its own.",
-  "qa.question2": "How many photos should I choose?",
-  "qa.answer2":
-    "Only 5 photos. The same photos appear on one side in black and white and on the other side in color.",
-  "qa.questionPreview": "Can I see the result before buying?",
+  "qa.questionPreview": "Can I see the illustrations before placing my order?",
   "qa.answerPreview":
-    "Yes, we let you see the full book result before purchase, including the black and white images and the colorful images in all styles.",
-  "qa.question3": "Who should be in the book?",
-  "qa.answer3":
-    "Anyone you want to show your baby. Some ideas: close family, extended family, friends, pets.",
-  "qa.question4": "What kind of photo is suitable?",
-  "qa.answer4":
-    "Technically speaking, the best photos are those where you can clearly see the faces, not in profile and with good lighting. Non-technically, the photos that turn out most beautiful are those that \"capture\" a special moment, photos of smiles and fun. The kind of things that are hard to explain in words but easy to feel.",
-  "qa.question5": "Can I put multiple people in one photo?",
-  "qa.answer5":
-    "Yes, absolutely. Just make sure that all the faces of the people in the photo are clearly visible and that it's not too crowded, as this can affect the quality of the result.",
-  "qa.question6": "Does the background matter?",
-  "qa.answer6":
-    "No. The background is automatically removed and replaced with white.",
-  "qa.question7": "How do I clean the book?",
-  "qa.answer7":
-    "You can gently wipe with a damp cloth. Avoid direct contact with water.",
-  "qa.question8": "How long does it take to prepare the book?",
-  "qa.answer8":
-    "We always do our best to deliver as quickly as possible, but please note production can take up to 14 business days, since image processing and printing at a professional print house can take time.",
-  "qa.question9": "What if I'm not satisfied with the book?",
-  "qa.answer9.beforeLink":
-    "Our goal is for you to love and be happy with your book. If you received it and something didn’t turn out as you expected, feel free to ",
-  "qa.answer9.previewLine1":
+    "Yes.\n\nAfter uploading your photos, you can see the illustrations created for you and a preview of the book before completing your order.\n\nIf you'd like, you can regenerate illustrations or contact us if there's anything you'd like to improve.",
+  "qa.questionSafety": "Is the book safe to use?",
+  "qa.answerSafety":
+    "Yes.\n\nThe book has been tested and approved by the Standards Institution of Israel and meets safety requirements for products intended for babies and children.\n\nIt is made from quality, durable materials so you can enjoy it with confidence and peace of mind.\n\nAs with any product intended for babies, adult supervision is recommended.",
+  "qa.questionPhotos": "What photos are suitable for creating the book?",
+  "qa.answerPhotos":
+    "For the best results, we recommend choosing sharp, clear photos where faces are clearly visible.\n\nClose-up photos usually yield the best results, but you can also use photos of several people together, as long as the faces are visible and clear.",
+  "qa.questionFromBirth": "Is the book suitable from birth?",
+  "qa.answerFromBirth":
+    "Yes.\n\nThe book was designed especially for babies from birth. One side features high-contrast black and white illustrations, adapted for babies' vision in their first months, and the other side features colorful illustrations that will accompany your baby as they grow.",
+  "qa.questionDelivery": "How long does it take to receive the book?",
+  "qa.answerDelivery":
+    "Each book is made to order after you place your order.\n\nProduction and delivery time is up to 7 business days.",
+  "qa.questionSpecial": "What makes the Little Gali book special?",
+  "qa.answerSpecial":
+    "The Little Gali baby book is created especially for your baby.\n\nInstead of generic characters or illustrations, the book features the people they know and love – parents, siblings, grandparents, and other meaningful people in their life.\n\nIt combines adaptation for baby vision in the first months with a personal, emotional experience, making it a unique gift created especially for your family.",
+  "qa.questionPhotoCount": "How many photos do I need to choose?",
+  "qa.answerPhotoCount":
+    "To create the book, you need to choose 5 photos.\n\nYou can choose different people or multiple photos of the same person – it's entirely up to you.",
+  "qa.questionPeopleCount": "How many people can appear in each photo?",
+  "qa.answerPeopleCount":
+    "There is no limit on the number of people in a photo.\n\nThe most important thing is that faces are clear and recognizable. The larger and clearer the faces, the better the result.",
+  "qa.questionGift":
+    "I want to buy the book as a gift. Do I have to choose the photos myself?",
+  "qa.answerGift":
+    "No.\n\nYou can purchase a gift card, and the parents will choose the photos themselves, create the illustrations, and order the book when it suits them.\n\nThis way you can give a personal and meaningful gift without choosing the photos for them.",
+  "qa.questionSimilarity": "Do the illustrations really look like the people in the photos?",
+  "qa.answerSimilarity":
+    "Yes.\n\nOur illustration system is designed to preserve each person's unique features – facial features, expressions, and hair – while adapting the image to the book's illustration style.\n\nThe goal is to create simple, clear illustrations for babies without losing the features that make each person special.",
+  "qa.questionCleaning": "How do I clean the book?",
+  "qa.answerCleaning":
+    "You can gently wipe the book with a damp cloth.\n\nDo not machine wash, soak in water, or use harsh cleaning agents.",
+  "qa.questionUnsatisfied": "What if I'm not satisfied with the book?",
+  "qa.answerUnsatisfied.line1":
     "The final book will be exactly the same as the book you approved before purchase.",
-  "qa.answer9.previewLine2Before":
-    "If something still didn’t turn out as you expected, feel free to contact ",
-  "qa.answer9.linkText": "contact us",
+  "qa.answerUnsatisfied.beforeLink":
+    "If something still didn't turn out as you expected, feel free to contact ",
+  "qa.answerUnsatisfied.linkText": "us",
   "qa.notFound": "Didn't find the answer you were looking for?",
   "qa.contact": "Contact Us",
 
   // Footer
   "footer.description":
-    "Little Gali transforms regular photos into delicate black and white creations that are especially suitable for baby vision. Born from a mother who loved seeing her baby drawn to familiar faces.",
+    "Personalized baby books\ncustom-made with illustrations\nof the people your baby loves most.",
   "footer.platform": "Platform",
+  "footer.products": "Products",
+  "footer.information": "Information",
+  "footer.babyBooks": "Baby Books",
+  "footer.framedArt": "Framed Illustration",
   "footer.howItWorks": "How It Works",
   "footer.photoGuide": "Photo Selection Guide",
   "footer.inspiration": "Inspiration Gallery",
   "footer.policies": "Policies",
   "footer.terms": "Terms of Service",
+  "footer.termsOfUse": "Terms of Use",
   "footer.privacy": "Privacy",
   "footer.shipping": "Shipping",
   "footer.returns": "Returns",
@@ -1820,7 +1916,7 @@ const englishTranslations = {
   "footer.contact": "Contact",
   "footer.contactUs": "Contact Us",
   "footer.contactUsAriaLabel": "Go to contact page",
-  "footer.copyright": "© Copyright Little Gali. All rights reserved.",
+  "footer.copyright": "© Little Gali. All rights reserved.",
 
   // Contact Page
   "contact.title": "Contact Us",
@@ -1945,6 +2041,10 @@ const englishTranslations = {
   "preview.lightboxNext": "Next page",
   "preview.colorLoadingTitle": "Creating the color side",
   "preview.colorStyleStrip.title": "3 styles · tap to compare",
+  "preview.bookColor.title": "Choose your book color",
+  "preview.bookColor.dark": "Black with spotted border",
+  "preview.bookColor.light": "Light with dotted border",
+  "preview.bookColor.required": "Which book fabric color would you like?",
   "preview.changesLeft": "Changes left",
   "preview.changesRemainingBadge": "You have {count} changes left",
   "preview.changesExhaustedLine1":
@@ -2063,8 +2163,10 @@ const englishTranslations = {
   // Gift Cards
   "giftCard.title": "Gift Card for Personalized Book",
   "giftCard.titleHighlight": "Gift Card",
-  "giftCard.description": "Want to give our book as a gift but prefer to let them choose the photos and style themselves?\nThat's exactly what our gift card is for.\nAfter payment, you'll receive the gift card details by email which you can pass on as a personal and special gift.",
-  "giftCard.selectOption": "Select Option:",
+  "giftCard.description":
+    "Want to give a gift but prefer they choose the photos themselves? Our gift card allows exactly that.",
+  "giftCard.selectOption": "Select an option",
+  "giftCard.emailNote": "The gift card will be sent by email immediately after purchase",
   "giftCard.addToCart": "Add to Cart",
   "giftCard.adding": "Adding...",
   "giftCard.ariaLabel": "Add gift card to cart",
@@ -2072,7 +2174,7 @@ const englishTranslations = {
   "giftCard.option2": "One Personalized Book (With Shipping)",
   "giftCard.option3": "Two Personalized Books (No Shipping)",
   "giftCard.option4": "Two Personalized Books (With Shipping)",
-  "giftCard.feature1": "Second book for ₪99",
+  "giftCard.feature1": "Second book for ₪139",
   "giftCard.feature2": "Choice of 5 photos",
   "giftCard.feature3": "Choice of style",
   "giftCard.feature4": "No expiration date",

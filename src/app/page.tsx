@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   motion,
-  AnimatePresence,
   useReducedMotion,
   useMotionValue,
   animate,
@@ -14,27 +13,18 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
-import { CustomerCommentsSection } from "@/components/customer-comments-section";
 import { GiftCardSection } from "@/components/gift-card-section";
-import { GalleryCarouselSection } from "@/components/gallery-carousel-section";
-import { StyleExamplesSection } from "@/components/style-examples-section";
-import { useIsMobile } from "@/lib/use-is-mobile";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
-import { Input } from "@/components/ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { BOOK_PRICE } from "@/lib/constants";
 import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
-import { FramedArtFeaturesSection } from "@/components/framed-art-features-section";
+import { BookFeaturePills, FreePreviewNote } from "@/components/feature-pill";
 import { FramedArtHomeSection } from "@/components/framed-art-home-section";
 import { QaTabsSection, HOME_BOOK_IDS, HOME_FRAMED_IDS } from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
-import MuiButton from "@mui/material/Button";
-import { trackSubscribe, trackViewContent } from "@/lib/meta-pixel-events";
+import { HomeCtaButton } from "@/components/home-cta-button";
+
+const HERO_IMAGE_MOBILE = "/hero-image-mobile.png";
+const HERO_IMAGE_DESKTOP = "/hero-image-desktop.JPG";
 
 const dotVariants = {
   inactive: {
@@ -47,379 +37,6 @@ const dotVariants = {
   },
 };
 
-function ComingSoonSection() {
-  const { locale, t } = useLanguage();
-  const easeOwlet = [0.16, 1, 0.3, 1] as const;
-  const prefersReducedMotion = useReducedMotion();
-  const reveal = useScrollReveal(easeOwlet);
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: "success" | "error" | null;
-    message: string;
-  }>({ type: null, message: "" });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: "" });
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setSubmitStatus({
-        type: "error",
-        message: t("home.comingSoon.error"),
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/email-signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus({
-          type: "success",
-          message: data.message || t("home.comingSoon.success"),
-        });
-        setEmail("");
-        
-        // Track Meta Pixel Subscribe event
-        try {
-          trackSubscribe();
-        } catch (err) {
-          console.error("Error tracking Subscribe:", err);
-        }
-      } else {
-        setSubmitStatus({
-          type: "error",
-          message: data.error || t("home.comingSoon.errorGeneric"),
-        });
-      }
-    } catch (error) {
-      setSubmitStatus({
-        type: "error",
-        message: t("home.comingSoon.errorGeneric"),
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <motion.section
-      id="fabric-book-signup"
-      className="relative pb-16 lg:pb-24"
-      style={{ backgroundColor: "#F9F7EE" }}
-      {...reveal.section}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="max-w-3xl mx-auto text-center"
-          {...reveal.staggerContainer({ amount: 0.2 })}
-        >
-          {/* Main Heading - Largest, Most Prominent */}
-          <motion.div
-            className="mb-8 pt-8 lg:pt-10"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.8, ease: easeOwlet },
-              },
-            }}
-          >
-            <Title
-              highlightText={t("home.comingSoon.titleHighlight")}
-              size="xl"
-              className="text-center"
-            >
-              {t("home.comingSoon.title")}
-            </Title>
-          </motion.div>
-
-          {/* Image */}
-          <div className="flex justify-center my-8">
-            <motion.div
-              className="w-full max-w-md rounded-lg overflow-hidden shadow-lg"
-              {...reveal.imageReveal}
-              whileHover={{
-                scale: 1.02,
-                transition: { duration: 0.3, ease: easeOwlet },
-              }}
-            >
-              <Image
-                src="/coming-soon.jpg"
-                alt={t("home.comingSoon.imageAlt")}
-                width={600}
-                height={400}
-                className="w-full h-auto object-cover"
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, 600px"
-              />
-            </motion.div>
-          </div>
-
-          {/* Coming Soon Label */}
-          <motion.div
-            className="mb-0 mt-5"
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.7, ease: easeOwlet },
-              },
-            }}
-          >
-            <p className="text-sm font-body-bold text-primary-orange text-center">
-              {t("home.comingSoon.comingSoon")}
-            </p>
-          </motion.div>
-
-          {/* Product Name - Secondary, Medium-Large */}
-          <motion.div
-            className="mb-4"
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.7, ease: easeOwlet },
-              },
-            }}
-          >
-            <h3 className="text-xl md:text-2xl font-heading font-bold text-dark-gray">
-              {t("home.comingSoon.productName")}
-            </h3>
-          </motion.div>
-
-          {/* Description/CTA Text - Tertiary, Regular Body */}
-          <motion.div
-            className="mb-8"
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.7, ease: easeOwlet },
-              },
-            }}
-          >
-            <p className="text-base font-body text-medium-gray whitespace-pre-line text-center">
-              {t("home.comingSoon.subtitle")}
-            </p>
-          </motion.div>
-
-          {/* Email Form or Success Message */}
-          <AnimatePresence mode="wait">
-            {submitStatus.type === "success" ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4, ease: easeOwlet }}
-                className="max-w-[500px] mx-auto"
-              >
-                {/* Success Card Container */}
-                <div
-                  className="rounded-2xl border-2 border-dashed border-primary-orange bg-[#FAFAF9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-8 md:p-10"
-                  style={{ borderColor: "#E16854" }}
-                >
-                  <div className="flex flex-col items-center text-center">
-                    {/* Checkmark Icon */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        duration: 0.4,
-                        ease: easeOwlet,
-                        delay: 0.1,
-                      }}
-                      className="w-12 h-12 rounded-full bg-primary-orange flex items-center justify-center shadow-lg mb-3"
-                    >
-                      <svg
-                        className="w-6 h-6 text-white"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="3"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path d="M5 13l4 4L19 7"></path>
-                      </svg>
-                    </motion.div>
-
-                    {/* Thank You Title */}
-                    <motion.h3
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        ease: easeOwlet,
-                        delay: 0.2,
-                      }}
-                      className="text-xl md:text-2xl font-heading font-bold text-dark-gray mb-2"
-                    >
-                      {t("home.comingSoon.successTitle")}
-                    </motion.h3>
-
-                    {/* Success Message */}
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        ease: easeOwlet,
-                        delay: 0.3,
-                      }}
-                      className="text-base font-body text-medium-gray"
-                    >
-                      {t("home.comingSoon.successMessage")}
-                    </motion.p>
-                  </div>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="form"
-                onSubmit={handleSubmit}
-                className="max-w-lg mx-auto"
-                initial="hidden"
-                animate="show"
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.8, ease: easeOwlet },
-                  },
-                }}
-              >
-                {/* Desktop: Horizontal Layout */}
-                <div
-                  className={`hidden md:flex md:items-center md:justify-center md:gap-4 ${
-                    locale === "en" ? "flex-row" : "flex-row"
-                  }`}
-                >
-                  <div className="flex-1 max-w-[350px]">
-                    <label htmlFor="coming-soon-email" className="sr-only">
-                      {t("home.comingSoon.emailLabel")}
-                    </label>
-                    <Input
-                      id="coming-soon-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t("home.comingSoon.emailPlaceholder")}
-                      required
-                      disabled={isSubmitting}
-                      className="w-full bg-white border-[1.5px] border-gray-300 rounded-lg px-4 py-[18px] text-base font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
-                      dir={locale === "en" ? "ltr" : "rtl"}
-                    />
-                  </div>
-                  <MuiButton
-                    type="submit"
-                    disabled={isSubmitting}
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      px: 2.5,
-                      py: 0.75,
-                      minWidth: "auto",
-                      fontFamily: "var(--font-assistant)",
-                      fontWeight: 700,
-                      fontSize: { xs: "0.85rem", md: "0.9rem" },
-                      textTransform: "none",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {isSubmitting
-                      ? t("home.comingSoon.submitting")
-                      : t("home.comingSoon.button")}
-                  </MuiButton>
-                </div>
-
-                {/* Mobile: Horizontal Layout */}
-                <div className="md:hidden flex gap-3 items-center justify-center">
-                  <div className="flex-1 max-w-[350px]">
-                    <label htmlFor="coming-soon-email-mobile" className="sr-only">
-                      {t("home.comingSoon.emailLabel")}
-                    </label>
-                    <Input
-                      id="coming-soon-email-mobile"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t("home.comingSoon.emailPlaceholder")}
-                      required
-                      disabled={isSubmitting}
-                      className="w-full h-[38px] bg-white border-[1.5px] border-gray-300 rounded-lg px-3.5 text-base placeholder:text-[14px] font-body focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-primary-orange"
-                      dir={locale === "en" ? "ltr" : "rtl"}
-                    />
-                  </div>
-                  <MuiButton
-                    type="submit"
-                    disabled={isSubmitting}
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      height: 36,
-                      minHeight: 36,
-                      px: 2.5,
-                      py: 0,
-                      fontFamily: "var(--font-assistant)",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                      lineHeight: 1,
-                      textTransform: "none",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isSubmitting
-                      ? t("home.comingSoon.submitting")
-                      : t("home.comingSoon.button")}
-                  </MuiButton>
-                </div>
-
-                {/* Error Message */}
-                {submitStatus.type === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-4"
-                  >
-                    <p className="text-base font-body text-red-600" role="alert">
-                      {submitStatus.message}
-                    </p>
-                  </motion.div>
-                )}
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
-    </motion.section>
-  );
-}
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
@@ -435,7 +52,7 @@ export default function Home() {
           titleKey: "home.howItWorks.step1.title",
           descriptionKey: "home.howItWorks.step1.description",
           imageAltKey: "home.howItWorks.step1.imageAlt",
-          src: "/upload-images.png",
+          src: "/how-it-works-step-1.jpg",
         },
         {
           num: 2,
@@ -443,7 +60,7 @@ export default function Home() {
           titleKey: "home.howItWorks.previewStep2.title",
           descriptionKey: "home.howItWorks.previewStep2.description",
           imageAltKey: "home.howItWorks.previewStep2.imageAlt",
-          src: "/preview-images.png",
+          src: "/how-it-works-step-2.jpg",
         },
         {
           num: 3,
@@ -451,7 +68,7 @@ export default function Home() {
           titleKey: "home.howItWorks.previewStep3.title",
           descriptionKey: "home.howItWorks.previewStep3.description",
           imageAltKey: "home.howItWorks.previewStep3.imageAlt",
-          src: "/book-example-pencil.jpeg",
+          src: "/how-it-works-step-3.jpg",
         },
       ]
     : [
@@ -461,7 +78,7 @@ export default function Home() {
           titleKey: "home.howItWorks.step1.title",
           descriptionKey: "home.howItWorks.step1.descriptionWithoutPreview",
           imageAltKey: "home.howItWorks.step1.imageAlt",
-          src: "/upload-images.png",
+          src: "/how-it-works-step-1.png",
         },
         {
           num: 2,
@@ -469,21 +86,39 @@ export default function Home() {
           titleKey: "home.howItWorks.step2.title",
           descriptionKey: "home.howItWorks.step2.description",
           imageAltKey: "home.howItWorks.step2.imageAlt",
-          src: "/book-example-pencil.jpeg",
+          src: "/how-it-works-step-2.png",
         },
       ];
-  const isMobile = useIsMobile();
-  const reveal = useScrollReveal(easeOwlet);
-  const heroImages = [
-    "/hero-image-1.jpeg",
-    "/hero-image-2-framed.jpeg",
-    "/hero-image-3.jpg",
-    "/hero-image-4.jpg",
+  const specialSteps = [
+    {
+      titleKey: "home.special.item1.title",
+      descriptionKey: "home.special.item1.description",
+      imageAltKey: "home.special.item1.imageAlt",
+      src: "/why-us-1.png",
+    },
+    {
+      titleKey: "home.special.item2.title",
+      descriptionKey: "home.special.item2.description",
+      imageAltKey: "home.special.item2.imageAlt",
+      src: "/why-us-2.png",
+    },
+    {
+      titleKey: "home.special.item3.title",
+      descriptionKey: "home.special.item3.description",
+      imageAltKey: "home.special.item3.imageAlt",
+      src: "/why-us-3.png",
+    },
+    {
+      titleKey: "home.special.item4.title",
+      descriptionKey: "home.special.item4.description",
+      imageAltKey: "home.special.item4.imageAlt",
+      src: "/why-us-4.png",
+    },
   ];
-  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const reveal = useScrollReveal(easeOwlet);
   const bookImages = [
-    { src: "/our-book-bw.jpg", labelKey: "home.book.bwSide" as const },
-    { src: "/our-book-color.jpg", labelKey: "home.book.colorSide" as const },
+    { src: "/our-book-light.JPG", labelKey: "home.book.bwSide" as const },
+    { src: "/our-book-dark.JPG", labelKey: "home.book.colorSide" as const },
   ];
   const [bookImageIndex, setBookImageIndex] = useState(0);
   const bookCarouselRef = useRef<HTMLDivElement>(null);
@@ -559,14 +194,6 @@ export default function Home() {
     document.documentElement.style.overflow = 'auto';
   }, []);
 
-  // Cycle hero images every 4 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="overflow-x-hidden bg-warm-light">
       <Header />
@@ -574,157 +201,147 @@ export default function Home() {
       <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
         <section id="hero" aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
-          {/* Background Images - all rendered in DOM so they preload; opacity controls which is visible */}
-          <div className="absolute inset-0" aria-hidden="true">
-            {heroImages.map((src, i) => (
-              <motion.div
-                key={i}
-                className="absolute inset-0"
-                initial={{ opacity: i === 0 ? 1 : 0, scale: 1 }}
-                animate={{
-                  opacity: i === currentHeroIndex ? 1 : 0,
-                  scale: i === currentHeroIndex ? (isMobile ? 1.20 : 1.05) : 1,
-                }}
-                transition={{
-                  opacity: { duration: 0.8, ease: "easeInOut" },
-                  scale: { duration: 4, ease: "easeOut" },
-                }}
-              >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  {...(i === 0 ? { priority: true } : { loading: "eager" })}
-                  className="object-cover sm:object-[center_65%]"
-                  sizes="100vw"
-                />
-                {/* Lighter gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10" />
-              </motion.div>
-            ))}
+          <div className="absolute inset-0">
+            <Image
+              src={HERO_IMAGE_MOBILE}
+              alt={t("home.hero.imageAlt")}
+              fill
+              priority
+              className="object-cover md:hidden"
+              sizes="100vw"
+            />
+            <Image
+              src={HERO_IMAGE_DESKTOP}
+              alt={t("home.hero.imageAlt")}
+              fill
+              priority
+              className="hidden object-cover md:block"
+              sizes="100vw"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-b from-black/8 via-black/5 to-black/0"
+              aria-hidden="true"
+            />
           </div>
-          {/* Content Overlay - center-aligned */}
-          <div className="absolute inset-0 z-10 flex items-start justify-center pt-16 md:pt-24">
+          {/* Content Overlay */}
+          <div className="absolute inset-0 z-10 flex items-start pt-6 md:pt-[130px]">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center space-y-5 md:space-y-6 max-w-2xl mx-auto">
-                {/* Title - centered with better contrast */}
-                <div className="relative px-4">
-                  {(() => {
-                    const titleText = t("home.hero.title");
-                    const highlightText = t("home.hero.titleHighlight");
-                    const titleParts = titleText.split("|");
+              <div className="max-w-xl text-start mt-2 md:mt-0">
+                <span className="mb-[8px] inline-flex w-fit items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-1.5 text-sm font-body text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)] max-md:px-[15px] max-md:py-[5px] max-md:text-[12px]">
+                  <svg
+                    className="w-3.5 h-3.5 shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 2l2.09 6.26L20.5 9.5l-5 3.64L17.18 20 12 16.77 6.82 20l1.68-6.86-5-3.64 6.41-1.24L12 2z" />
+                  </svg>
+                  {t("home.hero.badge")}
+                </span>
 
-                    if (titleParts.length === 2) {
-                      // Hebrew: split into two lines
-                      const [line1, line2] = titleParts;
-                      const highlightIndex = line2.indexOf(highlightText);
+                {(() => {
+                  const titleText = t("home.hero.title");
+                  const highlightText = t("home.hero.titleHighlight");
+                  const titleParts = titleText.split("|");
+                  const titleClassName =
+                    "m-0 max-md:text-[28px] text-4xl sm:text-4xl md:text-[40px] lg:text-[64px] font-heading font-bold !leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white md:-mt-1 lg:-mt-2";
 
-                      if (highlightIndex !== -1) {
-                        const beforeHighlight = line2.substring(
-                          0,
-                          highlightIndex
-                        );
-                        const afterHighlight = line2.substring(
-                          highlightIndex + highlightText.length
-                        );
+                  const renderHighlight = (text: string) => {
+                    const highlightIndex = text.indexOf(highlightText);
+                    if (highlightIndex === -1) return text;
 
-                        return (
-                          <h1 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
-                            {line1}
-                            <br />
-                            {beforeHighlight}
-                            <span className="relative inline-block">
-                              <span className="relative z-10">
-                                {highlightText}
-                              </span>
-                              <motion.svg
-                                className="absolute bottom-0 left-0"
-                                aria-hidden="true"
+                    const beforeHighlight = text.substring(0, highlightIndex);
+                    const afterHighlight = text.substring(
+                      highlightIndex + highlightText.length
+                    );
+
+                    return (
+                      <>
+                        <span className="whitespace-nowrap">
+                          {beforeHighlight}
+                          <span className="relative inline-block">
+                            <span className="relative z-10">{highlightText}</span>
+                            <motion.svg
+                              className="absolute bottom-0 left-0"
+                              aria-hidden="true"
+                              style={{
+                                width: "110%",
+                                left: "-5%",
+                                height: "14px",
+                                transform: "rotate(-2deg)",
+                                transformOrigin: "right center",
+                                overflow: "visible",
+                              }}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{
+                                delay: 0.75,
+                                duration: 0.8,
+                                ease: [0.16, 1, 0.3, 1],
+                              }}
+                              preserveAspectRatio="none"
+                              viewBox="0 0 100 14"
+                            >
+                              <path
+                                d="M 0 14 Q 50 10, 100 14"
+                                stroke="#e1a27d"
+                                strokeWidth="8"
+                                fill="none"
+                                strokeLinecap="round"
                                 style={{
-                                  width: "110%",
-                                  left: "-5%",
-                                  height: "14px",
-                                  transform: "rotate(-2deg)",
-                                  transformOrigin: "right center",
-                                  overflow: "visible",
+                                  filter:
+                                    "drop-shadow(0 2px 4px rgba(225, 162, 125, 0.3))",
                                 }}
-                                initial={{ scaleX: 0 }}
-                                animate={{ scaleX: 1 }}
-                                transition={{
-                                  delay: 0.75,
-                                  duration: 0.8,
-                                  ease: [0.16, 1, 0.3, 1],
-                                }}
-                                preserveAspectRatio="none"
-                                viewBox="0 0 100 14"
-                              >
-                                <path
-                                  d="M 0 14 Q 50 10, 100 14"
-                                  stroke="rgb(105, 52, 48)"
-                                  strokeWidth="8"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  style={{
-                                    filter: "drop-shadow(0 2px 4px rgba(105, 52, 48, 0.3))",
-                                  }}
-                                />
-                              </motion.svg>
-                            </span>
-                            {afterHighlight}
-                          </h1>
-                        );
-                      } else {
-                        // Fallback if highlight not found in second line
-                        return (
-                          <h1 className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white">
-                            {line1}
-                            <br />
-                            {line2}
-                          </h1>
-                        );
-                      }
-                    } else {
-                      // English or other: use Title component as before
-                      return (
-                        <Title
-                          as="h1"
-                          highlightText={highlightText}
-                          color="text-white"
-                          className="text-[34px] sm:text-5xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
-                          animateUnderline={true}
-                        >
-                          {titleText}
-                        </Title>
-                      );
-                    }
-                  })()}
-                </div>
-                <p className="font-body text-base sm:text-lg text-white/95 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] px-4">
+                              />
+                            </motion.svg>
+                          </span>
+                          {afterHighlight}
+                        </span>
+                      </>
+                    );
+                  };
+
+                  if (titleParts.length === 2) {
+                    const [line1, line2] = titleParts;
+                    return (
+                      <h1 className={titleClassName}>
+                        {line1}
+                        <br />
+                        {renderHighlight(line2)}
+                      </h1>
+                    );
+                  }
+
+                  return (
+                    <Title
+                      as="h1"
+                      highlightText={highlightText}
+                      color="text-white"
+                      size="2xl"
+                      className="m-0 !leading-none font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] max-md:text-[28px] md:text-[40px] lg:text-[64px] md:-mt-1 lg:-mt-2"
+                      animateUnderline={true}
+                    >
+                      {titleText}
+                    </Title>
+                  );
+                })()}
+
+                <p className="mt-2.5 font-body text-base sm:text-lg text-white/90 leading-relaxed max-w-md drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] md:hidden">
                   {t("home.hero.subtitle")}
                 </p>
-                {/* CTA Button - All devices */}
-                <div className="pt-6">
-                  <div className="relative w-auto">
-                    <a href="/upload" aria-label={t("home.hero.ctaAriaLabel")}>
-                      <MuiButton
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          px: 4,
-                          py: 1.5,
-                          fontFamily: "var(--font-assistant)",
-                          fontWeight: 700,
-                          fontSize: "1rem",
-                          textTransform: "none",
-                          bgcolor: "transparent",
-                          border: "1px solid rgba(255,255,255,0.9)",
-                          backdropFilter: "blur(12px)",
-                        }}
-                      >
-                        {t("home.hero.cta")}
-                      </MuiButton>
-                    </a>
-                  </div>
+
+                <div className="mt-3 pt-2 max-md:pt-0 md:mt-5">
+                  <a href="/upload" aria-label={t("home.hero.ctaAriaLabel")}>
+                    <HomeCtaButton
+                      sx={{
+                        px: { xs: "30px", md: "36px" },
+                        py: { xs: "8px", md: "12px" },
+                        fontSize: { xs: "12px", md: "14px" },
+                      }}
+                    >
+                      {t("home.hero.cta")}
+                    </HomeCtaButton>
+                  </a>
                 </div>
               </div>
             </div>
@@ -742,31 +359,27 @@ export default function Home() {
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 {/* Left Column - Text Content */}
                 <div className="order-1 lg:order-1 space-y-6">
-                  {/* Title with Highlight */}
-                  <div className="-mt-3">
-                    <Title
-                      highlightText={t("home.book.titleHighlight")}
-                      className={`text-3xl lg:text-4xl ${
-                        locale === "en"
-                          ? "text-center lg:text-left"
-                          : "text-center lg:text-right"
-                      }`}
-                    >
-                      {t("home.book.title")}
-                    </Title>
-                  </div>
-
-                  {/* Subtitle */}
+                  {/* Section header */}
                   <div
-                    className={`-mt-1 ${
+                    className={`-mt-3 ${
                       locale === "en"
                         ? "text-center lg:text-left"
                         : "text-center lg:text-right"
                     }`}
                   >
-                    <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
-                      {t("home.book.subtitle")}
-                    </h3>
+                    <p className="text-base lg:text-lg font-heading text-primary-orange">
+                      {t("home.book.title")}
+                    </p>
+                    <h2 className="mt-0.5 lg:mt-0 text-[22px] sm:text-3xl lg:text-4xl font-heading font-bold text-dark-gray leading-tight">
+                      {t("home.book.subtitle")
+                        .split("|")
+                        .map((line, i, lines) => (
+                          <span key={i}>
+                            {line}
+                            {i < lines.length - 1 && <br />}
+                          </span>
+                        ))}
+                    </h2>
                   </div>
 
                   {/* Description Text */}
@@ -777,71 +390,91 @@ export default function Home() {
                         : "text-center lg:text-right"
                     }`}
                   >
-                    <p className="font-body text-medium-gray leading-relaxed whitespace-pre-line">
+                    <p className="font-body text-medium-gray leading-relaxed">
                       {t("home.book.description")}
                     </p>
+                    <BookFeaturePills t={t} locale={locale} />
                   </div>
 
-                  {/* Price */}
-                  {/* Price - Underlined Elegant */}
-                  <div className="flex flex-col items-center lg:items-start gap-1">
-                    <div className="relative">
-                      <span className="text-sm font-body text-medium-gray mt-1 block">
+                  {/* Price & CTA */}
+                  <div
+                    className={
+                      locale === "en"
+                        ? "text-center lg:text-left"
+                        : "text-center lg:text-right"
+                    }
+                  >
+                    <div
+                      className={`inline-flex w-full max-w-md flex-col gap-4 lg:w-auto lg:min-w-[17rem] items-center ${
+                        locale === "en"
+                          ? "lg:mr-auto lg:items-start"
+                          : "lg:ml-auto lg:items-end"
+                      }`}
+                    >
+                    <div
+                      className={`w-full ${
+                        locale === "en"
+                          ? "text-center lg:text-left"
+                          : "text-center lg:text-right"
+                      }`}
+                    >
+                      <span className="text-sm font-body text-medium-gray block mb-1">
                         {t("home.book.price")}
                       </span>
-                      <div className="flex items-baseline pb-1">
-                        <span className="text-4xl font-heading font-light text-dark-gray">
-                          {BOOK_PRICE}
-                        </span>
-                        <span className="text-2xl font-bodye">₪</span>
-                      </div>
                       <div
-                        className={`absolute bottom-0 w-24 h-0.5 ${
-                          locale === "en"
-                            ? "left-0 bg-gradient-to-r from-primary-orange to-transparent"
-                            : "right-0 bg-gradient-to-l from-primary-orange to-transparent"
+                        className={`inline-flex items-baseline justify-center gap-0 font-heading font-bold text-dark-gray lg:justify-start ${
+                          locale === "he" ? "flex-row-reverse" : ""
                         }`}
-                      ></div>
-                    </div>
-                    <div className="flex items-center gap-2 font-body text-medium-gray">
-                      <svg
-                        className="w-4 h-4 shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#693430"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
                       >
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M7.5 12.5l3 3 5.5-6" />
-                      </svg>
-                      <span>{t("home.book.secondBook")}</span>
+                        <span className="text-2xl">₪</span>
+                        <span className="text-[32px] leading-none">{BOOK_PRICE}</span>
+                      </div>
                     </div>
-                    <p className="text-sm font-body text-medium-gray mt-1">
-                      {t("home.book.discountNote")}
-                    </p>
-                  </div>
 
-                  {/* CTA Button */}
-                  <div className="flex justify-center lg:justify-start -mt-2">
-                    <div>
-                      <a href="/upload" aria-label={t("home.book.ctaAriaLabel")}>
-                        <MuiButton
-                          variant="contained"
-                          color="primary"
-                          sx={{
-                            px: 4,
-                            py: 1.5,
-                            fontFamily: "var(--font-assistant)",
-                            fontWeight: 700,
-                            fontSize: "0.95rem",
-                            textTransform: "none",
-                          }}
+                    <p
+                      className={`-mt-3 w-full font-body text-medium-gray text-sm sm:text-base ${
+                        locale === "en"
+                          ? "text-center lg:text-left"
+                          : "text-center lg:text-right"
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg
+                          className="w-4 h-4 shrink-0 text-[#693430]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
                         >
-                          {t("home.book.cta")}
-                        </MuiButton>
-                      </a>
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M7.5 12.5l3 3 5.5-6" />
+                        </svg>
+                        <span>{t("home.book.secondBook")}</span>
+                      </span>
+                    </p>
+
+                    <a
+                      href="/upload"
+                      aria-label={t("home.book.ctaAriaLabel")}
+                      className="block w-full"
+                    >
+                      <HomeCtaButton fullWidth>
+                        {t("home.book.cta")}
+                      </HomeCtaButton>
+                    </a>
+
+                    <FreePreviewNote
+                      label={t("home.book.freePreview")}
+                      locale={locale}
+                      className={`-mt-2 w-full ${
+                        locale === "en"
+                          ? "text-center lg:text-left"
+                          : "text-center lg:text-right"
+                      }`}
+                    />
                     </div>
                   </div>
                 </div>
@@ -935,27 +568,11 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {framedOn && (
-          <>
-            <FramedArtHomeSection />
-            <FramedArtFeaturesSection />
-          </>
-        )}
-
-        {/* Gallery Carousel Section */}
-        <GalleryCarouselSection />
-
-        {/* Customer Comments Section */}
-        <CustomerCommentsSection />
-
-        {/* Testimonials Section */}
-        {/* <TestimonialsSection /> */}
-
         {/* How It Works Section */}
         <motion.section
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
-          className="relative pb-16 lg:pb-24 bg-white"
+          className="relative bg-[#FAF7F4] pb-16 lg:pb-24"
           {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -966,34 +583,22 @@ export default function Home() {
                 id="how-it-works-heading"
                 highlightText={t("home.howItWorks.titleHighlight")}
                 size="lg"
-                className="mb-4"
+                className="mb-4 text-[28px] sm:text-3xl"
               >
                 {t("home.howItWorks.title")}
               </Title>
             </div>
 
-            {/* Steps - Side by Side Layout */}
+            {/* Steps - Card Layout */}
             <motion.div
               dir={locale === "he" ? "rtl" : "ltr"}
-              className={`flex flex-col lg:flex-row max-w-6xl mx-auto relative items-start lg:items-stretch gap-8 ${
-                previewOn ? "lg:gap-10" : "lg:gap-0"
-              }`}
-              {...reveal.staggerContainer({ staggerDirection: -1 })}
+              className="mx-auto flex max-w-5xl flex-col gap-5 lg:flex-row lg:flex-nowrap lg:gap-6"
+              {...reveal.staggerContainer()}
             >
               {howItWorksSteps.map((step) => (
                 <motion.div
                   key={step.num}
-                  className={`flex flex-col flex-1 min-w-0 text-center ${
-                    !previewOn && step.num === 1
-                      ? locale === "he"
-                        ? "lg:-mr-8"
-                        : "lg:-ml-8"
-                      : !previewOn && step.num === 2
-                        ? locale === "he"
-                          ? "lg:-ml-8"
-                          : "lg:-mr-8"
-                        : ""
-                  }`}
+                  className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white"
                   variants={{
                     hidden: { opacity: 0, y: 30 },
                     show: {
@@ -1003,51 +608,38 @@ export default function Home() {
                     },
                   }}
                 >
-                  {/* Step Number */}
-                  <div
-                    className={`relative inline-block mb-6 lg:mb-6 ${
-                      step.num === 1 ? "-mt-6 lg:mt-0" : ""
-                    }`}
+                  {/* Illustration area — top half */}
+                  <motion.div
+                    className="relative h-[216px] shrink-0 overflow-hidden sm:h-[240px]"
+                    {...reveal.imageReveal}
                   >
-                    <div
-                      className="w-10 h-10 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto border-2 border-dark-gray"
-                      style={{ backgroundColor: "#FFFFFF" }}
-                    >
-                      <span className="text-dark-gray font-heading text-lg lg:text-2xl font-bold">
+                    <div className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm">
+                      <span className="font-heading text-sm font-bold text-dark-gray">
                         {step.num}
                       </span>
                     </div>
-                  </div>
+                    <Image
+                      src={step.src}
+                      alt={t(step.imageAltKey)}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      className="object-cover"
+                      loading="lazy"
+                    />
+                  </motion.div>
 
-                  {/* Step Content */}
-                  <div className="space-y-3 max-w-xs mx-auto mb-6">
-                    <p className="text-sm font-body-bold text-primary-orange mb-1">
+                  {/* Text area — bottom half */}
+                  <div className="flex flex-col items-center px-5 py-5 text-center sm:px-6 sm:py-6">
+                    <p className="mb-1 text-sm font-body-bold text-primary-orange">
                       {t(step.labelKey)}
                     </p>
-                    <h3 className="text-xl lg:text-2xl font-heading text-dark-gray">
+                    <h3 className="mb-2 text-xl font-heading font-bold text-dark-gray">
                       {t(step.titleKey)}
                     </h3>
-                    <p className="font-body text-medium-gray leading-relaxed text-base lg:text-lg whitespace-pre-line">
+                    <p className="font-body text-dark-gray leading-relaxed text-base whitespace-pre-line">
                       {t(step.descriptionKey)}
                     </p>
                   </div>
-
-                  {/* Step Image */}
-                  <motion.div
-                    className="mt-auto"
-                    {...reveal.imageReveal}
-                  >
-                    <div className="w-full max-w-md mx-auto aspect-square rounded-lg overflow-hidden">
-                      <Image
-                        src={step.src}
-                        alt={t(step.imageAltKey)}
-                        width={500}
-                        height={500}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  </motion.div>
                 </motion.div>
               ))}
             </motion.div>
@@ -1058,174 +650,77 @@ export default function Home() {
               {...reveal.section}
             >
               <a href="/upload" aria-label={t("home.howItWorks.ctaAriaLabel")}>
-                <MuiButton
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    fontFamily: "var(--font-assistant)",
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                    textTransform: "none",
-                  }}
-                >
-                  {t("home.howItWorks.cta")}
-                </MuiButton>
+                <HomeCtaButton>{t("home.howItWorks.cta")}</HomeCtaButton>
               </a>
             </motion.div>
           </div>
         </motion.section>
 
-        {/* Style Examples Section */}
-        <StyleExamplesSection />
+        {framedOn && (
+          <>
+            <FramedArtHomeSection />
+          </>
+        )}
 
-        {/* Choose Your Path Section */}
+        {/* Testimonials Section */}
+        {/* <TestimonialsSection /> */}
+
+        {/* Why Little Gali Section */}
         <motion.section
           id="special"
           aria-label={t("home.special.ariaLabel")}
-          className="relative bg-[#F3EEE8] pb-16 lg:pb-24"
+          className="relative bg-[#FAF7F4] pb-16 lg:pb-24"
           {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Title */}
-            <div className="text-center mb-12 pt-8 lg:pt-10">
+            <div className="mb-10 pt-8 text-center lg:mb-12 lg:pt-10">
               <Title
                 highlightText={t("home.special.titleHighlight")}
-                className="max-w-3xl mx-auto"
+                className="mx-auto max-w-3xl text-[28px] sm:text-3xl"
               >
                 {t("home.special.title")}
               </Title>
+              <p className="mx-auto mt-4 max-w-2xl font-body text-base leading-relaxed text-medium-gray sm:text-lg">
+                {t("home.special.subtitleLine1")}
+              </p>
             </div>
 
-            {/* 4 Column Grid */}
-            <motion.div 
-              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto"
+            <motion.div
+              dir={locale === "he" ? "rtl" : "ltr"}
+              className="mx-auto grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6"
               {...reveal.staggerContainer({ amount: 0.2, staggerChildren: 0.1 })}
             >
-              {/* Column 1 */}
-              <motion.div 
-                className="text-center"
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
-                }}
-              >
-                {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
-                  <Image
-                    src="/couple.png"
-                    alt={t("home.special.item1.imageAlt")}
-                    fill
-                    className="object-cover rounded-lg"
-                    loading="lazy"
-                    sizes="(max-width: 768px) 144px, 256px"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  {t("home.special.item1.title")}
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  {t("home.special.item1.description")}
-                </p>
-              </motion.div>
-
-              {/* Column 2 */}
-              <motion.div 
-                className="text-center"
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
-                }}
-              >
-                {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
-                  <Image
-                    src="/sister.png"
-                    alt={t("home.special.item2.imageAlt")}
-                    fill
-                    className="object-cover rounded-lg"
-                    loading="lazy"
-                    sizes="(max-width: 768px) 144px, 256px"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  {t("home.special.item2.title")}
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  {t("home.special.item2.description")}
-                </p>
-              </motion.div>
-
-              {/* Column 3 */}
-              <motion.div 
-                className="text-center"
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
-                }}
-              >
-                {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
-                  <Image
-                    src="/parent-and-son.png"
-                    alt={t("home.special.item3.imageAlt")}
-                    fill
-                    className="object-cover rounded-lg"
-                    loading="lazy"
-                    sizes="(max-width: 768px) 144px, 256px"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  {t("home.special.item3.title")}
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  {t("home.special.item3.description")}
-                </p>
-              </motion.div>
-
-              {/* Column 4 */}
-              <motion.div 
-                className="text-center"
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOwlet } },
-                }}
-              >
-                {/* Image */}
-                <div className="w-36 h-36 md:w-64 md:h-64 mx-auto mb-6 relative">
-                  <Image
-                    src="/dad-and-son.png"
-                    alt={t("home.special.item4.imageAlt")}
-                    fill
-                    className="object-cover rounded-lg"
-                    loading="lazy"
-                    sizes="(max-width: 768px) 144px, 256px"
-                  />
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading text-dark-gray text-lg mb-2 text-[1.2em] md:text-lg">
-                  {t("home.special.item4.title")}
-                </h3>
-
-                {/* Subtitle */}
-                <p className="font-body text-medium-gray text-sm leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  {t("home.special.item4.description")}
-                </p>
-              </motion.div>
+              {specialSteps.map((step) => (
+                <motion.div
+                  key={step.titleKey}
+                  className="flex flex-col items-center rounded-2xl border border-gray-200/80 bg-white px-5 pb-8 pt-3 text-center sm:px-6 sm:pt-4"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.5, ease: easeOwlet },
+                    },
+                  }}
+                >
+                  <div className="mb-3 flex w-full items-center justify-center">
+                    <Image
+                      src={step.src}
+                      alt={t(step.imageAltKey)}
+                      width={220}
+                      height={220}
+                      className="h-[8.4rem] w-[8.4rem] object-contain sm:h-[9.6rem] sm:w-[9.6rem] lg:h-[11rem] lg:w-[11rem]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="mb-2 font-heading text-base font-bold text-dark-gray sm:text-lg">
+                    {t(step.titleKey)}
+                  </h3>
+                  <p className="font-body text-sm leading-relaxed text-medium-gray sm:text-[15px]">
+                    {t(step.descriptionKey)}
+                  </p>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </motion.section>
@@ -1234,17 +729,17 @@ export default function Home() {
         <motion.section
           id="about"
           aria-labelledby="about-heading"
-          className={`relative bg-white pt-0 lg:pt-4 ${locale === "en" ? "pb-16 md:pb-20" : "pb-6"}`}
+          className={`relative bg-white pt-0 ${locale === "en" ? "pb-16 md:pb-20 lg:pb-0" : "pb-6 lg:pb-0"}`}
           {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-4 lg:gap-16 items-stretch max-w-6xl mx-auto">
+            <div className="grid max-w-6xl items-stretch gap-4 lg:grid-cols-2 lg:gap-16 mx-auto">
               {/* Left Column - Image */}
               <motion.div
-                className="relative h-full min-h-0 overflow-hidden rounded-3xl"
+                className="relative min-h-0 overflow-hidden rounded-3xl lg:h-full"
                 {...reveal.imageReveal}
               >
-                <div className="relative aspect-[4/3] w-full lg:aspect-auto lg:h-full">
+                <div className="relative aspect-[4/3] w-full lg:absolute lg:inset-0 lg:aspect-auto">
                   <Image
                     src="/about-us.jpg"
                     alt={t("home.about.imageAlt")}
@@ -1257,27 +752,34 @@ export default function Home() {
               </motion.div>
 
               {/* Right Column - Text Content */}
-              <div className="relative">
+              <div
+                className={`relative ${
+                  locale === "en" ? "lg:py-16 lg:pb-20" : "lg:py-12"
+                }`}
+              >
                 {/* Content */}
-                <div className="space-y-4">
-                  {/* Brand name */}
-                  <div className="text-primary-orange font-body-bold text-sm uppercase tracking-wide mb-0">
-                    {t("home.about.brand")}
+                <div>
+                  <div className="flex flex-col gap-1.5">
+                    {/* Brand name */}
+                    <div className="text-primary-orange font-body-bold text-sm leading-none tracking-wide">
+                      {t("home.about.brand")}
+                    </div>
+
+                    {/* Main heading */}
+                    <Title
+                      as="h2"
+                      id="about-heading"
+                      highlightText={t("home.about.titleHighlight")}
+                      size="lg"
+                      className="!leading-none text-[28px] sm:text-3xl"
+                    >
+                      {t("home.about.title")}
+                    </Title>
                   </div>
 
-                  {/* Main heading */}
-                  <Title
-                    as="h2"
-                    id="about-heading"
-                    highlightText={t("home.about.titleHighlight")}
-                    size="lg"
-                  >
-                    {t("home.about.title")}
-                  </Title>
-
                   {/* Body text */}
-                  <div className="space-y-3 pt-2">
-                    {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+                  <div className="space-y-3 pt-5">
+                    {([1, 2, 3, 4] as const).map((n) => (
                       <p
                         key={n}
                         className="font-body text-medium-gray leading-relaxed"
@@ -1292,9 +794,6 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* Coming Soon Section */}
-        <ComingSoonSection />
-
         {/* Gift Card Section */}
         <GiftCardSection />
 
@@ -1307,177 +806,33 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Title */}
-            <div className="text-center mb-10 md:mb-16 pt-8 lg:pt-10">
+            <div className="text-center mb-6 pt-8 lg:pt-10">
               <Title
                 as="h2"
                 id="qa-heading"
                 highlightText={t("home.qa.titleHighlight")}
                 size="lg"
-                className="mb-4"
+                className="mb-4 text-[28px] sm:text-3xl"
               >
                 {t("home.qa.title")}
               </Title>
-              <p className="text-lg font-body text-medium-gray max-w-2xl mx-auto">
+              <p className="mx-auto max-w-2xl font-body text-base leading-relaxed text-medium-gray">
                 {t("home.qa.subtitle")}
               </p>
             </div>
 
-            {framedOn ? (
-              <QaTabsSection
-                className="max-w-4xl mx-auto"
-                bookItemIds={[...HOME_BOOK_IDS]}
-                framedItemIds={[...HOME_FRAMED_IDS]}
-                previewOn={previewOn}
-              />
-            ) : (
-            <div className="max-w-4xl mx-auto">
-              <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
-                <AccordionItem
-                  value="item-1"
-                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger
-                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.question1")}
-                  </AccordionTrigger>
-                  <AccordionContent
-                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.answer1")}
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem
-                  value="item-2"
-                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger
-                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.question2")}
-                  </AccordionTrigger>
-                  <AccordionContent
-                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.answer2")}
-                  </AccordionContent>
-                </AccordionItem>
-
-                {previewOn && (
-                  <AccordionItem
-                    value="item-preview"
-                    className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
-                  >
-                    <AccordionTrigger
-                      className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
-                        locale === "en" ? "text-left" : "text-right"
-                      }`}
-                    >
-                      {t("qa.questionPreview")}
-                    </AccordionTrigger>
-                    <AccordionContent
-                      className={`font-body text-medium-gray leading-relaxed pt-4 ${
-                        locale === "en" ? "text-left" : "text-right"
-                      }`}
-                    >
-                      {t("qa.answerPreview")}
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-
-                <AccordionItem
-                  value="item-4"
-                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger
-                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.question4")}
-                  </AccordionTrigger>
-                  <AccordionContent
-                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.answer4")}
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem
-                  value="item-9"
-                  className="border border-soft-peach-light rounded-lg px-6 py-1.5 md:py-4 bg-white shadow-sm cursor-pointer"
-                >
-                  <AccordionTrigger
-                    className={`font-body-bold text-dark-gray hover:text-primary-orange transition-colors cursor-pointer ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {t("qa.question9")}
-                  </AccordionTrigger>
-                  <AccordionContent
-                    className={`font-body text-medium-gray leading-relaxed pt-4 ${
-                      locale === "en" ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {previewOn ? (
-                      <span className="block space-y-4">
-                        <span className="block">{t("qa.answer9.previewLine1")}</span>
-                        <span className="block">
-                          {t("qa.answer9.previewLine2Before")}
-                          <Link
-                            href="/contact"
-                            className="underline underline-offset-2 decoration-current hover:opacity-80"
-                          >
-                            {t("qa.answer9.linkText")}
-                          </Link>
-                        </span>
-                      </span>
-                    ) : (
-                      <span>
-                        {t("qa.answer9.beforeLink")}
-                        <Link
-                          href="/contact"
-                          className="underline underline-offset-2 decoration-current hover:opacity-80"
-                        >
-                          {t("qa.answer9.linkText")}
-                        </Link>
-                      </span>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-            )}
+            <QaTabsSection
+              className="max-w-4xl mx-auto"
+              bookItemIds={[...HOME_BOOK_IDS]}
+              framedItemIds={framedOn ? [...HOME_FRAMED_IDS] : undefined}
+              hideTabs={!framedOn}
+            />
 
             {/* Button to navigate to Q&A page */}
             <div className="text-center mt-12">
               <div>
                 <a href="/qa" aria-label={t("home.qa.ctaAriaLabel")}>
-                  <MuiButton
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                      px: 3,
-                      py: 1.25,
-                      fontFamily: "var(--font-assistant)",
-                      fontWeight: 700,
-                      fontSize: "0.9rem",
-                      textTransform: "none",
-                    }}
-                  >
-                    {t("home.qa.cta")}
-                  </MuiButton>
+                  <HomeCtaButton>{t("home.qa.cta")}</HomeCtaButton>
                 </a>
               </div>
             </div>

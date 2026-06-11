@@ -7,9 +7,9 @@ import { useLanguage } from "@/lib/LanguageContext";
 export function TopBanner() {
   const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const bannerRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
 
   // Get messages from translations
   const messages = [
@@ -29,20 +29,22 @@ export function TopBanner() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Hide banner when scrolling down past 10px, show when at top or scrolling up
-      if (currentScrollY > 10 && currentScrollY > lastScrollY) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY || currentScrollY <= 10) {
+      const lastScrollY = lastScrollYRef.current;
+
+      // Only show at the top — re-showing on scroll-up elsewhere shifts --banner-height
+      // and jumps the page (especially noticeable at the bottom).
+      if (currentScrollY <= 10) {
         setIsVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsVisible(false);
       }
-      
-      setLastScrollY(currentScrollY);
+
+      lastScrollYRef.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   // Update CSS variable for header positioning based on actual banner height
   useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useState, useEffect } from "react";
 
@@ -38,6 +39,7 @@ function TermsSection({
 function TermsPageContent() {
   const { t, locale } = useLanguage();
   const textAlign = locale === "en" ? "text-left" : "text-right";
+  const isHebrew = locale === "he";
 
   return (
     <div
@@ -54,9 +56,13 @@ function TermsPageContent() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-16">
             <div className="max-w-4xl mx-auto">
               <div className="mb-12 text-center">
-                <h1 className="mb-4 text-center font-heading text-3xl leading-tight text-dark-gray lg:text-4xl">
+                <Title
+                  as="h1"
+                  highlightText={isHebrew ? "שירות" : "Service"}
+                  size="lg"
+                >
                   {t("terms.title")}
-                </h1>
+                </Title>
               </div>
 
               <div
@@ -124,6 +130,7 @@ function TermsPageContent() {
                     t("terms.warrantyAndService.p1"),
                     t("terms.warrantyAndService.p2"),
                     t("terms.warrantyAndService.p3"),
+                    t("terms.warrantyAndService.p4"),
                   ]}
                 />
 
@@ -140,7 +147,9 @@ function TermsPageContent() {
                   </h3>
                   <p className="mb-4">{t("terms.safeUse.books.p1")}</p>
                   <p className="mb-4">{t("terms.safeUse.books.p2")}</p>
-                  <p className="mb-6">{t("terms.safeUse.books.p3")}</p>
+                  <p className="mb-4">{t("terms.safeUse.books.p3")}</p>
+                  <p className="mb-4">{t("terms.safeUse.books.p4")}</p>
+                  <p className="mb-6">{t("terms.safeUse.books.p5")}</p>
                   <h3
                     className={`mb-3 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
                   >
@@ -170,13 +179,17 @@ function TermsPageContent() {
                   paragraphs={[
                     t("terms.liabilityLimitation.p1"),
                     t("terms.liabilityLimitation.p2"),
+                    t("terms.liabilityLimitation.p3"),
                   ]}
                 />
 
                 <TermsSection
                   locale={locale}
                   title={t("terms.termsChanges.title")}
-                  paragraphs={[t("terms.termsChanges.p1")]}
+                  paragraphs={[
+                    t("terms.termsChanges.p1"),
+                    t("terms.termsChanges.p2"),
+                  ]}
                 />
 
                 <div>
