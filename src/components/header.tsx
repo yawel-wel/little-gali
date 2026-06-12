@@ -60,7 +60,6 @@ export function Header() {
     { nameKey: "nav.giftCard", href: "/#gift-card", isAnchor: true },
     { nameKey: "nav.qa", href: "/qa", isAnchor: false },
     { nameKey: "nav.inspiration", href: "/inspiration", isAnchor: false },
-    { nameKey: "nav.fabricBook", href: "/#fabric-book-signup", isAnchor: true },
     { nameKey: "nav.contact", href: "/contact", isAnchor: false },
   ].map((item) => ({
     ...item,
@@ -130,7 +129,7 @@ export function Header() {
                     >
                       {mobileNavigationItems.map((item) => (
                         <a
-                          key={item.name}
+                          key={item.nameKey}
                           href={item.href}
                           onClick={(e) => {
                             setIsOpen(false);
