@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     const contentType = request.headers.get("content-type") ?? "";
     let name = "";
     let email = "";
+    let subject = "";
     let message = "";
     let previewSessionId: string | undefined;
     let secondaryPreviewSessionId: string | undefined;
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       const formData = await request.formData();
       name = readFormField(formData.get("name"));
       email = readFormField(formData.get("email"));
+      subject = readFormField(formData.get("subject"));
       message = readFormField(formData.get("message"));
       const sessionField = readFormField(formData.get("previewSessionId"));
       previewSessionId = sessionField || undefined;
@@ -69,12 +71,14 @@ export async function POST(request: NextRequest) {
       const body = (await request.json()) as {
         name?: string;
         email?: string;
+        subject?: string;
         message?: string;
         previewSessionId?: string;
         secondaryPreviewSessionId?: string;
       };
       name = body.name?.trim() ?? "";
       email = body.email?.trim() ?? "";
+      subject = body.subject?.trim() ?? "";
       message = body.message?.trim() ?? "";
       previewSessionId = body.previewSessionId?.trim() || undefined;
       secondaryPreviewSessionId =
@@ -89,13 +93,6 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "כתובת אימייל לא תקינה" },
-        { status: 400 },
-      );
-    }
-
-    if (attachmentFiles.length > 0 && !previewSessionId) {
-      return NextResponse.json(
-        { error: "ניתן לצרף תמונות רק מהודעה הקשורה לתצוגה מקדימה" },
         { status: 400 },
       );
     }
@@ -145,18 +142,29 @@ export async function POST(request: NextRequest) {
         ? `\n\nקבצים מצורפים: ${attachments.length}`
         : "";
 
+    const emailSubject = subject
+      ? `הודעה חדשה מאתר ליטל גלי - ${escapeHtml(subject)} - ${escapeHtml(name)}`
+      : `הודעה חדשה מאתר ליטל גלי - ${escapeHtml(name)}`;
+
+    const subjectHtml = subject
+      ? `<p><strong>נושא:</strong> ${escapeHtml(subject)}</p>`
+      : "";
+
+    const subjectText = subject ? `\nנושא: ${subject}` : "";
+
     const resend = getResend();
     const { error } = await resend.emails.send({
       from: "Little Gali <onboarding@resend.dev>",
       to: ["yaelromashkano@gmail.com"],
       replyTo: email,
-      subject: `הודעה חדשה מאתר ליטל גלי - ${escapeHtml(name)}`,
+      subject: emailSubject,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px;">
           <h2 style="color: #E5543D;">הודעה חדשה מאתר ליטל גלי</h2>
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 20px;">
             <p><strong>שם:</strong> ${escapeHtml(name)}</p>
             <p><strong>אימייל:</strong> ${escapeHtml(email)}</p>
+            ${subjectHtml}
             <p><strong>תוכן ההודעה:</strong></p>
             <p style="white-space: pre-wrap; margin-top: 10px;">${escapeHtml(message)}</p>
             ${attachmentNote}
@@ -166,7 +174,7 @@ export async function POST(request: NextRequest) {
       `,
       text: `
 שם: ${name}
-אימייל: ${email}
+אימייל: ${email}${subjectText}
 תוכן ההודעה:
 ${message}${attachmentText}${previewText}
       `,

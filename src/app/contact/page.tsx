@@ -1,13 +1,18 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
-import { ImagePlus, X } from "lucide-react";
+import Link from "next/link";
+import {
+  Clock,
+  Mail,
+  Package,
+  Paperclip,
+  X,
+} from "lucide-react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { Title } from "@/components/title";
-import { Button } from "@/components/ui/button";
+import { HomeCtaButton } from "@/components/home-cta-button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/LanguageContext";
 import { UPLOAD_IMAGE_ACCEPT } from "@/lib/allowed-image-types";
@@ -19,10 +24,13 @@ import { trackContact } from "@/lib/meta-pixel-events";
 import { getPersistedLgSessionId } from "@/lib/session-id";
 import { cn } from "@/lib/utils";
 
-const easeOwlet = [0.16, 1, 0.3, 1];
+const SIDEBAR_LINKS = [
+  { labelKey: "contact.sidebarReturns", href: "/returns" },
+  { labelKey: "contact.sidebarOrderTracking", href: "/shipping" },
+  { labelKey: "contact.sidebarFaq", href: "/qa" },
+] as const;
 
 function ContactPageContent() {
-  const prefersReducedMotion = useReducedMotion();
   const { t, locale } = useLanguage();
   const searchParams = useSearchParams();
   const previewSessionIdFromUrl = searchParams.get("previewSessionId");
@@ -45,11 +53,11 @@ function ContactPageContent() {
     setSecondaryPreviewSessionId(secondaryPreviewSessionIdFromUrl);
   }, [previewSessionIdFromUrl, secondaryPreviewSessionIdFromUrl]);
 
-  const isPreviewContact = Boolean(previewSessionId);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    subject: "",
     message: "",
   });
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -59,13 +67,23 @@ function ContactPageContent() {
     message: string;
   }>({ type: null, message: "" });
 
+  const textAlign = locale === "en" ? "text-left" : "text-right";
+  const labelClass = cn(
+    "mb-1.5 block text-xs font-body-bold text-dark-gray lg:mb-2 lg:text-sm",
+    textAlign,
+  );
+  const inputClass = cn(
+    "h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-body text-dark-gray placeholder:text-sm placeholder:text-medium-gray focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 lg:h-12 lg:px-4 lg:text-base lg:placeholder:text-base",
+    textAlign,
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      if (isPreviewContact && attachedFiles.length > 0) {
+      if (attachedFiles.length > 0) {
         const validation = validateContactAttachments(attachedFiles);
         if (!validation.ok) {
           setSubmitStatus({
@@ -78,13 +96,16 @@ function ContactPageContent() {
       }
 
       let response: Response;
-      const hasAttachments = isPreviewContact && attachedFiles.length > 0;
+      const hasAttachments = attachedFiles.length > 0;
       if (hasAttachments) {
         const body = new FormData();
         body.append("name", formData.name);
         body.append("email", formData.email);
+        body.append("subject", formData.subject);
         body.append("message", formData.message);
-        body.append("previewSessionId", previewSessionId!);
+        if (previewSessionId) {
+          body.append("previewSessionId", previewSessionId);
+        }
         if (secondaryPreviewSessionId) {
           body.append("secondaryPreviewSessionId", secondaryPreviewSessionId);
         }
@@ -126,6 +147,7 @@ function ContactPageContent() {
         setFormData({
           name: "",
           email: "",
+          subject: "",
           message: "",
         });
         setAttachedFiles([]);
@@ -138,7 +160,7 @@ function ContactPageContent() {
           message: data.error || t("contact.error"),
         });
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus({
         type: "error",
         message: t("contact.serverError"),
@@ -149,7 +171,7 @@ function ContactPageContent() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -203,303 +225,333 @@ function ContactPageContent() {
     }
   };
 
-  const textAlign = locale === "en" ? "text-left" : "text-right";
+  const isRtl = locale === "he";
+
+  const contactInfoRow = (icon: ReactNode, content: ReactNode) => (
+    <li
+      dir={isRtl ? "ltr" : undefined}
+      className={cn("flex w-full", isRtl ? "justify-end" : "justify-start")}
+    >
+      <span className="inline-flex items-center gap-3 font-body text-sm text-dark-gray">
+        {isRtl ? (
+          <>
+            <span dir="rtl">{content}</span>
+            {icon}
+          </>
+        ) : (
+          <>
+            {icon}
+            <span>{content}</span>
+          </>
+        )}
+      </span>
+    </li>
+  );
 
   return (
-    <div
-      className="min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: "#F3EEE8" }}
-    >
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#F0E8DE] lg:bg-white">
       <Header />
 
-      <main id="main-content" className="flex-1">
-        <motion.section
-          className="relative py-16 lg:py-24 pt-20 md:pt-16"
-          style={{ backgroundColor: "#F3EEE8" }}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, ease: easeOwlet }}
-          viewport={{ once: true, amount: 0.25 }}
-        >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-                {/* Left Side - Title and Image Placeholder */}
-                <motion.div
-                  className="order-1 lg:order-1"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-                  whileInView={
-                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
-                  }
-                  transition={{ duration: 1.1, ease: easeOwlet, delay: 0.1 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                >
-                  <div className="space-y-4">
-                    {/* Title */}
-                    <div className="w-full">
-                      <Title
-                        highlightText={t("contact.titleHighlight")}
-                        size="lg"
-                        className="w-full m-0 text-center"
-                      >
-                        {t("contact.title")}
-                      </Title>
-                      <div className="mt-4 text-center">
-                        <p className="text-base font-body text-medium-gray leading-relaxed">
-                          {t("contact.subtitle1")}
-                        </p>
-                        <p className="text-base font-body text-medium-gray leading-relaxed">
-                          {t("contact.subtitle2")}
-                        </p>
-                      </div>
-                    </div>
+      <main id="main-content" className="flex flex-1 flex-col">
+        <section className="flex flex-1 flex-col pt-[calc(72px+var(--banner-height,0px)+20px)] lg:pt-28">
+          {/* Mobile header */}
+          <div className="px-4 pb-6 text-center lg:hidden">
+            <span className="inline-block rounded-full bg-[#E8DFD4] px-4 py-1.5 font-body text-sm text-dark-gray">
+              {t("contact.badge")}
+            </span>
+            <h1 className="mt-3 font-heading text-2xl font-bold leading-tight text-dark-gray">
+              {t("contact.sidebarTitle")}
+            </h1>
+            <p className="mt-2 font-body text-sm leading-relaxed text-medium-gray">
+              {t("contact.mobileSubtitle")}
+            </p>
+          </div>
 
-                    {/* Image */}
-                    <div className="w-full h-64 lg:h-80 rounded-lg overflow-hidden">
-                      <img
-                        src="/contact-us.png"
-                        alt={t("contact.imageAlt")}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+          <div
+            className="grid min-h-0 flex-1 lg:grid-cols-[2fr_1fr] lg:items-stretch"
+            dir="ltr"
+          >
+            {/* Form column */}
+            <div className="flex justify-center px-4 pb-10 sm:px-6 lg:col-start-1 lg:justify-end lg:bg-white lg:px-12 lg:py-14 xl:px-16">
+              <div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-sm sm:p-6 lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-5"
+                  dir={isRtl ? "rtl" : "ltr"}
+                >
+                {previewSessionId && (
+                  <input
+                    type="hidden"
+                    name="previewSessionId"
+                    value={previewSessionId}
+                  />
+                )}
+                {secondaryPreviewSessionId && (
+                  <input
+                    type="hidden"
+                    name="secondaryPreviewSessionId"
+                    value={secondaryPreviewSessionId}
+                  />
+                )}
+
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                  <div>
+                    <label htmlFor="name" className={labelClass}>
+                      {t("contact.name")}{" "}
+                      <span className="text-primary-orange">*</span>
+                    </label>
+                    <Input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={inputClass}
+                      placeholder={t("contact.namePlaceholder")}
+                    />
                   </div>
-                </motion.div>
 
-                {/* Right Side - Form */}
-                <motion.div
-                  className="order-2 lg:order-2"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
-                  whileInView={
-                    prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
-                  }
-                  transition={{ duration: 1.1, ease: easeOwlet, delay: 0.2 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                >
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {previewSessionId && (
-                      <input
-                        type="hidden"
-                        name="previewSessionId"
-                        value={previewSessionId}
-                      />
+                  <div>
+                    <label htmlFor="email" className={labelClass}>
+                      {t("contact.email")}{" "}
+                      <span className="text-primary-orange">*</span>
+                    </label>
+                    <Input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={cn(inputClass, "dir-ltr")}
+                      placeholder={t("contact.emailPlaceholder")}
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="subject" className={labelClass}>
+                    {t("contact.subject")}
+                  </label>
+                  <Input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder={t("contact.subjectPlaceholder")}
+                    dir={isRtl ? "rtl" : undefined}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="message" className={labelClass}>
+                    {t("contact.message")}{" "}
+                    <span className="text-primary-orange">*</span>
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    required
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={6}
+                    className={cn(
+                      "min-h-[120px] w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-body text-dark-gray placeholder:text-sm placeholder:text-medium-gray focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 lg:min-h-[220px] lg:px-4 lg:py-3 lg:text-base lg:placeholder:text-base",
+                      textAlign,
                     )}
-                    {secondaryPreviewSessionId && (
-                      <input
-                        type="hidden"
-                        name="secondaryPreviewSessionId"
-                        value={secondaryPreviewSessionId}
-                      />
+                    placeholder={t("contact.messagePlaceholder")}
+                  />
+                </div>
+
+                <div>
+                  <input
+                    ref={attachmentInputRef}
+                    type="file"
+                    accept={UPLOAD_IMAGE_ACCEPT}
+                    multiple
+                    className="hidden"
+                    onChange={handleAttachmentChange}
+                    disabled={
+                      isSubmitting ||
+                      attachedFiles.length >= CONTACT_ATTACHMENT_MAX_FILES
+                    }
+                  />
+                  <button
+                    type="button"
+                    disabled={
+                      isSubmitting ||
+                      attachedFiles.length >= CONTACT_ATTACHMENT_MAX_FILES
+                    }
+                    onClick={() => attachmentInputRef.current?.click()}
+                    className={cn(
+                      "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-dashed border-gray-300 bg-[#F7F5F2] px-3 py-2.5 text-sm transition-colors hover:bg-[#F0EBE5] disabled:cursor-not-allowed disabled:opacity-50 lg:px-4 lg:py-3.5",
+                      locale === "he" ? "flex-row-reverse" : "flex-row",
                     )}
-
-                    {/* Name Field */}
-                    <div>
-                      <label
-                        htmlFor="name"
-                        className={`block text-sm font-body-bold text-dark-gray mb-2 ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                      >
-                        {t("contact.name")}{" "}
-                        <span className="text-primary-orange">*</span>
-                      </label>
-                      <Input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
-                        value={formData.name}
-                        onChange={handleChange}
-                        className={`w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                        placeholder={t("contact.namePlaceholder")}
-                      />
-                    </div>
-
-                    {/* Email Field */}
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className={`block text-sm font-body-bold text-dark-gray mb-2 ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                      >
-                        {t("contact.email")}{" "}
-                        <span className="text-primary-orange">*</span>
-                      </label>
-                      <Input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={`w-full h-12 px-4 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                        placeholder={t("contact.emailPlaceholder")}
-                      />
-                    </div>
-
-                    {/* Message Field */}
-                    <div>
-                      <label
-                        htmlFor="message"
-                        className={`block text-sm font-body-bold text-dark-gray mb-2 ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                      >
-                        {t("contact.message")}{" "}
-                        <span className="text-primary-orange">*</span>
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        required
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={8}
-                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 bg-white resize-none font-body text-dark-gray ${
-                          locale === "en" ? "text-left" : "text-right"
-                        }`}
-                        placeholder={t("contact.messagePlaceholder")}
-                      />
-                      {previewSessionId && (
-                        <p
-                          className={cn(
-                            "mt-1 font-body text-sm text-medium-gray",
-                            textAlign,
-                          )}
-                        >
-                          {t("contact.previewLinked")}
-                        </p>
+                  >
+                    <span
+                      className={cn(
+                        "flex items-center gap-2 font-body text-sm text-dark-gray",
+                        locale === "he" ? "flex-row-reverse" : "flex-row",
                       )}
-                    </div>
+                    >
+                      <Paperclip className="h-4 w-4 shrink-0 text-medium-gray" />
+                      {t("contact.attachments")}
+                    </span>
+                    <span className="shrink-0 font-body text-xs text-medium-gray lg:hidden">
+                      {t("contact.attachmentsLimitHintShort")}
+                    </span>
+                    <span className="hidden shrink-0 font-body text-xs text-medium-gray lg:inline">
+                      {t("contact.attachmentsLimitHint")}
+                    </span>
+                  </button>
 
-                    {isPreviewContact && (
-                      <div>
-                        <label
+                  {attachedFiles.length > 0 && (
+                    <ul className="mt-3 space-y-2">
+                      {attachedFiles.map((file, index) => (
+                        <li
+                          key={`${file.name}-${file.size}-${index}`}
                           className={cn(
-                            "mb-2 block text-sm font-body-bold text-dark-gray",
-                            textAlign,
+                            "flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2",
+                            locale === "en" ? "flex-row" : "flex-row-reverse",
                           )}
                         >
-                          {t("contact.attachments")}
-                        </label>
-                        <input
-                          ref={attachmentInputRef}
-                          type="file"
-                          accept={UPLOAD_IMAGE_ACCEPT}
-                          multiple
-                          className="hidden"
-                          onChange={handleAttachmentChange}
-                          disabled={
-                            isSubmitting ||
-                            attachedFiles.length >= CONTACT_ATTACHMENT_MAX_FILES
-                          }
-                        />
-                        <div
-                          dir={locale === "en" ? "ltr" : "rtl"}
-                          className="flex flex-wrap items-center justify-start gap-3"
-                        >
-                          <Button
+                          <span className="min-w-0 flex-1 truncate font-body text-sm text-dark-gray">
+                            {file.name}
+                          </span>
+                          <button
                             type="button"
-                            variant="outline"
-                            disabled={
-                              isSubmitting ||
-                              attachedFiles.length >= CONTACT_ATTACHMENT_MAX_FILES
-                            }
-                            onClick={() => attachmentInputRef.current?.click()}
-                            className="cursor-pointer gap-2 rounded-full border-gray-300 bg-white font-body text-dark-gray hover:bg-gray-50"
+                            onClick={() => removeAttachment(index)}
+                            disabled={isSubmitting}
+                            className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={t("contact.attachmentsRemove")}
                           >
-                            <ImagePlus
-                              className="h-4 w-4"
-                              strokeWidth={2.25}
-                            />
-                            {t("contact.attachmentsChoose")}
-                          </Button>
-                        </div>
-                        <p
-                          className={cn(
-                            "mt-2 font-body text-xs text-medium-gray",
-                            textAlign,
-                          )}
-                        >
-                          {t("contact.attachmentsLimitHint")}
-                        </p>
-                        {attachedFiles.length > 0 && (
-                          <ul className="mt-4 space-y-2">
-                            {attachedFiles.map((file, index) => (
-                              <li
-                                key={`${file.name}-${file.size}-${index}`}
-                                className={cn(
-                                  "flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2",
-                                  locale === "en"
-                                    ? "flex-row"
-                                    : "flex-row-reverse",
-                                )}
-                              >
-                                <span className="min-w-0 flex-1 truncate font-body text-sm text-dark-gray">
-                                  {file.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeAttachment(index)}
-                                  disabled={isSubmitting}
-                                  className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label={t("contact.attachmentsRemove")}
-                                >
-                                  <X className="h-4 w-4" strokeWidth={2.25} />
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    )}
+                            <X className="h-4 w-4" strokeWidth={2.25} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
-                    {/* Status Messages */}
-                    {submitStatus.type && (
-                      <div
-                        className={`p-4 rounded-lg ${
-                          submitStatus.type === "success"
-                            ? "bg-green-50 border border-green-200 text-green-800"
-                            : "bg-red-50 border border-red-200 text-red-800"
-                        }`}
-                      >
-                        <p className="font-body text-sm">
-                          {submitStatus.message}
-                        </p>
-                      </div>
-                    )}
+                {previewSessionId && (
+                  <>
+                    <p
+                      className={cn(
+                        "text-center font-body text-xs leading-relaxed text-medium-gray lg:hidden",
+                      )}
+                    >
+                      {t("contact.previewLinkedMobile")}
+                    </p>
+                    <p
+                      className={cn(
+                        "hidden font-body text-sm text-medium-gray lg:block",
+                        textAlign,
+                      )}
+                    >
+                      {t("contact.previewLinked")}
+                    </p>
+                  </>
+                )}
 
-                    {/* Submit Button */}
-                    <div>
-                      <motion.div
-                        whileHover={{
-                          scale: 1.01,
-                          y: -1,
-                          transition: { duration: 0.2, ease: easeOwlet },
-                        }}
-                        whileTap={{ scale: 0.99 }}
-                      >
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-8 py-3 rounded-full font-body-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isSubmitting
-                            ? t("contact.submitting")
-                            : t("contact.submit")}
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </form>
-                </motion.div>
+                {submitStatus.type && (
+                  <div
+                    className={cn(
+                      "rounded-lg p-4",
+                      submitStatus.type === "success"
+                        ? "border border-warm-tan bg-warm-cream text-accent-burgundy"
+                        : "border border-red-200 bg-red-50 text-red-800",
+                    )}
+                  >
+                    <p className="font-body text-sm">{submitStatus.message}</p>
+                  </div>
+                )}
+
+                <HomeCtaButton
+                  type="submit"
+                  fullWidth
+                  disabled={isSubmitting}
+                  sx={{ py: { xs: 1.25, lg: 1.75 } }}
+                >
+                  {isSubmitting ? t("contact.submitting") : t("contact.submit")}
+                </HomeCtaButton>
+              </form>
               </div>
             </div>
+
+            {/* Desktop sidebar */}
+            <aside
+              className="hidden bg-[#F0E8DE] px-4 py-10 sm:px-6 lg:col-start-2 lg:block lg:h-full lg:min-h-full lg:px-12 lg:py-14 xl:px-16"
+              dir={isRtl ? "rtl" : "ltr"}
+            >
+              <div
+                className={cn(
+                  "mx-auto w-full max-w-md lg:max-w-lg lg:mx-0",
+                  isRtl ? "text-right" : "text-left",
+                )}
+              >
+                <span className="inline-block rounded-full bg-[#E8DFD4] px-4 py-1.5 font-body text-sm text-dark-gray">
+                  {t("contact.badge")}
+                </span>
+
+                <h1 className="mt-5 font-heading text-3xl font-bold leading-tight text-dark-gray lg:text-4xl">
+                  {t("contact.sidebarTitle")}
+                </h1>
+
+                <p className="mt-3 font-body text-base leading-relaxed text-medium-gray">
+                  {t("contact.sidebarSubtitle")}
+                </p>
+
+                <ul
+                  dir={isRtl ? "ltr" : undefined}
+                  className={cn("mt-8 space-y-5", isRtl && "text-right")}
+                >
+                  {contactInfoRow(
+                    <Clock className="h-5 w-5 shrink-0 text-dark-gray" strokeWidth={1.75} />,
+                    t("contact.responseTime"),
+                  )}
+                  {contactInfoRow(
+                    <Mail className="h-5 w-5 shrink-0 text-dark-gray" strokeWidth={1.75} />,
+                    <a
+                      href={`mailto:${t("contact.supportEmail")}`}
+                      className="font-body text-sm text-dark-gray underline-offset-2 hover:underline"
+                      dir="ltr"
+                    >
+                      {t("contact.supportEmail")}
+                    </a>,
+                  )}
+                  {contactInfoRow(
+                    <Package className="h-5 w-5 shrink-0 text-dark-gray" strokeWidth={1.75} />,
+                    t("contact.deliveryTime"),
+                  )}
+                </ul>
+
+                <div className="mt-10 border-t border-[#D9CEC4] pt-8">
+                  <div
+                    dir="ltr"
+                    className={cn(
+                      "flex flex-col gap-3",
+                      isRtl ? "items-end" : "items-start",
+                    )}
+                  >
+                    {SIDEBAR_LINKS.map((link) => (
+                      <Link
+                        key={link.labelKey}
+                        href={link.href}
+                        className="inline-flex w-fit rounded-full bg-white px-5 py-2.5 font-body-bold text-sm text-dark-gray transition-colors hover:bg-white/80"
+                      >
+                        {t(link.labelKey)}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </aside>
           </div>
-        </motion.section>
+        </section>
       </main>
 
       <Footer />

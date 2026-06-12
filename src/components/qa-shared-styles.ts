@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 export const QA_ACCORDION_CLASS = "space-y-2 md:space-y-3";
 
 export const QA_ACCORDION_ITEM_CLASS =
-  "cursor-pointer rounded-lg border border-soft-peach-light bg-white px-6 py-0 shadow-sm md:py-2";
+  "cursor-pointer rounded-lg border border-soft-peach-light bg-white px-6 py-[2px] shadow-sm md:py-[10px]";
 
 export const QA_TABS_ROW_CLASS = "mb-0 flex justify-center gap-2";
 

@@ -680,9 +680,6 @@ export default function Home() {
               >
                 {t("home.special.title")}
               </Title>
-              <p className="mx-auto mt-4 max-w-2xl font-body text-base leading-relaxed text-medium-gray sm:text-lg">
-                {t("home.special.subtitleLine1")}
-              </p>
             </div>
 
             <motion.div
