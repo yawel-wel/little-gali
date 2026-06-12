@@ -26,7 +26,6 @@ import { cn } from "@/lib/utils";
 
 const SIDEBAR_LINKS = [
   { labelKey: "contact.sidebarReturns", href: "/returns" },
-  { labelKey: "contact.sidebarOrderTracking", href: "/shipping" },
   { labelKey: "contact.sidebarFaq", href: "/qa" },
 ] as const;
 
