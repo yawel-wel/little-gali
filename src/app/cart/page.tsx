@@ -104,8 +104,6 @@ export default function CartPage() {
   const [isResettingCart, setIsResettingCart] = useState(false);
   const [addGiftMessage, setAddGiftMessage] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
-  const [isUpdatingGiftMessage, setIsUpdatingGiftMessage] = useState(false);
-  const giftMessageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isPendingAdd = isOptimisticAdding || readAddingToCartFlag();
 
   // Refresh cart when opening /cart. Defer fetch while an add is in flight so we
@@ -145,130 +143,16 @@ export default function CartPage() {
     return () => window.clearInterval(interval);
   }, []);
 
-  // Load gift message from cart attributes
-  useEffect(() => {
-    if (cart?.id) {
-      // Fetch cart attributes to get the current consent value
-      const loadConsent = async () => {
-        try {
-          const response = await fetch("/api/shopify/cart/get", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cartId: cart.id }),
-          });
-          const data = await response.json();
-          if (data.cart?.attributes) {
-            const giftMessageEnabledAttr = data.cart.attributes.find(
-              (attr: any) => attr.key === "_gift_message_enabled"
-            );
-            if (giftMessageEnabledAttr?.value === "true") {
-              setAddGiftMessage(true);
-            }
-            
-            const giftMessageAttr = data.cart.attributes.find(
-              (attr: any) => attr.key === "_gift_message"
-            );
-            if (giftMessageAttr?.value) {
-              setGiftMessage(giftMessageAttr.value);
-            }
-          }
-        } catch (error) {
-          console.error("Error loading consent:", error);
-        }
-      };
-      loadConsent();
-    }
-  }, [cart?.id]);
-
-  const handleGiftMessageCheckboxChange = async (checked: boolean) => {
-    if (!cart?.id || isUpdatingGiftMessage) return;
-    
+  const handleGiftMessageCheckboxChange = (checked: boolean) => {
     setAddGiftMessage(checked);
-    setIsUpdatingGiftMessage(true);
-    
-    // If unchecking, also clear the message
     if (!checked) {
       setGiftMessage("");
-    }
-    
-    try {
-      const attributes = [
-        { key: "_gift_message_enabled", value: checked ? "true" : "false" },
-      ];
-      
-      // If unchecking, also clear the stored message
-      if (!checked) {
-        attributes.push({ key: "_gift_message", value: "" });
-      }
-      
-      const response = await fetch("/api/shopify/cart/update-attributes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cartId: cart.id,
-          attributes,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to update gift message setting");
-      }
-    } catch (error) {
-      console.error("Error updating gift message setting:", error);
-      // Revert on error
-      setAddGiftMessage(!checked);
-    } finally {
-      setIsUpdatingGiftMessage(false);
     }
   };
 
   const handleGiftMessageChange = (message: string) => {
-    // Limit to 200 characters
-    const limitedMessage = message.slice(0, 200);
-    setGiftMessage(limitedMessage);
-    
-    // Clear existing timeout
-    if (giftMessageTimeoutRef.current) {
-      clearTimeout(giftMessageTimeoutRef.current);
-    }
-    
-    // Set new timeout to save after user stops typing (500ms delay)
-    giftMessageTimeoutRef.current = setTimeout(async () => {
-      if (!cart?.id) return;
-      
-      setIsUpdatingGiftMessage(true);
-      
-      try {
-        const response = await fetch("/api/shopify/cart/update-attributes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cartId: cart.id,
-            attributes: [
-              { key: "_gift_message", value: limitedMessage },
-            ],
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error("Failed to update gift message");
-        }
-      } catch (error) {
-        console.error("Error updating gift message:", error);
-      } finally {
-        setIsUpdatingGiftMessage(false);
-      }
-    }, 500);
+    setGiftMessage(message.slice(0, 200));
   };
-  
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (giftMessageTimeoutRef.current) {
-        clearTimeout(giftMessageTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleRemoveClick = (lineId: string) => {
     setItemToRemove(lineId);
@@ -362,31 +246,54 @@ export default function CartPage() {
 
   // Edit functionality removed: books can only be created via normal flow and not edited from cart
 
-  const handleCheckout = () => {
-    if (cart?.checkoutUrl) {
-      setIsCheckingOut(true);
-      
-      // Track Meta Pixel InitiateCheckout event
+  const handleCheckout = async () => {
+    if (!cart?.checkoutUrl) return;
+
+    setIsCheckingOut(true);
+
+    try {
+      if (cart.id) {
+        const attributes = [
+          {
+            key: "_gift_message_enabled",
+            value: addGiftMessage ? "true" : "false",
+          },
+          {
+            key: "_gift_message",
+            value: addGiftMessage ? giftMessage : "",
+          },
+        ];
+
+        const response = await fetch("/api/shopify/cart/update-attributes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cartId: cart.id, attributes }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save gift message");
+        }
+      }
+
       try {
         const totalValue = cart.totalAmount ? parseFloat(cart.totalAmount) : 0;
         trackInitiateCheckout(totalValue, cart.totalQuantity);
       } catch (err) {
         console.error("Error tracking InitiateCheckout:", err);
       }
-      
-      // The checkoutUrl in cart state should already have the locale
-      // But ensure it's there as a safety measure
+
       let checkoutUrl = cart.checkoutUrl;
       try {
         const url = new URL(checkoutUrl);
-        // Always ensure locale is set to current locale
         url.searchParams.set("locale", locale);
         checkoutUrl = url.toString();
       } catch (e) {
-        // If URL parsing fails, use original URL
         console.error("Error parsing checkout URL:", e);
       }
       window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error("Error proceeding to checkout:", error);
+      setIsCheckingOut(false);
     }
   };
 
@@ -593,10 +500,9 @@ export default function CartPage() {
                         giftMessage={giftMessage}
                         isCheckingOut={isCheckingOut}
                         isLoading={isLoading || isPendingAdd}
-                        isUpdatingGiftMessage={isUpdatingGiftMessage}
                         onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
                         onGiftMessageChange={handleGiftMessageChange}
-                        onCheckout={handleCheckout}
+                        onCheckout={() => void handleCheckout()}
                         giftCheckboxId="addGiftMessage"
                       />
                     </div>
@@ -611,10 +517,9 @@ export default function CartPage() {
                       giftMessage={giftMessage}
                       isCheckingOut={isCheckingOut}
                       isLoading={isLoading || isPendingAdd}
-                      isUpdatingGiftMessage={isUpdatingGiftMessage}
                       onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
                       onGiftMessageChange={handleGiftMessageChange}
-                      onCheckout={handleCheckout}
+                      onCheckout={() => void handleCheckout()}
                       giftCheckboxId="addGiftMessageMobile"
                     />
                   </div>

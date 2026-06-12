@@ -13,7 +13,6 @@ type CartOrderSummaryProps = {
   giftMessage: string;
   isCheckingOut: boolean;
   isLoading: boolean;
-  isUpdatingGiftMessage: boolean;
   onGiftMessageCheckboxChange: (checked: boolean) => void;
   onGiftMessageChange: (message: string) => void;
   onCheckout: () => void;
@@ -27,7 +26,6 @@ export function CartOrderSummary({
   giftMessage,
   isCheckingOut,
   isLoading,
-  isUpdatingGiftMessage,
   onGiftMessageCheckboxChange,
   onGiftMessageChange,
   onCheckout,
@@ -124,7 +122,7 @@ export function CartOrderSummary({
               size="small"
               checked={addGiftMessage}
               onChange={(e) => onGiftMessageCheckboxChange(e.target.checked)}
-              disabled={isUpdatingGiftMessage}
+              disabled={isCheckingOut}
               sx={{
                 padding: 0,
                 color: "#693430",
@@ -154,7 +152,6 @@ export function CartOrderSummary({
                 placeholder={t("cart.giftMessagePlaceholder")}
                 value={giftMessage}
                 onChange={(e) => onGiftMessageChange(e.target.value)}
-                disabled={isUpdatingGiftMessage}
                 inputProps={{
                   maxLength: 200,
                   dir: isHe ? "rtl" : "ltr",
