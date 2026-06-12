@@ -1023,6 +1023,7 @@ const hebrewTranslations = {
   "preview.changesExhaustedContactLink": "ליצור איתנו קשר",
   "preview.changesExhaustedLine2After": " אם משהו לא יצא כמו שציפיתם",
   "preview.regenerate": "צרו גרסה חדשה",
+  "preview.regenerateShort": "צור מחדש",
   "preview.replaceImage": "החליפו תמונה",
   "preview.prohibitedContentLine1": "התמונה נחסמה על ידי המודל.",
   "preview.prohibitedContentLine2": "יש להעלות תמונה אחרת במקום.",
@@ -2090,6 +2091,7 @@ const englishTranslations = {
   "preview.changesExhaustedLine2After":
     " if something didn't turn out as you expected",
   "preview.regenerate": "Generate again",
+  "preview.regenerateShort": "Regenerate",
   "preview.replaceImage": "Replace photo",
   "preview.prohibitedContentLine1": "The photo was blocked by the model.",
   "preview.prohibitedContentLine2": "Please upload a different photo instead.",

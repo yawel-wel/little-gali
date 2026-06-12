@@ -24,6 +24,7 @@ import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternat
 import { PreviewSlotGenerationError } from "@/components/preview-slot-generation-error";
 import { PreviewSlotProhibitedContent } from "@/components/preview-slot-prohibited-content";
 import { PreviewSlotFadeImage } from "@/components/preview-slot-fade-image";
+import { PreviewSlotRegenerateAction } from "@/components/preview-slot-regenerate-action";
 import {
   PreviewBookLightbox,
   type PreviewBookLightboxSlide,
@@ -1939,6 +1940,13 @@ export default function PreviewPage() {
                           displayedBookSide === "bw"
                             ? slot.activeCandidateId
                             : activeColorCandidate?.id;
+                        const canRegenerateSlot =
+                          displayedBookSide === "bw"
+                            ? session.canRegenerate
+                            : session.canRegenerateColor;
+                        const showRegenerateAction =
+                          Boolean(currentPreviewUrl && !previewUrlFailed) &&
+                          !isVisibleSideBusy;
                         return (
                           <div
                             key={slot.index}
@@ -2117,7 +2125,7 @@ export default function PreviewPage() {
                                   </div>
                                 </div>
                               ) : null}
-                              <div className="flex min-h-0 flex-1 items-center justify-center px-0 pb-[14px] md:px-0.5 md:pb-[18px]">
+                              <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-0 pb-2 md:px-0.5">
                                 <PreviewSlotLightboxActivator
                                   lightboxEnabled={Boolean(currentPreviewUrl)}
                                   onOpenLightbox={openSlotLightbox}
@@ -2258,6 +2266,21 @@ export default function PreviewPage() {
                                   </div>
                                 )}
                               </PreviewSlotLightboxActivator>
+                              {showRegenerateAction ? (
+                                <PreviewSlotRegenerateAction
+                                  className="mt-2"
+                                  disabled={
+                                    !canRegenerateSlot || isSubmitting
+                                  }
+                                  onClick={() => {
+                                    if (displayedBookSide === "bw") {
+                                      void handleRegenerate(slot.index);
+                                      return;
+                                    }
+                                    void handleRegenerateColor(slot.index);
+                                  }}
+                                />
+                              ) : null}
                               </div>
                             </div>
                             {versionCandidates.length > 1 ? (
