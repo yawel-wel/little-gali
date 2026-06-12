@@ -219,15 +219,15 @@ export default function Home() {
               sizes="100vw"
             />
             <div
-              className="absolute inset-0 bg-gradient-to-b from-black/8 via-black/5 to-black/0"
+              className="absolute inset-0 bg-gradient-to-b from-black/12 via-black/8 to-black/0"
               aria-hidden="true"
             />
           </div>
           {/* Content Overlay */}
           <div className="absolute inset-0 z-10 flex items-start pt-6 md:pt-[130px]">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="max-w-xl text-start mt-2 md:mt-0">
-                <span className="mb-[8px] inline-flex w-fit items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-1.5 text-sm font-body text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)] max-md:px-[15px] max-md:py-[5px] max-md:text-[12px]">
+              <div className="max-w-xl text-start mt-4 md:mt-0">
+                <span className="mb-[8px] inline-flex w-fit items-center gap-2 rounded-full bg-[#ebe5e0]/25 backdrop-blur-sm px-4 py-1.5 text-sm font-body text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)] max-md:px-[15px] max-md:py-[5px] max-md:text-[12px]">
                   <svg
                     className="w-3.5 h-3.5 shrink-0"
                     viewBox="0 0 24 24"
