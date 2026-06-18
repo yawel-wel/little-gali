@@ -4,7 +4,7 @@ import { isFreeGenerationError } from "./generation-errors";
 import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type { GenerationError, PreviewSession } from "./types";
 
-export const INITIAL_CHANGE_CREDITS = 3;
+export const INITIAL_CHANGE_CREDITS = 15;
 
 export function hasChangeCredits(session: PreviewSession): boolean {
   if (isPreviewLimitsBypassed()) {
