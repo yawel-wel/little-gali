@@ -15,6 +15,7 @@ import {
   useMemo,
 } from "react";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
+import { PreviousPreviewSessions } from "@/components/previous-preview-sessions";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
 import Link from "next/link";
@@ -602,6 +603,7 @@ function UploadPageContent() {
   );
 
   const previewEnabled = isAiPreviewEnabled();
+  const [hasPreviousSessions, setHasPreviousSessions] = useState(false);
   const showWithoutPreviewCartPath =
     previewBlockedCode === "preview_rate_limit" ||
     previewBlockedCode === "generation_rate_limit";
@@ -1029,7 +1031,7 @@ function UploadPageContent() {
                     highlightText={t("upload.titleReadyHighlight")}
                     size="xl"
                     roundedUnderline
-                    className="text-2xl md:text-4xl font-bold"
+                    className="text-[28px] md:text-4xl font-bold"
                   >
                     {t("upload.titleReady")}
                   </Title>
@@ -1038,7 +1040,7 @@ function UploadPageContent() {
                     highlightText={t("upload.titleHighlight")}
                     size="xl"
                     roundedUnderline
-                    className="text-2xl md:text-4xl font-bold"
+                    className="text-[28px] md:text-4xl font-bold"
                   >
                     {t("upload.title")}
                   </Title>
@@ -1046,18 +1048,24 @@ function UploadPageContent() {
               </div>
 
               {/* First Paragraph */}
-              <div className="text-center mb-8 -mt-4">
-                <p className="text-base font-body text-dark-gray leading-relaxed text-center">
-                  {t("upload.description")
-                    .split("\n")
-                    .map((line, i, arr) => (
-                      <span key={i}>
-                        {line}
-                        {i < arr.length - 1 && <br />}
-                      </span>
-                    ))}
-                </p>
-              </div>
+              {!(hasPreviousSessions && images.length === 0) && (
+                <div className="text-center mb-8 -mt-4">
+                  <p className="text-base font-body text-dark-gray leading-relaxed text-center">
+                    {t("upload.description")
+                      .split("\n")
+                      .map((line, i, arr) => (
+                        <span key={i}>
+                          {line}
+                          {i < arr.length - 1 && <br />}
+                        </span>
+                      ))}
+                  </p>
+                </div>
+              )}
+
+              {previewEnabled && images.length === 0 && (
+                <PreviousPreviewSessions onVisibleChange={setHasPreviousSessions} />
+              )}
 
               {/* Image Selection Progress Indicator */}
               <div className="text-center">
@@ -1234,9 +1242,6 @@ function UploadPageContent() {
 
                   {/* Image Upload Tip */}
                   <div className="text-center">
-                    <p className="mt-2 text-sm font-body text-dark-gray">
-                      {t("upload.photoNote")}
-                    </p>
                     <div
                       className="inline-flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                       style={{ color: "#693430" }}

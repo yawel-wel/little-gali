@@ -1,4 +1,4 @@
-export const PREVIEW_SESSION_TTL_SECONDS = 48 * 60 * 60;
+export const PREVIEW_SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 export function previewSessionKey(sessionId: string): string {
   return `preview:session:${sessionId}`;

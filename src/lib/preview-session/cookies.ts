@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
+import { PREVIEW_SESSION_TTL_SECONDS } from "./redis";
 
 export const PREVIEW_SESSION_COOKIE = "preview_session";
 
@@ -50,6 +51,6 @@ export function previewSessionCookieOptions() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
-    maxAge: 48 * 60 * 60,
+    maxAge: PREVIEW_SESSION_TTL_SECONDS,
   };
 }

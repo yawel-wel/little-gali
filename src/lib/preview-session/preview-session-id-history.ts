@@ -31,6 +31,43 @@ export function recordPreviewSessionId(sessionId: string): void {
   }
 }
 
+const LG_HIDDEN_RESUME_SESSIONS_KEY = "lgHiddenResumeSessionIds";
+
+/** Session ids the user dismissed from the upload resume cards. */
+export function getHiddenResumeSessionIds(): string[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const raw = localStorage.getItem(LG_HIDDEN_RESUME_SESSIONS_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((id): id is string => typeof id === "string" && isUuid(id));
+  } catch {
+    return [];
+  }
+}
+
+export function hideResumeSessionId(sessionId: string): void {
+  if (typeof window === "undefined" || !isUuid(sessionId)) {
+    return;
+  }
+  try {
+    const existing = getHiddenResumeSessionIds();
+    if (existing.includes(sessionId)) {
+      return;
+    }
+    localStorage.setItem(
+      LG_HIDDEN_RESUME_SESSIONS_KEY,
+      JSON.stringify([sessionId, ...existing]),
+    );
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
 /** Distinct session ids known on this device (most recent first). */
 export function getKnownPreviewSessionIds(): string[] {
   const ids: string[] = [];
