@@ -1,5 +1,5 @@
 import type { StyleType } from "@/components/style-selector";
-import { COLOR_STYLES, slotHasColorPreviewForStyle } from "./color-by-style";
+import { PREVIEW_COLOR_STYLES, slotHasColorPreviewForStyle } from "./color-by-style";
 import type { PreviewSession, PreviewSlot } from "./types";
 
 export function enqueuePendingColorRegen(
@@ -29,7 +29,7 @@ export function dequeuePendingColorRegen(
 }
 
 export function slotNeedsAllStylesColorRegen(slot: PreviewSlot): boolean {
-  return COLOR_STYLES.some(
-    (style) => !slotHasColorPreviewForStyle(slot, style as StyleType),
+  return PREVIEW_COLOR_STYLES.some(
+    (style) => !slotHasColorPreviewForStyle(slot, style),
   );
 }

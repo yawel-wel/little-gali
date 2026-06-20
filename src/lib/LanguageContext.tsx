@@ -973,7 +973,7 @@ const hebrewTranslations = {
   "preview.colorPhaseTitle": "הספרון המלא שלכם",
   "preview.colorPhaseTitleHighlight": "שלכם",
   "preview.colorPhaseDescription":
-    "עברו בין הצדדים של הספרון לצפייה בתוצאה המלאה.\nבצד הצבעוני ניתן לבחור בין שלושה סגנונות איור שונים.",
+    "עברו בין הצדדים של הספרון לצפייה בתוצאה המלאה.\nבצד הצבעוני ניתן לבחור בין שני סגנונות איור שונים.",
   "preview.bwPhaseDescription":
     "גרסאות השחור־לבן של התמונות שלכם מוכנות ✨\nשימו לב - לאחר המעבר לשלב הבא לא יהיה ניתן להעלות תמונות חדשות.",
   "preview.bwApproveAbove": "אהבתם? ממשיכים לצד הצבעוני",
@@ -1002,7 +1002,7 @@ const hebrewTranslations = {
   "preview.loadingSlow": "לוקח קצת יותר מהרגיל, כמעט שם...",
   "preview.title": "הנה הספרון שלכם",
   "preview.titleHighlight": "שלכם",
-  "preview.subtitle": "ניתן לבצע עד 3 שינויים.",
+  "preview.subtitle": "ניתן לבצע עד 5 שינויים.",
   "preview.tabBw": "צד שחור לבן",
   "preview.tabColor": "צד צבעוני",
   "preview.zoom": "הגדלה",
@@ -1010,7 +1010,7 @@ const hebrewTranslations = {
   "preview.lightboxPrevious": "עמוד קודם",
   "preview.lightboxNext": "עמוד הבא",
   "preview.colorLoadingTitle": "יוצרים את הצד הצבעוני",
-  "preview.colorStyleStrip.title": "3 סגנונות · לחצו להשוואה",
+  "preview.colorStyleStrip.title": "2 סגנונות · לחצו להשוואה",
   "preview.bookColor.title": "בחרו את צבע הספרון",
   "preview.bookColor.dark": "שחור עם מסגרת מנומרת",
   "preview.bookColor.light": "בהיר עם מסגרת נקודות",
@@ -2040,7 +2040,7 @@ const englishTranslations = {
   "preview.colorPhaseTitle": "Your Complete Booklet",
   "preview.colorPhaseTitleHighlight": "Your",
   "preview.colorPhaseDescription":
-    "Switch between the book sides to view the full result.\nOn the color side you can choose between three different illustration styles.",
+    "Switch between the book sides to view the full result.\nOn the color side you can choose between two different illustration styles.",
   "preview.bwPhaseDescription":
     "Your black & white versions are ready ✨\nNote: after moving to the next step, you won't be able to upload new photos.",
   "preview.bwApproveAbove": "Happy with it? Continue to the color side",
@@ -2069,7 +2069,7 @@ const englishTranslations = {
   "preview.loadingSlow": "Taking a little longer than usual, almost there...",
   "preview.title": "Here is your booklet",
   "preview.titleHighlight": "your",
-  "preview.subtitle": "You can make up to 3 changes.",
+  "preview.subtitle": "You can make up to 5 changes.",
   "preview.tabBw": "Black & white side",
   "preview.tabColor": "Color side",
   "preview.zoom": "Zoom",
@@ -2077,7 +2077,7 @@ const englishTranslations = {
   "preview.lightboxPrevious": "Previous page",
   "preview.lightboxNext": "Next page",
   "preview.colorLoadingTitle": "Creating the color side",
-  "preview.colorStyleStrip.title": "3 styles · tap to compare",
+  "preview.colorStyleStrip.title": "2 styles · tap to compare",
   "preview.bookColor.title": "Choose your book color",
   "preview.bookColor.dark": "Black with spotted border",
   "preview.bookColor.light": "Light with dotted border",

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
+import { PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 import type { StyleType } from "@/components/style-selector";
 
 export const runtime = "nodejs";
 
-const STYLES: StyleType[] = ["cartoon", "pencil", "watercolor"];
+const STYLES: StyleType[] = PREVIEW_COLOR_STYLES;
 
 export async function POST(
   request: NextRequest,

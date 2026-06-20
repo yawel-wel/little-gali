@@ -1,5 +1,6 @@
 import type { StyleType } from "@/components/style-selector";
 import { getColorCandidateForStyle } from "./color-by-style";
+import { effectiveChangeCreditsRemaining } from "./credits";
 import { normalizeDisplayOrder, urlsInDisplayOrder } from "./display-order";
 import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type {
@@ -119,7 +120,8 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
   const noBwInFlight = session.slots.every((slot) => !slot.inFlight);
   const noColorInFlight = session.slots.every((slot) => !slot.colorInFlight);
   const hasCredits =
-    isPreviewLimitsBypassed() || session.changeCreditsRemaining > 0;
+    isPreviewLimitsBypassed() ||
+    effectiveChangeCreditsRemaining(session) > 0;
 
   return {
     id: session.id,
@@ -127,7 +129,7 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     phase: session.phase,
     generationStatus,
     displayOrder: normalizeDisplayOrder(session.displayOrder),
-    changeCreditsRemaining: session.changeCreditsRemaining,
+    changeCreditsRemaining: effectiveChangeCreditsRemaining(session),
     slots: session.slots.map((slot, index) => ({
       index,
       originalUrl: slot.originalUrl,

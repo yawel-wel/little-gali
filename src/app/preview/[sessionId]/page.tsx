@@ -194,7 +194,7 @@ function frozenStripThumbnailsReady(
 ): boolean {
   const frozen = session?.frozenStyleStripThumbnails;
   return Boolean(
-    frozen?.cartoon?.previewUrl && frozen?.watercolor?.previewUrl,
+    frozen?.pencil?.previewUrl && frozen?.watercolor?.previewUrl,
   );
 }
 
@@ -242,7 +242,7 @@ function stripThumbnailsReady(
     return true;
   }
   return (
-    slotHasColorPreviewForStylePublic(bookSlot, "cartoon") &&
+    slotHasColorPreviewForStylePublic(bookSlot, "pencil") &&
     slotHasColorPreviewForStylePublic(bookSlot, "watercolor")
   );
 }
@@ -936,7 +936,7 @@ export default function PreviewPage() {
       return;
     }
 
-    const stylesToPrefetch = (["cartoon", "watercolor"] as const).filter(
+    const stylesToPrefetch = (["pencil"] as const).filter(
       (style) => !slotHasColorPreviewForStylePublic(bookSlot, style),
     );
 

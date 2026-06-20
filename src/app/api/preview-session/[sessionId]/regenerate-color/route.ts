@@ -9,14 +9,14 @@ import {
   consumeChangeCreditForResult,
   hasChangeCredits,
 } from "@/lib/preview-session/credits";
-import { DEFAULT_COLOR_STYLE } from "@/lib/preview-session/color-by-style";
+import { DEFAULT_COLOR_STYLE, PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
 import { slotColorActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-const STYLES: StyleType[] = ["cartoon", "pencil", "watercolor"];
+const STYLES: StyleType[] = PREVIEW_COLOR_STYLES;
 
 export async function POST(
   request: NextRequest,

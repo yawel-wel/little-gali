@@ -3,6 +3,9 @@ import type { PreviewCandidate, PreviewSession, PreviewSlot } from "./types";
 
 export const COLOR_STYLES: StyleType[] = ["pencil", "cartoon", "watercolor"];
 
+/** Color styles available in the booklet preview flow (excludes cartoon). */
+export const PREVIEW_COLOR_STYLES: StyleType[] = ["pencil", "watercolor"];
+
 /** Style shown first on the preview color tab when the user has not picked one yet. */
 export const DEFAULT_COLOR_STYLE: StyleType = "watercolor";
 

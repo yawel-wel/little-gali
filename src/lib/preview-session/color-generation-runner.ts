@@ -5,8 +5,8 @@ import { uploadCleanAndWatermarkedOutputs } from "./upload-preview-outputs";
 import {
   allSlotsHaveColorForStyle,
   BOOK_SLOT_INDEX,
-  COLOR_STYLES,
   DEFAULT_COLOR_STYLE,
+  PREVIEW_COLOR_STYLES,
   getColorCandidateForStyle,
   slotHasColorPreviewForStyle,
   syncColorPreviewForSlots,
@@ -283,7 +283,7 @@ function freezeStyleStripThumbnailsIfNeeded(session: PreviewSession): void {
     return;
   }
   const frozen: Partial<Record<StyleType, FrozenStyleStripThumbnail>> = {};
-  for (const style of COLOR_STYLES) {
+  for (const style of PREVIEW_COLOR_STYLES) {
     const candidate = getColorCandidateForStyle(bookSlot, style);
     if (candidate?.previewUrl) {
       frozen[style] = {
@@ -309,7 +309,7 @@ export async function runSlotAllStylesColorGeneration(
   const slot = session.slots[slotIndex];
   if (!slot) return null;
 
-  const stylesToGenerate = COLOR_STYLES.filter(
+  const stylesToGenerate = PREVIEW_COLOR_STYLES.filter(
     (style) => !slotHasColorPreviewForStyle(slot, style),
   );
 
@@ -401,7 +401,7 @@ export async function runInitialParallelColorBundle(
   for (let index = 0; index < ALL_SLOT_INDEXES.length; index += 1) {
     const slot = session.slots[index];
     if (!slot) continue;
-    for (const style of COLOR_STYLES) {
+    for (const style of PREVIEW_COLOR_STYLES) {
       if (!slotHasColorPreviewForStyle(slot, style)) {
         tasks.push({ index, style });
       }

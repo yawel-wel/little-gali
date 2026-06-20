@@ -5,6 +5,7 @@ import type { StyleType } from "@/components/style-selector";
 import {
   BOOK_SLOT_INDEX,
   getColorCandidateForStyleFromPublicSlot,
+  PREVIEW_COLOR_STYLES,
 } from "@/lib/preview-session/color-by-style";
 import type {
   FrozenStyleStripThumbnail,
@@ -13,7 +14,7 @@ import type {
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
 import { cn } from "@/lib/utils";
 
-const STRIP_STYLES: StyleType[] = ["watercolor", "cartoon", "pencil"];
+const STRIP_STYLES: StyleType[] = ["watercolor", "pencil"];
 
 type PreviewColorStyleStripProps = {
   session: PreviewSessionPublicView;
@@ -39,9 +40,7 @@ export function PreviewColorStyleStrip({
   const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
   const useFrozenThumbnails = Boolean(
     frozenThumbnails &&
-      (frozenThumbnails.pencil?.previewUrl ||
-        frozenThumbnails.cartoon?.previewUrl ||
-        frozenThumbnails.watercolor?.previewUrl),
+      PREVIEW_COLOR_STYLES.some((style) => frozenThumbnails[style]?.previewUrl),
   );
 
   return (

@@ -27,13 +27,6 @@ import {
   UPLOAD_IMAGE_ACCEPT,
 } from "@/lib/allowed-image-types";
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
-import { arrayMove } from "@dnd-kit/sortable";
-import {
-  UploadImageDragSurface,
-  UploadSortableImages,
-  type UploadDragActivator,
-} from "@/components/upload-sortable-images";
-import { reorderIndexMaps } from "@/lib/reorder-indexed-maps";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
 import { getOrCreateLgSessionId, persistLgSessionId } from "@/lib/session-id";
@@ -72,7 +65,6 @@ interface UploadImageItemProps {
   onRemove: (index: number) => void;
   isSubmitting: boolean;
   onTap: (index: number) => void;
-  dragActivator?: UploadDragActivator;
 }
 
 function UploadImageItem({
@@ -82,7 +74,6 @@ function UploadImageItem({
   onRemove,
   isSubmitting,
   onTap,
-  dragActivator,
 }: UploadImageItemProps) {
   useEffect(() => {
     [
@@ -123,22 +114,12 @@ function UploadImageItem({
         style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
         className={thumbClassName}
       >
-        {dragActivator ? (
-          <UploadImageDragSurface
-            dragActivator={dragActivator}
-            onTap={() => onTap(index)}
-            className="relative h-full w-full"
-          >
-            {thumbnail}
-          </UploadImageDragSurface>
-        ) : (
-          <div
-            className="relative h-full w-full"
-            onClick={() => onTap(index)}
-          >
-            {thumbnail}
-          </div>
-        )}
+        <div
+          className="relative h-full w-full"
+          onClick={() => onTap(index)}
+        >
+          {thumbnail}
+        </div>
       </div>
       <button
         type="button"
@@ -182,7 +163,6 @@ function UploadPageContent() {
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isReorderingImages, setIsReorderingImages] = useState(false);
   const [showPreviewLoader, setShowPreviewLoader] = useState(false);
   const [previewLoaderLineIndex, setPreviewLoaderLineIndex] = useState(0);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -490,26 +470,6 @@ function UploadPageContent() {
   const handleImageTap = useCallback((index: number) => {
     setEditingImageIndex(index);
   }, []);
-
-  const handleImagesReorder = useCallback(
-    (oldIndex: number, newIndex: number) => {
-      if (oldIndex === newIndex) {
-        return;
-      }
-      setImages(arrayMove(images, oldIndex, newIndex));
-      reorderIndexMaps(
-        [
-          originalUrls.current,
-          cropStates.current,
-          cloudinaryUrls.current,
-        ],
-        oldIndex,
-        newIndex,
-        images.length,
-      );
-    },
-    [images, setImages],
-  );
 
   // Save the cropped image back into the images array
   const handleSaveCrop = useCallback(
@@ -1138,52 +1098,19 @@ function UploadPageContent() {
               {images.length > 0 && (
                 <div className="space-y-4">
                   <div>
-                    {images.length === 5 && (
-                      <p className="mb-4 text-center font-body text-sm text-dark-gray px-4">
-                        {t("upload.dragToReorder")}
-                      </p>
-                    )}
-                    <div
-                      className={cn(
-                        "w-full py-1 md:overflow-visible",
-                        isReorderingImages
-                          ? "overflow-x-hidden"
-                          : "overflow-x-auto overscroll-x-contain",
-                      )}
-                    >
+                    <div className="w-full overflow-x-auto overscroll-x-contain py-1 md:overflow-visible">
                       <div className="mx-auto flex w-max min-w-full flex-nowrap items-end justify-center gap-0.5 overflow-visible px-3 pt-1 sm:px-4 md:gap-1">
-                      {images.length === 5 ? (
-                        <UploadSortableImages
-                          count={5}
-                          disabled={isSubmitting}
-                          onDraggingChange={setIsReorderingImages}
-                          onReorder={handleImagesReorder}
-                          renderItem={(index, { dragActivator }) => (
-                            <UploadImageItem
-                              key={index}
-                              url={images[index]}
-                              index={index}
-                              locale={locale}
-                              onRemove={handleRemoveImage}
-                              isSubmitting={isSubmitting}
-                              onTap={handleImageTap}
-                              dragActivator={dragActivator}
-                            />
-                          )}
+                      {images.map((url, index) => (
+                        <UploadImageItem
+                          key={url}
+                          url={url}
+                          index={index}
+                          locale={locale}
+                          onRemove={handleRemoveImage}
+                          isSubmitting={isSubmitting}
+                          onTap={handleImageTap}
                         />
-                      ) : (
-                        images.map((url, index) => (
-                          <UploadImageItem
-                            key={url}
-                            url={url}
-                            index={index}
-                            locale={locale}
-                            onRemove={handleRemoveImage}
-                            isSubmitting={isSubmitting}
-                            onTap={handleImageTap}
-                          />
-                        ))
-                      )}
+                      ))}
                       </div>
                     </div>
                   </div>
