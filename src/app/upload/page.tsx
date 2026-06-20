@@ -59,7 +59,7 @@ import {
   type UploadPreviewBlockedCode,
 } from "@/lib/preview-session/upload-preview-blocked-storage";
 import Button from "@mui/material/Button";
-import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
+import { track, ANALYTICS_EVENTS, withAnalyticsHeaders } from "@/lib/analytics";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
 
@@ -712,7 +712,9 @@ function UploadPageContent() {
       return;
     }
     setPreviewBlockedCode("preview_rate_limit");
-    track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED);
+    track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED, {
+      limit_type: "preview_rate_limit",
+    });
     setSubmitStatus({
       type: "error",
       errorCode: "preview_rate_limit",
@@ -782,7 +784,9 @@ function UploadPageContent() {
         blockedCode === "preview_rate_limit" ||
         blockedCode === "generation_rate_limit"
       ) {
-        track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED);
+        track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED, {
+          limit_type: blockedCode,
+        });
       }
     }
     setSubmitStatus({
@@ -812,11 +816,11 @@ function UploadPageContent() {
 
     try {
       const previewSessionId = getOrCreateLgSessionId();
-      const checkResponse = await fetch("/api/preview-session/check", {
+      const checkResponse = await fetch("/api/preview-session/check", withAnalyticsHeaders({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: previewSessionId }),
-      });
+      }));
       const checkData = (await checkResponse.json()) as {
         allowed?: boolean;
         error?: string;
@@ -845,10 +849,10 @@ function UploadPageContent() {
         previewFormData.append("images", file);
       });
 
-      const previewResponse = await fetch("/api/preview-session", {
+      const previewResponse = await fetch("/api/preview-session", withAnalyticsHeaders({
         method: "POST",
         body: previewFormData,
-      });
+      }));
       const previewData = (await previewResponse.json()) as {
         session?: { id: string; generationStatus?: string };
         error?: string;

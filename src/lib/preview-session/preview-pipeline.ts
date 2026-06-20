@@ -1,3 +1,4 @@
+import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackServerError } from "@/lib/analytics-server";
 import {
   copyCloudinaryUrlToPublicId,
@@ -66,10 +67,14 @@ export async function markSessionPipelineFailed(
     colorInFlight: false,
   }));
   await savePreviewSession(session);
-  trackServerError({
-    step: "booklet_generation",
-    error_message: message,
-  });
+  trackServerError(
+    {
+      step: "booklet_generation",
+      error_message: message,
+      session_id: sessionId,
+    },
+    analyticsContextFromSession(session),
+  );
 }
 
 async function applyOriginalUploads(

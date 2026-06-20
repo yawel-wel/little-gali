@@ -12,6 +12,7 @@ export const ANALYTICS_EVENTS = {
   BOOKLET_IMAGE_REPLACED: "booklet_image_replaced",
   BOOKLET_REGENERATED: "booklet_regenerated",
   BOOKLET_LIMIT_REACHED: "booklet_limit_reached",
+  BOOKLET_CHANGES_EXHAUSTED: "booklet_changes_exhausted",
   BOOKLET_ADDED_TO_CART: "booklet_added_to_cart",
   // Framed photo flow
   FRAME_UPLOAD_STARTED: "frame_upload_started",
@@ -30,6 +31,11 @@ export type AnalyticsEvent =
 
 export type ProductType = "booklet" | "frame";
 
+/** Which preview quota the user hit when booklet_limit_reached fires. */
+export type PreviewLimitType =
+  | "preview_rate_limit"
+  | "generation_rate_limit";
+
 export type EventProperties = {
   booklet_upload_started: Record<string, never>;
   booklet_upload_completed: { image_count: number };
@@ -38,8 +44,9 @@ export type EventProperties = {
   booklet_style_selected: { style_name: string };
   booklet_image_replaced: Record<string, never>;
   booklet_regenerated: Record<string, never>;
-  booklet_limit_reached: Record<string, never>;
-  booklet_added_to_cart: Record<string, never>;
+  booklet_limit_reached: { limit_type: PreviewLimitType };
+  booklet_changes_exhausted: { changes_used: number };
+  booklet_added_to_cart: { changes_used?: number };
   frame_upload_started: Record<string, never>;
   frame_upload_completed: { image_count: number };
   frame_preview_viewed: Record<string, never>;
@@ -75,6 +82,54 @@ export function initMixpanel(): void {
     initialized = true;
   } catch (error) {
     console.error("Mixpanel init failed:", error);
+  }
+}
+
+export function getMixpanelDistinctId(): string | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  try {
+    if (!initialized) {
+      initMixpanel();
+    }
+    const distinctId = mixpanel.get_distinct_id?.();
+    return typeof distinctId === "string" && distinctId.length > 0
+      ? distinctId
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Attach Mixpanel identity to server-side preview API calls. */
+export function withAnalyticsHeaders(init: RequestInit = {}): RequestInit {
+  const distinctId = getMixpanelDistinctId();
+  if (!distinctId) {
+    return init;
+  }
+
+  const headers = new Headers(init.headers);
+  headers.set("X-Mp-Distinct-Id", distinctId);
+  return { ...init, headers };
+}
+
+export function registerPreviewSessionSuperProperties(sessionId: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    if (!initialized) {
+      initMixpanel();
+    }
+    mixpanel.register({
+      preview_session_id: sessionId,
+      product_type: "booklet",
+    });
+  } catch (error) {
+    console.error("Analytics register failed:", error);
   }
 }
 

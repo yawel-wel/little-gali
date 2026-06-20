@@ -30,16 +30,28 @@ export function formatSelectedGenerationBySlot(
   return selectedGenerationBySlot.join(",");
 }
 
+export function mixpanelDistinctIdShopifyAttributes(
+  mixpanelDistinctId?: string,
+): Array<{ key: string; value: string }> {
+  if (!mixpanelDistinctId) {
+    return [];
+  }
+
+  return [{ key: "_mixpanel_distinct_id", value: mixpanelDistinctId }];
+}
+
 export function previewStatsShopifyAttributes(
   previewSessionId?: string,
   stats?: PreviewGenerationStats,
+  mixpanelDistinctId?: string,
 ): Array<{ key: string; value: string }> {
   if (!previewSessionId) {
-    return [];
+    return mixpanelDistinctIdShopifyAttributes(mixpanelDistinctId);
   }
 
   const attributes: Array<{ key: string; value: string }> = [
     { key: "_preview_session_id", value: previewSessionId },
+    ...mixpanelDistinctIdShopifyAttributes(mixpanelDistinctId),
   ];
 
   if (stats) {

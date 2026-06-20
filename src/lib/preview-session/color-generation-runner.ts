@@ -27,6 +27,7 @@ import {
   type PreviewGenerationTrigger,
 } from "./generation-log";
 import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
+import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackGenerationStepDuration } from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type {
@@ -267,6 +268,7 @@ export async function runColorGeneration(
     generation_type: trigger === "initial" ? "booklet_color" : "booklet_regen",
     startedAt,
     results,
+    context: analyticsContextFromSession(latest),
   });
   await savePreviewSession(latest);
   return latest;
@@ -376,6 +378,7 @@ export async function runSlotAllStylesColorGeneration(
     generation_type: "booklet_regen",
     startedAt,
     results: results.map(({ candidate }) => candidate),
+    context: analyticsContextFromSession(latest),
   });
 
   await savePreviewSession(latest);
@@ -474,6 +477,7 @@ export async function runInitialParallelColorBundle(
     generation_type: "booklet_color",
     startedAt,
     results: results.map(({ candidate }) => candidate),
+    context: analyticsContextFromSession(latest),
   });
 
   syncColorPreviewToStyle(latest, DEFAULT_COLOR_STYLE);

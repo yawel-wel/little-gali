@@ -13,6 +13,7 @@ import {
   type PreviewGenerationStats,
   previewStatsShopifyAttributes,
 } from "@/lib/preview-session/generation-stats";
+import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
       previewSessionId,
       generationStats,
       bookColor,
+      mixpanelDistinctId,
     } = body as {
       imageUrls: string[];
       quantity?: number;
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
       generatedColorUrls?: string[];
       previewSessionId?: string;
       generationStats?: PreviewGenerationStats;
+      mixpanelDistinctId?: string;
     };
 
     if (!imageUrls || imageUrls.length !== 5) {
@@ -53,6 +56,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const resolvedMixpanelDistinctId = await resolveMixpanelDistinctIdForCart({
+      mixpanelDistinctId,
+      previewSessionId,
+    });
 
     const storeDomain = process.env.SHOPIFY_STORE_DOMAIN;
     const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
@@ -170,7 +178,11 @@ export async function POST(request: NextRequest) {
                 key: "style",
                 value: style || "cartoon",
               },
-              ...previewStatsShopifyAttributes(previewSessionId, generationStats),
+              ...previewStatsShopifyAttributes(
+                previewSessionId,
+                generationStats,
+                resolvedMixpanelDistinctId,
+              ),
               ...originalUrlsShopifyAttributes(originalUrls),
               ...generatedColorUrlsShopifyAttributes(generatedColorUrls),
             ],

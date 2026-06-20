@@ -10,6 +10,7 @@ import {
   type PreviewGenerationTrigger,
 } from "./generation-log";
 import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
+import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackGenerationStepDuration } from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewCandidate, PreviewSession } from "./types";
@@ -124,6 +125,7 @@ export async function runSlotGeneration(
       generation_type: "booklet_regen",
       startedAt,
       results: [candidate],
+      context: analyticsContextFromSession(session),
     });
   }
 
@@ -181,6 +183,7 @@ export async function runInitialParallelGeneration(
     generation_type: "booklet_bw",
     startedAt,
     results,
+    context: analyticsContextFromSession(latest),
   });
   await savePreviewSession(latest);
   return latest;

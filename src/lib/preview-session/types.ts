@@ -78,6 +78,8 @@ export interface PreviewSession {
   createdAt: string;
   updatedAt: string;
   clientIpHash?: string;
+  /** Browser Mixpanel distinct_id, captured on upload for server-side events. */
+  mixpanelDistinctId?: string;
   /**
    * Ops: set to true in KV for one full support reset (credits + rate limits).
    * See support-bypass.ts.

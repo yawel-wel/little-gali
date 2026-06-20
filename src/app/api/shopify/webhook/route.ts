@@ -3,30 +3,13 @@ import { Resend } from "resend";
 import { createHmac } from "crypto";
 import {
   trackPurchaseCompleted,
-  type ServerProductType,
 } from "@/lib/analytics-server";
+import {
+  resolveOrderProductType,
+  resolvePurchaseAnalyticsContext,
+} from "@/lib/analytics-purchase";
 
 export const runtime = "nodejs";
-
-function resolveOrderProductType(orderData: {
-  line_items?: Array<{
-    properties?: Array<{ name: string; value: string }>;
-    properties_object?: Record<string, string>;
-  }>;
-}): ServerProductType {
-  const lineItems = orderData.line_items ?? [];
-  for (const item of lineItems) {
-    const props = item.properties ?? [];
-    const productTypeProp = props.find((p) => p.name === "_product_type");
-    if (productTypeProp?.value === "framed_art") {
-      return "frame";
-    }
-    if (item.properties_object?._product_type === "framed_art") {
-      return "frame";
-    }
-  }
-  return "booklet";
-}
 
 async function trackMixpanelPurchase(orderData: {
   total_price?: string;
@@ -38,11 +21,15 @@ async function trackMixpanelPurchase(orderData: {
   id?: string | number;
 }) {
   const amount = parseFloat(orderData.total_price || "0");
-  trackPurchaseCompleted({
-    product_type: resolveOrderProductType(orderData),
-    amount,
-    order_id: String(orderData.name ?? orderData.id ?? ""),
-  });
+  const context = await resolvePurchaseAnalyticsContext(orderData);
+  trackPurchaseCompleted(
+    {
+      product_type: resolveOrderProductType(orderData),
+      amount,
+      order_id: String(orderData.name ?? orderData.id ?? ""),
+    },
+    context,
+  );
 }
 
 // Track purchase via Meta Conversions API

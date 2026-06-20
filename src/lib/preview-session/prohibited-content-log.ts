@@ -1,6 +1,7 @@
 import { prohibitedContentErrorPublicId } from "./cloudinary-paths";
 import { uploadJsonToCloudinaryPublicId } from "./cloudinary";
 import { isProhibitedContentErrorMessage } from "./generation-errors";
+import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackSensitiveContentError } from "@/lib/analytics-server";
 import { logPreviewProhibitedContent } from "./generation-log";
 import type { PreviewGenerationTrigger } from "./generation-log";
@@ -90,11 +91,19 @@ export async function logProhibitedContentEvent(
   );
 
   const productType = params.productType ?? "booklet";
-  trackSensitiveContentError({
-    step:
-      productType === "frame" ? "frame_generation" : "booklet_generation",
-    product_type: productType,
-  });
+  trackSensitiveContentError(
+    {
+      step:
+        productType === "frame" ? "frame_generation" : "booklet_generation",
+      product_type: productType,
+      session_id: params.sessionId,
+      slot_index: params.slotIndex,
+    },
+    analyticsContextFromSession(
+      { id: params.sessionId },
+      productType,
+    ),
+  );
 }
 
 export function maybeLogProhibitedContentEvent(

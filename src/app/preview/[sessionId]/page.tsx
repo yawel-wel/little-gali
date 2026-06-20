@@ -50,6 +50,7 @@ import {
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
 import { logPreviewColorStyleSelected } from "@/lib/preview-session/generation-log";
 import { buildPreviewGenerationStats } from "@/lib/preview-session/generation-stats";
+import { INITIAL_CHANGE_CREDITS } from "@/lib/preview-session/credits";
 import {
   GenerationRateLimitError,
   getGenerationRateLimitMessage,
@@ -64,7 +65,7 @@ import type { PreviewSessionPublicView } from "@/lib/preview-session/types";
 import type { Area } from "react-easy-crop";
 import Button from "@mui/material/Button";
 import { Expand, Loader2, MoreHorizontal, X } from "lucide-react";
-import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
+import { track, ANALYTICS_EVENTS, registerPreviewSessionSuperProperties, withAnalyticsHeaders } from "@/lib/analytics";
 
 type PreviewBookSide = "bw" | "color";
 type CompareOutputImage = {
@@ -328,7 +329,9 @@ export default function PreviewPage() {
   const setGenerationError = useCallback(
     (err: unknown, fallback = t("preview.sessionError")) => {
       if (err instanceof GenerationRateLimitError) {
-        track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED);
+        track(ANALYTICS_EVENTS.BOOKLET_LIMIT_REACHED, {
+          limit_type: "generation_rate_limit",
+        });
         setError(getGenerationRateLimitMessage(t));
         return;
       }
@@ -338,6 +341,7 @@ export default function PreviewPage() {
   );
   const bwPreviewTrackedRef = useRef(false);
   const colorPreviewTrackedRef = useRef(false);
+  const changesExhaustedTrackedRef = useRef(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [failureDetail, setFailureDetail] = useState("");
   const [failureStatus, setFailureStatus] = useState<number | undefined>();
@@ -425,7 +429,10 @@ export default function PreviewPage() {
   );
 
   const refreshSession = useCallback(async () => {
-    const response = await fetch(`/api/preview-session/${sessionId}`);
+    const response = await fetch(
+      `/api/preview-session/${sessionId}`,
+      withAnalyticsHeaders(),
+    );
     if (!response.ok) {
       if (response.status === 403) {
         throw Object.assign(new Error(t("preview.sessionUnauthorized")), {
@@ -465,6 +472,23 @@ export default function PreviewPage() {
   }, [applySession, markLoadFailure, sessionId, t]);
 
   useEffect(() => {
+    registerPreviewSessionSuperProperties(sessionId);
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (
+      session?.changeCreditsRemaining !== 0 ||
+      changesExhaustedTrackedRef.current
+    ) {
+      return;
+    }
+    changesExhaustedTrackedRef.current = true;
+    track(ANALYTICS_EVENTS.BOOKLET_CHANGES_EXHAUSTED, {
+      changes_used: INITIAL_CHANGE_CREDITS,
+    });
+  }, [session?.changeCreditsRemaining]);
+
+  useEffect(() => {
     if (!session?.selectedColorStyle) {
       return;
     }
@@ -491,15 +515,18 @@ export default function PreviewPage() {
     if (!loadFailed || failureReportedRef.current) return;
     failureReportedRef.current = true;
 
-    void fetch("/api/preview-session/report-failure", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId,
-        detail: failureDetail,
-        status: failureStatus,
+    void fetch(
+      "/api/preview-session/report-failure",
+      withAnalyticsHeaders({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          detail: failureDetail,
+          status: failureStatus,
+        }),
       }),
-    }).catch((reportError) => {
+    ).catch((reportError) => {
       console.error("Failed to report preview failure:", reportError);
     });
   }, [failureDetail, failureStatus, loadFailed, sessionId]);
@@ -794,11 +821,11 @@ export default function PreviewPage() {
     async (style: StyleType, slotIndexes: number[]) => {
       const response = await fetch(
         `/api/preview-session/${sessionId}/generate-color`,
-        {
+        withAnalyticsHeaders({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ style, slotIndexes }),
-        },
+        }),
       );
       const data = (await response.json()) as {
         session?: PreviewSessionPublicView;
@@ -818,14 +845,14 @@ export default function PreviewPage() {
     async (slotIndex: number) => {
       const response = await fetch(
         `/api/preview-session/${sessionId}/generate-color`,
-        {
+        withAnalyticsHeaders({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             slotIndexes: [slotIndex],
             allStylesForSlot: true,
           }),
-        },
+        }),
       );
       const data = (await response.json()) as {
         session?: PreviewSessionPublicView;
@@ -1022,7 +1049,7 @@ export default function PreviewPage() {
     try {
       const response = await fetch(
         `/api/preview-session/${sessionId}/regenerate`,
-        {
+        withAnalyticsHeaders({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1030,7 +1057,7 @@ export default function PreviewPage() {
             idempotencyKey: createIdempotencyKey(),
             ...(freeRetry ? { freeRetry: true } : {}),
           }),
-        },
+        }),
       );
       const data = (await response.json()) as {
         session?: PreviewSessionPublicView;
@@ -1078,7 +1105,7 @@ export default function PreviewPage() {
     try {
       const response = await fetch(
         `/api/preview-session/${sessionId}/regenerate-color`,
-        {
+        withAnalyticsHeaders({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1086,7 +1113,7 @@ export default function PreviewPage() {
             style: activeColorStyle,
             ...(freeRetry ? { freeRetry: true } : {}),
           }),
-        },
+        }),
       );
       const data = (await response.json()) as {
         session?: PreviewSessionPublicView;
@@ -1276,10 +1303,13 @@ export default function PreviewPage() {
       formData.append("slotIndex", String(slotIndex));
       formData.append("idempotencyKey", createIdempotencyKey());
       formData.append("image", compressed);
-      const response = await fetch(`/api/preview-session/${sessionId}/replace`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `/api/preview-session/${sessionId}/replace`,
+        withAnalyticsHeaders({
+          method: "POST",
+          body: formData,
+        }),
+      );
       const data = (await response.json()) as {
         session?: PreviewSessionPublicView;
         error?: string;
@@ -1359,10 +1389,10 @@ export default function PreviewPage() {
 
         const response = await fetch(
           `/api/preview-session/${sessionId}/crop`,
-          {
+          withAnalyticsHeaders({
             method: "POST",
             body: formData,
-          },
+          }),
         );
         const data = await response.json();
         if (!response.ok) {
@@ -1389,11 +1419,14 @@ export default function PreviewPage() {
     setIsSubmitting(true);
     setError(null);
     try {
-      const response = await fetch(`/api/preview-session/${sessionId}/select`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotIndex, candidateId }),
-      });
+      const response = await fetch(
+        `/api/preview-session/${sessionId}/select`,
+        withAnalyticsHeaders({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slotIndex, candidateId }),
+        }),
+      );
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || t("preview.sessionError"));
@@ -1412,7 +1445,7 @@ export default function PreviewPage() {
     try {
       const response = await fetch(
         `/api/preview-session/${sessionId}/approve-bw`,
-        { method: "POST" },
+        withAnalyticsHeaders({ method: "POST" }),
       );
       const data = await response.json();
       if (!response.ok) {
@@ -1438,11 +1471,11 @@ export default function PreviewPage() {
     try {
       const styleResponse = await fetch(
         `/api/preview-session/${sessionId}/style`,
-        {
+        withAnalyticsHeaders({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ style: activeColorStyle }),
-        },
+        }),
       );
       const styleData = await styleResponse.json();
       if (!styleResponse.ok) {
@@ -1481,7 +1514,9 @@ export default function PreviewPage() {
         }
       } catch {}
 
-      track(ANALYTICS_EVENTS.BOOKLET_ADDED_TO_CART);
+      track(ANALYTICS_EVENTS.BOOKLET_ADDED_TO_CART, {
+        changes_used: INITIAL_CHANGE_CREDITS - latest.changeCreditsRemaining,
+      });
 
       const addPromise = addToCart(
         generatedBwUrls,

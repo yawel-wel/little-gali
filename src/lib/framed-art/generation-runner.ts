@@ -13,6 +13,7 @@ import {
 import type { FramedArtSession, FramedArtStyleCandidate } from "./types";
 import { logPreviewGenerationFailure } from "@/lib/preview-session/generation-log";
 import { maybeLogProhibitedContentEvent } from "@/lib/preview-session/prohibited-content-log";
+import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackGenerationStepDuration } from "@/lib/analytics-server";
 
 async function buildFramedStyleCandidate(
@@ -146,6 +147,7 @@ export async function runFramedArtStyleGeneration(
     generation_type: "frame",
     startedAt,
     results: [candidate],
+    context: analyticsContextFromSession({ id: sessionId }, "frame"),
   });
   await saveFramedArtSession(updated);
   return updated;
@@ -190,6 +192,7 @@ export async function runFramedArtRegenerate(
     generation_type: "frame",
     startedAt,
     results: [candidate],
+    context: analyticsContextFromSession({ id: sessionId }, "frame"),
   });
   await saveFramedArtSession(updated);
   return updated;

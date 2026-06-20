@@ -38,6 +38,10 @@ import {
 import { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
 import type { PreviewSession } from "@/lib/preview-session/types";
 import { resolveSessionIdForGenerationLimit } from "@/lib/preview-session/resolve-session-id-for-limit";
+import {
+  analyticsContextFromRequest,
+  captureMixpanelDistinctIdOnSession,
+} from "@/lib/analytics-context";
 import { trackServerError } from "@/lib/analytics-server";
 
 export { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
@@ -119,6 +123,8 @@ async function createNewPreviewSession(
     updatedAt: now,
     clientIpHash: ipHash,
   };
+
+  captureMixpanelDistinctIdOnSession(session, request);
 
   await savePreviewSession(session);
 
@@ -266,6 +272,9 @@ export async function POST(request: NextRequest) {
       let sessionForPipeline = prepared.session;
       let shouldSchedule = prepared.shouldSchedulePipeline;
 
+      captureMixpanelDistinctIdOnSession(sessionForPipeline, request);
+      await savePreviewSession(sessionForPipeline);
+
       if (!shouldSchedule) {
         const genStatus = resolveGenerationStatus(sessionForPipeline);
         if (genStatus === "complete" || genStatus === "running") {
@@ -354,6 +363,9 @@ export async function POST(request: NextRequest) {
     let sessionForPipeline = prepared.session;
     let shouldSchedule = prepared.shouldSchedulePipeline;
 
+    captureMixpanelDistinctIdOnSession(sessionForPipeline, request);
+    await savePreviewSession(sessionForPipeline);
+
     if (!shouldSchedule) {
       const genStatus = resolveGenerationStatus(sessionForPipeline);
         if (genStatus === "complete" || genStatus === "running") {
@@ -388,10 +400,13 @@ export async function POST(request: NextRequest) {
     return respondWithSession(sessionForPipeline);
   } catch (error) {
     console.error("Preview session start error:", error);
-    trackServerError({
-      step: "booklet_generation",
-      error_message: error instanceof Error ? error.message : "Internal server error",
-    });
+    trackServerError(
+      {
+        step: "booklet_generation",
+        error_message: error instanceof Error ? error.message : "Internal server error",
+      },
+      analyticsContextFromRequest(request),
+    );
     if (error instanceof Error && error.message === "Invalid session ID") {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }

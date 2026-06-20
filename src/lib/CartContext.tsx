@@ -21,6 +21,7 @@ import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
 import type { BookColor } from "./book-color";
 import { bookColorFromVariantId } from "./book-color";
 import type { StoredCartImages } from "./cart-images-store";
+import { getMixpanelDistinctId } from "./analytics";
 
 export interface CartItem {
   id: string;
@@ -340,6 +341,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   ) => {
     setIsLoading(true);
     try {
+      const mixpanelDistinctId = getMixpanelDistinctId();
       let response;
       if (cart?.id) {
         // Add to existing cart
@@ -363,6 +365,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             generatedColorUrls: fulfillment?.generatedColorUrls,
             previewSessionId: fulfillment?.previewSessionId,
             generationStats: fulfillment?.generationStats,
+            mixpanelDistinctId,
           }),
         });
       } else {
@@ -385,6 +388,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             generatedColorUrls: fulfillment?.generatedColorUrls,
             previewSessionId: fulfillment?.previewSessionId,
             generationStats: fulfillment?.generationStats,
+            mixpanelDistinctId,
           }),
         });
       }
