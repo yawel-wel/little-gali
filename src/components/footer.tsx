@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
-import { isFramedArtEnabled } from "@/lib/feature-flags";
 
 const INSTAGRAM_URL = "https://www.instagram.com/little.gali/";
 const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61583927914508";
@@ -94,14 +93,10 @@ function ContactChatIcon() {
 
 export function Footer() {
   const { t, locale } = useLanguage();
-  const framedOn = isFramedArtEnabled();
   const isRtl = locale === "he";
 
   const productLinks: FooterLink[] = [
     { labelKey: "footer.babyBooks", href: "/upload" },
-    ...(framedOn
-      ? [{ labelKey: "footer.framedArt", href: "/framed-art/upload" }]
-      : []),
     { labelKey: "nav.giftCard", href: "/#gift-card" },
   ];
 

@@ -16,10 +16,9 @@ import { TestimonialsSection } from "@/components/testimonials-section";
 import { GiftCardSection } from "@/components/gift-card-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 import { BOOK_PRICE } from "@/lib/constants";
-import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
+import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { BookFeaturePills, FreePreviewNote } from "@/components/feature-pill";
-import { FramedArtHomeSection } from "@/components/framed-art-home-section";
-import { QaTabsSection, HOME_BOOK_IDS, HOME_FRAMED_IDS } from "@/components/qa-tabs-section";
+import { QaTabsSection, HOME_BOOK_IDS } from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { HomeCtaButton } from "@/components/home-cta-button";
 
@@ -43,7 +42,6 @@ export default function Home() {
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
   const previewOn = isAiPreviewEnabled();
-  const framedOn = isFramedArtEnabled();
   const howItWorksSteps = previewOn
     ? [
         {
@@ -656,12 +654,6 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {framedOn && (
-          <>
-            <FramedArtHomeSection />
-          </>
-        )}
-
         {/* Testimonials Section */}
         {/* <TestimonialsSection /> */}
 
@@ -821,8 +813,7 @@ export default function Home() {
             <QaTabsSection
               className="max-w-4xl mx-auto"
               bookItemIds={[...HOME_BOOK_IDS]}
-              framedItemIds={framedOn ? [...HOME_FRAMED_IDS] : undefined}
-              hideTabs={!framedOn}
+              hideTabs
             />
 
             {/* Button to navigate to Q&A page */}

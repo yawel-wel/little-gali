@@ -6,7 +6,6 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/LanguageContext";
-import { isFramedArtEnabled } from "@/lib/feature-flags";
 import { QaTabsSection } from "@/components/qa-tabs-section";
 
 const easeOwlet = [0.16, 1, 0.3, 1];
@@ -14,7 +13,6 @@ const easeOwlet = [0.16, 1, 0.3, 1];
 export default function QAPage() {
   const prefersReducedMotion = useReducedMotion();
   const { t } = useLanguage();
-  const framedOn = isFramedArtEnabled();
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#F3EEE8" }}>
       <Header />
@@ -40,7 +38,7 @@ export default function QAPage() {
               </p>
             </div>
 
-            <QaTabsSection className="max-w-4xl mx-auto" hideTabs={!framedOn} />
+            <QaTabsSection className="max-w-4xl mx-auto" hideTabs />
 
             {/* Bottom CTA */}
             <div className="text-center mt-16">
