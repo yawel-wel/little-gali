@@ -17,7 +17,7 @@ import {
   enqueuePendingColorRegen,
   slotNeedsAllStylesColorRegen,
 } from "./pending-color-regen";
-import { generateColorImageBuffer } from "./generate-color";
+import { generateColorImageBuffer, downloadImageAsBase64ForGemini } from "./generate-color";
 import { toGenerationError } from "./generate-bw";
 import {
   logPreviewGenerationFailure,
@@ -76,6 +76,7 @@ async function buildColorPreview(
   style: StyleType,
   version: number,
   trigger: PreviewGenerationTrigger,
+  prefetched?: { base64: string; mimeType: string },
 ): Promise<PreviewCandidate> {
   const generationContext: PreviewGenerationContext = {
     sessionId,
@@ -99,6 +100,7 @@ async function buildColorPreview(
       sourceUrl,
       style,
       generationContext,
+      prefetched,
     );
     const { cleanUpload, previewUpload } = await uploadCleanAndWatermarkedOutputs(
       cleanBuffer,
@@ -425,6 +427,21 @@ export async function runInitialParallelColorBundle(
   await savePreviewSession(session);
 
   const startedAt = Date.now();
+
+  // Pre-fetch each slot's image once, then share across all 3 style tasks for that slot.
+  const prefetchedByIndex = new Map<number, { base64: string; mimeType: string }>();
+  await Promise.all(
+    [...indexesWithWork].map(async (index) => {
+      const slot = session.slots[index];
+      if (!slot?.originalUrl) return;
+      try {
+        prefetchedByIndex.set(index, await downloadImageAsBase64ForGemini(slot.originalUrl));
+      } catch {
+        // If prefetch fails, individual tasks will retry the download themselves.
+      }
+    }),
+  );
+
   const results = await Promise.all(
     tasks.map(({ index, style }) => {
       const slot = session.slots[index];
@@ -439,6 +456,7 @@ export async function runInitialParallelColorBundle(
         style,
         version,
         "initial",
+        prefetchedByIndex.get(index),
       ).then((candidate) => ({ index, style, candidate }));
     }),
   );

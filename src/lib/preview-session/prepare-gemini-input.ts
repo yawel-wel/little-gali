@@ -19,7 +19,7 @@ export async function downloadImageAsBase64ForGemini(
       fit: "inside",
       withoutEnlargement: true,
     })
-    .jpeg({ quality: GEMINI_INPUT_JPEG_QUALITY, mozjpeg: true })
+    .jpeg({ quality: GEMINI_INPUT_JPEG_QUALITY })
     .toBuffer();
 
   return {

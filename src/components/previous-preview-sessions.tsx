@@ -52,7 +52,8 @@ function formatRelativeCreatedAt(
   return t("upload.previousSessions.createdRelative").replace("{relative}", relative);
 }
 
-function hasCandidateSessionIds(): boolean {
+export function hasCandidateSessionIds(): boolean {
+  if (typeof window === "undefined") return false;
   const hiddenIds = new Set(getHiddenResumeSessionIds());
   return getKnownPreviewSessionIds().some((id) => !hiddenIds.has(id));
 }
@@ -80,9 +81,9 @@ export function PreviousPreviewSessions({
         case "review_bw":
           return t("upload.previousSessions.status.reviewBw");
         case "pick_style":
-          return null;
+          return t("upload.previousSessions.status.pickStyle");
         case "ready_to_order":
-          return t("upload.previousSessions.status.readyToOrder");
+          return t("upload.previousSessions.status.pickStyle");
         case "in_cart":
           return t("upload.previousSessions.status.inCart");
       }
@@ -201,7 +202,7 @@ export function PreviousPreviewSessions({
         </div>
       ) : (
         <>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {sessions.map((session) => {
               const isResuming = resumingId === session.id;
               const status = statusLabel(session.status);

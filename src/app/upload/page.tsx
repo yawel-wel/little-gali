@@ -15,7 +15,7 @@ import {
   useMemo,
 } from "react";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
-import { PreviousPreviewSessions } from "@/components/previous-preview-sessions";
+import { PreviousPreviewSessions, hasCandidateSessionIds } from "@/components/previous-preview-sessions";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
 import Link from "next/link";
@@ -603,7 +603,9 @@ function UploadPageContent() {
   );
 
   const previewEnabled = isAiPreviewEnabled();
-  const [hasPreviousSessions, setHasPreviousSessions] = useState(false);
+  const [hasPreviousSessions, setHasPreviousSessions] = useState(
+    () => previewEnabled && hasCandidateSessionIds(),
+  );
   const showWithoutPreviewCartPath =
     previewBlockedCode === "preview_rate_limit" ||
     previewBlockedCode === "generation_rate_limit";

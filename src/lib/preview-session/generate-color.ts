@@ -19,6 +19,14 @@ import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 const COLOR_MODEL = "gemini-2.5-flash-image";
 const MAX_RETRIES = 2;
 
+let _geminiClient: GoogleGenAI | undefined;
+function getGeminiClient(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
+  if (!_geminiClient) _geminiClient = new GoogleGenAI({ apiKey });
+  return _geminiClient;
+}
+
 const STYLE_PROMPTS: Record<StyleType, string> = {
   pencil: PENCIL_COLOR_PROMPT,
   cartoon: CARTOON_COLOR_PROMPT,
@@ -55,10 +63,12 @@ async function generateWithGemini(
   imageUrl: string,
   prompt: string,
   generationContext?: PreviewGenerationContext,
+  prefetched?: { base64: string; mimeType: string },
 ): Promise<Buffer> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    const error = new Error("GEMINI_API_KEY is not configured");
+  let ai: GoogleGenAI;
+  try {
+    ai = getGeminiClient();
+  } catch (error) {
     logPreviewGenerationFailure(
       "color",
       { model: COLOR_MODEL, stage: "config" },
@@ -68,8 +78,7 @@ async function generateWithGemini(
     throw error;
   }
 
-  const { base64, mimeType } = await downloadImageAsBase64ForGemini(imageUrl);
-  const ai = new GoogleGenAI({ apiKey });
+  const { base64, mimeType } = prefetched ?? await downloadImageAsBase64ForGemini(imageUrl);
   // Would be sent to the API as systemInstruction (disabled for prompt testing).
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 
@@ -173,11 +182,14 @@ export async function generateColorImageBuffer(
   imageUrl: string,
   style: StyleType,
   generationContext?: PreviewGenerationContext,
+  prefetched?: { base64: string; mimeType: string },
 ): Promise<Buffer> {
   if (isMockGenerationEnabled()) {
     return createMockColorImage(imageUrl);
   }
 
   const prompt = resolveColorPrompt(style);
-  return generateWithGemini(imageUrl, prompt, generationContext);
+  return generateWithGemini(imageUrl, prompt, generationContext, prefetched);
 }
+
+export { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";

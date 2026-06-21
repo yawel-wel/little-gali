@@ -24,6 +24,14 @@ function getBwImageModel(): string {
   return configured || DEFAULT_BW_IMAGE_MODEL;
 }
 
+let _geminiClient: GoogleGenAI | undefined;
+function getGeminiClient(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
+  if (!_geminiClient) _geminiClient = new GoogleGenAI({ apiKey });
+  return _geminiClient;
+}
+
 function isMockGenerationEnabled(): boolean {
   return process.env.MOCK_AI_GENERATION === "true";
 }
@@ -45,9 +53,10 @@ async function generateWithGemini(
   imageUrl: string,
   generationContext?: PreviewGenerationContext,
 ): Promise<Buffer> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    const error = new Error("GEMINI_API_KEY is not configured");
+  let ai: GoogleGenAI;
+  try {
+    ai = getGeminiClient();
+  } catch (error) {
     logPreviewGenerationFailure(
       "bw",
       { model: getBwImageModel(), stage: "config" },
@@ -58,7 +67,6 @@ async function generateWithGemini(
   }
 
   const { base64, mimeType } = await downloadImageAsBase64ForGemini(imageUrl);
-  const ai = new GoogleGenAI({ apiKey });
   // Would be sent to the API as systemInstruction (disabled for prompt testing).
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
   const bwModel = getBwImageModel();
