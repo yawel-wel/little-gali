@@ -217,6 +217,76 @@ export function logPreviewGenerationSummary(
   });
 }
 
+export type ColorPipelineSlotDiagnostic = {
+  slot: number;
+  hasPreviewUrl: boolean;
+  hasError: boolean;
+  colorCandidateCount: number;
+};
+
+export function logPreviewColorPipelineIncomplete(
+  sessionId: string,
+  context: {
+    style: string;
+    phase: string;
+    slots: ColorPipelineSlotDiagnostic[];
+    colorInFlightCount: number;
+    reloadAttempts: number;
+  },
+): void {
+  const missingSlots = context.slots
+    .filter((slot) => !slot.hasPreviewUrl && !slot.hasError)
+    .map((slot) => slot.slot);
+  console.error(
+    `[preview-color] pipeline incomplete sessionId=${sessionId} missingSlots=${missingSlots.join(",") || "none"}`,
+  );
+  emitSentryLog(
+    "error",
+    "preview.color_pipeline.incomplete",
+    { sessionId, side: "color" },
+    {
+      style: context.style,
+      phase: context.phase,
+      missingSlotIndexes: missingSlots.join(","),
+      slotDiagnostics: JSON.stringify(context.slots),
+      colorInFlightCount: context.colorInFlightCount,
+      reloadAttempts: context.reloadAttempts,
+    },
+  );
+}
+
+export function logPreviewColorPipelineRecovered(
+  sessionId: string,
+  reloadAttempt: number,
+): void {
+  console.info(
+    `[preview-color] pipeline recovered after reload sessionId=${sessionId} attempt=${reloadAttempt}`,
+  );
+  emitSentryLog(
+    "warn",
+    "preview.color_pipeline.recovered_after_reload",
+    { sessionId, side: "color" },
+    { reloadAttempt },
+  );
+}
+
+export function logPreviewPipelineBackgroundFailed(
+  sessionId: string,
+  pipeline: "color" | "bw",
+  error: unknown,
+): void {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  console.error(
+    `[preview-${pipeline}] background pipeline failed sessionId=${sessionId} detail=${errorMessage}`,
+  );
+  emitSentryLog(
+    "error",
+    `preview.${pipeline}_pipeline.background_failed`,
+    { sessionId, side: pipeline === "color" ? "color" : "bw" },
+    { errorMessage },
+  );
+}
+
 /** Log Gemini call start (console may include prompts once; Sentry never logs prompts). */
 export function logGeminiRequest(
   kind: PreviewGenerationKind,

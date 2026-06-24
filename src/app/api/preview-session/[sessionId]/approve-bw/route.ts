@@ -1,5 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
+import { logPreviewPipelineBackgroundFailed } from "@/lib/preview-session/generation-log";
 import {
   markSessionPipelineFailed,
   runColorPipelineForApprovedSession,
@@ -36,6 +37,7 @@ export async function POST(
       await runColorPipelineForApprovedSession(sessionId);
     } catch (error) {
       console.error("Background color pipeline failed:", sessionId, error);
+      logPreviewPipelineBackgroundFailed(sessionId, "color", error);
       await markSessionPipelineFailed(sessionId, error);
     }
   });

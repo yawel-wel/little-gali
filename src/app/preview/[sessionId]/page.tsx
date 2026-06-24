@@ -247,6 +247,28 @@ function stripThumbnailsReady(
   );
 }
 
+function isPreviewColorPhase(session: PreviewSessionPublicView): boolean {
+  return (
+    session.phase === "bw_approved" ||
+    session.phase === "style_selected" ||
+    session.phase === "cart_added"
+  );
+}
+
+function sessionHasUsableBwPreview(
+  session: PreviewSessionPublicView,
+): boolean {
+  return session.slots.every((slot) =>
+    slot.candidates.some((candidate) => candidate.previewUrl || candidate.error),
+  );
+}
+
+function shouldRecoverFromInitializationError(
+  session: PreviewSessionPublicView,
+): boolean {
+  return isPreviewColorPhase(session) && sessionHasUsableBwPreview(session);
+}
+
 function PreviewSlotLightboxActivator({
   lightboxEnabled,
   onOpenLightbox,
@@ -455,6 +477,24 @@ export default function PreviewPage() {
     const data = (await response.json()) as { session: PreviewSessionPublicView };
     if (data.session.initializationError) {
       applySession(data.session);
+      if (shouldRecoverFromInitializationError(data.session)) {
+        Sentry.logger.error("preview.load.initialization_error_partial", {
+          sessionId,
+          detail: data.session.initializationError,
+          phase: data.session.phase,
+          generationStatus: data.session.generationStatus,
+        });
+        setLoadFailed(false);
+        setFailureDetail("");
+        setFailureStatus(undefined);
+        return data.session;
+      }
+      Sentry.logger.error("preview.load.initialization_error", {
+        sessionId,
+        detail: data.session.initializationError,
+        phase: data.session.phase,
+        generationStatus: data.session.generationStatus,
+      });
       markLoadFailure(data.session.initializationError);
       return data.session;
     }
@@ -738,9 +778,7 @@ export default function PreviewPage() {
     side === "color" &&
     Boolean(session) &&
     !stripThumbnailsAreReady &&
-    (isColorStripPrefetching ||
-      Boolean(bookSlotForColor?.colorInFlight) ||
-      !hasColorStripPrefetchCompleted(sessionId));
+    (isColorStripPrefetching || Boolean(bookSlotForColor?.colorInFlight));
 
   const isInitialColorPipelineRunning =
     session?.generationStatus === "running";
@@ -908,6 +946,12 @@ export default function PreviewPage() {
       void processPendingColorRegenSlots(session);
     }
   }, [bookSide, session, processPendingColorRegenSlots]);
+
+  useEffect(() => {
+    if (stripThumbnailsAreReady) {
+      setIsColorStripPrefetching(false);
+    }
+  }, [stripThumbnailsAreReady]);
 
   const prefetchStripThumbnailsIfNeeded = useCallback(async () => {
     if (!session) {
@@ -1561,14 +1605,6 @@ export default function PreviewPage() {
     setBookLightboxOpen(false);
 
     if (nextSide === "color" && session) {
-      const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
-      if (
-        bookSlot &&
-        !stripThumbnailsReady(session, bookSlot) &&
-        !hasColorStripPrefetchCompleted(sessionId)
-      ) {
-        setIsColorStripPrefetching(true);
-      }
       void prefetchStripThumbnailsIfNeeded();
       void processPendingColorRegenSlots(session);
     }

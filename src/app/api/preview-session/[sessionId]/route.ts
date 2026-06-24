@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { captureMixpanelDistinctIdOnSession } from "@/lib/analytics-context";
+import { applyMixpanelDistinctIdFromRequest } from "@/lib/analytics-context";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
@@ -13,8 +13,9 @@ export async function GET(
   const auth = await requirePreviewSession(sessionId);
   if (auth instanceof NextResponse) return auth;
 
-  captureMixpanelDistinctIdOnSession(auth.session, request);
-  await savePreviewSession(auth.session);
+  if (applyMixpanelDistinctIdFromRequest(auth.session, request)) {
+    await savePreviewSession(auth.session);
+  }
 
   return NextResponse.json({ session: toPublicView(auth.session) });
 }

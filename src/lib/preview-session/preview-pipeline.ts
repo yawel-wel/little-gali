@@ -1,5 +1,12 @@
 import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackServerError } from "@/lib/analytics-server";
+import type { StyleType } from "@/components/style-selector";
+import {
+  allSlotsHaveColorForStyle,
+  DEFAULT_COLOR_STYLE,
+  getColorCandidateForStyle,
+  syncColorPreviewToStyle,
+} from "./color-by-style";
 import {
   copyCloudinaryUrlToPublicId,
   uploadFileToCloudinaryPublicId,
@@ -7,14 +14,27 @@ import {
 import { inputPublicId } from "./cloudinary-paths";
 import { runInitialParallelColorBundle } from "./color-generation-runner";
 import { runInitialParallelGeneration } from "./generation-runner";
+import {
+  logPreviewColorPipelineIncomplete,
+  logPreviewColorPipelineRecovered,
+  type ColorPipelineSlotDiagnostic,
+} from "./generation-log";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewSession, PreviewSlot } from "./types";
-import { allSlotsHaveColorForStyle, DEFAULT_COLOR_STYLE } from "./color-by-style";
 
 export interface PendingUpload {
   buffer: Buffer;
   mimeType: string;
   fileName: string;
+}
+
+const COLOR_PIPELINE_RELOAD_ATTEMPTS = 3;
+const COLOR_PIPELINE_RELOAD_DELAY_MS = 400;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function slotHasBwResult(slot: PreviewSlot): boolean {
@@ -46,6 +66,56 @@ function syncColorGenerationStatus(session: PreviewSession): void {
     session.generationStatus = "complete";
     session.initializationError = undefined;
   }
+}
+
+function collectColorPipelineSlotDiagnostics(
+  session: PreviewSession,
+  style: StyleType,
+): ColorPipelineSlotDiagnostic[] {
+  return session.slots.map((slot, index) => {
+    const candidate = getColorCandidateForStyle(slot, style);
+    const colorCandidateCount =
+      slot.colorCandidates?.filter(
+        (item) =>
+          item.kind === "color" && (item.style ?? "pencil") === style,
+      ).length ?? 0;
+    return {
+      slot: index,
+      hasPreviewUrl: Boolean(candidate?.previewUrl),
+      hasError: Boolean(candidate?.error),
+      colorCandidateCount,
+    };
+  });
+}
+
+async function finalizeColorPipelineSession(
+  sessionId: string,
+): Promise<PreviewSession | null> {
+  let session = await loadPreviewSession(sessionId);
+  if (!session) {
+    return null;
+  }
+
+  for (let attempt = 0; attempt < COLOR_PIPELINE_RELOAD_ATTEMPTS; attempt += 1) {
+    syncColorPreviewToStyle(session, DEFAULT_COLOR_STYLE);
+    syncColorGenerationStatus(session);
+    if (session.generationStatus === "complete") {
+      if (attempt > 0) {
+        logPreviewColorPipelineRecovered(sessionId, attempt);
+      }
+      return session;
+    }
+    if (attempt < COLOR_PIPELINE_RELOAD_ATTEMPTS - 1) {
+      await delay(COLOR_PIPELINE_RELOAD_DELAY_MS);
+      const reloaded = await loadPreviewSession(sessionId);
+      if (!reloaded) {
+        return null;
+      }
+      session = reloaded;
+    }
+  }
+
+  return session;
 }
 
 export async function markSessionPipelineFailed(
@@ -160,14 +230,32 @@ export async function runColorPipelineForApprovedSession(
 ): Promise<void> {
   await runInitialParallelColorBundle(sessionId);
 
-  const session = await loadPreviewSession(sessionId);
+  const session = await finalizeColorPipelineSession(sessionId);
   if (!session) return;
-  syncColorGenerationStatus(session);
+
   if (session.generationStatus !== "complete") {
-    session.generationStatus = "failed";
-    session.initializationError =
+    const message =
       session.initializationError ?? "Color generation did not complete";
+    session.generationStatus = "failed";
+    session.initializationError = message;
+    logPreviewColorPipelineIncomplete(sessionId, {
+      style: DEFAULT_COLOR_STYLE,
+      phase: session.phase,
+      slots: collectColorPipelineSlotDiagnostics(session, DEFAULT_COLOR_STYLE),
+      colorInFlightCount: session.slots.filter((slot) => slot.colorInFlight)
+        .length,
+      reloadAttempts: COLOR_PIPELINE_RELOAD_ATTEMPTS,
+    });
+    trackServerError(
+      {
+        step: "booklet_color_generation",
+        error_message: message,
+        session_id: sessionId,
+      },
+      analyticsContextFromSession(session),
+    );
   }
+
   session.slots = session.slots.map((slot) => ({
     ...slot,
     colorInFlight: false,

@@ -20,10 +20,20 @@ export function captureMixpanelDistinctIdOnSession(
   session: { mixpanelDistinctId?: string },
   request: Request,
 ): void {
+  applyMixpanelDistinctIdFromRequest(session, request);
+}
+
+/** Returns true when the session was updated and should be saved. */
+export function applyMixpanelDistinctIdFromRequest(
+  session: { mixpanelDistinctId?: string },
+  request: Request,
+): boolean {
   const distinctId = getMixpanelDistinctIdFromRequest(request);
-  if (distinctId) {
-    session.mixpanelDistinctId = distinctId;
+  if (!distinctId || session.mixpanelDistinctId === distinctId) {
+    return false;
   }
+  session.mixpanelDistinctId = distinctId;
+  return true;
 }
 
 export function analyticsContextFromSession(

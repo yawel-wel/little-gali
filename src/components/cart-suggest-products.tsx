@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BookOpen, Frame } from "lucide-react";
-import { isFramedArtEnabled } from "@/lib/feature-flags";
+import { BookOpen } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 
 function SuggestProductButton({
@@ -45,7 +44,6 @@ function SuggestProductButton({
 export function CartSuggestProducts() {
   const router = useRouter();
   const { t, locale } = useLanguage();
-  const framedArtOn = isFramedArtEnabled();
   const isHe = locale === "he";
 
   const iconClass = "h-6 w-6";
@@ -62,54 +60,12 @@ export function CartSuggestProducts() {
       </h2>
 
       <div className="mt-3 flex w-full gap-2 justify-start">
-        {(isHe && framedArtOn
-          ? [
-              {
-                key: "framed",
-                title: t("cart.suggest.framedArtTitle"),
-                promo: t("cart.suggest.framedArtPromo"),
-                icon: <Frame className={iconClass} strokeWidth={iconStroke} />,
-                href: "/framed-art/upload",
-              },
-              {
-                key: "book",
-                title: t("cart.suggest.bookTitle"),
-                promo: t("cart.suggest.bookPromo"),
-                icon: <BookOpen className={iconClass} strokeWidth={iconStroke} />,
-                href: "/upload",
-              },
-            ]
-          : [
-              {
-                key: "book",
-                title: t("cart.suggest.bookTitle"),
-                promo: t("cart.suggest.bookPromo"),
-                icon: <BookOpen className={iconClass} strokeWidth={iconStroke} />,
-                href: "/upload",
-              },
-              ...(framedArtOn
-                ? [
-                    {
-                      key: "framed",
-                      title: t("cart.suggest.framedArtTitle"),
-                      promo: t("cart.suggest.framedArtPromo"),
-                      icon: (
-                        <Frame className={iconClass} strokeWidth={iconStroke} />
-                      ),
-                      href: "/framed-art/upload",
-                    },
-                  ]
-                : []),
-            ]
-        ).map((item) => (
-          <SuggestProductButton
-            key={item.key}
-            title={item.title}
-            promo={item.promo}
-            icon={item.icon}
-            onClick={() => router.push(item.href)}
-          />
-        ))}
+        <SuggestProductButton
+          title={t("cart.suggest.bookTitle")}
+          promo={t("cart.suggest.bookPromo")}
+          icon={<BookOpen className={iconClass} strokeWidth={iconStroke} />}
+          onClick={() => router.push("/upload")}
+        />
       </div>
     </section>
   );
