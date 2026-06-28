@@ -106,7 +106,6 @@ const hebrewTranslations = {
   "nav.about": "אודותינו",
   "nav.giftCard": "גיפט קארד",
   "nav.qa": "שאלות ותשובות",
-  "nav.inspiration": "השראה",
   "nav.fabricBook": "הרשמה לספרוני בד",
   "nav.contact": "צור קשר",
   "nav.createBook": "צרו ספרון",
@@ -175,26 +174,6 @@ const hebrewTranslations = {
   "cart.startCreating": "התחל ליצור ספרון מותאם אישית",
   "cart.giftCardTitle": "גיפט קארד",
   "cart.createBook": "צרו ספרון",
-
-  // Inspiration Page
-  "inspiration.title": "השראה לספרונים",
-  "inspiration.titleHighlight": "השראה",
-  "inspiration.subtitle":
-    "צפו בדוגמאות לסוגי ספרונים כדי לעזור לכם לבחור תמונות וליצור ספרון משלכם",
-  "inspiration.colorful": "צבעוני",
-  "inspiration.blackWhite": "שחור לבן",
-  "inspiration.switchToBlackWhite": "החלף לצד שחור לבן",
-  "inspiration.switchToColorful": "החלף לצד צבעוני",
-  "inspiration.card1.title": "ספרון משפחה גרעינית",
-  "inspiration.card1.description":
-    "הפנים הקרובות ביותר לתינוק – אמא, אבא, ואולי גם אח, אחות או הכלב המשפחתי. הספרון שמעניק לו תחושת רוגע וחיבור למשפחה",
-  "inspiration.card2.title": "הכירו את שאר המשפחה",
-  "inspiration.card2.description":
-    "סבים, סבתות, דודים, בני דודים – כל מי שאוהב ומכיר את התינוק. דרך מתוקה לעודד היכרות וחיבור גם מרחוק",
-  "inspiration.card3.title": "ספר תינוקי",
-  "inspiration.card3.description":
-    "רגעים שונים של התינוק עצמו – חיוך, פליאה, מבט סקרן. ספרון אישי ופשוט שמרתק כל תינוק",
-  "inspiration.cta": "התחילו ליצור את הספרון שלכם",
 
   // Styles Page
   "styles.title": "גלו את הסגנונות שלנו",
@@ -856,7 +835,6 @@ const hebrewTranslations = {
   "footer.framedArt": "איור ממוסגר",
   "footer.howItWorks": "איך זה עובד",
   "footer.photoGuide": "מדריך בחירת תמונה",
-  "footer.inspiration": "גלריית השראה",
   "footer.policies": "תקנונים",
   "footer.terms": "תנאי שירות",
   "footer.termsOfUse": "תנאי שימוש",
@@ -1178,7 +1156,6 @@ const englishTranslations = {
   "nav.about": "About Us",
   "nav.giftCard": "Gift Card",
   "nav.qa": "Q&A",
-  "nav.inspiration": "Inspiration",
   "nav.fabricBook": "Fabric Book Signup",
   "nav.contact": "Contact",
   "nav.createBook": "Create Book",
@@ -1250,26 +1227,6 @@ const englishTranslations = {
   "cart.startCreating": "Start creating a personalized book",
   "cart.giftCardTitle": "Gift Card",
   "cart.createBook": "Create Book",
-
-  // Inspiration Page
-  "inspiration.title": "Book Inspiration",
-  "inspiration.titleHighlight": "Inspiration",
-  "inspiration.subtitle":
-    "View examples of different types of books to help you choose photos and create your own book",
-  "inspiration.colorful": "Colorful",
-  "inspiration.blackWhite": "Black and White",
-  "inspiration.switchToBlackWhite": "Switch to black and white side",
-  "inspiration.switchToColorful": "Switch to colorful side",
-  "inspiration.card1.title": "Core Family Book",
-  "inspiration.card1.description":
-    "The faces closest to the baby – mom, dad, and maybe also a sibling or the family dog. The book that gives them a sense of calm and connection to the family",
-  "inspiration.card2.title": "Meet the Rest of the Family",
-  "inspiration.card2.description":
-    "Grandparents, aunts, uncles, cousins – everyone who loves and knows the baby. A sweet way to encourage familiarity and connection even from afar",
-  "inspiration.card3.title": "Baby Book",
-  "inspiration.card3.description":
-    "Different moments of the baby itself – smile, wonder, curious gaze. A personal and simple book that captivates every baby",
-  "inspiration.cta": "Start Creating Your Book",
 
   // Styles Page
   "styles.title": "Discover Our Styles",
@@ -1938,7 +1895,6 @@ const englishTranslations = {
   "footer.framedArt": "Framed Illustration",
   "footer.howItWorks": "How It Works",
   "footer.photoGuide": "Photo Selection Guide",
-  "footer.inspiration": "Inspiration Gallery",
   "footer.policies": "Policies",
   "footer.terms": "Terms of Service",
   "footer.termsOfUse": "Terms of Use",

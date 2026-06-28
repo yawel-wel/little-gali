@@ -59,7 +59,6 @@ export function Header() {
     { nameKey: "nav.about", href: "/#about", isAnchor: true },
     { nameKey: "nav.giftCard", href: "/#gift-card", isAnchor: true },
     { nameKey: "nav.qa", href: "/qa", isAnchor: false },
-    { nameKey: "nav.inspiration", href: "/inspiration", isAnchor: false },
     { nameKey: "nav.contact", href: "/contact", isAnchor: false },
   ].map((item) => ({
     ...item,

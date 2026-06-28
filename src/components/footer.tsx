@@ -151,7 +151,6 @@ export function Footer() {
               titleKey="footer.platform"
               links={[
                 { labelKey: "footer.howItWorks", href: "/#how-it-works" },
-                { labelKey: "footer.inspiration", href: "/inspiration" },
                 { labelKey: "nav.qa", href: "/qa" },
               ]}
               t={t}
