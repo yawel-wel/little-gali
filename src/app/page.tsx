@@ -26,7 +26,7 @@ import { Eye, Gift, Heart, ShieldCheck, type LucideIcon } from "lucide-react";
 const HERO_IMAGE_MOBILE = "/hero-image-mobile.png";
 const HERO_IMAGE_DESKTOP = "/hero-image-desktop.JPG";
 
-const SPECIAL_ICON_BG = "bg-[#E8E3DC]";
+const SPECIAL_ICON_BG = "bg-white shadow-sm";
 
 const specialSteps: {
   titleKey: string;
@@ -596,16 +596,16 @@ export default function Home() {
               </Title>
             </div>
 
-            {/* Steps - Card Layout */}
+            {/* Steps - horizontal scroll on mobile, row on desktop */}
             <motion.div
               dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto flex max-w-5xl flex-col gap-5 lg:flex-row lg:flex-nowrap lg:gap-6"
+              className="mx-auto flex max-w-5xl snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 hide-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-auto lg:snap-none lg:overflow-visible lg:gap-6 lg:px-0"
               {...reveal.staggerContainer()}
             >
               {howItWorksSteps.map((step) => (
                 <motion.div
                   key={step.num}
-                  className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white"
+                  className="flex w-[82%] shrink-0 snap-start flex-col overflow-hidden rounded-2xl bg-white sm:w-[80%] lg:w-auto lg:min-w-0 lg:flex-1 lg:shrink"
                   variants={{
                     hidden: { opacity: 0, y: 30 },
                     show: {
@@ -687,7 +687,7 @@ export default function Home() {
 
             <motion.div
               dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+              className="mx-auto flex max-w-5xl snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 hide-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-auto lg:grid lg:snap-none lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:px-0"
               {...reveal.staggerContainer({ amount: 0.2, staggerChildren: 0.1 })}
             >
               {specialSteps.map((step) => {
@@ -695,7 +695,7 @@ export default function Home() {
                 return (
                   <motion.div
                     key={step.titleKey}
-                    className="flex flex-col items-center px-3 text-center"
+                    className="flex w-[72%] shrink-0 snap-start flex-col items-center px-3 text-center sm:w-[70%] lg:w-auto lg:min-w-0 lg:shrink"
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       show: {
@@ -706,11 +706,11 @@ export default function Home() {
                     }}
                   >
                     <div
-                      className={`mb-5 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full sm:h-20 sm:w-20 ${SPECIAL_ICON_BG}`}
+                      className={`mb-5 flex h-[5.2rem] w-[5.2rem] items-center justify-center rounded-full sm:h-[5.75rem] sm:w-[5.75rem] ${SPECIAL_ICON_BG}`}
                       aria-hidden="true"
                     >
                       <Icon
-                        className="h-7 w-7 text-dark-gray sm:h-8 sm:w-8"
+                        className="h-8 w-8 text-dark-gray sm:h-9 sm:w-9"
                         strokeWidth={1.5}
                       />
                     </div>
