@@ -21,9 +21,44 @@ import { BookFeaturePills, FreePreviewNote } from "@/components/feature-pill";
 import { QaTabsSection, HOME_BOOK_IDS } from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { HomeCtaButton } from "@/components/home-cta-button";
+import { Eye, Gift, Heart, ShieldCheck, type LucideIcon } from "lucide-react";
 
 const HERO_IMAGE_MOBILE = "/hero-image-mobile.png";
 const HERO_IMAGE_DESKTOP = "/hero-image-desktop.JPG";
+
+const SPECIAL_ICON_BG = "bg-[#E8E3DC]";
+
+const specialSteps: {
+  titleKey: string;
+  descriptionKey: string;
+  imageAltKey: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    titleKey: "home.special.item1.title",
+    descriptionKey: "home.special.item1.description",
+    imageAltKey: "home.special.item1.imageAlt",
+    icon: Eye,
+  },
+  {
+    titleKey: "home.special.item2.title",
+    descriptionKey: "home.special.item2.description",
+    imageAltKey: "home.special.item2.imageAlt",
+    icon: Gift,
+  },
+  {
+    titleKey: "home.special.item3.title",
+    descriptionKey: "home.special.item3.description",
+    imageAltKey: "home.special.item3.imageAlt",
+    icon: Heart,
+  },
+  {
+    titleKey: "home.special.item4.title",
+    descriptionKey: "home.special.item4.description",
+    imageAltKey: "home.special.item4.imageAlt",
+    icon: ShieldCheck,
+  },
+];
 
 const dotVariants = {
   inactive: {
@@ -87,32 +122,6 @@ export default function Home() {
           src: "/how-it-works-step-2.png",
         },
       ];
-  const specialSteps = [
-    {
-      titleKey: "home.special.item1.title",
-      descriptionKey: "home.special.item1.description",
-      imageAltKey: "home.special.item1.imageAlt",
-      src: "/why-us-1.png",
-    },
-    {
-      titleKey: "home.special.item2.title",
-      descriptionKey: "home.special.item2.description",
-      imageAltKey: "home.special.item2.imageAlt",
-      src: "/why-us-2.png",
-    },
-    {
-      titleKey: "home.special.item3.title",
-      descriptionKey: "home.special.item3.description",
-      imageAltKey: "home.special.item3.imageAlt",
-      src: "/why-us-3.png",
-    },
-    {
-      titleKey: "home.special.item4.title",
-      descriptionKey: "home.special.item4.description",
-      imageAltKey: "home.special.item4.imageAlt",
-      src: "/why-us-4.png",
-    },
-  ];
   const reveal = useScrollReveal(easeOwlet);
   const bookImages = [
     { src: "/our-book-light.JPG", labelKey: "home.book.bwSide" as const },
@@ -657,18 +666,20 @@ export default function Home() {
         {/* Testimonials Section */}
         {/* <TestimonialsSection /> */}
 
-        {/* Why Little Gali Section */}
+        {/* Why Choose Us Section */}
         <motion.section
           id="special"
           aria-label={t("home.special.ariaLabel")}
-          className="relative bg-[#FAF7F4] pb-16 lg:pb-24"
+          className="relative bg-[#F5F2ED] pt-8 pb-14 lg:pt-10 lg:pb-20"
           {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10 pt-8 text-center lg:mb-12 lg:pt-10">
+            <div className="mb-12 text-center lg:mb-16">
               <Title
+                as="h2"
+                size="lg"
                 highlightText={t("home.special.titleHighlight")}
-                className="mx-auto max-w-3xl text-[28px] sm:text-3xl"
+                className="mx-auto max-w-3xl"
               >
                 {t("home.special.title")}
               </Title>
@@ -676,40 +687,43 @@ export default function Home() {
 
             <motion.div
               dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6"
+              className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
               {...reveal.staggerContainer({ amount: 0.2, staggerChildren: 0.1 })}
             >
-              {specialSteps.map((step) => (
-                <motion.div
-                  key={step.titleKey}
-                  className="flex flex-col items-center rounded-2xl border border-gray-200/80 bg-white px-5 pb-8 pt-3 text-center sm:px-6 sm:pt-4"
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    show: {
-                      opacity: 1,
-                      y: 0,
-                      transition: { duration: 0.5, ease: easeOwlet },
-                    },
-                  }}
-                >
-                  <div className="mb-3 flex w-full items-center justify-center">
-                    <Image
-                      src={step.src}
-                      alt={t(step.imageAltKey)}
-                      width={220}
-                      height={220}
-                      className="h-[8.4rem] w-[8.4rem] object-contain sm:h-[9.6rem] sm:w-[9.6rem] lg:h-[11rem] lg:w-[11rem]"
-                      loading="lazy"
-                    />
-                  </div>
-                  <h3 className="mb-2 font-heading text-base font-bold text-dark-gray sm:text-lg">
-                    {t(step.titleKey)}
-                  </h3>
-                  <p className="font-body text-sm leading-relaxed text-medium-gray sm:text-[15px]">
-                    {t(step.descriptionKey)}
-                  </p>
-                </motion.div>
-              ))}
+              {specialSteps.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <motion.div
+                    key={step.titleKey}
+                    className="flex flex-col items-center px-3 text-center"
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      show: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.5, ease: easeOwlet },
+                      },
+                    }}
+                  >
+                    <div
+                      className={`mb-5 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full sm:h-20 sm:w-20 ${SPECIAL_ICON_BG}`}
+                      aria-hidden="true"
+                    >
+                      <Icon
+                        className="h-7 w-7 text-dark-gray sm:h-8 sm:w-8"
+                        strokeWidth={1.5}
+                      />
+                    </div>
+                    <span className="sr-only">{t(step.imageAltKey)}</span>
+                    <h3 className="mb-3 font-heading text-base font-bold text-dark-gray sm:text-lg">
+                      {t(step.titleKey)}
+                    </h3>
+                    <p className="max-w-[16rem] font-body text-sm leading-relaxed text-medium-gray sm:text-[15px]">
+                      {t(step.descriptionKey)}
+                    </p>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </div>
         </motion.section>

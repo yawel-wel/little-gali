@@ -18,6 +18,7 @@ import { StyleSelector, type StyleType } from "@/components/style-selector";
 import { MobileImageEditor } from "@/components/mobile-image-editor";
 import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
 import { PreviewBookColorPicker } from "@/components/preview-book-color-picker";
+import { BookAccordionPreview } from "@/components/book-accordion-preview";
 import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
 import { PreviewPhaseFooter } from "@/components/preview-phase-footer";
 import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternate-versions";
@@ -335,6 +336,7 @@ export default function PreviewPage() {
   const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
   const [selectedBookColor, setSelectedBookColor] =
     useState<BookColor | null>(null);
+  const [previewViewMode, setPreviewViewMode] = useState<"illustrations" | "book">("illustrations");
   const [bookColorError, setBookColorError] = useState(false);
   const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
     () => new Set(),
@@ -1868,6 +1870,48 @@ export default function PreviewPage() {
                             <span>{t("preview.zoom")}</span>
                           </button>
                         </div>
+                        {/* View mode toggle: איורים / בספרון */}
+                        <div className="flex justify-center mb-4">
+                          <div className="flex rounded-full border border-[#E5DDD4] bg-[#F5F1EC] p-0.5">
+                            {(["illustrations", "book"] as const).map((mode) => (
+                              <button
+                                key={mode}
+                                type="button"
+                                onClick={() => setPreviewViewMode(mode)}
+                                className={cn(
+                                  "px-5 py-1.5 rounded-full text-sm font-body transition-colors",
+                                  previewViewMode === mode
+                                    ? "bg-white shadow-sm text-dark-gray"
+                                    : "text-dark-gray/60 cursor-pointer",
+                                )}
+                              >
+                                {mode === "illustrations" ? "איורים" : "בספרון"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {previewViewMode === "book" ? (
+                          <BookAccordionPreview
+                            images={sortSlotsByDisplayOrder(
+                              session.slots,
+                              session.displayOrder,
+                            ).map((slot) => {
+                              const active = slot.candidates.find(
+                                (c) => c.id === slot.activeCandidateId,
+                              );
+                              const activeColorCandidate =
+                                getColorCandidateForStyleFromPublicSlot(
+                                  slot,
+                                  activeColorStyle,
+                                );
+                              return displayedBookSide === "bw"
+                                ? active?.previewUrl ?? null
+                                : activeColorCandidate?.previewUrl ?? null;
+                            })}
+                            bookColor={selectedBookColor}
+                          />
+                        ) : (
                         <div className="relative">
                         <div className="overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0">
                           <div className="flex w-max items-start gap-3 md:gap-3.5 lg:mx-auto lg:justify-center lg:gap-3">
@@ -2377,6 +2421,7 @@ export default function PreviewPage() {
                           </div>
                         </div>
                       </div>
+                        )} {/* end previewViewMode === "illustrations" */}
                         {session && isColorPhase ? (
                           <div className="flex flex-col items-center">
                             {displayedBookSide === "color" ? (
