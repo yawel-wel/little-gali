@@ -129,6 +129,7 @@ export default function Home() {
   ];
   const [bookImageIndex, setBookImageIndex] = useState(0);
   const bookCarouselRef = useRef<HTMLDivElement>(null);
+  const specialScrollRef = useRef<HTMLDivElement>(null);
   const bookX = useMotionValue(0);
   const [bookStep, setBookStep] = useState(0);
 
@@ -150,6 +151,14 @@ export default function Home() {
     const targetX = locale === "he" ? bookImageIndex * bookStep : -bookImageIndex * bookStep;
     animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   }, [bookImageIndex, locale, bookStep]);
+
+  useEffect(() => {
+    const el = specialScrollRef.current;
+    if (!el || window.innerWidth >= 1024) return;
+
+    const firstSlide = el.querySelector<HTMLElement>('[data-special-slide="0"]');
+    firstSlide?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [locale]);
 
   const handleBookDragEnd = (_: any, info: any) => {
     const step = (bookCarouselRef.current?.offsetWidth ?? bookStep / 0.8) * 0.8;
@@ -686,16 +695,19 @@ export default function Home() {
             </div>
 
             <motion.div
+              ref={specialScrollRef}
               dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto flex max-w-5xl snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 hide-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-auto lg:grid lg:snap-none lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:px-0"
+              className="mx-auto flex max-w-5xl snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 hide-scrollbar scroll-pl-[15vw] -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-auto lg:grid lg:snap-none lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:scroll-pl-0 lg:px-0"
               {...reveal.staggerContainer({ amount: 0.2, staggerChildren: 0.1 })}
             >
-              {specialSteps.map((step) => {
+              <div className="w-[4vw] shrink-0 lg:hidden" aria-hidden="true" />
+              {specialSteps.map((step, index) => {
                 const Icon = step.icon;
                 return (
                   <motion.div
                     key={step.titleKey}
-                    className="flex w-[72%] shrink-0 snap-start flex-col items-center px-3 text-center sm:w-[70%] lg:w-auto lg:min-w-0 lg:shrink"
+                    data-special-slide={index}
+                    className="flex w-[58vw] shrink-0 snap-center flex-col items-center px-2 text-center sm:w-[56vw] lg:w-auto lg:min-w-0 lg:snap-normal lg:shrink lg:px-3"
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       show: {
@@ -718,12 +730,13 @@ export default function Home() {
                     <h3 className="mb-3 font-heading text-base font-bold text-dark-gray sm:text-lg">
                       {t(step.titleKey)}
                     </h3>
-                    <p className="max-w-[16rem] font-body text-sm leading-relaxed text-medium-gray sm:text-[15px]">
+                    <p className="max-w-[10.5rem] font-body text-sm leading-relaxed text-medium-gray sm:max-w-[11rem] sm:text-[15px] lg:max-w-[16rem]">
                       {t(step.descriptionKey)}
                     </p>
                   </motion.div>
                 );
               })}
+              <div className="w-[34vw] shrink-0 lg:hidden" aria-hidden="true" />
             </motion.div>
           </div>
         </motion.section>
