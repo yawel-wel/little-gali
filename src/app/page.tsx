@@ -153,11 +153,24 @@ export default function Home() {
   }, [bookImageIndex, locale, bookStep]);
 
   useEffect(() => {
-    const el = specialScrollRef.current;
-    if (!el || window.innerWidth >= 1024) return;
+    const container = specialScrollRef.current;
+    if (!container || window.innerWidth >= 1024) return;
 
-    const firstSlide = el.querySelector<HTMLElement>('[data-special-slide="0"]');
-    firstSlide?.scrollIntoView({ inline: "center", block: "nearest" });
+    const firstSlide = container.querySelector<HTMLElement>(
+      '[data-special-slide="0"]',
+    );
+    if (!firstSlide) return;
+
+    // Center the first slide horizontally without scrolling the page vertically.
+    requestAnimationFrame(() => {
+      const containerRect = container.getBoundingClientRect();
+      const slideRect = firstSlide.getBoundingClientRect();
+      const delta =
+        slideRect.left +
+        slideRect.width / 2 -
+        (containerRect.left + containerRect.width / 2);
+      container.scrollBy({ left: delta, top: 0 });
+    });
   }, [locale]);
 
   const handleBookDragEnd = (_: any, info: any) => {
@@ -347,7 +360,7 @@ export default function Home() {
                 </p>
 
                 <div className="mt-3 pt-2 max-md:pt-0 md:mt-5">
-                  <a href="/upload" aria-label={t("home.hero.ctaAriaLabel")}>
+                  <a href="/soft-book" aria-label={t("home.hero.ctaAriaLabel")}>
                     <HomeCtaButton
                       sx={{
                         px: { xs: "30px", md: "36px" },
@@ -473,7 +486,7 @@ export default function Home() {
                     </p>
 
                     <a
-                      href="/upload"
+                      href="/soft-book"
                       aria-label={t("home.book.ctaAriaLabel")}
                       className="block w-full"
                     >
@@ -665,7 +678,7 @@ export default function Home() {
               className="text-center mt-10 md:mt-16"
               {...reveal.section}
             >
-              <a href="/upload" aria-label={t("home.howItWorks.ctaAriaLabel")}>
+              <a href="/soft-book" aria-label={t("home.howItWorks.ctaAriaLabel")}>
                 <HomeCtaButton>{t("home.howItWorks.cta")}</HomeCtaButton>
               </a>
             </motion.div>

@@ -1,9 +1,11 @@
 import mixpanel from "mixpanel-browser";
+import type { BookColor } from "@/lib/book-color";
 
 // ─── Event names ─────────────────────────────────────────────────────────────
 
 export const ANALYTICS_EVENTS = {
   // Booklet flow
+  BOOKLET_FLOW_STARTED: "booklet_flow_started",
   BOOKLET_UPLOAD_STARTED: "booklet_upload_started",
   BOOKLET_UPLOAD_COMPLETED: "booklet_upload_completed",
   BOOKLET_BW_PREVIEW_VIEWED: "booklet_bw_preview_viewed",
@@ -37,6 +39,7 @@ export type PreviewLimitType =
   | "generation_rate_limit";
 
 export type EventProperties = {
+  booklet_flow_started: { book_color: BookColor };
   booklet_upload_started: Record<string, never>;
   booklet_upload_completed: { image_count: number };
   booklet_bw_preview_viewed: Record<string, never>;
