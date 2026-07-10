@@ -15,7 +15,7 @@ export const BOOK_PRODUCT_GALLERY: Record<BookColor, readonly string[]> = {
     "/book-product-light-1.JPG",
     "/book-product-light-2.JPG",
     "/book-product-light-3.JPG",
-    "/book-product-light-4.JPG",
+    "/book-product-light-4.jpg",
     "/book-product-light-5.JPG",
   ],
   dark: [

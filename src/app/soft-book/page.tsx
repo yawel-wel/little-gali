@@ -207,8 +207,8 @@ export default function SoftBookProductPage() {
               </div>
 
               {/* Product info */}
-              <div className={cn("order-2 space-y-5 lg:order-1", textAlign)}>
-                <div className="space-y-3">
+              <div className={cn("order-2 flex flex-col gap-5 lg:order-1", textAlign)}>
+                <div className="order-1 space-y-3">
                   <div className={cn("flex", isHe ? "justify-start" : "justify-start")} dir={isHe ? "rtl" : "ltr"}>
                     <FeaturePill
                       locale={locale}
@@ -256,7 +256,7 @@ export default function SoftBookProductPage() {
 
                 <div
                   className={cn(
-                    "flex items-baseline",
+                    "order-2 flex items-baseline",
                     isHe ? "justify-start" : "justify-start",
                   )}
                   dir={isHe ? "rtl" : "ltr"}
@@ -270,7 +270,7 @@ export default function SoftBookProductPage() {
                   </span>
                 </div>
 
-                <div className="space-y-3">
+                <div className="order-4 space-y-3 lg:order-3">
                   <p className="font-body text-medium-gray leading-snug whitespace-pre-line">
                     {t("product.book.description.intro")}
                   </p>
@@ -288,7 +288,7 @@ export default function SoftBookProductPage() {
                 </div>
 
                 {/* Color selector */}
-                <div className="w-full space-y-2.5">
+                <div className="order-3 w-full space-y-2.5 lg:order-4">
                   <p className="text-sm font-body-bold text-dark-gray">
                     {t("product.book.colorLabel")}:{" "}
                     <span className="font-body text-medium-gray">
@@ -330,7 +330,7 @@ export default function SoftBookProductPage() {
                 </div>
 
                 {/* CTA */}
-                <div className="space-y-3 pt-2">
+                <div className="order-5 space-y-3 pt-2">
                   <Link
                     href={uploadHref}
                     className="block"
