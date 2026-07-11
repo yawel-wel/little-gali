@@ -10,7 +10,7 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { HomeCtaButton } from "@/components/home-cta-button";
-import { FeaturePill, FreePreviewNote } from "@/components/feature-pill";
+import { FreePreviewNote } from "@/components/feature-pill";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
@@ -33,6 +33,7 @@ const DESCRIPTION_BULLET_KEYS = [
   "product.book.description.bullet4",
   "product.book.description.bullet3",
   "product.book.description.bullet5",
+  "product.book.description.bullet6",
 ] as const;
 
 type ProductTab = "description" | "goodToKnow";
@@ -209,15 +210,6 @@ export default function SoftBookProductPage() {
               {/* Product info */}
               <div className={cn("order-2 flex flex-col gap-5 lg:order-1", textAlign)}>
                 <div className="order-1 space-y-3">
-                  <div className={cn("flex", isHe ? "justify-start" : "justify-start")} dir={isHe ? "rtl" : "ltr"}>
-                    <FeaturePill
-                      locale={locale}
-                      label={t("home.book.pill.standards")}
-                      icon="award"
-                      highlighted
-                    />
-                  </div>
-
                   <h1 className="text-2xl font-heading font-bold text-dark-gray sm:text-3xl lg:text-4xl leading-tight">
                     {t("product.book.name")}
                   </h1>
