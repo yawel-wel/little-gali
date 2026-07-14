@@ -599,7 +599,7 @@ const hebrewTranslations = {
   "product.book.goodToKnow.care.line2": "אין לכבס ולגהץ",
   "product.book.goodToKnow.mirrorNoteTitle": "שימו לב:",
   "product.book.goodToKnow.mirrorNote":
-    "בצד עם המראה יוצגו 4 תמונות.\nהתמונה החמישית תמוקם בכיס האחרון, מאחורי התמונה שלצד המראה, כך שתוכלו להחליף ביניהן מתי שתרצו.",
+    "בצד עם המראה יוצגו 4 תמונות.\nבספרון הקלאסי, התמונה החמישית נמצאת בכיס האחרון, מאחורי התמונה שלצד המראה - כך שכל 5 התמונות כלולות בספרון.",
   "product.book.tabs.material": "חומרים",
   "product.book.highlights.item1.title": "כותרת 1",
   "product.book.highlights.item1.subtitle": "תת-כותרת 1",
@@ -611,7 +611,7 @@ const hebrewTranslations = {
   "product.book.service.item2": "זמן אספקה עד 7 ימי עסקים",
   "product.book.accordion.overview": "סקירה כללית",
   "product.book.accordion.overviewContent":
-    "ספרון הבד של Little Gali נוצר כדי להכיר לתינוק את האנשים החשובים ביותר בחייו כבר מהימים הראשונים.\nבמקום איורים גנריים או חיות, הספרון מציג את המשפחה שלו - הורים, אחים, סבים, סבתות וכל מי שהוא אוהב.\nאתם מעלים את התמונות באתר, ואנחנו הופכים אותן לאיורים ייחודיים שנכנסים לכיסים השקופים שבספרון.\nהספרון דו־צדדי:\n\n• צד אחד עם איורים בשחור־לבן, המותאמים במיוחד לראייה של תינוקות בחודשים הראשונים.\n• הצד השני עם אותם איורים בצבע, להמשך ההתפתחות.\n\nהמראה המובנית מוסיפה עניין ומשחק, והאפשרות להחליף את סדר התמונות מאפשרת לרענן את הספרון בכל פעם מחדש.\nהוא רך, קל לנשיאה ומתאים לעגלה, לעריסה, לזמן בטן ולכל יציאה מהבית.",
+    "ספרון הבד של Little Gali נוצר כדי להכיר לתינוק את האנשים החשובים ביותר בחייו כבר מהימים הראשונים.\nבמקום איורים גנריים או חיות, הספרון מציג את המשפחה שלו - הורים, אחים, סבים, סבתות וכל מי שהוא אוהב.\nאתם מעלים את התמונות באתר, ואנחנו הופכים אותן לאיורים ייחודיים שנכנסים לכיסים השקופים שבספרון.\nהספרון הוא דו צדדי ואתם יכולים לבחור איך הוא יאוכלס: אפשר צד אחד עם תמונות בשחור-לבן וצד שני צבעוני ואפשר ששני הצדדים יהיו צבעוניים.\nהמראה המובנית מוסיפה עניין ומשחק, והאפשרות להחליף את סדר התמונות מאפשרת לרענן את הספרון בכל פעם מחדש.\nהוא רך, קל לנשיאה ומתאים לעגלה, לעריסה, לזמן בטן ולכל יציאה מהבית.",
   "product.book.accordion.howToUse": "איך זה עובד",
   "product.book.accordion.howToUseContent":
     "1. העלו 5 תמונות של האנשים החשובים לתינוק\n2. בחרו סגנון איור וצבע ספרון\n3. צפו בתצוגה מקדימה חינם לפני הרכישה\n4. אשרו והזמינו – נייצר ונשלח אליכם את הספרון",
@@ -1765,7 +1765,7 @@ const englishTranslations = {
   "product.book.goodToKnow.care.line2": "Do not machine wash or iron",
   "product.book.goodToKnow.mirrorNoteTitle": "Please note:",
   "product.book.goodToKnow.mirrorNote":
-    "On the side with the mirror, 4 photos will be displayed.\nThe fifth photo will be placed in the last pocket, behind the photo next to the mirror, so you can swap between them whenever you like.",
+    "On the side with the mirror, 4 photos will be displayed.\nIn the classic booklet, the fifth photo is in the last pocket, behind the photo next to the mirror - so all 5 photos are included in the book.",
   "product.book.tabs.material": "Material",
   "product.book.highlights.item1.title": "Title 1",
   "product.book.highlights.item1.subtitle": "Subtitle 1",
@@ -1777,7 +1777,7 @@ const englishTranslations = {
   "product.book.service.item2": "Delivery within 7 business days",
   "product.book.accordion.overview": "Overview",
   "product.book.accordion.overviewContent":
-    "Little Gali's fabric book is designed to introduce your baby to the most important people in their life from the very first days.\nInstead of generic illustrations or animals, the book shows their family — parents, siblings, grandparents, and everyone they love.\nYou upload photos on the site, and we turn them into unique illustrations that slide into the book's clear pockets.\nThe book is double-sided:\n\n• One side with black-and-white illustrations, specially suited to babies' vision in the first months.\n• The other side with the same illustrations in color, for later development.\n\nThe built-in mirror adds interest and play, and the option to reorder photos lets you refresh the book every time.\nIt's soft, easy to carry, and great for the stroller, crib, tummy time, and every outing.",
+    "Little Gali's fabric book is designed to introduce your baby to the most important people in their life from the very first days.\nInstead of generic illustrations or animals, the book shows their family - parents, siblings, grandparents, and everyone they love.\nYou upload photos on the site, and we turn them into unique illustrations that slide into the book's clear pockets.\nThe book is double-sided, and you can choose how it's filled: one side black-and-white and the other colorful, or both sides colorful.\nThe built-in mirror adds interest and play, and the option to reorder photos lets you refresh the book every time.\nIt's soft, easy to carry, and great for the stroller, crib, tummy time, and every outing.",
   "product.book.accordion.howToUse": "How it works",
   "product.book.accordion.howToUseContent":
     "1. Upload 5 photos of the people who matter to your baby\n2. Choose an illustration style and book color\n3. Preview your book for free before purchase\n4. Approve and order — we'll create and ship your book",

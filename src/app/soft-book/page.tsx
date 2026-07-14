@@ -148,7 +148,7 @@ export default function SoftBookProductPage() {
                 </Link>
               </li>
               <li aria-hidden="true" className="text-light-gray">
-                {isHe ? "‹" : "›"}
+                <span dir="ltr">{isHe ? "‹" : "›"}</span>
               </li>
               <li>
                 <span className="text-dark-gray">{t("product.book.breadcrumbProduct")}</span>
