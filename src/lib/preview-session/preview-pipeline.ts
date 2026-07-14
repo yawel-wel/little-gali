@@ -178,7 +178,7 @@ async function applyOriginalUploads(
   session.initializationError = undefined;
   if (isColorful) {
     session.phase = "bw_approved";
-    session.selectedColorStyle = "colorful";
+    session.selectedColorStyle = DEFAULT_COLOR_STYLE;
   }
   await savePreviewSession(session);
 }
@@ -188,8 +188,11 @@ async function finalizeAfterInitialPipeline(sessionId: string): Promise<void> {
   if (!session) return;
 
   if (parseBookFlow(session.bookFlow) === "colorful") {
-    syncColorPreviewToStyle(session, "colorful");
-    const colorReady = allSlotsHaveColorForStyle(session, "colorful");
+    syncColorPreviewToStyle(session, DEFAULT_COLOR_STYLE);
+    const colorReady = allSlotsHaveColorForStyle(
+      session,
+      DEFAULT_COLOR_STYLE,
+    );
     if (colorReady) {
       session.generationStatus = "complete";
       session.initializationError = undefined;

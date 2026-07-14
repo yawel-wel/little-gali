@@ -531,15 +531,15 @@ export async function runParallelColorGeneration(
   );
 }
 
-/** Color-only booklet flow: generate a single style for every slot in parallel. */
+/** Color-only booklet flow: 9 watercolor + pencil thumb on slot 0 for the style strip. */
 export async function runColorfulBookColorGeneration(
   sessionId: string,
 ): Promise<PreviewSession | null> {
   const session = await loadPreviewSession(sessionId);
   if (!session) return null;
 
-  const style: StyleType = "colorful";
   const indexes = allSlotIndexesForSession(session);
+  const defaultStyle = DEFAULT_COLOR_STYLE;
 
   for (const index of indexes) {
     const slot = session.slots[index];
@@ -548,18 +548,38 @@ export async function runColorfulBookColorGeneration(
       slot.colorInFlight = true;
     }
   }
-  session.selectedColorStyle = style;
+  session.selectedColorStyle = defaultStyle;
   session.phase = "bw_approved";
   await savePreviewSession(session);
 
-  const updated = await runColorGeneration(sessionId, style, indexes, {
+  // All watercolor slots first (primary product images).
+  let updated = await runColorGeneration(sessionId, defaultStyle, indexes, {
     trigger: "initial",
   });
   if (!updated) return null;
 
-  syncColorPreviewToStyle(updated, style);
+  // One pencil preview (slot 0) for the style-switcher button; remaining pencils
+  // generate on demand when the user picks pencil.
+  if (!slotHasColorPreviewForStyle(updated.slots[BOOK_SLOT_INDEX], "pencil")) {
+    updated = await runColorGeneration(
+      sessionId,
+      "pencil",
+      [BOOK_SLOT_INDEX],
+      { trigger: "initial" },
+    );
+    if (!updated) return null;
+  }
+
+  syncColorPreviewToStyle(updated, defaultStyle);
+  freezeStyleStripThumbnailsIfNeeded(updated);
   updated.phase = "bw_approved";
-  updated.selectedColorStyle = style;
+  updated.selectedColorStyle = defaultStyle;
+  updated.generationStatus = allSlotsHaveColorForStyle(updated, defaultStyle)
+    ? "complete"
+    : "failed";
+  if (updated.generationStatus === "complete") {
+    updated.initializationError = undefined;
+  }
   updated.slots = updated.slots.map((slot) => ({
     ...slot,
     inFlight: false,

@@ -45,6 +45,15 @@ function getStyleLabel(
   return t("cart.style.cartoon");
 }
 
+function getBookTypeLabel(
+  bookFlow: CartItem["bookFlow"],
+  t: (key: string) => string,
+): string | undefined {
+  if (bookFlow === "colorful") return t("cart.type.colorful");
+  if (bookFlow === "classic") return t("cart.type.classic");
+  return undefined;
+}
+
 function getBookColorDisplay(
   bookColor: BookColor | undefined,
   t: (key: string) => string,
@@ -279,6 +288,12 @@ export function CartDrawer() {
                                   : getStyleLabel(item.style, t)
                               }
                               showStyleRow={!item.isGiftCard}
+                              typeValue={
+                                item.isGiftCard || item.isFramedArt
+                                  ? undefined
+                                  : getBookTypeLabel(item.bookFlow, t)
+                              }
+                              showTypeRow={!item.isGiftCard && !item.isFramedArt}
                               quantity={quantity}
                               unitPrice={pricing.unitPrice}
                               lineTotal={pricing.lineTotal}

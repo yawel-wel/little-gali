@@ -16,19 +16,31 @@ export async function POST(
   if (auth instanceof NextResponse) return auth;
 
   const body = (await request.json()) as { style?: StyleType };
-  const isColorful = parseBookFlow(auth.session.bookFlow) === "colorful";
-  const allowedStyles: StyleType[] = isColorful
-    ? ["colorful"]
-    : [...PREVIEW_COLOR_STYLES];
+  const allowedStyles: StyleType[] = [...PREVIEW_COLOR_STYLES];
 
   if (!body.style || !allowedStyles.includes(body.style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }
 
   const session = auth.session;
-  if (session.phase !== "bw_approved" && session.phase !== "style_selected") {
+  const isColorful = parseBookFlow(session.bookFlow) === "colorful";
+  if (
+    !isColorful &&
+    session.phase !== "bw_approved" &&
+    session.phase !== "style_selected"
+  ) {
     return NextResponse.json(
       { error: "Approve B&W before choosing style" },
+      { status: 409 },
+    );
+  }
+  if (
+    isColorful &&
+    session.phase !== "bw_approved" &&
+    session.phase !== "style_selected"
+  ) {
+    return NextResponse.json(
+      { error: "Color preview is not ready for style selection" },
       { status: 409 },
     );
   }

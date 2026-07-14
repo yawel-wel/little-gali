@@ -98,6 +98,9 @@ export function getPreviewSessionThumbnailUrls(session: PreviewSession): string[
 }
 
 export function isPreviewSessionResumable(session: PreviewSession): boolean {
+  if (session.phase === "cart_added") {
+    return false;
+  }
   return session.slots.some(
     (slot) =>
       Boolean(slot.originalUrl?.trim()) ||

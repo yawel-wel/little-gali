@@ -23,6 +23,7 @@ import type { BookColor } from "./book-color";
 import { bookColorFromVariantId } from "./book-color";
 import type { StoredCartImages } from "./cart-images-store";
 import { getMixpanelDistinctId } from "./analytics";
+import { hideResumeSessionId } from "./preview-session/preview-session-id-history";
 
 export interface CartItem {
   id: string;
@@ -217,10 +218,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 attr.key === "book_flow" ||
                 attr.key === "type",
             );
+            const bookFlowFromAttr =
+              bookFlowAttr?.value === "colorful" ||
+              bookFlowAttr?.value === "classic"
+                ? bookFlowAttr.value
+                : undefined;
             const bookFlow =
-              bookFlowAttr?.value === "colorful" || style === "colorful"
+              bookFlowFromAttr ??
+              (style === "colorful"
                 ? ("colorful" as const)
-                : ("classic" as const);
+                : imageUrls.length === 9
+                  ? ("colorful" as const)
+                  : ("classic" as const));
 
             const bookColor =
               line.bookColor ??
@@ -234,6 +243,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
             const linePricing = parseShopifyLineCost(line.cost);
 
+            const previewSessionIdFromAttr = line.attributes?.find(
+              (attr) =>
+                attr.key === "_preview_session_id" ||
+                attr.key === "preview_session_id",
+            )?.value;
+            const previewSessionId = isGiftCard
+              ? undefined
+              : stored?.previewSessionId ?? previewSessionIdFromAttr;
+
             return {
               id: line.id,
               lineId: line.id,
@@ -243,7 +261,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               originalUrls: isGiftCard ? undefined : stored?.originalUrls,
               generatedBwUrls: isGiftCard ? undefined : stored?.generatedBwUrls,
               generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
-              previewSessionId: isGiftCard ? undefined : stored?.previewSessionId,
+              previewSessionId,
               style: isGiftCard ? undefined : style,
               bookFlow: isGiftCard || isFramedArt ? undefined : bookFlow,
               bookColor: isGiftCard || isFramedArt ? undefined : bookColor,
@@ -262,6 +280,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           if (seq !== fetchCartSeqRef.current) {
             return;
+          }
+
+          for (const item of displayItems) {
+            if (item.previewSessionId) {
+              hideResumeSessionId(item.previewSessionId);
+            }
           }
 
           setCart({
@@ -419,6 +443,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               ...item,
               imageUrls: isNewItem ? item.imageUrls : (existingItem?.imageUrls ?? []),
               style: isNewItem ? (style ?? "cartoon") : (item.style ?? existingItem?.style),
+              bookFlow: isNewItem
+                ? (fulfillment?.bookFlow ?? item.bookFlow)
+                : (item.bookFlow ?? existingItem?.bookFlow),
               bookColor: isNewItem
                 ? (bookColor ?? item.bookColor)
                 : (item.bookColor ?? existingItem?.bookColor),
@@ -439,10 +466,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 generatedBwUrls: fulfillment.generatedBwUrls,
                 generatedColorUrls: fulfillment.generatedColorUrls,
                 previewSessionId: fulfillment.previewSessionId,
+                bookFlow: fulfillment.bookFlow ?? base.bookFlow,
               };
             }
             return base;
           });
+
+          if (fulfillment?.previewSessionId) {
+            hideResumeSessionId(fulfillment.previewSessionId);
+          }
 
           setCart({
             id: data.cart.id,

@@ -131,7 +131,7 @@ async function createNewPreviewSession(
         ? { ...slot, inFlight: false, colorInFlight: true }
         : slot,
     ),
-    selectedColorStyle: isColorful ? "colorful" : undefined,
+    selectedColorStyle: isColorful ? "watercolor" : undefined,
     createdAt: now,
     updatedAt: now,
     clientIpHash: ipHash,
@@ -214,7 +214,7 @@ async function prepareSessionForPipelineStart(
     );
     existing.displayOrder = defaultDisplayOrder(bookFlow);
     existing.phase = isColorful ? "bw_approved" : "bw_review";
-    existing.selectedColorStyle = isColorful ? "colorful" : undefined;
+    existing.selectedColorStyle = isColorful ? "watercolor" : undefined;
     existing.initializationError = undefined;
     existing.generationStatus = "not_started";
     await savePreviewSession(existing);

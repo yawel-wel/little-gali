@@ -11,6 +11,22 @@ export function parseBookFlow(value: unknown): BookFlow {
   return value === "colorful" ? "colorful" : "classic";
 }
 
+/** Read classic/colorful from Shopify cart line attributes. */
+export function bookFlowFromLineAttributes(
+  attributes: Array<{ key: string; value: string }> | undefined | null,
+): BookFlow | undefined {
+  const attr = attributes?.find(
+    (item) =>
+      item.key === "_book_flow" ||
+      item.key === "book_flow" ||
+      item.key === "type",
+  );
+  if (attr?.value === "colorful" || attr?.value === "classic") {
+    return attr.value;
+  }
+  return undefined;
+}
+
 export function getSlotCount(flow: BookFlow = "classic"): number {
   return flow === "colorful" ? COLORFUL_SLOT_COUNT : CLASSIC_SLOT_COUNT;
 }

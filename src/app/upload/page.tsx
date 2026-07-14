@@ -1011,7 +1011,7 @@ function UploadPageContent() {
       // Fire-and-forget to enable optimistic navigation; cart page will reflect when ready
       // Use ref to ensure we get the current value, not a stale closure
       const styleToAdd = isColorfulFlow
-        ? "colorful"
+        ? "watercolor"
         : selectedStyleRef.current || selectedStyle || "pencil";
       console.log(
         "Adding to cart - selectedStyle state:",

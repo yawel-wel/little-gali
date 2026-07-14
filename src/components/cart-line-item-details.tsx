@@ -9,11 +9,13 @@ type CartLineItemDetailsProps = {
   colorValue?: string;
   colorSwatchSrc?: string;
   styleValue?: string;
+  typeValue?: string;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
   showColorRow?: boolean;
   showStyleRow?: boolean;
+  showTypeRow?: boolean;
   quantityControls?: ReactNode;
 };
 
@@ -22,11 +24,13 @@ export function CartLineItemDetails({
   colorValue,
   colorSwatchSrc,
   styleValue,
+  typeValue,
   quantity,
   unitPrice,
   lineTotal,
   showColorRow = true,
   showStyleRow = true,
+  showTypeRow = true,
   quantityControls,
 }: CartLineItemDetailsProps) {
   const { t } = useLanguage();
@@ -55,6 +59,13 @@ export function CartLineItemDetails({
             />
             <span>{colorValue}</span>
           </span>
+        </p>
+      ) : null}
+
+      {showTypeRow && typeValue ? (
+        <p className={rowClass}>
+          {t("cart.typeLabel")}
+          <span className="font-body text-dark-gray"> {typeValue}</span>
         </p>
       ) : null}
 

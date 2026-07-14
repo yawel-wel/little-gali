@@ -17,8 +17,9 @@ import {
   type PreviewGenerationStats,
   previewStatsShopifyAttributes,
 } from "@/lib/preview-session/generation-stats";
-import { parseBookFlow, type BookFlow } from "@/lib/preview-session/book-flow";
+import { parseBookFlow, bookFlowFromLineAttributes, type BookFlow } from "@/lib/preview-session/book-flow";
 import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
+import { markPreviewSessionCartAdded } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
 
@@ -354,6 +355,8 @@ export async function POST(request: NextRequest) {
       console.error("No lineId found after creating cart");
     }
 
+    await markPreviewSessionCartAdded(previewSessionId);
+
     // Return cart with line items including images for immediate use
     const cartItems =
       cart.lines?.edges?.map((e: any) => {
@@ -382,6 +385,9 @@ export async function POST(request: NextRequest) {
 
         const variantId = node.merchandise?.id;
         const itemBookColor = bookColorFromVariantId(variantId);
+        const itemBookFlow = isNewLine
+          ? bookFlow
+          : bookFlowFromLineAttributes(node.attributes);
 
         return {
           id: node.id,
@@ -394,6 +400,7 @@ export async function POST(request: NextRequest) {
           imageUrls: isNewLine ? urls : [], // Include images for the newly created line
           style:
             itemStyle || (isNewLine ? styleToStore || "cartoon" : undefined), // Include style for new line
+          bookFlow: itemBookFlow,
           variantId: variantId ?? undefined,
           bookColor: itemBookColor ?? undefined,
         };

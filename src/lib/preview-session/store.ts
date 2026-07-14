@@ -1,5 +1,9 @@
 import type { StyleType } from "@/components/style-selector";
-import { getColorCandidateForStyle } from "./color-by-style";
+import {
+  allSlotsHaveColorForStyle,
+  DEFAULT_COLOR_STYLE,
+  getColorCandidateForStyle,
+} from "./color-by-style";
 import { effectiveChangeCreditsRemaining } from "./credits";
 import { parseBookFlow } from "./book-flow";
 import { normalizeDisplayOrder, urlsInDisplayOrder } from "./display-order";
@@ -12,6 +16,15 @@ import type {
 } from "./types";
 import { kvGet, kvSet } from "./kv";
 import { PREVIEW_SESSION_TTL_SECONDS, previewSessionKey } from "./redis";
+
+function resolveSessionColorStyle(
+  style: StyleType | undefined | null,
+): StyleType {
+  if (style === "pencil" || style === "cartoon" || style === "watercolor") {
+    return style;
+  }
+  return DEFAULT_COLOR_STYLE;
+}
 
 export function createEmptySlots(originalUrls: string[]): PreviewSlot[] {
   return originalUrls.map((originalUrl) => ({
@@ -65,6 +78,21 @@ export async function loadPreviewSession(
     ensureColorCandidatesPersisted(slot);
   }
   return data;
+}
+
+/** Mark a soft-book preview as ordered so it no longer shows in resume lists. */
+export async function markPreviewSessionCartAdded(
+  sessionId: string | undefined | null,
+): Promise<void> {
+  if (!sessionId || typeof sessionId !== "string") {
+    return;
+  }
+  const session = await loadPreviewSession(sessionId);
+  if (!session || session.phase === "cart_added") {
+    return;
+  }
+  session.phase = "cart_added";
+  await savePreviewSession(session);
 }
 
 function getColorCandidates(slot: PreviewSlot): PreviewSlot["colorCandidates"] {
@@ -151,7 +179,10 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
       colorPreview: slot.colorPreview,
       colorInFlight: Boolean(slot.colorInFlight),
     })),
-    selectedColorStyle: session.selectedColorStyle,
+    selectedColorStyle:
+      isColorful && session.selectedColorStyle === "colorful"
+        ? "watercolor"
+        : session.selectedColorStyle,
     pendingColorRegenSlotIndexes: session.pendingColorRegenSlotIndexes ?? [],
     frozenStyleStripThumbnails: session.frozenStyleStripThumbnails,
     initializationError: session.initializationError,
@@ -173,13 +204,17 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
         return Boolean(active?.previewUrl && !active.error);
       }),
     canRegenerateColor: inColorPhase && noColorInFlight && hasCredits,
-    canSelectStyle:
-      !isColorful && inColorPhase && generationStatus === "complete",
+    canSelectStyle: inColorPhase && generationStatus === "complete",
     canAddToCart:
       inColorPhase &&
-      generationStatus === "complete" &&
       noColorInFlight &&
-      session.phase !== "cart_added",
+      session.phase !== "cart_added" &&
+      (isColorful
+        ? allSlotsHaveColorForStyle(
+            session,
+            resolveSessionColorStyle(session.selectedColorStyle),
+          )
+        : generationStatus === "complete"),
   };
 }
 

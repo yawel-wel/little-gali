@@ -100,12 +100,8 @@ export async function POST(
     return NextResponse.json({ session: toPublicView(latest) });
   }
 
-  const style = isColorful
-    ? "colorful"
-    : (body.style ?? DEFAULT_COLOR_STYLE);
-  const allowedStyles: StyleType[] = isColorful
-    ? ["colorful"]
-    : PREVIEW_COLOR_STYLES;
+  const style = body.style ?? DEFAULT_COLOR_STYLE;
+  const allowedStyles: StyleType[] = [...PREVIEW_COLOR_STYLES];
   if (!allowedStyles.includes(style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }
@@ -122,10 +118,8 @@ export async function POST(
       return NextResponse.json({ session: toPublicView(session) });
     }
   }
-  if (isFullBookRequest) {
-    session.selectedColorStyle = style;
-    await savePreviewSession(session);
-  }
+  session.selectedColorStyle = style;
+  await savePreviewSession(session);
 
   const updated = await runColorGeneration(sessionId, style, slotIndexes);
   if (!updated) {

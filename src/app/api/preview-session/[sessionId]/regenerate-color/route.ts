@@ -40,11 +40,9 @@ export async function POST(
   const style =
     body.style ??
     auth.session.selectedColorStyle ??
-    (isColorful ? "colorful" : DEFAULT_COLOR_STYLE);
+    DEFAULT_COLOR_STYLE;
   const requestedFreeRetry = body.freeRetry === true;
-  const allowedStyles: StyleType[] = isColorful
-    ? ["colorful"]
-    : [...PREVIEW_COLOR_STYLES];
+  const allowedStyles: StyleType[] = [...PREVIEW_COLOR_STYLES];
   const maxSlotIndex = Math.max(0, auth.session.slots.length - 1);
 
   if (

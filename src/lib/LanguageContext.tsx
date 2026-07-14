@@ -149,6 +149,7 @@ const hebrewTranslations = {
   "cart.cancel": "ביטול",
   "cart.quantity": "כמות:",
   "cart.styleLabel": "סגנון:",
+  "cart.typeLabel": "סוג:",
   "cart.colorLabel": "צבע:",
   "cart.lineTotal": "סך הכל:",
   "cart.discountApplied": "הנחה חלה על המוצר 🎉",
@@ -159,6 +160,8 @@ const hebrewTranslations = {
   "cart.style.pencil": "עיפרון",
   "cart.style.watercolor": "צבעי מים",
   "cart.style.colorful": "צבעוני",
+  "cart.type.classic": "קלאסי",
+  "cart.type.colorful": "צבעוני",
   "cart.book": "ספרון בד",
   "cart.orderSummary": "סיכום הזמנה",
   "cart.itemsCount": "כמות פריטים:",
@@ -969,7 +972,8 @@ const hebrewTranslations = {
   // Upload Page
   "upload.title": "בואו ניצור ספרון אישי",
   "upload.titleHighlight": "אישי",
-  "upload.description": "בחרו את חמשת התמונות שיופיעו בספרון.",
+  "upload.description":
+    "בחרו את חמשת התמונות שיופיעו בספרון.\nאותן תמונות יופיעו בצד אחד בשחור-לבן ובצד השני בצבעוני.",
   "upload.descriptionColorful":
     "בחרו 9 תמונות שיופיעו בספרון הצבעוני.",
   "upload.colorfulMirrorNote":
@@ -990,7 +994,7 @@ const hebrewTranslations = {
   "upload.chooser.colorfulDescription":
     "שני הצדדים יכילו תמונות צבעוניות, בצד אחד יהיו 4 תמונות ומראה, בצד השני 5 תמונות",
   "upload.chooser.colorfulBadge": "9 תמונות",
-  "upload.chooser.create": "צרו",
+  "upload.chooser.create": "התחילו",
   "upload.chooser.previousImage": "תמונה קודמת",
   "upload.chooser.nextImage": "תמונה הבאה",
   "upload.waitForUpload": "אנא המתן עד שהתמונות יסיימו להעלות",
@@ -1302,6 +1306,7 @@ const englishTranslations = {
   "cart.cancel": "Cancel",
   "cart.quantity": "Quantity:",
   "cart.styleLabel": "Style:",
+  "cart.typeLabel": "Type:",
   "cart.colorLabel": "Color:",
   "cart.lineTotal": "Total:",
   "cart.discountApplied": "A discount applies to this item 🎉",
@@ -1312,6 +1317,8 @@ const englishTranslations = {
   "cart.style.pencil": "Pencil",
   "cart.style.watercolor": "Watercolor",
   "cart.style.colorful": "Colorful",
+  "cart.type.classic": "Classic",
+  "cart.type.colorful": "Colorful",
   "cart.book": "Fabric Book",
   "cart.orderSummary": "Order Summary",
   "cart.itemsCount": "Number of items:",
@@ -2132,7 +2139,7 @@ const englishTranslations = {
   "upload.title": "Let's Create a Personalized Book for Your Baby",
   "upload.titleHighlight": "Personalized",
   "upload.description":
-    "Select 5 photos that will appear in the book.\nThe five photos will appear on one side in black and white and on the other in color.",
+    "Select 5 photos that will appear in the book.\nThose same photos will appear on one side in black and white and on the other in color.",
   "upload.descriptionColorful":
     "Select 9 photos that will appear in the colorful booklet.",
   "upload.colorfulMirrorNote":
@@ -2153,7 +2160,7 @@ const englishTranslations = {
   "upload.chooser.colorfulDescription":
     "Both sides include colorful photos, one side has 4 photos and a mirror; the other has 5 photos.",
   "upload.chooser.colorfulBadge": "9 photos",
-  "upload.chooser.create": "Create",
+  "upload.chooser.create": "Start",
   "upload.chooser.previousImage": "Previous image",
   "upload.chooser.nextImage": "Next image",
   "upload.waitForUpload": "Please wait until photos finish uploading",
@@ -2241,7 +2248,7 @@ const englishTranslations = {
   "preview.bwLoadingLine5": "Making sure everything looks great",
   "preview.colorfulLoadingTitle": "Creating your colorful illustrations",
   "preview.colorfulLoadingLine1": "Processing your photos",
-  "preview.colorfulLoadingLine2": "Drawing with colored markers",
+  "preview.colorfulLoadingLine2": "Drawing with colorful markers",
   "preview.colorfulLoadingLine3": "Keeping the likeness true to you",
   "preview.colorfulLoadingLine4": "Making sure everything looks great",
   "preview.colorLoadingLine1": "Creating the color side",

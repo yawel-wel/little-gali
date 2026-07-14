@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Clock3, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useCart } from "@/lib/CartContext";
 import {
   getHiddenResumeSessionIds,
   getKnownPreviewSessionIds,
@@ -67,6 +68,7 @@ export function PreviousPreviewSessions({
 }) {
   const router = useRouter();
   const { t, locale } = useLanguage();
+  const { cart } = useCart();
   const [sessions, setSessions] = useState<PreviewSessionResumeSummary[]>([]);
   const [hiddenSessionIds, setHiddenSessionIds] = useState<string[]>(() =>
     getHiddenResumeSessionIds(),
@@ -74,6 +76,24 @@ export function PreviousPreviewSessions({
   const [isLoading, setIsLoading] = useState(hasCandidateSessionIds);
   const [resumingId, setResumingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const cartPreviewSessionIds = useCallback(() => {
+    const ids = new Set<string>();
+    for (const item of cart?.items ?? []) {
+      if (item.previewSessionId) {
+        ids.add(item.previewSessionId);
+      }
+      const attrId = item.attributes?.find(
+        (attr) =>
+          attr.key === "_preview_session_id" ||
+          attr.key === "preview_session_id",
+      )?.value;
+      if (attrId) {
+        ids.add(attrId);
+      }
+    }
+    return ids;
+  }, [cart?.items]);
 
   const statusLabel = useCallback(
     (status: PreviewResumeStatus) => {
@@ -102,6 +122,12 @@ export function PreviousPreviewSessions({
 
     async function loadSessions() {
       const hiddenIds = new Set(getHiddenResumeSessionIds());
+      const inCartIds = cartPreviewSessionIds();
+      for (const sessionId of inCartIds) {
+        hideResumeSessionId(sessionId);
+        hiddenIds.add(sessionId);
+      }
+
       const sessionIds = getKnownPreviewSessionIds().filter(
         (id) => !hiddenIds.has(id),
       );
@@ -125,7 +151,20 @@ export function PreviousPreviewSessions({
         };
         if (!cancelled) {
           const loaded = Array.isArray(data.sessions) ? data.sessions : [];
-          setSessions(loaded.filter((session) => !hiddenIds.has(session.id)));
+          const visible: PreviewSessionResumeSummary[] = [];
+          for (const session of loaded) {
+            if (
+              hiddenIds.has(session.id) ||
+              inCartIds.has(session.id) ||
+              session.status === "in_cart" ||
+              session.phase === "cart_added"
+            ) {
+              hideResumeSessionId(session.id);
+              continue;
+            }
+            visible.push(session);
+          }
+          setSessions(visible);
         }
       } catch {
         if (!cancelled) {
@@ -143,7 +182,7 @@ export function PreviousPreviewSessions({
     return () => {
       cancelled = true;
     };
-  }, [hiddenSessionIds]);
+  }, [hiddenSessionIds, cartPreviewSessionIds]);
 
   const handleHideSession = (sessionId: string) => {
     hideResumeSessionId(sessionId);
@@ -177,7 +216,8 @@ export function PreviousPreviewSessions({
   };
 
   const handleContinue = async (session: PreviewSessionResumeSummary) => {
-    if (session.status === "in_cart") {
+    if (session.status === "in_cart" || session.phase === "cart_added") {
+      hideResumeSessionId(session.id);
       router.push("/cart");
       return;
     }

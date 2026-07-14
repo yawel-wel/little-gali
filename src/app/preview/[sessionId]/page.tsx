@@ -18,7 +18,6 @@ import { StyleSelector, type StyleType } from "@/components/style-selector";
 import { MobileImageEditor } from "@/components/mobile-image-editor";
 import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
 import { PreviewBookColorPicker } from "@/components/preview-book-color-picker";
-import { BookAccordionPreview } from "@/components/book-accordion-preview";
 import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
 import { PreviewPhaseFooter } from "@/components/preview-phase-footer";
 import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternate-versions";
@@ -263,10 +262,17 @@ function isPreviewColorPhase(session: PreviewSessionPublicView): boolean {
 function isColorfulPreviewSession(
   session: PreviewSessionPublicView | null | undefined,
 ): boolean {
-  return (
-    session?.bookFlow === "colorful" ||
-    session?.selectedColorStyle === "colorful"
-  );
+  return session?.bookFlow === "colorful";
+}
+
+/** Map legacy `colorful` style (and anything else unexpected) to a real preview style. */
+function resolvePreviewColorStyle(
+  style: StyleType | undefined | null,
+): StyleType {
+  if (style === "pencil" || style === "cartoon" || style === "watercolor") {
+    return style;
+  }
+  return DEFAULT_COLOR_STYLE;
 }
 
 function translateOrFallback(
@@ -282,8 +288,10 @@ function slotHasUsableColorPreview(
   slot: PreviewSessionPublicView["slots"][number],
   style: StyleType,
 ): boolean {
+  const resolvedStyle = resolvePreviewColorStyle(style);
   const candidate =
-    getColorCandidateForStyleFromPublicSlot(slot, style) ?? slot.colorPreview;
+    getColorCandidateForStyleFromPublicSlot(slot, resolvedStyle) ??
+    slot.colorPreview;
   return Boolean(candidate?.previewUrl || candidate?.error);
 }
 
@@ -302,8 +310,9 @@ function shouldRecoverFromInitializationError(
     return false;
   }
   if (isColorfulPreviewSession(session)) {
+    const style = resolvePreviewColorStyle(session.selectedColorStyle);
     return session.slots.every((slot) =>
-      slotHasUsableColorPreview(slot, "colorful"),
+      slotHasUsableColorPreview(slot, style),
     );
   }
   return sessionHasUsableBwPreview(session);
@@ -375,7 +384,6 @@ export default function PreviewPage() {
   const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
   const [selectedBookColor, setSelectedBookColor] =
     useState<BookColor | null>(null);
-  const [previewViewMode, setPreviewViewMode] = useState<"illustrations" | "book">("illustrations");
   const [bookColorError, setBookColorError] = useState(false);
   const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
     () => new Set(),
@@ -511,6 +519,7 @@ export default function PreviewPage() {
   const isColorfulFlow =
     isColorfulPreviewSession(session) ||
     (!session && localInitialPhotoUrls.length === COLORFUL_SLOT_COUNT);
+  const displayColorStyle = resolvePreviewColorStyle(activeColorStyle);
 
   const markLoadFailure = useCallback(
     (detail: string, status?: number) => {
@@ -603,19 +612,20 @@ export default function PreviewPage() {
     if (!session?.selectedColorStyle) {
       return;
     }
-    setSelectedStyle(session.selectedColorStyle);
-    setActiveColorStyle(session.selectedColorStyle);
+    const resolved = resolvePreviewColorStyle(session.selectedColorStyle);
+    setSelectedStyle(resolved);
+    setActiveColorStyle(resolved);
   }, [session?.selectedColorStyle]);
 
   useEffect(() => {
-    if (!isColorfulPreviewSession(session)) {
+    if (!session || !isColorfulPreviewSession(session)) {
       return;
     }
     setBookSide("color");
     setDisplayedBookSide("color");
-    setActiveColorStyle("colorful");
-    setSelectedStyle("colorful");
-    setPreviewViewMode("illustrations");
+    const resolved = resolvePreviewColorStyle(session.selectedColorStyle);
+    setActiveColorStyle(resolved);
+    setSelectedStyle(resolved);
   }, [session?.bookFlow, session?.selectedColorStyle]);
 
   useEffect(() => {
@@ -721,7 +731,10 @@ export default function PreviewPage() {
     (!session ||
       session.slots.some((slot) => {
         if (isColorfulPreviewSession(session)) {
-          return !slotHasUsableColorPreview(slot, "colorful");
+          return !slotHasUsableColorPreview(
+            slot,
+            resolvePreviewColorStyle(session.selectedColorStyle),
+          );
         }
         return !slot.candidates.some(
           (candidate) => candidate.previewUrl || candidate.error,
@@ -747,11 +760,15 @@ export default function PreviewPage() {
   const isInitialLoadingExiting =
     !isInitialLoading && keepInitialLoadingVisible;
 
+  const isActiveStyleStripLoading = styleStripLoading.has(
+    resolvePreviewColorStyle(activeColorStyle),
+  );
+
   const isColorGenerating =
     !loadFailed &&
     session !== null &&
     (session.phase === "bw_approved" || session.phase === "style_selected") &&
-    session.generationStatus === "running";
+    (session.generationStatus === "running" || isActiveStyleStripLoading);
 
   useEffect(() => {
     if (isColorGenerating) {
@@ -816,6 +833,15 @@ export default function PreviewPage() {
     (session.phase === "bw_approved" ||
       session.phase === "style_selected" ||
       session.phase === "cart_added");
+
+  const canAddToCart = Boolean(
+    session &&
+      session.phase !== "cart_added" &&
+      !session.slots.some((slot) => slot.colorInFlight) &&
+      (isColorfulFlow
+        ? allSlotsHaveColorForStylePublic(session, displayColorStyle)
+        : session.canAddToCart),
+  );
 
   useEffect(() => {
     if (!showInitialLoadingScreen && session && !bwPreviewTrackedRef.current) {
@@ -916,7 +942,7 @@ export default function PreviewPage() {
         );
         const colorCandidate =
           displayedBookSide === "color"
-            ? getColorCandidateForStyleFromPublicSlot(slot, activeColorStyle)
+            ? getColorCandidateForStyleFromPublicSlot(slot, displayColorStyle)
             : undefined;
         const imageUrl =
           displayedBookSide === "bw"
@@ -940,7 +966,7 @@ export default function PreviewPage() {
         ];
       },
     );
-  }, [activeColorStyle, displayedBookSide, session, t]);
+  }, [displayColorStyle, displayedBookSide, session, t]);
 
   useEffect(() => {
     setBookLightboxOpen(false);
@@ -1125,12 +1151,26 @@ export default function PreviewPage() {
       setError(null);
 
       if (!allSlotsCached) {
+        const missingSlotIndexes = session.slots
+          .map((slot) => slot.index)
+          .filter((slotIndex) => {
+            const slot = session.slots.find((item) => item.index === slotIndex);
+            if (!slot) return true;
+            return !getColorCandidateForStyleFromPublicSlot(slot, style)
+              ?.previewUrl;
+          });
+
         setStyleStripLoading((current) => {
           const next = new Set(current);
           next.add(style);
           return next;
         });
-        fetchColorStylePreview(style, [0, 1, 2, 3, 4])
+        fetchColorStylePreview(
+          style,
+          missingSlotIndexes.length > 0
+            ? missingSlotIndexes
+            : session.slots.map((slot) => slot.index),
+        )
           .catch((err) => setGenerationError(err))
           .finally(() => {
             setStyleStripLoading((current) => {
@@ -1633,10 +1673,15 @@ export default function PreviewPage() {
         latest.displayOrder,
       );
       const originalUrls = orderedSlots.map((slot) => slot.originalUrl);
+      const cartStyle = colorful
+        ? resolvePreviewColorStyle(activeColorStyle) === "pencil"
+          ? "pencil"
+          : "watercolor"
+        : resolvePreviewColorStyle(activeColorStyle);
       const generatedColorUrls = orderedSlots.map((slot) => {
         const active = getColorCandidateForStyleFromPublicSlot(
           slot,
-          colorful ? "colorful" : activeColorStyle,
+          cartStyle,
         );
         if (!active?.cleanUrl) {
           throw new Error(t("preview.sessionError"));
@@ -1655,7 +1700,6 @@ export default function PreviewPage() {
             return active.cleanUrl;
           });
       const cartImageUrls = colorful ? generatedColorUrls : generatedBwUrls;
-      const cartStyle = colorful ? "colorful" : activeColorStyle;
 
       try {
         if (typeof window !== "undefined") {
@@ -2000,50 +2044,6 @@ export default function PreviewPage() {
                             <span>{t("preview.zoom")}</span>
                           </button>
                         </div>
-                        {/* View mode toggle: איורים / בספרון */}
-                        {!isColorfulFlow ? (
-                        <div className="flex justify-center mb-4">
-                          <div className="flex rounded-full border border-[#E5DDD4] bg-[#F5F1EC] p-0.5">
-                            {(["illustrations", "book"] as const).map((mode) => (
-                              <button
-                                key={mode}
-                                type="button"
-                                onClick={() => setPreviewViewMode(mode)}
-                                className={cn(
-                                  "px-5 py-1.5 rounded-full text-sm font-body transition-colors",
-                                  previewViewMode === mode
-                                    ? "bg-white shadow-sm text-dark-gray"
-                                    : "text-dark-gray/60 cursor-pointer",
-                                )}
-                              >
-                                {mode === "illustrations" ? "איורים" : "בספרון"}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        ) : null}
-
-                        {previewViewMode === "book" ? (
-                          <BookAccordionPreview
-                            images={sortSlotsByDisplayOrder(
-                              session.slots,
-                              session.displayOrder,
-                            ).map((slot) => {
-                              const active = slot.candidates.find(
-                                (c) => c.id === slot.activeCandidateId,
-                              );
-                              const activeColorCandidate =
-                                getColorCandidateForStyleFromPublicSlot(
-                                  slot,
-                                  activeColorStyle,
-                                );
-                              return displayedBookSide === "bw"
-                                ? active?.previewUrl ?? null
-                                : activeColorCandidate?.previewUrl ?? null;
-                            })}
-                            bookColor={selectedBookColor}
-                          />
-                        ) : (
                         <div className="relative">
                         <div
                           className={cn(
@@ -2075,11 +2075,14 @@ export default function PreviewPage() {
                         const activeColorCandidate =
                           getColorCandidateForStyleFromPublicSlot(
                             slot,
-                            activeColorStyle,
-                          );
+                            displayColorStyle,
+                          ) ??
+                          (displayedBookSide === "color"
+                            ? slot.colorPreview
+                            : undefined);
                         const colorVersions = getColorVersionsForStyle(
                           slot,
-                          activeColorStyle,
+                          displayColorStyle,
                         );
                         const isSlotPendingColorRegen =
                           (session.pendingColorRegenSlotIndexes?.includes(
@@ -2192,7 +2195,7 @@ export default function PreviewPage() {
                             : isColorPhase
                               ? getSelectableColorVersionCandidates(
                                   slot,
-                                  activeColorStyle,
+                                  displayColorStyle,
                                 )
                               : [];
                         const activeVersionCandidateId =
@@ -2566,14 +2569,13 @@ export default function PreviewPage() {
                           ))}
                         </div>
                       </div>
-                        )} {/* end previewViewMode === "illustrations" */}
                         {session && isColorPhase ? (
                           <div className="flex flex-col items-center">
-                            {displayedBookSide === "color" && !isColorfulFlow ? (
+                            {displayedBookSide === "color" ? (
                               <PreviewColorStyleStrip
                                 session={session}
                                 frozenThumbnails={session.frozenStyleStripThumbnails}
-                                activeStyle={activeColorStyle}
+                                activeStyle={displayColorStyle}
                                 loadingStyles={styleStripLoadingSet}
                                 onSelectStyle={(style) => {
                                   void handleSelectColorStyle(style);
@@ -2619,7 +2621,7 @@ export default function PreviewPage() {
                       headline={t("preview.colorCartAbove")}
                       buttonLabel={t("preview.addToCart")}
                       submittingLabel={t("preview.addingToCart")}
-                      buttonDisabled={!session.canAddToCart}
+                      buttonDisabled={!canAddToCart}
                       isSubmitting={isSubmitting}
                       onButtonClick={handleContinueToCart}
                       contactBefore={t("preview.bwApproveBelowBefore")}
@@ -2633,7 +2635,7 @@ export default function PreviewPage() {
                       headline={t("preview.colorCartAbove")}
                       buttonLabel={t("preview.addToCart")}
                       submittingLabel={t("preview.addingToCart")}
-                      buttonDisabled={!session.canAddToCart}
+                      buttonDisabled={!canAddToCart}
                       isSubmitting={isSubmitting}
                       onButtonClick={handleContinueToCart}
                       contactBefore={t("preview.bwApproveBelowBefore")}
