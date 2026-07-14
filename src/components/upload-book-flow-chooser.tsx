@@ -1,32 +1,69 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, type TouchEvent, type TransitionEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type TouchEvent,
+  type TransitionEvent,
+} from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import type { BookFlow } from "@/lib/preview-session/book-flow";
 import { PreviousPreviewSessions } from "@/components/previous-preview-sessions";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
+import {
+  DEFAULT_BOOK_COLOR,
+  getPreferredBookColor,
+  type BookColor,
+} from "@/lib/book-color";
 import { cn } from "@/lib/utils";
 
 type UploadBookFlowChooserProps = {
   onSelect: (flow: BookFlow) => void;
 };
 
-/** Classic card carousel — put matching files in /public */
-const CLASSIC_CARD_IMAGES = [
+type ChooserCardImage = { name: string; src: string };
+
+const CLASSIC_CARD_IMAGES_LIGHT: ChooserCardImage[] = [
   { name: "classic-card-1", src: "/chooser-classic-1.JPG" },
   { name: "classic-card-2", src: "/chooser-classic-2.JPG" },
-] as const;
+];
 
-/** Colorful card carousel — put matching files in /public */
-const COLORFUL_CARD_IMAGES = [
+const CLASSIC_CARD_IMAGES_DARK: ChooserCardImage[] = [
+  { name: "classic-card-dark-1", src: "/chooser-classic-dark-1.JPG" },
+  { name: "classic-card-dark-2", src: "/chooser-classic-dark-2.JPG" },
+];
+
+const COLORFUL_CARD_IMAGES_LIGHT: ChooserCardImage[] = [
   { name: "colorful-card-1", src: "/chooser-colorful-1.JPG" },
   { name: "colorful-card-2", src: "/chooser-colorful-2.JPG" },
-] as const;
+];
 
-function buildLoopSlides(
-  images: ReadonlyArray<{ name: string; src: string }>,
-) {
+const COLORFUL_CARD_IMAGES_DARK: ChooserCardImage[] = [
+  { name: "colorful-card-dark-1", src: "/chooser-colorful-dark-1.JPG" },
+  { name: "colorful-card-dark-2", src: "/chooser-colorful-dark-2.JPG" },
+];
+
+function chooserImagesForColor(color: BookColor): {
+  classic: ChooserCardImage[];
+  colorful: ChooserCardImage[];
+} {
+  if (color === "dark") {
+    return {
+      classic: CLASSIC_CARD_IMAGES_DARK,
+      colorful: COLORFUL_CARD_IMAGES_DARK,
+    };
+  }
+  return {
+    classic: CLASSIC_CARD_IMAGES_LIGHT,
+    colorful: COLORFUL_CARD_IMAGES_LIGHT,
+  };
+}
+
+function buildLoopSlides(images: ReadonlyArray<ChooserCardImage>) {
   if (images.length <= 1) return [...images];
   return [images[images.length - 1], ...images, images[0]];
 }
@@ -41,7 +78,7 @@ function BookFlowCard({
   onSelect,
 }: {
   flow: BookFlow;
-  images: ReadonlyArray<{ name: string; src: string }>;
+  images: ReadonlyArray<ChooserCardImage>;
   title: string;
   description: string;
   badge: string;
@@ -259,6 +296,16 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
   const isHe = locale === "he";
   const previewEnabled = isAiPreviewEnabled();
   const [hasPreviousSessions, setHasPreviousSessions] = useState(false);
+  const [bookColor, setBookColor] = useState<BookColor>(DEFAULT_BOOK_COLOR);
+
+  useEffect(() => {
+    const preferred = getPreferredBookColor();
+    if (preferred) {
+      setBookColor(preferred);
+    }
+  }, []);
+
+  const cardImages = useMemo(() => chooserImagesForColor(bookColor), [bookColor]);
 
   return (
     <section
@@ -274,7 +321,7 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
       </p>
 
       {previewEnabled ? (
-        <div className="mt-8 mb-2">
+        <div className="mx-auto mt-8 mb-2 w-full max-w-2xl">
           <PreviousPreviewSessions
             onVisibleChange={setHasPreviousSessions}
             compact
@@ -283,15 +330,30 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
       ) : null}
 
       {hasPreviousSessions ? (
-        <p className="mb-4 mt-6 text-center font-body-bold text-sm text-dark-gray">
-          {t("upload.chooser.titleNew")}
-        </p>
+        <div
+          className="mx-auto mb-4 mt-6 flex w-full max-w-2xl items-center gap-3"
+          role="separator"
+          aria-label={t("upload.chooser.titleNew")}
+        >
+          <span
+            aria-hidden
+            className="h-px min-w-0 flex-1 bg-[#D9CFC4]"
+          />
+          <span className="shrink-0 font-body-bold text-sm text-dark-gray">
+            {t("upload.chooser.titleNew")}
+          </span>
+          <span
+            aria-hidden
+            className="h-px min-w-0 flex-1 bg-[#D9CFC4]"
+          />
+        </div>
       ) : null}
 
       <div className="mx-auto mt-6 grid min-w-0 max-w-2xl grid-cols-2 gap-x-3 sm:gap-x-4 [grid-template-rows:auto_auto_auto]">
         <BookFlowCard
+          key={`classic-${bookColor}`}
           flow="classic"
-          images={CLASSIC_CARD_IMAGES}
+          images={cardImages.classic}
           title={t("upload.chooser.classicTitle")}
           description={t("upload.chooser.classicDescription")}
           badge={t("upload.chooser.classicBadge")}
@@ -299,8 +361,9 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
           onSelect={onSelect}
         />
         <BookFlowCard
+          key={`colorful-${bookColor}`}
           flow="colorful"
-          images={COLORFUL_CARD_IMAGES}
+          images={cardImages.colorful}
           title={t("upload.chooser.colorfulTitle")}
           description={t("upload.chooser.colorfulDescription")}
           badge={t("upload.chooser.colorfulBadge")}

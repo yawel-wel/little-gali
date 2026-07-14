@@ -43,7 +43,11 @@ import {
   displayPosition,
   sortSlotsByDisplayOrder,
 } from "@/lib/preview-session/display-order";
-import type { BookColor } from "@/lib/book-color";
+import {
+  getPreferredBookColor,
+  setPreferredBookColor,
+  type BookColor,
+} from "@/lib/book-color";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
@@ -396,6 +400,13 @@ export default function PreviewPage() {
   const pendingColorRegenProcessingRef = useRef(false);
   const mutationInProgressRef = useRef(false);
   const [error, setError] = useState<ReactNode | null>(null);
+
+  useEffect(() => {
+    const preferred = getPreferredBookColor();
+    if (preferred) {
+      setSelectedBookColor(preferred);
+    }
+  }, []);
 
   const setGenerationError = useCallback(
     (err: unknown, fallback = t("preview.sessionError")) => {
@@ -2589,6 +2600,7 @@ export default function PreviewPage() {
                               selectedColor={selectedBookColor}
                               onSelectColor={(color) => {
                                 setSelectedBookColor(color);
+                                setPreferredBookColor(color);
                                 setBookColorError(false);
                               }}
                               disabled={isSubmitting}

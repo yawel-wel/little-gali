@@ -66,3 +66,29 @@ export function resolveBookVariantGid(bookColor?: BookColor | null): string {
 export function isValidBookColor(value: unknown): value is BookColor {
   return value === "dark" || value === "light";
 }
+
+const PREFERRED_BOOK_COLOR_KEY = "lg_preferred_book_color";
+
+/** Persist product-page color choice for preview / cart. */
+export function getPreferredBookColor(): BookColor | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = localStorage.getItem(PREFERRED_BOOK_COLOR_KEY);
+    return isValidBookColor(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setPreferredBookColor(color: BookColor): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(PREFERRED_BOOK_COLOR_KEY, color);
+  } catch {
+    // ignore quota / private mode
+  }
+}

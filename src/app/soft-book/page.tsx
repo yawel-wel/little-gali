@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,6 +18,8 @@ import {
   BOOK_COLOR_LABEL_KEYS,
   BOOK_COLOR_SWATCHES,
   BOOK_PRODUCT_GALLERY,
+  getPreferredBookColor,
+  setPreferredBookColor,
 } from "@/lib/book-color";
 import { useLanguage } from "@/lib/LanguageContext";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
@@ -30,8 +32,8 @@ const GOOGLE_REVIEWS_URL =
 const DESCRIPTION_BULLET_KEYS = [
   "product.book.description.bullet1",
   "product.book.description.bullet2",
-  "product.book.description.bullet4",
   "product.book.description.bullet3",
+  "product.book.description.bullet4",
   "product.book.description.bullet5",
   "product.book.description.bullet6",
 ] as const;
@@ -82,11 +84,19 @@ export default function SoftBookProductPage() {
   const [selectedColor, setSelectedColor] = useState<BookColor>(DEFAULT_BOOK_COLOR);
   const [activeTab, setActiveTab] = useState<ProductTab>("description");
 
+  useEffect(() => {
+    const preferred = getPreferredBookColor();
+    if (preferred) {
+      setSelectedColor(preferred);
+    }
+  }, []);
+
   const colorImages = BOOK_PRODUCT_GALLERY[selectedColor];
   const currentImageSrc = colorImages[imageIndex];
 
   const selectColor = (color: BookColor) => {
     setSelectedColor(color);
+    setPreferredBookColor(color);
     setImageIndex(0);
   };
 
@@ -102,6 +112,7 @@ export default function SoftBookProductPage() {
   };
 
   const handleFlowStart = () => {
+    setPreferredBookColor(selectedColor);
     track(ANALYTICS_EVENTS.BOOKLET_FLOW_STARTED, {
       book_color: selectedColor,
     });
