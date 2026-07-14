@@ -1,6 +1,7 @@
 import type { StyleType } from "@/components/style-selector";
 import { getColorCandidateForStyle } from "./color-by-style";
 import { effectiveChangeCreditsRemaining } from "./credits";
+import { parseBookFlow } from "./book-flow";
 import { normalizeDisplayOrder, urlsInDisplayOrder } from "./display-order";
 import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type {
@@ -28,8 +29,8 @@ export function createStartingSlots(originalUrls: string[]): PreviewSlot[] {
   }));
 }
 
-export function createPendingSlots(): PreviewSlot[] {
-  return Array.from({ length: 5 }, () => ({
+export function createPendingSlots(count = 5): PreviewSlot[] {
+  return Array.from({ length: count }, () => ({
     originalUrl: "",
     candidates: [],
     inFlight: true,
@@ -106,11 +107,20 @@ export function resolveGenerationStatus(
 }
 
 export function toPublicView(session: PreviewSession): PreviewSessionPublicView {
-  const inBwReview = session.phase === "bw_review";
+  const bookFlow = parseBookFlow(session.bookFlow);
+  const isColorful = bookFlow === "colorful";
+  const inBwReview = !isColorful && session.phase === "bw_review";
   const inColorPhase =
-    session.phase === "bw_approved" || session.phase === "style_selected";
+    isColorful ||
+    session.phase === "bw_approved" ||
+    session.phase === "style_selected";
   const generationStatus = resolveGenerationStatus(session);
   const allSlotsReady = session.slots.every((slot) => {
+    if (isColorful) {
+      return Boolean(
+        slot.colorPreview?.previewUrl || slot.colorPreview?.error,
+      );
+    }
     const active = slot.candidates.find(
       (candidate) =>
         candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
@@ -128,7 +138,8 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     updatedAt: session.updatedAt,
     phase: session.phase,
     generationStatus,
-    displayOrder: normalizeDisplayOrder(session.displayOrder),
+    bookFlow,
+    displayOrder: normalizeDisplayOrder(session.displayOrder, bookFlow),
     changeCreditsRemaining: effectiveChangeCreditsRemaining(session),
     slots: session.slots.map((slot, index) => ({
       index,
@@ -144,7 +155,11 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     pendingColorRegenSlotIndexes: session.pendingColorRegenSlotIndexes ?? [],
     frozenStyleStripThumbnails: session.frozenStyleStripThumbnails,
     initializationError: session.initializationError,
-    canRegenerate: (inBwReview || inColorPhase) && noBwInFlight && hasCredits,
+    canRegenerate:
+      !isColorful &&
+      (inBwReview || inColorPhase) &&
+      noBwInFlight &&
+      hasCredits,
     canReplace: inBwReview && noBwInFlight && hasCredits,
     canApproveBw:
       inBwReview &&
@@ -158,7 +173,8 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
         return Boolean(active?.previewUrl && !active.error);
       }),
     canRegenerateColor: inColorPhase && noColorInFlight && hasCredits,
-    canSelectStyle: inColorPhase && generationStatus === "complete",
+    canSelectStyle:
+      !isColorful && inColorPhase && generationStatus === "complete",
     canAddToCart:
       inColorPhase &&
       generationStatus === "complete" &&

@@ -41,7 +41,7 @@ export type PreviewLimitType =
 export type EventProperties = {
   booklet_flow_started: { book_color: BookColor };
   booklet_upload_started: Record<string, never>;
-  booklet_upload_completed: { image_count: number };
+  booklet_upload_completed: { image_count: number; book_flow?: string };
   booklet_bw_preview_viewed: Record<string, never>;
   booklet_color_preview_viewed: Record<string, never>;
   booklet_style_selected: { style_name: string };

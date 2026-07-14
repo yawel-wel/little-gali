@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Image from "next/image";
 
-export type StyleType = "cartoon" | "pencil" | "watercolor";
+export type StyleType = "cartoon" | "pencil" | "watercolor" | "colorful";
 
 interface StyleSelectorProps {
   selectedStyle: StyleType;
@@ -51,6 +51,16 @@ const outputImages: Record<StyleType, Array<{ src: string; alt: string }>> = {
     { src: "/watercolor-output-image-5.png", alt: "Watercolor style result" },
     { src: "/watercolor-output-image-6.png", alt: "Watercolor style result" },
     { src: "/watercolor-output-image-7.png", alt: "Watercolor style result" },
+  ],
+  // Not shown in StyleSelector UI; required for StyleType completeness.
+  colorful: [
+    { src: "/cartoon-output-image-1.png", alt: "Colorful style result" },
+    { src: "/cartoon-output-image-2.png", alt: "Colorful style result" },
+    { src: "/cartoon-output-image-3.png", alt: "Colorful style result" },
+    { src: "/cartoon-output-image-4.png", alt: "Colorful style result" },
+    { src: "/cartoon-output-image-5.png", alt: "Colorful style result" },
+    { src: "/cartoon-output-image-6.png", alt: "Colorful style result" },
+    { src: "/cartoon-output-image-7.png", alt: "Colorful style result" },
   ],
 };
 

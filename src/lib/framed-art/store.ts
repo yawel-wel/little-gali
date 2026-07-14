@@ -1,6 +1,7 @@
 import { kvDel, kvGet, kvSet } from "@/lib/preview-session/kv";
 import { framedArtSessionKey } from "@/lib/preview-session/redis";
-import { COLOR_STYLES, DEFAULT_COLOR_STYLE } from "@/lib/preview-session/color-by-style";
+import { DEFAULT_COLOR_STYLE } from "@/lib/preview-session/color-by-style";
+import type { StyleType } from "@/components/style-selector";
 import type {
   FramedArtSession,
   FramedArtSessionPublicView,
@@ -28,7 +29,7 @@ export async function deleteFramedArtSession(sessionId: string): Promise<void> {
 
 export function getCandidateForStyle(
   session: FramedArtSession,
-  style: (typeof COLOR_STYLES)[number],
+  style: StyleType,
 ): FramedArtStyleCandidate | undefined {
   const matches = session.candidates.filter((c) => c.style === style);
   return matches.sort((a, b) => b.version - a.version)[0];

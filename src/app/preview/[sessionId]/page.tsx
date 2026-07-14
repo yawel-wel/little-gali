@@ -37,6 +37,10 @@ import {
   getColorCandidateForStyleFromPublicSlot,
 } from "@/lib/preview-session/color-by-style";
 import {
+  COLORFUL_SLOT_COUNT,
+  getSlotCount,
+} from "@/lib/preview-session/book-flow";
+import {
   displayPosition,
   sortSlotsByDisplayOrder,
 } from "@/lib/preview-session/display-order";
@@ -256,6 +260,33 @@ function isPreviewColorPhase(session: PreviewSessionPublicView): boolean {
   );
 }
 
+function isColorfulPreviewSession(
+  session: PreviewSessionPublicView | null | undefined,
+): boolean {
+  return (
+    session?.bookFlow === "colorful" ||
+    session?.selectedColorStyle === "colorful"
+  );
+}
+
+function translateOrFallback(
+  t: (key: string) => string,
+  key: string,
+  fallbackKey: string,
+): string {
+  const value = t(key);
+  return value === key ? t(fallbackKey) : value;
+}
+
+function slotHasUsableColorPreview(
+  slot: PreviewSessionPublicView["slots"][number],
+  style: StyleType,
+): boolean {
+  const candidate =
+    getColorCandidateForStyleFromPublicSlot(slot, style) ?? slot.colorPreview;
+  return Boolean(candidate?.previewUrl || candidate?.error);
+}
+
 function sessionHasUsableBwPreview(
   session: PreviewSessionPublicView,
 ): boolean {
@@ -267,7 +298,15 @@ function sessionHasUsableBwPreview(
 function shouldRecoverFromInitializationError(
   session: PreviewSessionPublicView,
 ): boolean {
-  return isPreviewColorPhase(session) && sessionHasUsableBwPreview(session);
+  if (!isPreviewColorPhase(session)) {
+    return false;
+  }
+  if (isColorfulPreviewSession(session)) {
+    return session.slots.every((slot) =>
+      slotHasUsableColorPreview(slot, "colorful"),
+    );
+  }
+  return sessionHasUsableBwPreview(session);
 }
 
 function PreviewSlotLightboxActivator({
@@ -443,6 +482,36 @@ export default function PreviewPage() {
     [t],
   );
 
+  const colorfulLoadingLines = useMemo(() => {
+    const lines = [
+      translateOrFallback(
+        t,
+        "preview.colorfulLoadingLine1",
+        "preview.colorLoadingLine1",
+      ),
+      translateOrFallback(
+        t,
+        "preview.colorfulLoadingLine2",
+        "preview.colorLoadingLine2",
+      ),
+      translateOrFallback(
+        t,
+        "preview.colorfulLoadingLine3",
+        "preview.colorLoadingLine3",
+      ),
+      translateOrFallback(
+        t,
+        "preview.colorfulLoadingLine4",
+        "preview.colorLoadingLine4",
+      ),
+    ];
+    return lines;
+  }, [t]);
+
+  const isColorfulFlow =
+    isColorfulPreviewSession(session) ||
+    (!session && localInitialPhotoUrls.length === COLORFUL_SLOT_COUNT);
+
   const markLoadFailure = useCallback(
     (detail: string, status?: number) => {
       setLoadFailed(true);
@@ -537,6 +606,17 @@ export default function PreviewPage() {
     setSelectedStyle(session.selectedColorStyle);
     setActiveColorStyle(session.selectedColorStyle);
   }, [session?.selectedColorStyle]);
+
+  useEffect(() => {
+    if (!isColorfulPreviewSession(session)) {
+      return;
+    }
+    setBookSide("color");
+    setDisplayedBookSide("color");
+    setActiveColorStyle("colorful");
+    setSelectedStyle("colorful");
+    setPreviewViewMode("illustrations");
+  }, [session?.bookFlow, session?.selectedColorStyle]);
 
   useEffect(() => {
     refreshSession().catch((err: Error & { status?: number }) => {
@@ -639,12 +719,14 @@ export default function PreviewPage() {
   const isInitialLoading =
     !loadFailed &&
     (!session ||
-      session.slots.some(
-        (slot) =>
-          !slot.candidates.some(
-            (candidate) => candidate.previewUrl || candidate.error,
-          ),
-      ));
+      session.slots.some((slot) => {
+        if (isColorfulPreviewSession(session)) {
+          return !slotHasUsableColorPreview(slot, "colorful");
+        }
+        return !slot.candidates.some(
+          (candidate) => candidate.previewUrl || candidate.error,
+        );
+      }));
 
   useEffect(() => {
     if (isInitialLoading) {
@@ -693,9 +775,14 @@ export default function PreviewPage() {
 
   const isLoadingScreenActive =
     showInitialLoadingScreen || showColorLoadingScreen;
-  const activeLoadingLineCount = showColorLoadingScreen
-    ? colorLoadingLines.length
-    : bwLoadingLines.length;
+  const activeLoadingLines = showColorLoadingScreen
+    ? isColorfulFlow
+      ? colorfulLoadingLines
+      : colorLoadingLines
+    : isColorfulFlow
+      ? colorfulLoadingLines
+      : bwLoadingLines;
+  const activeLoadingLineCount = activeLoadingLines.length;
 
   const wasInitialLoadingScreenRef = useRef(false);
   const wasColorLoadingScreenRef = useRef(false);
@@ -754,12 +841,22 @@ export default function PreviewPage() {
       ? sortSlotsByDisplayOrder(session.slots, session.displayOrder)
           .map((slot) => slot.originalUrl)
           .filter((url): url is string => Boolean(url))
-          .slice(0, 5)
+          .slice(0, getSlotCount(session.bookFlow))
       : [];
   const initialLoadingPhotoUrls =
     sessionInitialPhotoUrls.length > 0
       ? sessionInitialPhotoUrls
-      : localInitialPhotoUrls;
+      : localInitialPhotoUrls.slice(0, COLORFUL_SLOT_COUNT);
+
+  const orderedIllustrationSlots = session?.slots
+    ? sortSlotsByDisplayOrder(session.slots, session.displayOrder)
+    : [];
+  const illustrationSlotRows = isColorfulFlow
+    ? [
+        orderedIllustrationSlots.slice(0, 5),
+        orderedIllustrationSlots.slice(5),
+      ].filter((row) => row.length > 0)
+    : [orderedIllustrationSlots];
 
   useEffect(() => {
     if (showInitialLoadingScreen || localInitialPhotoUrls.length === 0) {
@@ -778,6 +875,7 @@ export default function PreviewPage() {
 
   const isAwaitingStripAssetsOnColorSide = (side: PreviewBookSide) =>
     side === "color" &&
+    !isColorfulFlow &&
     Boolean(session) &&
     !stripThumbnailsAreReady &&
     (isColorStripPrefetching || Boolean(bookSlotForColor?.colorInFlight));
@@ -1529,30 +1627,35 @@ export default function PreviewPage() {
       }
 
       const latest = styleData.session as PreviewSessionPublicView;
+      const colorful = isColorfulPreviewSession(latest);
       const orderedSlots = sortSlotsByDisplayOrder(
         latest.slots,
         latest.displayOrder,
       );
       const originalUrls = orderedSlots.map((slot) => slot.originalUrl);
-      const generatedBwUrls = orderedSlots.map((slot) => {
-        const active = slot.candidates.find(
-          (candidate) => candidate.id === slot.activeCandidateId,
-        );
-        if (!active?.cleanUrl) {
-          throw new Error(t("preview.sessionError"));
-        }
-        return active.cleanUrl;
-      });
       const generatedColorUrls = orderedSlots.map((slot) => {
         const active = getColorCandidateForStyleFromPublicSlot(
           slot,
-          activeColorStyle,
+          colorful ? "colorful" : activeColorStyle,
         );
         if (!active?.cleanUrl) {
           throw new Error(t("preview.sessionError"));
         }
         return active.cleanUrl;
       });
+      const generatedBwUrls = colorful
+        ? []
+        : orderedSlots.map((slot) => {
+            const active = slot.candidates.find(
+              (candidate) => candidate.id === slot.activeCandidateId,
+            );
+            if (!active?.cleanUrl) {
+              throw new Error(t("preview.sessionError"));
+            }
+            return active.cleanUrl;
+          });
+      const cartImageUrls = colorful ? generatedColorUrls : generatedBwUrls;
+      const cartStyle = colorful ? "colorful" : activeColorStyle;
 
       try {
         if (typeof window !== "undefined") {
@@ -1565,18 +1668,19 @@ export default function PreviewPage() {
       });
 
       const addPromise = addToCart(
-        generatedBwUrls,
+        cartImageUrls,
         1,
         undefined,
         undefined,
-        activeColorStyle,
+        cartStyle,
         selectedBookColor,
         {
           originalUrls,
-          generatedBwUrls,
+          ...(colorful ? {} : { generatedBwUrls }),
           generatedColorUrls,
           previewSessionId: sessionId,
           generationStats: buildPreviewGenerationStats(latest),
+          bookFlow: colorful ? "colorful" : "classic",
         },
       );
 
@@ -1650,12 +1754,24 @@ export default function PreviewPage() {
             isExiting={isInitialLoadingExiting}
             isComplete={!isInitialLoading}
             loadingLine={
-              bwLoadingLines[loadingLineIndex % bwLoadingLines.length] ??
-              bwLoadingLines[0]
+              (isColorfulFlow ? colorfulLoadingLines : bwLoadingLines)[
+                loadingLineIndex %
+                  (isColorfulFlow ? colorfulLoadingLines : bwLoadingLines)
+                    .length
+              ] ??
+              (isColorfulFlow ? colorfulLoadingLines[0] : bwLoadingLines[0])
             }
             slowText={t("preview.loadingSlow")}
             standardText={t("preview.loadingDuration")}
-            title={t("preview.bwLoadingTitle")}
+            title={
+              isColorfulFlow
+                ? translateOrFallback(
+                    t,
+                    "preview.colorfulLoadingTitle",
+                    "preview.colorLoadingTitle",
+                  )
+                : t("preview.bwLoadingTitle")
+            }
             locale={locale}
           />
         ) : showColorLoadingScreen ? (
@@ -1664,12 +1780,26 @@ export default function PreviewPage() {
             isExiting={isColorLoadingExiting}
             isComplete={!isColorGenerating}
             loadingLine={
-              colorLoadingLines[loadingLineIndex % colorLoadingLines.length] ??
-              colorLoadingLines[0]
+              (isColorfulFlow ? colorfulLoadingLines : colorLoadingLines)[
+                loadingLineIndex %
+                  (isColorfulFlow ? colorfulLoadingLines : colorLoadingLines)
+                    .length
+              ] ??
+              (isColorfulFlow
+                ? colorfulLoadingLines[0]
+                : colorLoadingLines[0])
             }
             slowText={t("preview.loadingSlow")}
             standardText={t("preview.loadingDuration")}
-            title={t("preview.colorLoadingTitle")}
+            title={
+              isColorfulFlow
+                ? translateOrFallback(
+                    t,
+                    "preview.colorfulLoadingTitle",
+                    "preview.colorLoadingTitle",
+                  )
+                : t("preview.colorLoadingTitle")
+            }
             locale={locale}
           />
         ) : (
@@ -1802,7 +1932,7 @@ export default function PreviewPage() {
                       : "mt-3 md:mt-6",
                   )}
                 >
-                  {isColorPhase && (
+                  {isColorPhase && !isColorfulFlow && (
                   <div
                     className="flex justify-center gap-8 border-b border-gray-200 pt-1 sm:gap-10 md:mt-2"
                     role="tablist"
@@ -1871,6 +2001,7 @@ export default function PreviewPage() {
                           </button>
                         </div>
                         {/* View mode toggle: איורים / בספרון */}
+                        {!isColorfulFlow ? (
                         <div className="flex justify-center mb-4">
                           <div className="flex rounded-full border border-[#E5DDD4] bg-[#F5F1EC] p-0.5">
                             {(["illustrations", "book"] as const).map((mode) => (
@@ -1890,6 +2021,7 @@ export default function PreviewPage() {
                             ))}
                           </div>
                         </div>
+                        ) : null}
 
                         {previewViewMode === "book" ? (
                           <BookAccordionPreview
@@ -1913,12 +2045,24 @@ export default function PreviewPage() {
                           />
                         ) : (
                         <div className="relative">
-                        <div className="overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0">
-                          <div className="flex w-max items-start gap-3 md:gap-3.5 lg:mx-auto lg:justify-center lg:gap-3">
-                      {sortSlotsByDisplayOrder(
-                        session.slots,
-                        session.displayOrder,
-                      ).map((slot) => {
+                        <div
+                          className={cn(
+                            isColorfulFlow
+                              ? "flex flex-col items-center gap-3 overflow-x-auto pb-2"
+                              : "overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0",
+                          )}
+                        >
+                          {illustrationSlotRows.map((rowSlots, rowIndex) => (
+                          <div
+                            key={rowIndex}
+                            className={cn(
+                              "flex items-start gap-3 md:gap-3.5",
+                              isColorfulFlow
+                                ? "flex-nowrap justify-center"
+                                : "w-max lg:mx-auto lg:justify-center lg:gap-3",
+                            )}
+                          >
+                      {rowSlots.map((slot) => {
                         const pageNum = displayPosition(
                           slot.index,
                           session.displayOrder,
@@ -2419,12 +2563,13 @@ export default function PreviewPage() {
                         );
                       })}
                           </div>
+                          ))}
                         </div>
                       </div>
                         )} {/* end previewViewMode === "illustrations" */}
                         {session && isColorPhase ? (
                           <div className="flex flex-col items-center">
-                            {displayedBookSide === "color" ? (
+                            {displayedBookSide === "color" && !isColorfulFlow ? (
                               <PreviewColorStyleStrip
                                 session={session}
                                 frozenThumbnails={session.frozenStyleStripThumbnails}

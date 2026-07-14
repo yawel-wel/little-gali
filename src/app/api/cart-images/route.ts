@@ -5,6 +5,7 @@ import {
   saveCartImages,
   type StoredCartImages,
 } from "@/lib/cart-images-store";
+import { isValidBookCartImageCount } from "@/lib/preview-session/generation-stats";
 
 export const runtime = "nodejs";
 
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     };
 
     const isFramedArt = productType === "framed_art";
-    const validBook = imageUrls && imageUrls.length === 5;
+    const validBook = imageUrls && isValidBookCartImageCount(imageUrls.length);
     const validFramed =
       isFramedArt &&
       framedImageUrl &&

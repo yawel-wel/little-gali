@@ -1,4 +1,5 @@
 import type { StyleType } from "@/components/style-selector";
+import type { BookFlow } from "./book-flow";
 
 export type PreviewPhase =
   | "bw_review"
@@ -63,6 +64,8 @@ export interface PreviewSession {
   id: string;
   phase: PreviewPhase;
   generationStatus: PreviewGenerationStatus;
+  /** classic = 5 B&W+color; colorful = 9 color-only. Defaults to classic. */
+  bookFlow?: BookFlow;
   /** Book page order on preview/cart; slot indices refer to fixed Cloudinary/upload slots. */
   displayOrder?: number[];
   changeCreditsRemaining: number;
@@ -98,6 +101,7 @@ export interface PreviewSessionPublicView {
   updatedAt: string;
   phase: PreviewPhase;
   generationStatus: PreviewGenerationStatus;
+  bookFlow: BookFlow;
   displayOrder: number[];
   changeCreditsRemaining: number;
   slots: Array<{
@@ -124,9 +128,6 @@ export interface PreviewSessionPublicView {
   canAddToCart: boolean;
 }
 
-export interface BookImagePayload {
-  originalUrls: string[];
-  generatedBwUrls: string[];
-  previewSessionId: string;
+export interface PreviewStyleSelectionBody {
   style: StyleType;
 }

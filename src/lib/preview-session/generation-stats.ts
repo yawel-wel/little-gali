@@ -68,10 +68,24 @@ export function previewStatsShopifyAttributes(
   return attributes;
 }
 
+export function bookFlowShopifyAttributes(
+  bookFlow: "classic" | "colorful",
+): Array<{ key: string; value: string }> {
+  // `_book_flow` stays hidden for APIs; `type` is the customer-facing checkout label
+  // (same pattern as `_style` / `style`).
+  return [
+    { key: "_book_flow", value: bookFlow },
+    { key: "type", value: bookFlow },
+  ];
+}
+
 export function originalUrlsShopifyAttributes(
   originalUrls?: string[],
 ): Array<{ key: string; value: string }> {
-  if (!originalUrls || originalUrls.length !== 5) {
+  if (
+    !originalUrls ||
+    (originalUrls.length !== 5 && originalUrls.length !== 9)
+  ) {
     return [];
   }
 
@@ -84,7 +98,10 @@ export function originalUrlsShopifyAttributes(
 export function generatedColorUrlsShopifyAttributes(
   generatedColorUrls?: string[],
 ): Array<{ key: string; value: string }> {
-  if (!generatedColorUrls || generatedColorUrls.length !== 5) {
+  if (
+    !generatedColorUrls ||
+    (generatedColorUrls.length !== 5 && generatedColorUrls.length !== 9)
+  ) {
     return [];
   }
 
@@ -92,6 +109,30 @@ export function generatedColorUrlsShopifyAttributes(
     key: `_color_image_${index + 1}`,
     value: url,
   }));
+}
+
+export function primaryImageUrlsShopifyAttributes(
+  imageUrls: string[],
+): Array<{ key: string; value: string }> {
+  return imageUrls.map((url, index) => ({
+    key: `_image_${index + 1}`,
+    value: url,
+  }));
+}
+
+export function isValidBookCartImageCount(count: number): boolean {
+  return count === 5 || count === 9;
+}
+
+export function isValidBookCartStyle(
+  style: unknown,
+): style is "cartoon" | "pencil" | "watercolor" | "colorful" {
+  return (
+    style === "cartoon" ||
+    style === "pencil" ||
+    style === "watercolor" ||
+    style === "colorful"
+  );
 }
 
 export function hasInvalidHttpImageUrls(urls: string[]): boolean {

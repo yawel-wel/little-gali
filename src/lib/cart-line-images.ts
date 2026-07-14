@@ -1,6 +1,9 @@
 import { getLineGroupId } from "@/lib/shopify/cart-line-group";
+import { isValidBookCartImageCount } from "@/lib/preview-session/generation-stats";
 
 type LineAttribute = { key: string; value: string };
+
+const MAX_BOOK_IMAGE_SLOTS = 9;
 
 export function extractImagesFromLineAttributes(
   attributes: LineAttribute[] | undefined,
@@ -19,7 +22,7 @@ export function extractImagesFromLineAttributes(
       imageUrls.push(framedImage.value);
     }
   } else {
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= MAX_BOOK_IMAGE_SLOTS; i++) {
       const imageAttr = attributes?.find(
         (a) => a.key === `_image_${i}` || a.key === `image_${i}`,
       );
@@ -42,7 +45,7 @@ export function extractImagesFromLineAttributes(
       }
     }
     if (imageUrls.length === 0) {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= MAX_BOOK_IMAGE_SLOTS; i++) {
         const imageAttr = cartAttributes.find(
           (a) => a.key === `_image_${i}` || a.key === `image_${i}`,
         );
@@ -63,13 +66,13 @@ export function extractColorUrlsFromAttributes(
     return undefined;
   }
   const urls: string[] = [];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= MAX_BOOK_IMAGE_SLOTS; i++) {
     const colorAttr = attributes.find((a) => a.key === `_color_image_${i}`);
     if (colorAttr?.value) {
       urls.push(colorAttr.value);
     }
   }
-  return urls.length === 5 ? urls : undefined;
+  return isValidBookCartImageCount(urls.length) ? urls : undefined;
 }
 
 /** One KV read per line group (cloned qty lines share the same images). */

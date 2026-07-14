@@ -1,4 +1,5 @@
 import type { StyleType } from "@/components/style-selector";
+import { parseBookFlow, type BookFlow } from "./book-flow";
 import { getColorCandidateForStyle } from "./color-by-style";
 import { effectiveChangeCreditsRemaining } from "./credits";
 import { normalizeDisplayOrder } from "./display-order";
@@ -17,6 +18,7 @@ export interface PreviewSessionResumeSummary {
   createdAt: string;
   updatedAt: string;
   phase: PreviewPhase;
+  bookFlow: BookFlow;
   selectedColorStyle?: StyleType;
   /** Up to two preview URLs for the card UI. */
   thumbnailUrls: string[];
@@ -78,7 +80,11 @@ function getSlotThumbnailUrl(
 }
 
 export function getPreviewSessionThumbnailUrls(session: PreviewSession): string[] {
-  const order = normalizeDisplayOrder(session.displayOrder);
+  const bookFlow = parseBookFlow(session.bookFlow);
+  const order = normalizeDisplayOrder(
+    session.displayOrder,
+    session.slots.length > 0 ? session.slots.length : bookFlow,
+  );
   const urls: string[] = [];
 
   for (const slotIndex of order) {
@@ -88,7 +94,7 @@ export function getPreviewSessionThumbnailUrls(session: PreviewSession): string[
     }
   }
 
-  return urls.slice(0, 5);
+  return urls.slice(0, Math.min(5, order.length));
 }
 
 export function isPreviewSessionResumable(session: PreviewSession): boolean {
@@ -143,6 +149,7 @@ export function toPreviewSessionResumeSummary(
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     phase: session.phase,
+    bookFlow: parseBookFlow(session.bookFlow),
     selectedColorStyle: session.selectedColorStyle,
     thumbnailUrls: allThumbnailUrls.slice(0, PREVIEW_RESUME_THUMBNAIL_PREVIEW_COUNT),
     thumbnailCount: allThumbnailUrls.length,

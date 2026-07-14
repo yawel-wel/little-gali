@@ -1,4 +1,5 @@
 import type { CartItem } from "@/lib/CartContext";
+import { isValidBookCartImageCount } from "@/lib/preview-session/generation-stats";
 
 export type CartItemAvatarSlot = string | null;
 
@@ -12,6 +13,32 @@ export function getCartItemAvatarPreview(item: CartItem): {
       slots: url ? [url] : [],
       expectedCount: url ? 1 : 0,
     };
+  }
+
+  const isColorful =
+    item.bookFlow === "colorful" ||
+    item.style === "colorful" ||
+    item.generatedColorUrls?.length === 9 ||
+    item.imageUrls?.length === 9;
+
+  if (isColorful) {
+    const color =
+      item.generatedColorUrls?.length === 9
+        ? item.generatedColorUrls
+        : item.imageUrls?.length === 9
+          ? item.imageUrls
+          : [];
+    if (color.length === 9) {
+      return { slots: [...color], expectedCount: 9 };
+    }
+    const partial = item.imageUrls?.length
+      ? item.imageUrls.slice(0, 9)
+      : color;
+    const slots: CartItemAvatarSlot[] = partial.map((url) => url);
+    while (slots.length < 9) {
+      slots.push(null);
+    }
+    return { slots: slots.slice(0, 9), expectedCount: 9 };
   }
 
   const bw =
@@ -55,4 +82,8 @@ export function getCartItemAvatarPreview(item: CartItem): {
     slots.push(null);
   }
   return { slots: slots.slice(0, 5), expectedCount: 5 };
+}
+
+export function isBookCartImageCount(count: number): boolean {
+  return isValidBookCartImageCount(count);
 }

@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import type { StyleType } from "@/components/style-selector";
 import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
-import { DEFAULT_COLOR_STYLE, PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
+import { parseBookFlow } from "@/lib/preview-session/book-flow";
+import {
+  DEFAULT_COLOR_STYLE,
+  PREVIEW_COLOR_STYLES,
+} from "@/lib/preview-session/color-by-style";
 import {
   runColorGeneration,
   runSlotAllStylesColorGeneration,
@@ -12,7 +16,10 @@ import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-function parseSlotIndexes(value: unknown): number[] | undefined {
+function parseSlotIndexes(
+  value: unknown,
+  maxSlotIndex: number,
+): number[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
@@ -21,7 +28,7 @@ function parseSlotIndexes(value: unknown): number[] | undefined {
       typeof item === "number" &&
       Number.isInteger(item) &&
       item >= 0 &&
-      item <= 4,
+      item <= maxSlotIndex,
   );
   if (indexes.length === 0) {
     return undefined;
@@ -48,10 +55,14 @@ export async function POST(
     allStylesForSlot?: boolean;
   };
 
-  const slotIndexes = parseSlotIndexes(body.slotIndexes) ?? [0, 1, 2, 3, 4];
-  const allStylesForSlot = body.allStylesForSlot === true;
-
   const session = auth.session;
+  const isColorful = parseBookFlow(session.bookFlow) === "colorful";
+  const maxSlotIndex = Math.max(0, session.slots.length - 1);
+  const defaultIndexes = session.slots.map((_, index) => index);
+  const slotIndexes =
+    parseSlotIndexes(body.slotIndexes, maxSlotIndex) ?? defaultIndexes;
+  const allStylesForSlot = body.allStylesForSlot === true && !isColorful;
+
   if (session.phase === "cart_added") {
     return NextResponse.json(
       { error: "Color preview is not available after cart submission" },
@@ -59,7 +70,7 @@ export async function POST(
     );
   }
 
-  if (session.phase === "bw_review") {
+  if (session.phase === "bw_review" && !isColorful) {
     const allSlotsReady = session.slots.every((slot) => {
       const active = slot.candidates.find(
         (candidate) =>
@@ -89,13 +100,19 @@ export async function POST(
     return NextResponse.json({ session: toPublicView(latest) });
   }
 
-  const style = body.style ?? DEFAULT_COLOR_STYLE;
-  if (!PREVIEW_COLOR_STYLES.includes(style)) {
+  const style = isColorful
+    ? "colorful"
+    : (body.style ?? DEFAULT_COLOR_STYLE);
+  const allowedStyles: StyleType[] = isColorful
+    ? ["colorful"]
+    : PREVIEW_COLOR_STYLES;
+  if (!allowedStyles.includes(style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }
 
   const isFullBookRequest =
-    slotIndexes.length === 5 && [0, 1, 2, 3, 4].every((i) => slotIndexes.includes(i));
+    slotIndexes.length === session.slots.length &&
+    defaultIndexes.every((i) => slotIndexes.includes(i));
 
   if (isFullBookRequest) {
     const targetSlotsInFlight = slotIndexes.some(

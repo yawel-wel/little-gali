@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
+import { parseBookFlow } from "@/lib/preview-session/book-flow";
 import { PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 import type { StyleType } from "@/components/style-selector";
 
 export const runtime = "nodejs";
-
-const STYLES: StyleType[] = PREVIEW_COLOR_STYLES;
 
 export async function POST(
   request: NextRequest,
@@ -17,13 +16,21 @@ export async function POST(
   if (auth instanceof NextResponse) return auth;
 
   const body = (await request.json()) as { style?: StyleType };
-  if (!body.style || !STYLES.includes(body.style)) {
+  const isColorful = parseBookFlow(auth.session.bookFlow) === "colorful";
+  const allowedStyles: StyleType[] = isColorful
+    ? ["colorful"]
+    : [...PREVIEW_COLOR_STYLES];
+
+  if (!body.style || !allowedStyles.includes(body.style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }
 
   const session = auth.session;
   if (session.phase !== "bw_approved" && session.phase !== "style_selected") {
-    return NextResponse.json({ error: "Approve B&W before choosing style" }, { status: 409 });
+    return NextResponse.json(
+      { error: "Approve B&W before choosing style" },
+      { status: 409 },
+    );
   }
 
   session.selectedColorStyle = body.style;

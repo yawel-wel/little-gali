@@ -6,13 +6,18 @@ import {
   type BookColor,
 } from "@/lib/book-color";
 import {
+  bookFlowShopifyAttributes,
   formatSelectedGenerationBySlot,
   generatedColorUrlsShopifyAttributes,
   hasInvalidHttpImageUrls,
+  isValidBookCartImageCount,
+  isValidBookCartStyle,
   originalUrlsShopifyAttributes,
+  primaryImageUrlsShopifyAttributes,
   type PreviewGenerationStats,
   previewStatsShopifyAttributes,
 } from "@/lib/preview-session/generation-stats";
+import { parseBookFlow, type BookFlow } from "@/lib/preview-session/book-flow";
 import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
 
 export const runtime = "nodejs";
@@ -34,6 +39,7 @@ export async function POST(request: NextRequest) {
       previewSessionId,
       generationStats,
       bookColor,
+      bookFlow: bookFlowRaw,
       mixpanelDistinctId,
     } = body as {
       cartId: string;
@@ -41,8 +47,9 @@ export async function POST(request: NextRequest) {
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
-      style?: "cartoon" | "pencil" | "watercolor";
+      style?: "cartoon" | "pencil" | "watercolor" | "colorful";
       bookColor?: BookColor;
+      bookFlow?: BookFlow;
       locale?: string;
       originalUrls?: string[];
       generatedBwUrls?: string[];
@@ -59,12 +66,16 @@ export async function POST(request: NextRequest) {
       typeof style
     );
 
-    if (!cartId || !imageUrls || imageUrls.length !== 5) {
+    if (!cartId || !imageUrls || !isValidBookCartImageCount(imageUrls.length)) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
+
+    const bookFlow = parseBookFlow(
+      bookFlowRaw ?? (imageUrls.length === 9 ? "colorful" : "classic"),
+    );
 
     const resolvedMixpanelDistinctId = await resolveMixpanelDistinctIdForCart({
       mixpanelDistinctId,
@@ -102,7 +113,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (generatedColorUrls) {
-      if (generatedColorUrls.length !== 5) {
+      if (!isValidBookCartImageCount(generatedColorUrls.length)) {
         return NextResponse.json(
           { error: "Invalid color image count" },
           { status: 400 },
@@ -175,15 +186,11 @@ export async function POST(request: NextRequest) {
             // Ensure this line stays distinct (prevents quantity merge)
             { key: "_uid", value: lineUid },
             { key: "_line_group", value: lineUid },
-            // Line item attributes with underscore prefix are hidden from checkout
-            { key: "_image_1", value: urls[0] },
-            { key: "_image_2", value: urls[1] },
-            { key: "_image_3", value: urls[2] },
-            { key: "_image_4", value: urls[3] },
-            { key: "_image_5", value: urls[4] },
+            ...bookFlowShopifyAttributes(bookFlow),
+            ...primaryImageUrlsShopifyAttributes(urls),
             // Always include style attribute (default to "cartoon" if not provided)
             // Ensure style is valid before saving
-            ...(style && (style === "cartoon" || style === "pencil" || style === "watercolor")
+            ...(isValidBookCartStyle(style)
               ? [
                   {
                     key: "_style",
@@ -297,12 +304,11 @@ export async function POST(request: NextRequest) {
     const lineId = addedLine?.id;
 
     // Validate and normalize style (use this throughout the function)
-    const styleToStore =
-      style && (style === "cartoon" || style === "pencil" || style === "watercolor") ? style : "cartoon";
+    const styleToStore = isValidBookCartStyle(style) ? style : "cartoon";
 
     if (lineId) {
       try {
-        // Images are now stored as line item attributes (_image_1..._image_5) which are hidden from checkout
+        // Images are now stored as line item attributes (_image_N) which are hidden from checkout
         // Also store in our server-side storage for UI
         console.log(
           "💾 Storing cart images for lineId:",
@@ -367,15 +373,17 @@ export async function POST(request: NextRequest) {
           );
 
         // Extract style from attributes (check both "style" and "_style")
-        let itemStyle: "cartoon" | "pencil" | "watercolor" | undefined = undefined;
+        let itemStyle:
+          | "cartoon"
+          | "pencil"
+          | "watercolor"
+          | "colorful"
+          | undefined = undefined;
         if (Array.isArray(node.attributes)) {
           const styleAttr = node.attributes.find(
             (a: any) => a.key === "style" || a.key === "_style"
           );
-          if (
-            styleAttr &&
-            (styleAttr.value === "cartoon" || styleAttr.value === "pencil" || styleAttr.value === "watercolor")
-          ) {
+          if (styleAttr && isValidBookCartStyle(styleAttr.value)) {
             itemStyle = styleAttr.value;
           }
         }

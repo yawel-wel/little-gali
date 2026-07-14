@@ -24,6 +24,11 @@ const STYLE_EXAMPLES: Record<
     labelKey: "styleSelector.watercolor",
     descriptionKey: "styleSelector.watercolorDescription",
   },
+  colorful: {
+    src: "/style-example-cartoon.png",
+    labelKey: "styleSelector.cartoon",
+    descriptionKey: "styleSelector.cartoonDescription",
+  },
 };
 
 type FramedArtStylePickerProps = {

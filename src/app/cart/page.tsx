@@ -46,6 +46,7 @@ function getStyleLabel(
   if (style === "cartoon") return t("cart.style.cartoon");
   if (style === "pencil") return t("cart.style.pencil");
   if (style === "watercolor") return t("cart.style.watercolor");
+  if (style === "colorful") return t("cart.style.colorful");
   return t("cart.style.cartoon");
 }
 

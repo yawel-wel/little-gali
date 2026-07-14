@@ -25,10 +25,11 @@ export async function POST(
   };
   const { slotIndex, candidateId } = body;
 
+  const maxSlotIndex = Math.max(0, auth.session.slots.length - 1);
   if (
     typeof slotIndex !== "number" ||
     slotIndex < 0 ||
-    slotIndex > 4 ||
+    slotIndex > maxSlotIndex ||
     !candidateId
   ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });

@@ -332,7 +332,10 @@ export default function FramedArtPreviewPage() {
       }
     } catch {}
 
-    const addPromise = addFramedArtToCart(sessionId, selectedStyle);
+    const addPromise = addFramedArtToCart(
+      sessionId,
+      selectedStyle as "cartoon" | "pencil" | "watercolor",
+    );
     router.push("/cart");
     addPromise.catch((err) => {
       console.error("Add framed art to cart failed:", err);

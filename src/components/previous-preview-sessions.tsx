@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "@mui/material/Button";
-import { ArrowLeft, Loader2, X } from "lucide-react";
+import { ArrowLeft, Clock3, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
   getHiddenResumeSessionIds,
@@ -17,9 +16,6 @@ import type {
 import { persistLgSessionId } from "@/lib/session-id";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
 import { cn } from "@/lib/utils";
-
-const THUMBNAIL_TILE_CLASS =
-  "h-[62px] w-[62px] shrink-0 overflow-hidden rounded-xl border border-gray-200 sm:h-[70px] sm:w-[70px]";
 
 function formatRelativeCreatedAt(
   createdAt: string,
@@ -60,8 +56,14 @@ export function hasCandidateSessionIds(): boolean {
 
 export function PreviousPreviewSessions({
   onVisibleChange,
+  orContinueHint,
+  compact = false,
 }: {
   onVisibleChange?: (visible: boolean) => void;
+  /** Override the “or upload below” hint when shown on the chooser. */
+  orContinueHint?: string;
+  /** Compact horizontal resume rows (chooser screen). */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const { t, locale } = useLanguage();
@@ -190,6 +192,98 @@ export function PreviousPreviewSessions({
     return null;
   }
 
+  if (compact) {
+    return (
+      <div className="space-y-3" dir={isRtl ? "rtl" : "ltr"}>
+        <p className="flex items-center justify-start gap-2 font-body-bold text-sm text-dark-gray">
+          <Clock3 className="h-4 w-4 text-accent-burgundy" aria-hidden />
+          {t("upload.previousSessions.sectionTitle")}
+        </p>
+
+        {isLoading ? (
+          <div className="flex justify-start py-3">
+            <Loader2 className="h-5 w-5 animate-spin text-medium-gray" />
+          </div>
+        ) : (
+          <div className="flex flex-col items-stretch gap-2 sm:max-w-md">
+            {sessions.map((session) => {
+              const isResuming = resumingId === session.id;
+              const status = statusLabel(session.status);
+              const createdAtLabel = formatRelativeCreatedAt(
+                session.createdAt,
+                locale,
+                t,
+              );
+              const thumb = session.thumbnailUrls[0];
+              const flowLabel =
+                session.bookFlow === "colorful"
+                  ? t("upload.previousSessions.badge.colorful")
+                  : t("upload.previousSessions.badge.classic");
+              const meta = [status, createdAtLabel].filter(Boolean).join(" · ");
+
+              return (
+                <div
+                  key={session.id}
+                  className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 shadow-sm"
+                >
+                  <button
+                    type="button"
+                    onClick={() => void handleContinue(session)}
+                    disabled={Boolean(resumingId)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-start disabled:opacity-60"
+                  >
+                    <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-[#F3EEE8]">
+                      {thumb ? (
+                        <img
+                          src={thumb}
+                          alt=""
+                          className={cn(
+                            SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                            "h-full w-full object-cover",
+                          )}
+                        />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-body-bold text-sm text-dark-gray">
+                        {flowLabel}
+                      </p>
+                      <p className="truncate font-body text-xs text-medium-gray">
+                        {meta}
+                      </p>
+                    </div>
+                    {isResuming ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin text-accent-burgundy" />
+                    ) : (
+                      <ArrowLeft
+                        className="h-4 w-4 shrink-0 text-accent-burgundy"
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleHideSession(session.id)}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-medium-gray transition-colors hover:bg-gray-100 hover:text-dark-gray"
+                    aria-label={t("upload.previousSessions.dismissSession")}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {error ? (
+          <p className={cn("font-body text-sm text-red-700", textAlignClass)}>
+            {error}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4" dir={isRtl ? "rtl" : "ltr"}>
       <p className="text-center font-body-bold text-sm text-dark-gray">
@@ -211,10 +305,6 @@ export function PreviousPreviewSessions({
                 locale,
                 t,
               );
-              const hiddenThumbnailCount = Math.max(
-                0,
-                session.thumbnailCount - session.thumbnailUrls.length,
-              );
 
               return (
                 <div
@@ -232,101 +322,68 @@ export function PreviousPreviewSessions({
 
                   <div className="space-y-3">
                     <div className={cn("pe-8", textAlignClass)}>
+                      <span
+                        className={cn(
+                          "inline-block rounded-full px-2.5 py-0.5 font-body-bold text-[11px]",
+                          session.bookFlow === "colorful"
+                            ? "bg-[#F6D8DD] text-accent-burgundy"
+                            : "bg-[#EAE6E1] text-dark-gray",
+                        )}
+                      >
+                        {session.bookFlow === "colorful"
+                          ? t("upload.previousSessions.badge.colorful")
+                          : t("upload.previousSessions.badge.classic")}
+                      </span>
                       {status && (
-                        <p className="font-body text-sm text-medium-gray">{status}</p>
+                        <p className="mt-2 font-body text-sm text-medium-gray">
+                          {status}
+                        </p>
                       )}
                       <p
                         className={cn(
                           "font-body text-sm text-dark-gray",
-                          status && "mt-1",
+                          status ? "mt-1" : "mt-2",
                         )}
                       >
                         {createdAtLabel}
                       </p>
                     </div>
 
-                    <div
-                      className={cn(
-                        "flex w-full overflow-x-auto overscroll-x-contain py-1",
-                        isRtl ? "justify-end" : "justify-start",
-                      )}
-                      dir="ltr"
-                    >
-                      <div className="flex flex-nowrap items-center gap-2 px-1">
-                        {hiddenThumbnailCount > 0 && (
-                          <div
+                    <div className="flex items-center gap-2">
+                      {session.thumbnailUrls.map((url, index) => (
+                        <div
+                          key={`${session.id}-${index}`}
+                          className="h-[62px] w-[62px] overflow-hidden rounded-xl border border-gray-200"
+                        >
+                          <img
+                            src={url}
+                            alt=""
                             className={cn(
-                              THUMBNAIL_TILE_CLASS,
-                              "flex items-center justify-center bg-[#F3EEE8]",
+                              SENTRY_REPLAY_BLOCK_USER_IMAGE,
+                              "h-full w-full object-cover",
                             )}
-                          >
-                            <span className="font-body-bold text-base text-dark-gray/70">
-                              +{hiddenThumbnailCount}
-                            </span>
-                          </div>
-                        )}
-                        {session.thumbnailUrls.map((url, index) => (
-                          <div key={`${session.id}-${index}`} className={THUMBNAIL_TILE_CLASS}>
-                            <img
-                              src={url}
-                              alt=""
-                              className={cn(
-                                SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                                "h-full w-full object-cover",
-                              )}
-                            />
-                          </div>
-                        ))}
-                      </div>
+                          />
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="flex flex-col items-stretch justify-center gap-2">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => void handleContinue(session)}
-                        disabled={Boolean(resumingId)}
-                        className="w-full cursor-pointer shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
-                        sx={{
-                          borderRadius: "12px",
-                          textTransform: "none",
-                          fontSize: "0.875rem",
-                          fontWeight: 600,
-                          px: 2.5,
-                          py: 1,
-                          boxShadow: "none",
-                        }}
-                      >
-                        {isResuming ? (
-                          <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-                        ) : (
-                          <span className="flex items-center justify-center gap-2">
-                            {session.status === "in_cart"
-                              ? t("upload.previousSessions.goToCart")
-                              : t("upload.previousSessions.continue")}
-                            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
-                          </span>
-                        )}
-                      </Button>
-                      {session.status === "in_cart" && (
-                        <Button
-                          variant="outlined"
-                          onClick={() => void resumePreview(session.id)}
-                          disabled={Boolean(resumingId)}
-                          className="w-full cursor-pointer"
-                          sx={{
-                            borderRadius: "12px",
-                            textTransform: "none",
-                            fontSize: "0.8125rem",
-                            fontWeight: 600,
-                            px: 2,
-                            py: 0.75,
-                          }}
-                        >
-                          {t("upload.previousSessions.viewPreview")}
-                        </Button>
+                    <button
+                      type="button"
+                      onClick={() => void handleContinue(session)}
+                      disabled={Boolean(resumingId)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-orange px-3 py-2.5 font-body-bold text-sm text-white disabled:opacity-50"
+                    >
+                      {isResuming ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          {session.status === "in_cart"
+                            ? t("upload.previousSessions.goToCart")
+                            : t("upload.previousSessions.continue")}
+                          <ArrowLeft className="h-4 w-4" aria-hidden />
+                        </>
                       )}
-                    </div>
+                    </button>
                   </div>
                 </div>
               );
@@ -334,12 +391,16 @@ export function PreviousPreviewSessions({
           </div>
 
           {error && (
-            <p className={cn("font-body text-sm text-red-700", textAlignClass)}>{error}</p>
+            <p className={cn("font-body text-sm text-red-700", textAlignClass)}>
+              {error}
+            </p>
           )}
 
-          <p className="text-center font-body text-sm text-medium-gray">
-            {t("upload.previousSessions.orUploadNew")}
-          </p>
+          {orContinueHint ? (
+            <p className="text-center font-body text-sm text-medium-gray">
+              {orContinueHint}
+            </p>
+          ) : null}
         </>
       )}
     </div>

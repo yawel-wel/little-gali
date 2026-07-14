@@ -12,7 +12,11 @@ import {
   uploadFileToCloudinaryPublicId,
 } from "./cloudinary";
 import { inputPublicId } from "./cloudinary-paths";
-import { runInitialParallelColorBundle } from "./color-generation-runner";
+import {
+  runColorfulBookColorGeneration,
+  runInitialParallelColorBundle,
+} from "./color-generation-runner";
+import { parseBookFlow } from "./book-flow";
 import { runInitialParallelGeneration } from "./generation-runner";
 import {
   logPreviewColorPipelineIncomplete,
@@ -156,13 +160,15 @@ async function applyOriginalUploads(
     throw new Error("Preview session not found");
   }
 
+  const isColorful = parseBookFlow(session.bookFlow) === "colorful";
+
   session.slots = session.slots.map((slot, index) => ({
     ...slot,
     originalUrl: originalUrls[index]?.secureUrl ?? slot.originalUrl,
     originalPublicId: originalUrls[index]?.publicId ?? slot.originalPublicId,
     inputVersion: 1,
-    inFlight: true,
-    colorInFlight: false,
+    inFlight: !isColorful,
+    colorInFlight: isColorful,
     candidates: [],
     activeCandidateId: undefined,
     colorCandidates: [],
@@ -170,6 +176,36 @@ async function applyOriginalUploads(
   }));
   session.generationStatus = "running";
   session.initializationError = undefined;
+  if (isColorful) {
+    session.phase = "bw_approved";
+    session.selectedColorStyle = "colorful";
+  }
+  await savePreviewSession(session);
+}
+
+async function finalizeAfterInitialPipeline(sessionId: string): Promise<void> {
+  const session = await loadPreviewSession(sessionId);
+  if (!session) return;
+
+  if (parseBookFlow(session.bookFlow) === "colorful") {
+    syncColorPreviewToStyle(session, "colorful");
+    const colorReady = allSlotsHaveColorForStyle(session, "colorful");
+    if (colorReady) {
+      session.generationStatus = "complete";
+      session.initializationError = undefined;
+    } else {
+      session.generationStatus = "failed";
+      session.initializationError =
+        session.initializationError ?? "Preview generation did not complete";
+    }
+  } else {
+    syncGenerationStatus(session);
+    if (session.generationStatus !== "complete") {
+      session.generationStatus = "failed";
+      session.initializationError =
+        session.initializationError ?? "Preview generation did not complete";
+    }
+  }
   await savePreviewSession(session);
 }
 
@@ -188,17 +224,17 @@ export async function runPreviewPipelineFromMultipart(
   );
 
   await applyOriginalUploads(sessionId, originalUrls);
-  await runInitialParallelGeneration(sessionId);
 
   const session = await loadPreviewSession(sessionId);
   if (!session) return;
-  syncGenerationStatus(session);
-  if (session.generationStatus !== "complete") {
-    session.generationStatus = "failed";
-    session.initializationError =
-      session.initializationError ?? "Preview generation did not complete";
+
+  if (parseBookFlow(session.bookFlow) === "colorful") {
+    await runColorfulBookColorGeneration(sessionId);
+  } else {
+    await runInitialParallelGeneration(sessionId);
   }
-  await savePreviewSession(session);
+
+  await finalizeAfterInitialPipeline(sessionId);
 }
 
 export async function runPreviewPipelineFromRemoteUrls(
@@ -212,17 +248,17 @@ export async function runPreviewPipelineFromRemoteUrls(
   );
 
   await applyOriginalUploads(sessionId, originalUrls);
-  await runInitialParallelGeneration(sessionId);
 
   const session = await loadPreviewSession(sessionId);
   if (!session) return;
-  syncGenerationStatus(session);
-  if (session.generationStatus !== "complete") {
-    session.generationStatus = "failed";
-    session.initializationError =
-      session.initializationError ?? "Preview generation did not complete";
+
+  if (parseBookFlow(session.bookFlow) === "colorful") {
+    await runColorfulBookColorGeneration(sessionId);
+  } else {
+    await runInitialParallelGeneration(sessionId);
   }
-  await savePreviewSession(session);
+
+  await finalizeAfterInitialPipeline(sessionId);
 }
 
 export async function runColorPipelineForApprovedSession(

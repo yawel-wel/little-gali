@@ -1,4 +1,5 @@
 import type { StyleType } from "@/components/style-selector";
+import { COLORFUL_SLOT_COUNT } from "./book-flow";
 import type { PreviewCandidate, PreviewSession } from "./types";
 
 export type PreviewOutputKind = "bw" | "color";
@@ -12,7 +13,11 @@ export function isUuid(value: string): boolean {
 }
 
 function slotNumber(slotIndex: number): number {
-  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex > 4) {
+  if (
+    !Number.isInteger(slotIndex) ||
+    slotIndex < 0 ||
+    slotIndex >= COLORFUL_SLOT_COUNT
+  ) {
     throw new Error("Invalid slot index");
   }
   return slotIndex + 1;
@@ -116,7 +121,11 @@ export function previewPublicIdFromClean(cleanPublicId: string): string {
   if (cleanPublicId.includes("/outputs/bw/")) {
     return cleanPublicId.replace("/outputs/bw/", "/outputs/watermark/bw/");
   }
-  if (/\/outputs\/color\/(cartoon|pencil|watercolor)\//.test(cleanPublicId)) {
+  if (
+    /\/outputs\/color\/(cartoon|pencil|watercolor|colorful)\//.test(
+      cleanPublicId,
+    )
+  ) {
     return cleanPublicId.replace("/outputs/color/", "/outputs/watermark/color/");
   }
   return `${cleanPublicId}_wm`;

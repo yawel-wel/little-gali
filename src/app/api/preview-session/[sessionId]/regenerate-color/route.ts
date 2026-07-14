@@ -9,14 +9,13 @@ import {
   consumeChangeCreditForResult,
   hasChangeCredits,
 } from "@/lib/preview-session/credits";
+import { parseBookFlow } from "@/lib/preview-session/book-flow";
 import { DEFAULT_COLOR_STYLE, PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
 import { slotColorActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
-
-const STYLES: StyleType[] = PREVIEW_COLOR_STYLES;
 
 export async function POST(
   request: NextRequest,
@@ -37,14 +36,22 @@ export async function POST(
     freeRetry?: boolean;
   };
   const { slotIndex } = body;
-  const style = body.style ?? auth.session.selectedColorStyle ?? DEFAULT_COLOR_STYLE;
+  const isColorful = parseBookFlow(auth.session.bookFlow) === "colorful";
+  const style =
+    body.style ??
+    auth.session.selectedColorStyle ??
+    (isColorful ? "colorful" : DEFAULT_COLOR_STYLE);
   const requestedFreeRetry = body.freeRetry === true;
+  const allowedStyles: StyleType[] = isColorful
+    ? ["colorful"]
+    : [...PREVIEW_COLOR_STYLES];
+  const maxSlotIndex = Math.max(0, auth.session.slots.length - 1);
 
   if (
     typeof slotIndex !== "number" ||
     slotIndex < 0 ||
-    slotIndex > 4 ||
-    !STYLES.includes(style)
+    slotIndex > maxSlotIndex ||
+    !allowedStyles.includes(style)
   ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
@@ -65,13 +72,20 @@ export async function POST(
   const freeRetry =
     requestedFreeRetry && slotColorActiveHasRetryableError(slot, style);
 
-  const active = slot.candidates.find(
-    (candidate) =>
-      candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
-  );
-  if (!active?.previewUrl || active.error) {
+  if (!isColorful) {
+    const active = slot.candidates.find(
+      (candidate) =>
+        candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
+    );
+    if (!active?.previewUrl || active.error) {
+      return NextResponse.json(
+        { error: "B&W preview is not ready for color generation" },
+        { status: 409 },
+      );
+    }
+  } else if (!slot.originalUrl) {
     return NextResponse.json(
-      { error: "B&W preview is not ready for color generation" },
+      { error: "Original image is not ready for color generation" },
       { status: 409 },
     );
   }

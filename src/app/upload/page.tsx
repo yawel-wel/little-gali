@@ -15,11 +15,11 @@ import {
   useMemo,
 } from "react";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
-import { PreviousPreviewSessions, hasCandidateSessionIds } from "@/components/previous-preview-sessions";
+import { UploadBookFlowChooser } from "@/components/upload-book-flow-chooser";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUploadImages } from "@/lib/UploadImagesContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
@@ -31,6 +31,11 @@ import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { useLanguage } from "@/lib/LanguageContext";
 import { getOrCreateLgSessionId, persistLgSessionId } from "@/lib/session-id";
+import {
+  getSlotCount,
+  isBookFlow,
+  type BookFlow,
+} from "@/lib/preview-session/book-flow";
 import {
   getGenerationRateLimitMessage,
   isGenerationRateLimited,
@@ -54,6 +59,7 @@ import {
 } from "@/lib/preview-session/upload-preview-blocked-storage";
 import Button from "@mui/material/Button";
 import { track, ANALYTICS_EVENTS, withAnalyticsHeaders } from "@/lib/analytics";
+import { Suspense } from "react";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
 
@@ -66,6 +72,8 @@ interface UploadImageItemProps {
   onRemove: (index: number) => void;
   isSubmitting: boolean;
   onTap: (index: number) => void;
+  /** Smaller thumbs so 5 fit in one row on mobile (colorful 9-photo layout). */
+  compact?: boolean;
 }
 
 function UploadImageItem({
@@ -75,6 +83,7 @@ function UploadImageItem({
   onRemove,
   isSubmitting,
   onTap,
+  compact = false,
 }: UploadImageItemProps) {
   useEffect(() => {
     [
@@ -106,11 +115,16 @@ function UploadImageItem({
     />
   );
 
-  const thumbClassName =
-    "relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] cursor-pointer rounded-lg overflow-hidden";
+  const thumbClassName = compact
+    ? "relative h-[65px] w-[56px] shrink-0 cursor-pointer overflow-hidden rounded-lg sm:h-[74px] sm:w-[64px] md:h-[102px] md:w-[88px]"
+    : "relative w-[72px] h-[84px] sm:w-[80px] sm:h-[93px] md:w-[120px] md:h-[140px] lg:w-[140px] lg:h-[163px] cursor-pointer rounded-lg overflow-hidden";
 
   return (
-    <div className="relative flex-shrink-0 pt-1.5 pl-1.5">
+    <div
+      className={cn(
+        "relative shrink-0 pt-1.5 pl-1.5",
+      )}
+    >
       <div
         style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)" }}
         className={thumbClassName}
@@ -154,6 +168,7 @@ function UploadImageItem({
 
 function UploadPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { images: contextImages, setImages, clearImages } = useUploadImages();
   const { addToCart, removeFromCart, cart } = useCart();
 
@@ -161,6 +176,19 @@ function UploadPageContent() {
   const images = contextImages;
   const { t, locale } = useLanguage();
   const { limits, refreshLimits } = usePreviewLimits();
+  const modeParam = searchParams.get("mode");
+  const bookFlow: BookFlow | null = isBookFlow(modeParam) ? modeParam : null;
+  const slotCount = bookFlow ? getSlotCount(bookFlow) : 5;
+  const isColorfulFlow = bookFlow === "colorful";
+
+  const selectBookFlow = useCallback(
+    (flow: BookFlow) => {
+      clearImages();
+      setImages([]);
+      router.replace(`/upload?mode=${flow}`);
+    },
+    [clearImages, router, setImages],
+  );
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -406,7 +434,7 @@ function UploadPageContent() {
       return;
     }
     const currentCount = images.length;
-    const availableSlots = 5 - currentCount;
+    const availableSlots = slotCount - currentCount;
     if (availableSlots <= 0) return;
 
     const filesToProcess = imageFiles.slice(0, availableSlots);
@@ -603,9 +631,6 @@ function UploadPageContent() {
   );
 
   const previewEnabled = isAiPreviewEnabled();
-  const [hasPreviousSessions, setHasPreviousSessions] = useState(
-    () => previewEnabled && hasCandidateSessionIds(),
-  );
   const showWithoutPreviewCartPath =
     previewBlockedCode === "preview_rate_limit" ||
     previewBlockedCode === "generation_rate_limit";
@@ -704,17 +729,31 @@ function UploadPageContent() {
     [t],
   );
 
+  const colorfulLoadingLines = useMemo(
+    () => [
+      t("preview.colorfulLoadingLine1"),
+      t("preview.colorfulLoadingLine2"),
+      t("preview.colorfulLoadingLine3"),
+      t("preview.colorfulLoadingLine4"),
+    ],
+    [t],
+  );
+
+  const activeLoadingLines = isColorfulFlow
+    ? colorfulLoadingLines
+    : bwLoadingLines;
+
   useEffect(() => {
-    if (!showPreviewLoader || bwLoadingLines.length === 0) {
+    if (!showPreviewLoader || activeLoadingLines.length === 0) {
       return;
     }
     const interval = setInterval(() => {
       setPreviewLoaderLineIndex(
-        (current) => (current + 1) % bwLoadingLines.length,
+        (current) => (current + 1) % activeLoadingLines.length,
       );
     }, 3500);
     return () => clearInterval(interval);
-  }, [bwLoadingLines.length, showPreviewLoader]);
+  }, [activeLoadingLines.length, showPreviewLoader]);
 
   const applyPreviewStartBlockedState = (
     response: Response,
@@ -765,10 +804,12 @@ function UploadPageContent() {
   };
 
   const handleContinueToPreview = async () => {
-    if (!images || images.length !== 5) {
+    if (!bookFlow || images.length !== slotCount) {
       setSubmitStatus({
         type: "error",
-        message: t("upload.selectExactly5"),
+        message: isColorfulFlow
+          ? t("upload.selectExactly9")
+          : t("upload.selectExactly5"),
       });
       return;
     }
@@ -803,12 +844,13 @@ function UploadPageContent() {
 
       setPreviewLoaderLineIndex(0);
       setShowPreviewLoader(true);
-      setUploadingImages(new Set([0, 1, 2, 3, 4]));
+      setUploadingImages(new Set(images.map((_, index) => index)));
       const compressedImages = await Promise.all(
         images.map((url) => compressImage(url)),
       );
       const previewFormData = new FormData();
       previewFormData.append("sessionId", previewSessionId);
+      previewFormData.append("bookFlow", bookFlow);
       compressedImages.forEach((file) => {
         previewFormData.append("images", file);
       });
@@ -852,13 +894,16 @@ function UploadPageContent() {
       setUploadingImages(new Set());
       setPreviewBlockedCode(null);
       persistUploadPreviewBlocked(null);
-      track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_COMPLETED, { image_count: 5 });
+      track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_COMPLETED, {
+        image_count: slotCount,
+        book_flow: bookFlow,
+      });
       if (typeof window !== "undefined") {
         persistLgSessionId(previewData.session.id);
         recordPreviewSessionId(previewData.session.id);
         sessionStorage.setItem(
           `${PREVIEW_LOADING_IMAGES_STORAGE_PREFIX}:${previewData.session.id}`,
-          JSON.stringify(images.slice(0, 5)),
+          JSON.stringify(images.slice(0, slotCount)),
         );
       }
       router.push(`/preview/${previewData.session.id}`);
@@ -883,19 +928,21 @@ function UploadPageContent() {
 
     try {
       // Validate images
-      if (!images || images.length !== 5) {
+      if (!bookFlow || !images || images.length !== slotCount) {
         setSubmitStatus({
           type: "error",
-          message: t("upload.selectExactly5"),
+          message: isColorfulFlow
+            ? t("upload.selectExactly9")
+            : t("upload.selectExactly5"),
         });
         setIsSubmitting(false);
         return;
       }
 
       // Mark all images as uploading for UI feedback
-      setUploadingImages(new Set([0, 1, 2, 3, 4]));
+      setUploadingImages(new Set(images.map((_, index) => index)));
 
-      // Upload all 5 images simultaneously to Cloudinary
+      // Upload all images simultaneously to Cloudinary
       // Compress all images in parallel
       const compressedImages = await Promise.all(
         images.map((url) => compressImage(url)),
@@ -921,7 +968,11 @@ function UploadPageContent() {
       const uploadData = await uploadResponse.json();
       const imageUrls = uploadData.imageUrls;
 
-      if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length !== 5) {
+      if (
+        !imageUrls ||
+        !Array.isArray(imageUrls) ||
+        imageUrls.length !== slotCount
+      ) {
         setUploadingImages(new Set());
         throw new Error("Invalid response from upload API");
       }
@@ -945,7 +996,10 @@ function UploadPageContent() {
       }
 
       console.log("Uploaded images, adding to cart:", imageUrls);
-      track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_COMPLETED, { image_count: 5 });
+      track(ANALYTICS_EVENTS.BOOKLET_UPLOAD_COMPLETED, {
+        image_count: slotCount,
+        book_flow: bookFlow,
+      });
       track(ANALYTICS_EVENTS.BOOKLET_ADDED_TO_CART);
       // Mark optimistic adding to avoid empty-state flash
       try {
@@ -956,7 +1010,9 @@ function UploadPageContent() {
 
       // Fire-and-forget to enable optimistic navigation; cart page will reflect when ready
       // Use ref to ensure we get the current value, not a stale closure
-      const styleToAdd = selectedStyleRef.current || selectedStyle || "pencil";
+      const styleToAdd = isColorfulFlow
+        ? "colorful"
+        : selectedStyleRef.current || selectedStyle || "pencil";
       console.log(
         "Adding to cart - selectedStyle state:",
         selectedStyle,
@@ -971,6 +1027,14 @@ function UploadPageContent() {
         undefined,
         undefined,
         styleToAdd,
+        undefined,
+        isColorfulFlow
+          ? {
+              originalUrls: imageUrls,
+              generatedColorUrls: imageUrls,
+              bookFlow: "colorful",
+            }
+          : undefined,
       );
 
       // Navigate immediately to cart (optimistic UX)
@@ -1001,12 +1065,38 @@ function UploadPageContent() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("withoutPreview") !== "1") return;
     if (withoutPreviewStartedRef.current) return;
-    if (images.length !== 5 || isSubmitting) return;
+    if (!bookFlow || images.length !== slotCount || isSubmitting) return;
 
     withoutPreviewStartedRef.current = true;
-    router.replace("/upload");
+    router.replace(`/upload?mode=${bookFlow}`);
     void handleAddToCart();
-  }, [handleAddToCart, images.length, isSubmitting, router]);
+  }, [bookFlow, handleAddToCart, images.length, isSubmitting, router, slotCount]);
+
+  if (!bookFlow) {
+    return (
+      <div
+        className="min-h-screen"
+        style={{ backgroundColor: "#F3EEE8" }}
+      >
+        <Header />
+        <main
+          id="main-content"
+          className="flex-1"
+          style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
+        >
+          <section
+            className="relative pb-10 lg:pb-16 pt-6 lg:pt-10"
+            style={{ backgroundColor: "#F3EEE8" }}
+          >
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <UploadBookFlowChooser onSelect={selectBookFlow} />
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -1050,10 +1140,11 @@ function UploadPageContent() {
               </div>
 
               {/* First Paragraph */}
-              {!(hasPreviousSessions && images.length === 0) && (
-                <div className="text-center mb-8 -mt-4">
+              <div className="text-center mb-8 -mt-4">
                   <p className="text-base font-body text-dark-gray leading-relaxed text-center">
-                    {t("upload.description")
+                    {(isColorfulFlow
+                      ? t("upload.descriptionColorful")
+                      : t("upload.description"))
                       .split("\n")
                       .map((line, i, arr) => (
                         <span key={i}>
@@ -1062,12 +1153,12 @@ function UploadPageContent() {
                         </span>
                       ))}
                   </p>
+                  {isColorfulFlow && (
+                    <p className="mt-3 text-sm font-body text-medium-gray">
+                      {t("upload.colorfulMirrorNote")}
+                    </p>
+                  )}
                 </div>
-              )}
-
-              {previewEnabled && images.length === 0 && (
-                <PreviousPreviewSessions onVisibleChange={setHasPreviousSessions} />
-              )}
 
               {/* Image Selection Progress Indicator */}
               <div className="text-center">
@@ -1080,7 +1171,9 @@ function UploadPageContent() {
                     <span style={{ color: "#693430" }}>
                       {images.length}
                     </span>{" "}
-                    {t("upload.imagesCount")}
+                    {isColorfulFlow
+                      ? t("upload.imagesCount9")
+                      : t("upload.imagesCount")}
                   </span>
                 </div>
               </div>
@@ -1108,27 +1201,63 @@ function UploadPageContent() {
               {images.length > 0 && (
                 <div className="space-y-4">
                   <div>
-                    <div className="w-full overflow-x-auto overscroll-x-contain py-1 md:overflow-visible">
-                      <div className="mx-auto flex w-max min-w-full flex-nowrap items-end justify-center gap-0.5 overflow-visible px-3 pt-1 sm:px-4 md:gap-1">
-                      {images.map((url, index) => (
-                        <UploadImageItem
-                          key={url}
-                          url={url}
-                          index={index}
-                          locale={locale}
-                          onRemove={handleRemoveImage}
-                          isSubmitting={isSubmitting}
-                          onTap={handleImageTap}
-                        />
-                      ))}
+                    {isColorfulFlow ? (
+                      <div className="mx-auto flex w-full flex-col items-center gap-2 overflow-x-auto px-2 pt-1 sm:px-4">
+                        <div className="flex flex-nowrap items-end justify-center gap-0.5 sm:gap-1">
+                          {images.slice(0, 5).map((url, index) => (
+                            <UploadImageItem
+                              key={url}
+                              url={url}
+                              index={index}
+                              locale={locale}
+                              onRemove={handleRemoveImage}
+                              isSubmitting={isSubmitting}
+                              onTap={handleImageTap}
+                              compact
+                            />
+                          ))}
+                        </div>
+                        {images.length > 5 && (
+                          <div className="flex flex-nowrap items-end justify-center gap-0.5 sm:gap-1">
+                            {images.slice(5).map((url, index) => (
+                              <UploadImageItem
+                                key={url}
+                                url={url}
+                                index={index + 5}
+                                locale={locale}
+                                onRemove={handleRemoveImage}
+                                isSubmitting={isSubmitting}
+                                onTap={handleImageTap}
+                                compact
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="w-full overflow-x-auto overscroll-x-contain py-1 md:overflow-visible">
+                        <div className="mx-auto flex w-max min-w-full flex-nowrap items-end justify-center gap-0.5 overflow-visible px-3 pt-1 sm:px-4 md:gap-1">
+                          {images.map((url, index) => (
+                            <UploadImageItem
+                              key={url}
+                              url={url}
+                              index={index}
+                              locale={locale}
+                              onRemove={handleRemoveImage}
+                              isSubmitting={isSubmitting}
+                              onTap={handleImageTap}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Action Buttons */}
-                  {images.length >= 5 && (
+                  {images.length >= slotCount && (
                     <div className="mt-10 flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
-                      {(!previewEnabled || showWithoutPreviewCartPath) && (
+                      {(!previewEnabled || showWithoutPreviewCartPath) &&
+                        !isColorfulFlow && (
                         <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
                           <StyleSelector
                             selectedStyle={selectedStyle}
@@ -1145,7 +1274,7 @@ function UploadPageContent() {
                       {lastGenerationWarning &&
                         previewEnabled &&
                         !showWithoutPreviewCartPath &&
-                        images.length === 5 && (
+                        images.length === slotCount && (
                           <div className="w-full rounded-lg border border-amber-200 bg-amber-50 p-4 text-center font-body text-sm text-dark-gray">
                             {lastGenerationWarning}
                           </div>
@@ -1230,8 +1359,8 @@ function UploadPageContent() {
                 </div>
               )}
 
-              {/* Image Upload Area - Only show when less than 5 images */}
-              {images.length < 5 && (
+              {/* Image Upload Area - Only show when less than required images */}
+              {images.length < slotCount && (
                 <>
                   <div className="text-center">
                     <div
@@ -1315,16 +1444,25 @@ function UploadPageContent() {
       {showPreviewLoader && (
         <PreviewInitialLoadingScreen
           variant="overlay"
-          imageUrls={images.slice(0, 5)}
+          imageUrls={images.slice(0, slotCount)}
           isExiting={false}
           isComplete={false}
           loadingLine={
-            bwLoadingLines[previewLoaderLineIndex % bwLoadingLines.length] ??
-            bwLoadingLines[0]
+            isColorfulFlow
+              ? (colorfulLoadingLines[
+                  previewLoaderLineIndex % colorfulLoadingLines.length
+                ] ?? colorfulLoadingLines[0])
+              : (bwLoadingLines[
+                  previewLoaderLineIndex % bwLoadingLines.length
+                ] ?? bwLoadingLines[0])
           }
           slowText={t("preview.loadingSlow")}
           standardText={t("preview.loadingDuration")}
-          title={t("preview.bwLoadingTitle")}
+          title={
+            isColorfulFlow
+              ? t("preview.colorfulLoadingTitle")
+              : t("preview.bwLoadingTitle")
+          }
           locale={locale}
         />
       )}
@@ -1335,5 +1473,9 @@ function UploadPageContent() {
 }
 
 export default function UploadPage() {
-  return <UploadPageContent />;
+  return (
+    <Suspense fallback={null}>
+      <UploadPageContent />
+    </Suspense>
+  );
 }

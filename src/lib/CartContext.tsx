@@ -16,6 +16,7 @@ import {
   extractColorUrlsFromAttributes,
   extractImagesFromLineAttributes,
 } from "./cart-line-images";
+import { isValidBookCartImageCount, isValidBookCartStyle } from "./preview-session/generation-stats";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
 import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
 import type { BookColor } from "./book-color";
@@ -33,8 +34,9 @@ export interface CartItem {
   previewSessionId?: string;
   title?: string;
   lineId?: string;
-  style?: "cartoon" | "pencil" | "watercolor";
+  style?: "cartoon" | "pencil" | "watercolor" | "colorful";
   bookColor?: BookColor;
+  bookFlow?: "classic" | "colorful";
   variantId?: string;
   isGiftCard?: boolean;
   giftCardAmount?: number;
@@ -57,10 +59,11 @@ export interface PreviewGenerationStats {
 
 export interface BookFulfillmentImages {
   originalUrls: string[];
-  generatedBwUrls: string[];
+  generatedBwUrls?: string[];
   generatedColorUrls?: string[];
-  previewSessionId: string;
+  previewSessionId?: string;
   generationStats?: PreviewGenerationStats;
+  bookFlow?: "classic" | "colorful";
 }
 
 export interface Cart {
@@ -80,7 +83,7 @@ interface CartContextType {
     quantity?: number,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor",
+    style?: "cartoon" | "pencil" | "watercolor" | "colorful",
     bookColor?: BookColor,
     fulfillment?: BookFulfillmentImages
   ) => Promise<void>;
@@ -163,7 +166,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             let isFramedArt = attrExtract.isFramedArt;
 
             if (stored?.imageUrls?.length) {
-              const validBook = stored.imageUrls.length === 5;
+              const validBook = isValidBookCartImageCount(stored.imageUrls.length);
               const validFramed =
                 stored.productType === "framed_art" &&
                 stored.imageUrls.length >= 1;
@@ -203,15 +206,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               const styleAttr = line.attributes.find(
                 (attr) => attr.key === "style" || attr.key === "_style",
               );
-              if (
-                styleAttr &&
-                (styleAttr.value === "cartoon" ||
-                  styleAttr.value === "pencil" ||
-                  styleAttr.value === "watercolor")
-              ) {
+              if (styleAttr && isValidBookCartStyle(styleAttr.value)) {
                 style = styleAttr.value;
               }
             }
+
+            const bookFlowAttr = line.attributes?.find(
+              (attr) =>
+                attr.key === "_book_flow" ||
+                attr.key === "book_flow" ||
+                attr.key === "type",
+            );
+            const bookFlow =
+              bookFlowAttr?.value === "colorful" || style === "colorful"
+                ? ("colorful" as const)
+                : ("classic" as const);
 
             const bookColor =
               line.bookColor ??
@@ -236,6 +245,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
               previewSessionId: isGiftCard ? undefined : stored?.previewSessionId,
               style: isGiftCard ? undefined : style,
+              bookFlow: isGiftCard || isFramedArt ? undefined : bookFlow,
               bookColor: isGiftCard || isFramedArt ? undefined : bookColor,
               variantId: line.variantId,
               isGiftCard,
@@ -335,7 +345,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number = 1,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor",
+    style?: "cartoon" | "pencil" | "watercolor" | "colorful",
     bookColor?: BookColor,
     fulfillment?: BookFulfillmentImages
   ) => {
@@ -359,6 +369,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             bookColor,
+            bookFlow: fulfillment?.bookFlow,
             locale,
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,
@@ -382,6 +393,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             phoneNumber,
             style: style || "cartoon",
             bookColor,
+            bookFlow: fulfillment?.bookFlow,
             locale,
             originalUrls: fulfillment?.originalUrls,
             generatedBwUrls: fulfillment?.generatedBwUrls,

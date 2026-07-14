@@ -13,7 +13,12 @@ import {
   verifyPreviewSessionCookie,
 } from "@/lib/preview-session/cookies";
 import { INITIAL_CHANGE_CREDITS } from "@/lib/preview-session/credits";
-import { DEFAULT_DISPLAY_ORDER } from "@/lib/preview-session/display-order";
+import {
+  defaultDisplayOrder,
+  getSlotCount,
+  parseBookFlow,
+  type BookFlow,
+} from "@/lib/preview-session/book-flow";
 import { getRequestIp, hashClientIp } from "@/lib/preview-session/hash";
 import {
   markSessionPipelineFailed,
@@ -109,16 +114,24 @@ function scheduleRemotePipeline(sessionId: string, originalUrls: string[]): void
 async function createNewPreviewSession(
   request: NextRequest,
   sessionId: string,
+  bookFlow: BookFlow = "classic",
 ): Promise<PreviewSession> {
   const ipHash = hashClientIp(getRequestIp(request));
   const now = new Date().toISOString();
+  const isColorful = bookFlow === "colorful";
   const session: PreviewSession = {
     id: sessionId,
-    phase: "bw_review",
+    phase: isColorful ? "bw_approved" : "bw_review",
     generationStatus: "not_started",
-    displayOrder: [...DEFAULT_DISPLAY_ORDER],
+    bookFlow,
+    displayOrder: defaultDisplayOrder(bookFlow),
     changeCreditsRemaining: INITIAL_CHANGE_CREDITS,
-    slots: createPendingSlots(),
+    slots: createPendingSlots(getSlotCount(bookFlow)).map((slot) =>
+      isColorful
+        ? { ...slot, inFlight: false, colorInFlight: true }
+        : slot,
+    ),
+    selectedColorStyle: isColorful ? "colorful" : undefined,
     createdAt: now,
     updatedAt: now,
     clientIpHash: ipHash,
@@ -145,14 +158,16 @@ async function createNewPreviewSession(
  */
 async function startFreshPreviewSessionForNewUpload(
   request: NextRequest,
+  bookFlow: BookFlow = "classic",
 ): Promise<{ session: PreviewSession }> {
-  const session = await createNewPreviewSession(request, randomUUID());
+  const session = await createNewPreviewSession(request, randomUUID(), bookFlow);
   return { session };
 }
 
 async function prepareSessionForPipelineStart(
   request: NextRequest,
   requestedSessionId?: string,
+  bookFlow: BookFlow = "classic",
 ): Promise<
   | { session: PreviewSession; shouldSchedulePipeline: boolean }
   | { error: string; status: number }
@@ -161,7 +176,7 @@ async function prepareSessionForPipelineStart(
   const sessionId = requestedSessionId ?? randomUUID();
 
   if (isNewSession) {
-    const session = await createNewPreviewSession(request, sessionId);
+    const session = await createNewPreviewSession(request, sessionId, bookFlow);
     return { session, shouldSchedulePipeline: true };
   }
 
@@ -173,7 +188,7 @@ async function prepareSessionForPipelineStart(
      * deterministically keyed by sessionId. That can lead to "yesterday's images"
      * showing up for a "new" upload. Always rotate to a fresh session id.
      */
-    const session = await createNewPreviewSession(request, randomUUID());
+    const session = await createNewPreviewSession(request, randomUUID(), bookFlow);
     return { session, shouldSchedulePipeline: true };
   }
 
@@ -190,8 +205,16 @@ async function prepareSessionForPipelineStart(
   }
 
   if (status === "failed") {
-    existing.slots = createPendingSlots();
-    existing.displayOrder = [...DEFAULT_DISPLAY_ORDER];
+    const isColorful = bookFlow === "colorful";
+    existing.bookFlow = bookFlow;
+    existing.slots = createPendingSlots(getSlotCount(bookFlow)).map((slot) =>
+      isColorful
+        ? { ...slot, inFlight: false, colorInFlight: true }
+        : slot,
+    );
+    existing.displayOrder = defaultDisplayOrder(bookFlow);
+    existing.phase = isColorful ? "bw_approved" : "bw_review";
+    existing.selectedColorStyle = isColorful ? "colorful" : undefined;
     existing.initializationError = undefined;
     existing.generationStatus = "not_started";
     await savePreviewSession(existing);
@@ -232,6 +255,8 @@ export async function POST(request: NextRequest) {
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       const files = formData.getAll("images") as File[];
+      const bookFlow = parseBookFlow(formData.get("bookFlow"));
+      const expectedCount = getSlotCount(bookFlow);
       const requestedSessionId = readRequestedSessionId(formData.get("sessionId"));
       const sessionIdForLimit = await resolveSessionIdForGenerationLimit(
         requestedSessionId,
@@ -244,9 +269,14 @@ export async function POST(request: NextRequest) {
         return generationLimit;
       }
 
-      if (files.length !== 5) {
+      if (files.length !== expectedCount) {
         return NextResponse.json(
-          { error: "Exactly five images are required" },
+          {
+            error:
+              bookFlow === "colorful"
+                ? "Exactly nine images are required"
+                : "Exactly five images are required",
+          },
           { status: 400 },
         );
       }
@@ -261,6 +291,7 @@ export async function POST(request: NextRequest) {
       const prepared = await prepareSessionForPipelineStart(
         request,
         requestedSessionId ?? sessionIdForLimit,
+        bookFlow,
       );
       if ("error" in prepared) {
         return NextResponse.json(
@@ -279,7 +310,10 @@ export async function POST(request: NextRequest) {
         const genStatus = resolveGenerationStatus(sessionForPipeline);
         if (genStatus === "complete" || genStatus === "running") {
           const priorSession = sessionForPipeline;
-          const fresh = await startFreshPreviewSessionForNewUpload(request);
+          const fresh = await startFreshPreviewSessionForNewUpload(
+            request,
+            bookFlow,
+          );
           sessionForPipeline = fresh.session;
           inheritSupportGrants(priorSession, sessionForPipeline);
           await savePreviewSession(sessionForPipeline);
@@ -320,7 +354,10 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       originalUrls?: string[];
       sessionId?: string;
+      bookFlow?: string;
     };
+    const bookFlow = parseBookFlow(body.bookFlow);
+    const expectedCount = getSlotCount(bookFlow);
     const requestedSessionId = readRequestedSessionId(body.sessionId);
     const sessionIdForLimit = await resolveSessionIdForGenerationLimit(
       requestedSessionId,
@@ -335,9 +372,14 @@ export async function POST(request: NextRequest) {
 
     const originalUrls = body.originalUrls ?? [];
 
-    if (originalUrls.length !== 5) {
+    if (originalUrls.length !== expectedCount) {
       return NextResponse.json(
-        { error: "Exactly five original image URLs are required" },
+        {
+          error:
+            bookFlow === "colorful"
+              ? "Exactly nine original image URLs are required"
+              : "Exactly five original image URLs are required",
+        },
         { status: 400 },
       );
     }
@@ -352,6 +394,7 @@ export async function POST(request: NextRequest) {
     const prepared = await prepareSessionForPipelineStart(
       request,
       requestedSessionId ?? sessionIdForLimit,
+      bookFlow,
     );
     if ("error" in prepared) {
       return NextResponse.json(
@@ -370,7 +413,10 @@ export async function POST(request: NextRequest) {
       const genStatus = resolveGenerationStatus(sessionForPipeline);
         if (genStatus === "complete" || genStatus === "running") {
           const priorSession = sessionForPipeline;
-          const fresh = await startFreshPreviewSessionForNewUpload(request);
+          const fresh = await startFreshPreviewSessionForNewUpload(
+            request,
+            bookFlow,
+          );
           sessionForPipeline = fresh.session;
           inheritSupportGrants(priorSession, sessionForPipeline);
           await savePreviewSession(sessionForPipeline);

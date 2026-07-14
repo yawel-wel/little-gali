@@ -70,10 +70,11 @@ export async function POST(
     idempotencyKey = body.idempotencyKey;
   }
 
+  const maxSlotIndex = Math.max(0, auth.session.slots.length - 1);
   if (
     typeof slotIndex !== "number" ||
     slotIndex < 0 ||
-    slotIndex > 4 ||
+    slotIndex > maxSlotIndex ||
     (!originalUrl && !replacementFile) ||
     !idempotencyKey
   ) {

@@ -37,6 +37,7 @@ export function framedArtSessionToPreviewView(
     updatedAt: session.updatedAt,
     phase: "style_selected",
     generationStatus: session.generationStatus,
+    bookFlow: "classic",
     displayOrder: [0],
     changeCreditsRemaining: 0,
     slots: [

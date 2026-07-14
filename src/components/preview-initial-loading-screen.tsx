@@ -18,6 +18,46 @@ export type PreviewInitialLoadingScreenProps = {
   variant?: "inline" | "overlay";
 };
 
+function AvatarRow({
+  urls,
+  startDelayMs,
+  locale,
+}: {
+  urls: string[];
+  startDelayMs: number;
+  locale: Locale;
+}) {
+  const avatarDir = locale === "he" ? "rtl" : "ltr";
+  return (
+    <div
+      className="flex min-h-[4.5rem] justify-center md:min-h-20"
+      dir={avatarDir}
+      aria-hidden={urls.length === 0}
+    >
+      {urls.map((url, index) => (
+        <div
+          key={`${url}-${index}`}
+          className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
+          style={{
+            animationDelay: `${startDelayMs + index * 140}ms`,
+            marginInlineStart: index === 0 ? 0 : -18,
+            zIndex: urls.length - index,
+          }}
+        >
+          <img
+            src={url}
+            alt=""
+            className={cn(
+              SENTRY_REPLAY_BLOCK_USER_IMAGE,
+              "h-full w-full object-cover",
+            )}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function PreviewInitialLoadingScreen({
   imageUrls,
   isExiting,
@@ -32,7 +72,6 @@ export function PreviewInitialLoadingScreen({
   const [isTakingLonger, setIsTakingLonger] = useState(false);
   const [displayLine, setDisplayLine] = useState(loadingLine);
   const [lineVisible, setLineVisible] = useState(true);
-  const avatarDir = locale === "he" ? "rtl" : "ltr";
 
   useEffect(() => {
     const timeout = setTimeout(() => setIsTakingLonger(true), 90000);
@@ -51,6 +90,10 @@ export function PreviewInitialLoadingScreen({
     return () => clearTimeout(timeout);
   }, [displayLine, loadingLine]);
 
+  const useTwoRows = imageUrls.length > 5;
+  const firstRow = useTwoRows ? imageUrls.slice(0, 5) : imageUrls.slice(0, 5);
+  const secondRow = useTwoRows ? imageUrls.slice(5, 9) : [];
+
   return (
     <section
       className={cn(
@@ -66,31 +109,11 @@ export function PreviewInitialLoadingScreen({
       aria-busy={!isComplete}
     >
       <div className="flex w-full max-w-2xl flex-col items-center">
-        <div
-          className="mb-7 flex min-h-[4.5rem] justify-center md:min-h-20"
-          dir={avatarDir}
-          aria-hidden={imageUrls.length === 0}
-        >
-          {imageUrls.slice(0, 5).map((url, index) => (
-            <div
-              key={url}
-              className="preview-loading-avatar h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-[4px] border-[#F6D8DD] bg-white shadow-[0_10px_26px_rgba(105,52,48,0.14)] md:h-20 md:w-20"
-              style={{
-                animationDelay: `${index * 140}ms`,
-                marginInlineStart: index === 0 ? 0 : -18,
-                zIndex: imageUrls.length - index,
-              }}
-            >
-              <img
-                src={url}
-                alt=""
-                className={cn(
-                  SENTRY_REPLAY_BLOCK_USER_IMAGE,
-                  "h-full w-full object-cover",
-                )}
-              />
-            </div>
-          ))}
+        <div className="mb-7 flex flex-col items-center gap-3">
+          <AvatarRow urls={firstRow} startDelayMs={0} locale={locale} />
+          {secondRow.length > 0 && (
+            <AvatarRow urls={secondRow} startDelayMs={700} locale={locale} />
+          )}
         </div>
 
         <h1 className="max-w-xl font-heading text-2xl leading-[1.15] text-accent-burgundy md:text-3xl">

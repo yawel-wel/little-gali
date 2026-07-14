@@ -3,6 +3,7 @@ import sharp from "sharp";
 import type { StyleType } from "@/components/style-selector";
 import {
   CARTOON_COLOR_PROMPT,
+  COLORFUL_BOOK_PROMPT,
   GENERATION_SYSTEM_INSTRUCTION,
   PENCIL_COLOR_PROMPT,
   WATERCOLOR_COLOR_PROMPT,
@@ -31,6 +32,7 @@ const STYLE_PROMPTS: Record<StyleType, string> = {
   pencil: PENCIL_COLOR_PROMPT,
   cartoon: CARTOON_COLOR_PROMPT,
   watercolor: WATERCOLOR_COLOR_PROMPT,
+  colorful: COLORFUL_BOOK_PROMPT,
 };
 
 function resolveColorPrompt(style: StyleType): string {

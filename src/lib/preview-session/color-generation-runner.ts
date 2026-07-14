@@ -44,6 +44,10 @@ export {
 
 const ALL_SLOT_INDEXES = [0, 1, 2, 3, 4] as const;
 
+function allSlotIndexesForSession(session: PreviewSession): number[] {
+  return session.slots.map((_, index) => index);
+}
+
 function appendSlotColorCandidate(
   slot: PreviewSession["slots"][number],
   candidate: PreviewCandidate,
@@ -188,7 +192,7 @@ export async function runColorGeneration(
   if (!session) return null;
 
   const uniqueIndexes = [...new Set(slotIndexes)].filter(
-    (index) => index >= 0 && index <= 4,
+    (index) => index >= 0 && index < session.slots.length,
   );
   const forceGenerate = trigger === "regenerate";
   const slotsToGenerate = uniqueIndexes
@@ -246,7 +250,7 @@ export async function runColorGeneration(
 
   const succeeded = results.filter((candidate) => candidate.previewUrl).length;
   const failed = results.filter((candidate) => candidate.error).length;
-  if (slotsToGenerate.length === ALL_SLOT_INDEXES.length) {
+  if (slotsToGenerate.length === allSlotIndexesForSession(session).length) {
     logPreviewGenerationSummary(
       "color",
       {
@@ -261,7 +265,7 @@ export async function runColorGeneration(
     );
   }
 
-  if (uniqueIndexes.length === ALL_SLOT_INDEXES.length) {
+  if (uniqueIndexes.length === allSlotIndexesForSession(latest).length) {
     syncColorPreviewToStyle(latest, style);
   } else {
     syncColorPreviewForSlots(latest, style, uniqueIndexes);
@@ -400,7 +404,7 @@ export async function runInitialParallelColorBundle(
 
   const tasks: InitialColorBundleTask[] = [];
 
-  for (let index = 0; index < ALL_SLOT_INDEXES.length; index += 1) {
+  for (let index = 0; index < session.slots.length; index += 1) {
     const slot = session.slots[index];
     if (!slot) continue;
     for (const style of PREVIEW_COLOR_STYLES) {
@@ -517,9 +521,52 @@ export async function runParallelColorGeneration(
     return session;
   }
 
-  return runColorGeneration(sessionId, style, [...ALL_SLOT_INDEXES], {
+  return runColorGeneration(
+    sessionId,
+    style,
+    allSlotIndexesForSession(session),
+    {
+      trigger: "initial",
+    },
+  );
+}
+
+/** Color-only booklet flow: generate a single style for every slot in parallel. */
+export async function runColorfulBookColorGeneration(
+  sessionId: string,
+): Promise<PreviewSession | null> {
+  const session = await loadPreviewSession(sessionId);
+  if (!session) return null;
+
+  const style: StyleType = "colorful";
+  const indexes = allSlotIndexesForSession(session);
+
+  for (const index of indexes) {
+    const slot = session.slots[index];
+    if (slot) {
+      slot.inFlight = false;
+      slot.colorInFlight = true;
+    }
+  }
+  session.selectedColorStyle = style;
+  session.phase = "bw_approved";
+  await savePreviewSession(session);
+
+  const updated = await runColorGeneration(sessionId, style, indexes, {
     trigger: "initial",
   });
+  if (!updated) return null;
+
+  syncColorPreviewToStyle(updated, style);
+  updated.phase = "bw_approved";
+  updated.selectedColorStyle = style;
+  updated.slots = updated.slots.map((slot) => ({
+    ...slot,
+    inFlight: false,
+    colorInFlight: false,
+  }));
+  await savePreviewSession(updated);
+  return updated;
 }
 
 export function getActiveColorCandidate(
