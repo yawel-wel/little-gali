@@ -16,8 +16,8 @@ const BOOK_IN_USE_IMAGES = [
   { num: 2, ext: "JPG" },
   { num: 3, ext: "jpg" },
   { num: 4, ext: "JPG" },
-  { num: 5, ext: "jpg" },
-  { num: 6, ext: "JPG" },
+  { num: 5, ext: "JPG" },
+  { num: 6, ext: "jpg" },
   { num: 7, ext: "JPG" },
   { num: 8, ext: "jpg" },
 ] as const;
@@ -33,10 +33,39 @@ const dotVariants = {
   },
 };
 
+function BookInUseImage({
+  num,
+  ext,
+  alt,
+  priority = false,
+}: {
+  num: number;
+  ext: string;
+  alt: string;
+  priority?: boolean;
+}) {
+  return (
+    <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
+      <Image
+        src={`/book-in-use-${num}.${ext}`}
+        alt={alt}
+        fill
+        priority={priority}
+        className="object-cover bg-neutral-100"
+        sizes="(max-width: 1024px) 28vw, 16vw"
+      />
+    </div>
+  );
+}
+
 export function BookInUseSection() {
   const { locale, t } = useLanguage();
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
+  const imageAlt = (num: number) =>
+    t("home.bookInUse.imageAlt").replace("{num}", String(num));
 
   return (
     <section
@@ -74,34 +103,83 @@ export function BookInUseSection() {
           <ChevronRight className="h-6 w-6 text-dark-gray" />
         </button>
 
-        <Swiper
-          slidesPerView={3.5}
-          spaceBetween={10}
-          loop={true}
-          onSwiper={setSwiperInstance}
-          onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
-          dir={locale === "he" ? "rtl" : "ltr"}
-          breakpoints={{
-            1024: {
-              slidesPerView: 6,
-              spaceBetween: 14,
-            },
-          }}
+        {/* Correct-size preview until Swiper finishes init (avoids width:100% flash) */}
+        {!isReady && (
+          <>
+            <div
+              className="flex gap-2.5 overflow-hidden lg:hidden"
+              dir={locale === "he" ? "rtl" : "ltr"}
+              aria-hidden="true"
+            >
+              {BOOK_IN_USE_IMAGES.slice(0, 4).map(({ num, ext }, index) => (
+                <div
+                  key={num}
+                  className="w-[calc((100%-25px)/3.5)] shrink-0"
+                >
+                  <BookInUseImage
+                    num={num}
+                    ext={ext}
+                    alt={imageAlt(num)}
+                    priority={index < 3}
+                  />
+                </div>
+              ))}
+            </div>
+            <div
+              className="hidden gap-3.5 overflow-hidden lg:flex"
+              dir={locale === "he" ? "rtl" : "ltr"}
+              aria-hidden="true"
+            >
+              {BOOK_IN_USE_IMAGES.slice(0, 6).map(({ num, ext }, index) => (
+                <div
+                  key={num}
+                  className="w-[calc((100%-70px)/6)] shrink-0"
+                >
+                  <BookInUseImage
+                    num={num}
+                    ext={ext}
+                    alt={imageAlt(num)}
+                    priority={index < 4}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div
+          className={
+            isReady
+              ? undefined
+              : "pointer-events-none absolute inset-x-2 top-0 -z-10 h-0 overflow-hidden opacity-0 lg:inset-x-16"
+          }
+          aria-hidden={!isReady}
         >
-          {BOOK_IN_USE_IMAGES.map(({ num, ext }) => (
-            <SwiperSlide key={num}>
-              <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
-                <Image
-                  src={`/book-in-use-${num}.${ext}`}
-                  alt={t("home.bookInUse.imageAlt").replace("{num}", String(num))}
-                  fill
-                  className="object-cover bg-neutral-100"
-                  sizes="(max-width: 1024px) 28vw, 16vw"
-                />
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          <Swiper
+            slidesPerView={3.5}
+            spaceBetween={10}
+            loop={true}
+            onSwiper={(swiper) => {
+              setSwiperInstance(swiper);
+              // Wait a frame so slide widths are applied before revealing
+              requestAnimationFrame(() => setIsReady(true));
+            }}
+            onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
+            dir={locale === "he" ? "rtl" : "ltr"}
+            breakpoints={{
+              1024: {
+                slidesPerView: 6,
+                spaceBetween: 14,
+              },
+            }}
+          >
+            {BOOK_IN_USE_IMAGES.map(({ num, ext }) => (
+              <SwiperSlide key={num}>
+                <BookInUseImage num={num} ext={ext} alt={imageAlt(num)} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       </div>
 
       <div className="mt-6 flex justify-center gap-2" style={{ direction: "ltr" }}>
