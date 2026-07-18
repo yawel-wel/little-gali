@@ -607,6 +607,10 @@ const hebrewTranslations = {
   "product.book.goodToKnow.mirrorNote":
     "בצד עם המראה יוצגו 4 תמונות.\nבספרון הקלאסי, התמונה החמישית נמצאת בכיס האחרון, מאחורי התמונה שלצד המראה - כך שכל 5 התמונות כלולות בספרון.",
   "product.book.tabs.material": "חומרים",
+  "product.book.inUseVideo.title": "הכירו את הספרון שלנו",
+  "product.book.inUseVideo.ariaLabel": "סרטון של הספרון בשימוש",
+  "product.book.qa.subtitle":
+    "התשובות לשאלות הנפוצות ביותר על הספרון שלנו",
   "product.book.highlights.item1.title": "כותרת 1",
   "product.book.highlights.item1.subtitle": "תת-כותרת 1",
   "product.book.highlights.item2.title": "כותרת 2",
@@ -1779,6 +1783,10 @@ const englishTranslations = {
   "product.book.goodToKnow.mirrorNote":
     "On the side with the mirror, 4 photos will be displayed.\nIn the classic booklet, the fifth photo is in the last pocket, behind the photo next to the mirror - so all 5 photos are included in the book.",
   "product.book.tabs.material": "Material",
+  "product.book.inUseVideo.title": "The book in use",
+  "product.book.inUseVideo.ariaLabel": "Video of the book in use",
+  "product.book.qa.subtitle":
+    "Answers to the most common questions about our soft book",
   "product.book.highlights.item1.title": "Title 1",
   "product.book.highlights.item1.subtitle": "Subtitle 1",
   "product.book.highlights.item2.title": "Title 2",

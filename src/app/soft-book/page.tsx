@@ -11,6 +11,8 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { HomeCtaButton } from "@/components/home-cta-button";
 import { FreePreviewNote } from "@/components/feature-pill";
+import { BookInUseSection } from "@/components/book-in-use-section";
+import { QaPreviewSection } from "@/components/qa-preview-section";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
@@ -459,6 +461,40 @@ export default function SoftBookProductPage() {
               </div>
             </div>
           </section>
+
+        {/* Book in use video */}
+        <section
+          className="w-full bg-[#FAF7F4] py-10 sm:py-14"
+          aria-labelledby="product-book-in-use-heading"
+        >
+          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <h2
+              id="product-book-in-use-heading"
+              className="mb-6 text-center font-heading text-2xl font-bold text-dark-gray sm:mb-8 sm:text-3xl"
+            >
+              {t("product.book.inUseVideo.title")}
+            </h2>
+            <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-2xl bg-neutral-100 shadow-sm sm:max-w-[320px]">
+              <video
+                className="aspect-[9/16] w-full object-cover"
+                controls
+                playsInline
+                preload="metadata"
+                poster="/book-in-use-poster.jpg"
+                aria-label={t("product.book.inUseVideo.ariaLabel")}
+              >
+                <source src="/book-in-use.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+        </section>
+
+        <BookInUseSection />
+
+        <QaPreviewSection
+          showCta={false}
+          subtitleKey="product.book.qa.subtitle"
+        />
       </main>
 
       <Footer />

@@ -19,7 +19,7 @@ import { useScrollReveal } from "@/lib/use-scroll-reveal";
 import { BOOK_PRICE } from "@/lib/constants";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { BookFeaturePills, FreePreviewNote } from "@/components/feature-pill";
-import { QaTabsSection, HOME_BOOK_IDS } from "@/components/qa-tabs-section";
+import { QaPreviewSection } from "@/components/qa-preview-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { HomeCtaButton } from "@/components/home-cta-button";
 import { Eye, Gift, Heart, ShieldCheck, type LucideIcon } from "lucide-react";
@@ -830,46 +830,7 @@ export default function Home() {
         {/* Gift Card Section */}
         <GiftCardSection />
 
-        {/* Q&A Section */}
-        <motion.section
-          id="qa"
-          aria-labelledby="qa-heading"
-          className="relative pb-16 lg:pb-24 bg-[#F3EEE8]"
-          {...reveal.section}
-        >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Title */}
-            <div className="text-center mb-6 pt-8 lg:pt-10">
-              <Title
-                as="h2"
-                id="qa-heading"
-                highlightText={t("home.qa.titleHighlight")}
-                size="lg"
-                className="mb-4 text-[28px] sm:text-3xl"
-              >
-                {t("home.qa.title")}
-              </Title>
-              <p className="mx-auto max-w-2xl font-body text-base leading-relaxed text-medium-gray">
-                {t("home.qa.subtitle")}
-              </p>
-            </div>
-
-            <QaTabsSection
-              className="max-w-4xl mx-auto"
-              bookItemIds={[...HOME_BOOK_IDS]}
-              hideTabs
-            />
-
-            {/* Button to navigate to Q&A page */}
-            <div className="text-center mt-12">
-              <div>
-                <a href="/qa" aria-label={t("home.qa.ctaAriaLabel")}>
-                  <HomeCtaButton>{t("home.qa.cta")}</HomeCtaButton>
-                </a>
-              </div>
-            </div>
-          </div>
-        </motion.section>
+        <QaPreviewSection />
       </main>
 
       <Footer />
