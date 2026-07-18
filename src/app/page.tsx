@@ -14,6 +14,7 @@ import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { GiftCardSection } from "@/components/gift-card-section";
+import { BookInUseSection } from "@/components/book-in-use-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 import { BOOK_PRICE } from "@/lib/constants";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
@@ -376,6 +377,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <BookInUseSection />
+
         {/* הספרון שלנו Section */}
         <motion.section
           id="book"
