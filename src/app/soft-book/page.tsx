@@ -481,10 +481,9 @@ export default function SoftBookProductPage() {
                 playsInline
                 preload="metadata"
                 poster="/book-in-use-poster.jpg"
+                src="https://res.cloudinary.com/dvexwgpjf/video/upload/v1784375629/book-in-use_iujgu3.mp4"
                 aria-label={t("product.book.inUseVideo.ariaLabel")}
-              >
-                <source src="/book-in-use.mp4" type="video/mp4" />
-              </video>
+              />
             </div>
           </div>
         </section>
