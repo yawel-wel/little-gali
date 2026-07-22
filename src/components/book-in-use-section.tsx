@@ -12,14 +12,17 @@ import { useLanguage } from "@/lib/LanguageContext";
 import "swiper/css";
 
 const BOOK_IN_USE_IMAGES = [
-  { num: 1, ext: "JPG" },
+  { num: 1, ext: "jpg" },
   { num: 2, ext: "JPG" },
   { num: 3, ext: "jpg" },
   { num: 4, ext: "JPG" },
   { num: 5, ext: "JPG" },
-  { num: 6, ext: "jpg" },
+  { num: 6, ext: "JPG" },
   { num: 7, ext: "JPG" },
   { num: 8, ext: "jpg" },
+  { num: 9, ext: "JPG" },
+  { num: 10, ext: "jpg" },
+  { num: 11, ext: "JPG" },
 ] as const;
 
 const dotVariants = {

@@ -27,7 +27,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-const GOOGLE_REVIEW_COUNT = 21;
+const GOOGLE_REVIEW_COUNT = 22;
 const GOOGLE_REVIEWS_URL =
   "https://www.google.com/search?q=little+gali&rlz=1C5CHFA_enIL1050IL1050&oq=li&gs_lcrp=EgZjaHJvbWUqCAgAEEUYJxg7MggIABBFGCcYOzIMCAEQABhDGIAEGIoFMhIIAhAuGEMYxwEY0QMYgAQYigUyBggDEEUYOTIGCAQQRRg7MgYIBRAjGCcyDAgGEAAYQxiABBiKBTIMCAcQABhDGIAEGIoFMgwICBAAGEMYgAQYigUyDAgJEAAYQxiABBiKBdIBCTIyNTJqMGoxNagCDLACAfEFYzFfNDCzkwbxBWMxXzQws5MG&sourceid=chrome&ie=UTF-8#mpd=~2188930366782340558/customers/reviews";
 
