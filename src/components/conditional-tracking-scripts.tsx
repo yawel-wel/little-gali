@@ -28,28 +28,9 @@ export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingS
     }
   });
 
-  // Only load scripts if consent is given
-  if (!hasConsent) {
-    return null;
-  }
-
   return (
     <>
-      {/* Google Analytics */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-7NHYLBNE1J"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-7NHYLBNE1J');
-        `}
-      </Script>
-
-      {/* Meta Pixel */}
+      {/* Meta Pixel — loads immediately, does not wait for cookie consent */}
       {metaPixelId && (
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
@@ -65,6 +46,24 @@ export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingS
             fbq('track', 'PageView');
           `}
         </Script>
+      )}
+
+      {/* Google Analytics — still gated behind cookie consent */}
+      {hasConsent && (
+        <>
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-7NHYLBNE1J"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-7NHYLBNE1J');
+            `}
+          </Script>
+        </>
       )}
     </>
   );
