@@ -78,5 +78,5 @@ Background should be completely removed and replaced with pure white background.
 
 export const PENCIL_COLOR_PROMPT = `Transform this photo into a colored pencil drawing. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
 
-Style: soft pastel pencil strokes, light hand-drawn texture, colored outlines only, no black lines, no border, no vignette, no soft edges, no fading anywhere.
+Style: soft strokes, light hand-drawn texture, colored outlines only, no black lines, no border, no vignette, no soft edges, no fading anywhere.
 Background should be completely removed and replaced with pure white background.`;
