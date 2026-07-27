@@ -215,69 +215,83 @@ export async function runColorGeneration(
   await savePreviewSession(session);
 
   const startedAt = Date.now();
-  const results = await Promise.all(
-    slotsToGenerate.map(({ slot, index }) => {
-      const version = nextColorVersionForStyle(slot, style);
-      return buildColorPreview(
-        sessionId,
-        index,
-        slot.originalUrl,
-        style,
-        version,
-        trigger,
+  try {
+    const results = await Promise.all(
+      slotsToGenerate.map(({ slot, index }) => {
+        const version = nextColorVersionForStyle(slot, style);
+        return buildColorPreview(
+          sessionId,
+          index,
+          slot.originalUrl,
+          style,
+          version,
+          trigger,
+        );
+      }),
+    );
+
+    const latest = await loadPreviewSession(sessionId);
+    if (!latest) return null;
+
+    const activateNewPreview = trigger === "regenerate";
+    slotsToGenerate.forEach(({ index }, resultIndex) => {
+      const slot = latest.slots[index];
+      if (!slot) return;
+      const candidate = results[resultIndex];
+      appendSlotColorCandidate(
+        slot,
+        candidate,
+        activateNewPreview && Boolean(candidate.previewUrl),
       );
-    }),
-  );
+      slot.colorInFlight = false;
+      if (!slotNeedsAllStylesColorRegen(slot)) {
+        dequeuePendingColorRegen(latest, index);
+      }
+    });
 
-  const latest = await loadPreviewSession(sessionId);
-  if (!latest) return null;
-
-  const activateNewPreview = trigger === "regenerate";
-  slotsToGenerate.forEach(({ index }, resultIndex) => {
-    const slot = latest.slots[index];
-    if (!slot) return;
-    const candidate = results[resultIndex];
-    appendSlotColorCandidate(
-      slot,
-      candidate,
-      activateNewPreview && Boolean(candidate.previewUrl),
-    );
-    slot.colorInFlight = false;
-    if (!slotNeedsAllStylesColorRegen(slot)) {
-      dequeuePendingColorRegen(latest, index);
+    const succeeded = results.filter((candidate) => candidate.previewUrl).length;
+    const failed = results.filter((candidate) => candidate.error).length;
+    if (slotsToGenerate.length === allSlotIndexesForSession(session).length) {
+      logPreviewGenerationSummary(
+        "color",
+        {
+          sessionId,
+          style,
+          succeeded,
+          failed,
+          total: results.length,
+          trigger,
+        },
+        { sessionId, trigger, side: "color", style },
+      );
     }
-  });
 
-  const succeeded = results.filter((candidate) => candidate.previewUrl).length;
-  const failed = results.filter((candidate) => candidate.error).length;
-  if (slotsToGenerate.length === allSlotIndexesForSession(session).length) {
-    logPreviewGenerationSummary(
-      "color",
-      {
-        sessionId,
-        style,
-        succeeded,
-        failed,
-        total: results.length,
-        trigger,
-      },
-      { sessionId, trigger, side: "color", style },
-    );
+    if (uniqueIndexes.length === allSlotIndexesForSession(latest).length) {
+      syncColorPreviewToStyle(latest, style);
+    } else {
+      syncColorPreviewForSlots(latest, style, uniqueIndexes);
+    }
+    trackGenerationStepDuration({
+      generation_type: trigger === "initial" ? "booklet_color" : "booklet_regen",
+      startedAt,
+      results,
+      context: analyticsContextFromSession(latest),
+    });
+    await savePreviewSession(latest);
+    return latest;
+  } catch (error) {
+    const latest = await loadPreviewSession(sessionId);
+    if (latest) {
+      for (const { index } of slotsToGenerate) {
+        const slot = latest.slots[index];
+        if (slot) {
+          slot.colorInFlight = false;
+        }
+      }
+      await savePreviewSession(latest);
+    }
+    throw error;
   }
-
-  if (uniqueIndexes.length === allSlotIndexesForSession(latest).length) {
-    syncColorPreviewToStyle(latest, style);
-  } else {
-    syncColorPreviewForSlots(latest, style, uniqueIndexes);
-  }
-  trackGenerationStepDuration({
-    generation_type: trigger === "initial" ? "booklet_color" : "booklet_regen",
-    startedAt,
-    results,
-    context: analyticsContextFromSession(latest),
-  });
-  await savePreviewSession(latest);
-  return latest;
 }
 
 function freezeStyleStripThumbnailsIfNeeded(session: PreviewSession): void {

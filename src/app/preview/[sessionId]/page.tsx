@@ -397,6 +397,7 @@ export default function PreviewPage() {
     () => new Set(),
   );
   const stripThumbPrefetchRunningRef = useRef(false);
+  const styleResumeRunningRef = useRef(false);
   const pendingColorRegenProcessingRef = useRef(false);
   const mutationInProgressRef = useRef(false);
   const [error, setError] = useState<ReactNode | null>(null);
@@ -845,13 +846,16 @@ export default function PreviewPage() {
       session.phase === "style_selected" ||
       session.phase === "cart_added");
 
+  // Colorful: ready when every slot has the *currently selected* style.
+  // Do not gate on unrelated colorInFlight (e.g. background pencil gen) —
+  // that left watercolor-ready books stuck with a disabled cart button.
   const canAddToCart = Boolean(
     session &&
       session.phase !== "cart_added" &&
-      !session.slots.some((slot) => slot.colorInFlight) &&
       (isColorfulFlow
         ? allSlotsHaveColorForStylePublic(session, displayColorStyle)
-        : session.canAddToCart),
+        : !session.slots.some((slot) => slot.colorInFlight) &&
+          session.canAddToCart),
   );
 
   useEffect(() => {
@@ -1141,6 +1145,55 @@ export default function PreviewPage() {
     }
   }, [fetchColorStylePreview, session, sessionId]);
 
+  const ensureColorStyleGenerated = useCallback(
+    (style: StyleType) => {
+      if (!session) {
+        return;
+      }
+      if (allSlotsHaveColorForStylePublic(session, style)) {
+        return;
+      }
+      if (styleResumeRunningRef.current) {
+        return;
+      }
+
+      const missingSlotIndexes = session.slots
+        .map((slot) => slot.index)
+        .filter((slotIndex) => {
+          const slot = session.slots.find((item) => item.index === slotIndex);
+          if (!slot) return true;
+          if (slot.colorInFlight) return false;
+          const candidate = getColorCandidateForStyleFromPublicSlot(slot, style);
+          // Skip slots that already have a result (success or error) to avoid
+          // retry loops after a failed on-demand style generation.
+          if (candidate?.previewUrl || candidate?.error) return false;
+          return true;
+        });
+
+      if (missingSlotIndexes.length === 0) {
+        return;
+      }
+
+      styleResumeRunningRef.current = true;
+      setStyleStripLoading((current) => {
+        const next = new Set(current);
+        next.add(style);
+        return next;
+      });
+      fetchColorStylePreview(style, missingSlotIndexes)
+        .catch((err) => setGenerationError(err))
+        .finally(() => {
+          styleResumeRunningRef.current = false;
+          setStyleStripLoading((current) => {
+            const next = new Set(current);
+            next.delete(style);
+            return next;
+          });
+        });
+    },
+    [fetchColorStylePreview, session, setGenerationError],
+  );
+
   const handleSelectColorStyle = useCallback(
     (style: StyleType) => {
       if (!session || style === activeColorStyle) {
@@ -1162,38 +1215,34 @@ export default function PreviewPage() {
       setError(null);
 
       if (!allSlotsCached) {
-        const missingSlotIndexes = session.slots
-          .map((slot) => slot.index)
-          .filter((slotIndex) => {
-            const slot = session.slots.find((item) => item.index === slotIndex);
-            if (!slot) return true;
-            return !getColorCandidateForStyleFromPublicSlot(slot, style)
-              ?.previewUrl;
-          });
-
-        setStyleStripLoading((current) => {
-          const next = new Set(current);
-          next.add(style);
-          return next;
-        });
-        fetchColorStylePreview(
-          style,
-          missingSlotIndexes.length > 0
-            ? missingSlotIndexes
-            : session.slots.map((slot) => slot.index),
-        )
-          .catch((err) => setGenerationError(err))
-          .finally(() => {
-            setStyleStripLoading((current) => {
-              const next = new Set(current);
-              next.delete(style);
-              return next;
-            });
-          });
+        ensureColorStyleGenerated(style);
       }
     },
-    [activeColorStyle, fetchColorStylePreview, session, sessionId, setGenerationError],
+    [
+      activeColorStyle,
+      ensureColorStyleGenerated,
+      session,
+      sessionId,
+    ],
   );
+
+  // Resume on-demand style generation after refresh / timed-out workers
+  // (colorful books only pre-generate watercolor + one pencil thumb).
+  useEffect(() => {
+    if (!session || showInitialLoadingScreen || loadFailed) {
+      return;
+    }
+    const style = resolvePreviewColorStyle(activeColorStyle);
+    if (!allSlotsHaveColorForStylePublic(session, style)) {
+      ensureColorStyleGenerated(style);
+    }
+  }, [
+    activeColorStyle,
+    ensureColorStyleGenerated,
+    loadFailed,
+    session,
+    showInitialLoadingScreen,
+  ]);
 
   const getColorStyleLabel = useCallback(
     (style: StyleType) => {
@@ -2083,14 +2132,13 @@ export default function PreviewPage() {
                         );
                         const isSlotBusy =
                           slot.inFlight || busySlotIndexes.has(slot.index);
+                        // Never fall back to another style's colorPreview — that made
+                        // pencil look "ready" while add-to-cart stayed disabled.
                         const activeColorCandidate =
                           getColorCandidateForStyleFromPublicSlot(
                             slot,
                             displayColorStyle,
-                          ) ??
-                          (displayedBookSide === "color"
-                            ? slot.colorPreview
-                            : undefined);
+                          );
                         const colorVersions = getColorVersionsForStyle(
                           slot,
                           displayColorStyle,
@@ -2103,6 +2151,9 @@ export default function PreviewPage() {
                         const isColorSlotBusy =
                           slot.colorInFlight ||
                           (isSlotPendingColorRegen &&
+                            !activeColorCandidate?.previewUrl) ||
+                          (displayedBookSide === "color" &&
+                            isActiveStyleStripLoading &&
                             !activeColorCandidate?.previewUrl) ||
                           (displayedBookSide === "color" &&
                             busySlotIndexes.has(slot.index));

@@ -17,6 +17,9 @@ import type {
 import { kvGet, kvSet } from "./kv";
 import { PREVIEW_SESSION_TTL_SECONDS, previewSessionKey } from "./redis";
 
+/** Serverless kills can leave colorInFlight=true forever; clear after this window. */
+const STALE_COLOR_IN_FLIGHT_MS = 4 * 60 * 1000;
+
 function resolveSessionColorStyle(
   style: StyleType | undefined | null,
 ): StyleType {
@@ -24,6 +27,32 @@ function resolveSessionColorStyle(
     return style;
   }
   return DEFAULT_COLOR_STYLE;
+}
+
+/**
+ * Clears colorInFlight flags left behind when a generate-color worker is killed
+ * (timeout) before it can finish. Returns true when the session was mutated.
+ */
+export function clearStaleColorInFlight(session: PreviewSession): boolean {
+  const hasInFlight = session.slots.some((slot) => slot.colorInFlight);
+  if (!hasInFlight) {
+    return false;
+  }
+  const updatedAtMs = Date.parse(session.updatedAt);
+  if (!Number.isFinite(updatedAtMs)) {
+    return false;
+  }
+  if (Date.now() - updatedAtMs < STALE_COLOR_IN_FLIGHT_MS) {
+    return false;
+  }
+  let cleared = false;
+  for (const slot of session.slots) {
+    if (slot.colorInFlight) {
+      slot.colorInFlight = false;
+      cleared = true;
+    }
+  }
+  return cleared;
 }
 
 export function createEmptySlots(originalUrls: string[]): PreviewSlot[] {
@@ -207,14 +236,14 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     canSelectStyle: inColorPhase && generationStatus === "complete",
     canAddToCart:
       inColorPhase &&
-      noColorInFlight &&
       session.phase !== "cart_added" &&
       (isColorful
-        ? allSlotsHaveColorForStyle(
+        ? // Ready for the selected style even if another style is still generating.
+          allSlotsHaveColorForStyle(
             session,
             resolveSessionColorStyle(session.selectedColorStyle),
           )
-        : generationStatus === "complete"),
+        : noColorInFlight && generationStatus === "complete"),
   };
 }
 
