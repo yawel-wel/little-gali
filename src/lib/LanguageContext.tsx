@@ -987,7 +987,7 @@ const hebrewTranslations = {
   "upload.descriptionColorful":
     "בחרו 9 תמונות שיופיעו בספרון הצבעוני.",
   "upload.colorfulMirrorNote":
-    "בספרון יש כיס למראה בטיחותית - לכן בוחרים 9 תמונות (5 בצד אחד ו־4 בצד השני).",
+    "בספרון יש כיס למראה - לכן בוחרים 9 תמונות (5 בצד אחד ו־4 בצד השני).",
   "upload.imagesCount": "מתוך 5 תמונות",
   "upload.imagesCount9": "מתוך 9 תמונות",
   "upload.selectExactly5": "אנא בחר בדיוק 5 תמונות",
