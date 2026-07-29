@@ -12,7 +12,8 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
-import { TestimonialsSection } from "@/components/testimonials-section";
+// import { TestimonialsSection } from "@/components/testimonials-section";
+import { LooxWidgetSection } from "@/components/loox-widget-section";
 import { GiftCardSection } from "@/components/gift-card-section";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
@@ -380,6 +381,8 @@ export default function Home() {
 
         <BookInUseSection />
 
+        <LooxWidgetSection showComparisonLabel={false} />
+
         {/* הספרון שלנו Section */}
         <motion.section
           id="book"
@@ -689,7 +692,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* Testimonials Section */}
+        {/* Custom testimonials from Loox API */}
         {/* <TestimonialsSection /> */}
 
         {/* Why Choose Us Section */}
