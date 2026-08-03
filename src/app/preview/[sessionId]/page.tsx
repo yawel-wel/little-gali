@@ -74,6 +74,7 @@ import type { Area } from "react-easy-crop";
 import Button from "@mui/material/Button";
 import { Expand, Loader2, MoreHorizontal, X } from "lucide-react";
 import { track, ANALYTICS_EVENTS, registerPreviewSessionSuperProperties, withAnalyticsHeaders } from "@/lib/analytics";
+import { markAddingToCart } from "@/lib/cart-add-pending";
 
 type PreviewBookSide = "bw" | "color";
 type CompareOutputImage = {
@@ -1763,7 +1764,7 @@ export default function PreviewPage() {
 
       try {
         if (typeof window !== "undefined") {
-          sessionStorage.setItem("adding_to_cart", "1");
+          markAddingToCart();
         }
       } catch {}
 

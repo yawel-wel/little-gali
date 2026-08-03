@@ -3,7 +3,11 @@
 import { motion } from "framer-motion";
 import { Title } from "@/components/title";
 import { HomeCtaButton } from "@/components/home-cta-button";
-import { QaTabsSection, HOME_BOOK_IDS } from "@/components/qa-tabs-section";
+import {
+  QaTabsSection,
+  HOME_BOOK_IDS,
+  HOME_FRAMED_IDS,
+} from "@/components/qa-tabs-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
@@ -12,11 +16,14 @@ const easeOwlet = [0.16, 1, 0.3, 1] as const;
 type QaPreviewSectionProps = {
   showCta?: boolean;
   subtitleKey?: string;
+  /** Which product's questions to list. */
+  product?: "books" | "framed";
 };
 
 export function QaPreviewSection({
   showCta = true,
   subtitleKey = "home.qa.subtitle",
+  product = "books",
 }: QaPreviewSectionProps) {
   const { t } = useLanguage();
   const reveal = useScrollReveal(easeOwlet);
@@ -47,7 +54,9 @@ export function QaPreviewSection({
         <QaTabsSection
           className="max-w-4xl mx-auto"
           bookItemIds={[...HOME_BOOK_IDS]}
+          framedItemIds={[...HOME_FRAMED_IDS]}
           hideTabs
+          hiddenTab={product}
         />
 
         {showCta && (

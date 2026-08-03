@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Frame } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
+import { isFramedArtEnabled } from "@/lib/feature-flags";
 
 function SuggestProductButton({
   title,
@@ -66,6 +67,14 @@ export function CartSuggestProducts() {
           icon={<BookOpen className={iconClass} strokeWidth={iconStroke} />}
           onClick={() => router.push("/upload")}
         />
+        {isFramedArtEnabled() && (
+          <SuggestProductButton
+            title={t("cart.suggest.framedArtTitle")}
+            promo={t("cart.suggest.framedArtPromo")}
+            icon={<Frame className={iconClass} strokeWidth={iconStroke} />}
+            onClick={() => router.push("/framed-art/upload")}
+          />
+        )}
       </div>
     </section>
   );

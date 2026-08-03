@@ -6,44 +6,19 @@ import Image from "next/image";
 import { HomeCtaButton } from "@/components/home-cta-button";
 import { motion } from "framer-motion";
 import { Title } from "@/components/title";
-import {
-  FRAMED_ART_THREE_PRICE,
-  FRAMED_ART_TWO_PRICE,
-  FRAMED_ART_UNIT_PRICE,
-} from "@/lib/constants";
+import { FramedArtPricingCards } from "@/components/framed-art-pricing-cards";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 import { FreePreviewNote } from "@/components/feature-pill";
 
 const easeOwlet = [0.16, 1, 0.3, 1] as const;
 
-/** Place in public/: framed-art-carousel-1.png … framed-art-carousel-3.png */
+/** Place in public/: framed-art-carousel-1 … framed-art-carousel-3 */
 const FRAMED_ART_CAROUSEL_IMAGES = [
-  "/framed-art-carousel-1.png",
+  "/framed-art-carousel-1.JPG",
   "/framed-art-carousel-2.png",
   "/framed-art-carousel-3.png",
 ] as const;
-
-const PRICING_CARDS = [
-  {
-    labelKey: "home.framedArt.priceCardSingle" as const,
-    total: FRAMED_ART_UNIT_PRICE,
-    perPhoto: FRAMED_ART_UNIT_PRICE,
-    bestValue: false,
-  },
-  {
-    labelKey: "home.framedArt.priceCardTwo" as const,
-    total: FRAMED_ART_TWO_PRICE,
-    perPhoto: Math.floor(FRAMED_ART_TWO_PRICE / 2),
-    bestValue: false,
-  },
-  {
-    labelKey: "home.framedArt.priceCardThree" as const,
-    total: FRAMED_ART_THREE_PRICE,
-    perPhoto: Math.floor(FRAMED_ART_THREE_PRICE / 3),
-    bestValue: true,
-  },
-];
 
 export function FramedArtHomeSection() {
   const { t, locale } = useLanguage();
@@ -111,50 +86,14 @@ export function FramedArtHomeSection() {
             </p>
 
             <div dir="ltr" className="w-full">
-              <div className="px-2 pb-2.5 pt-2">
-                <div
-                  className="grid grid-cols-3 gap-1.5 sm:gap-2"
-                  dir={locale === "he" ? "rtl" : "ltr"}
-                >
-                  {PRICING_CARDS.map((card) => (
-                    <div
-                      key={card.labelKey}
-                      className="relative flex flex-col items-center rounded-lg border border-[#E8DFD4] bg-white px-1.5 py-3 text-center sm:px-2"
-                    >
-                      {card.bestValue && (
-                        <span
-                          dir={locale === "he" ? "rtl" : "ltr"}
-                          className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary-orange px-2 py-0.5 text-[10px] font-body-bold leading-none text-white"
-                        >
-                          {t("home.framedArt.bestValue")}
-                        </span>
-                      )}
-                      <p className="text-xs font-body-bold text-dark-gray sm:text-sm">
-                        {t(card.labelKey)}
-                      </p>
-                      <p
-                        className="mt-1 font-heading text-xl font-bold leading-none text-dark-gray tabular-nums sm:text-2xl"
-                        dir="ltr"
-                      >
-                        ₪{card.total}
-                      </p>
-                      <p className="mt-1 text-[10px] text-medium-gray sm:text-xs">
-                        {t("home.framedArt.pricePerPhoto").replace(
-                          "{price}",
-                          String(card.perPhoto),
-                        )}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <FramedArtPricingCards />
 
               <div
                 className={`mt-9 flex w-full flex-col items-center gap-2 ${
                   locale === "en" ? "lg:items-start" : "lg:items-end"
                 }`}
               >
-                <Link href="/framed-art/upload" aria-label={t("home.framedArt.ctaAriaLabel")}>
+                <Link href="/framed-art" aria-label={t("home.framedArt.ctaAriaLabel")}>
                   <HomeCtaButton>{t("home.framedArt.cta")}</HomeCtaButton>
                 </Link>
                 <FreePreviewNote

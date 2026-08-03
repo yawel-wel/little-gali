@@ -18,8 +18,9 @@ import { GiftCardSection } from "@/components/gift-card-section";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 import { BOOK_PRICE } from "@/lib/constants";
-import { isAiPreviewEnabled } from "@/lib/feature-flags";
+import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
 import { BookFeaturePills, FreePreviewNote } from "@/components/feature-pill";
+import { FramedArtHomeSection } from "@/components/framed-art-home-section";
 import { QaPreviewSection } from "@/components/qa-preview-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { HomeCtaButton } from "@/components/home-cta-button";
@@ -79,6 +80,7 @@ export default function Home() {
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
   const previewOn = isAiPreviewEnabled();
+  const framedOn = isFramedArtEnabled();
   const howItWorksSteps = previewOn
     ? [
         {
@@ -691,6 +693,8 @@ export default function Home() {
             </motion.div>
           </div>
         </motion.section>
+
+        {framedOn && <FramedArtHomeSection />}
 
         {/* Custom testimonials from Loox API */}
         {/* <TestimonialsSection /> */}

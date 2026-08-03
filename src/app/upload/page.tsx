@@ -59,6 +59,7 @@ import {
 } from "@/lib/preview-session/upload-preview-blocked-storage";
 import Button from "@mui/material/Button";
 import { track, ANALYTICS_EVENTS, withAnalyticsHeaders } from "@/lib/analytics";
+import { markAddingToCart } from "@/lib/cart-add-pending";
 import { Suspense } from "react";
 
 const PREVIEW_LOADING_IMAGES_STORAGE_PREFIX = "little-gali-preview-loading-images";
@@ -1004,7 +1005,7 @@ function UploadPageContent() {
       // Mark optimistic adding to avoid empty-state flash
       try {
         if (typeof window !== "undefined") {
-          sessionStorage.setItem("adding_to_cart", "1");
+          markAddingToCart();
         }
       } catch {}
 

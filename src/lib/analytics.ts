@@ -17,6 +17,7 @@ export const ANALYTICS_EVENTS = {
   BOOKLET_CHANGES_EXHAUSTED: "booklet_changes_exhausted",
   BOOKLET_ADDED_TO_CART: "booklet_added_to_cart",
   // Framed photo flow
+  FRAME_FLOW_STARTED: "frame_flow_started",
   FRAME_UPLOAD_STARTED: "frame_upload_started",
   FRAME_UPLOAD_COMPLETED: "frame_upload_completed",
   FRAME_PREVIEW_VIEWED: "frame_preview_viewed",
@@ -50,6 +51,7 @@ export type EventProperties = {
   booklet_limit_reached: { limit_type: PreviewLimitType };
   booklet_changes_exhausted: { changes_used: number };
   booklet_added_to_cart: { changes_used?: number };
+  frame_flow_started: Record<string, never>;
   frame_upload_started: Record<string, never>;
   frame_upload_completed: { image_count: number };
   frame_preview_viewed: Record<string, never>;

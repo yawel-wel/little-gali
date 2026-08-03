@@ -366,8 +366,9 @@ export function CartDrawer() {
                   variant="contained"
                   color="primary"
                   onClick={() => router.push("/upload")}
-                  className="mt-4 cursor-pointer"
+                  className="cursor-pointer"
                   sx={{
+                    mt: "16px",
                     textTransform: "none",
                     fontSize: "0.85rem",
                     fontWeight: 600,
@@ -375,6 +376,10 @@ export function CartDrawer() {
                     py: 0.6,
                     px: 2,
                     minHeight: 34,
+                    backgroundColor: "#693430",
+                    "&:hover": {
+                      backgroundColor: "#5a2b28",
+                    },
                   }}
                 >
                   {t("nav.createBook")}

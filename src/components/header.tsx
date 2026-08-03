@@ -56,6 +56,8 @@ export function Header() {
   // Navigation items for hamburger menu (mobile and desktop)
   const mobileNavigationItems = [
     { nameKey: "nav.home", href: "/", isAnchor: false },
+    { nameKey: "nav.softBook", href: "/soft-book", isAnchor: false },
+    { nameKey: "nav.framedArt", href: "/framed-art", isAnchor: false },
     { nameKey: "nav.about", href: "/#about", isAnchor: true },
     { nameKey: "nav.giftCard", href: "/#gift-card", isAnchor: true },
     { nameKey: "nav.qa", href: "/qa", isAnchor: false },

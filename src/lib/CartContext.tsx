@@ -16,6 +16,7 @@ import {
   extractColorUrlsFromAttributes,
   extractImagesFromLineAttributes,
 } from "./cart-line-images";
+import { FRAMED_ART_UNIT_PRICE } from "./constants";
 import { isValidBookCartImageCount, isValidBookCartStyle } from "./preview-session/generation-stats";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
 import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
@@ -23,6 +24,11 @@ import type { BookColor } from "./book-color";
 import { bookColorFromVariantId } from "./book-color";
 import type { StoredCartImages } from "./cart-images-store";
 import { getMixpanelDistinctId } from "./analytics";
+import {
+  clearAddingToCart,
+  isAddingToCart,
+  markAddingToCart,
+} from "./cart-add-pending";
 import { hideResumeSessionId } from "./preview-session/preview-session-id-history";
 
 export interface CartItem {
@@ -330,7 +336,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       if (savedCartId) {
         try {
-          if (sessionStorage.getItem("adding_to_cart") === "1") {
+          if (isAddingToCart()) {
             // Avoid a stale fetch racing with add-to-cart; /cart refreshes when done.
             return;
           }
@@ -487,7 +493,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("shopify_cart_id", data.cart.id);
           try {
             if (typeof window !== "undefined") {
-              sessionStorage.removeItem("adding_to_cart");
+              clearAddingToCart();
             }
           } catch {}
 
@@ -509,6 +515,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
+      try {
+        clearAddingToCart();
+      } catch {}
       throw error;
     } finally {
       setIsLoading(false);
@@ -522,7 +531,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("adding_to_cart", "1");
+        markAddingToCart();
       }
       const response = await fetch("/api/shopify/cart/add-framed-art", {
         method: "POST",
@@ -544,13 +553,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (data.cart) {
         await fetchCart(data.cart.id, { silent: true });
         try {
-          trackAddToCart("איור ממוסגר", sessionId, 129, 1);
+          trackAddToCart("איור ממוסגר", sessionId, FRAMED_ART_UNIT_PRICE, 1);
         } catch (err) {
           console.error("Error tracking framed art AddToCart:", err);
         }
         try {
           if (typeof window !== "undefined") {
-            sessionStorage.removeItem("adding_to_cart");
+            clearAddingToCart();
           }
         } catch {}
       }
@@ -558,7 +567,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error("Error adding framed art to cart:", error);
       try {
         if (typeof window !== "undefined") {
-          sessionStorage.removeItem("adding_to_cart");
+          clearAddingToCart();
         }
       } catch {}
       throw error;

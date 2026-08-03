@@ -33,6 +33,7 @@ import { useCart } from "@/lib/CartContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { cn } from "@/lib/utils";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
+import { markAddingToCart } from "@/lib/cart-add-pending";
 
 function getActiveCandidate(
   session: FramedArtSessionPublicView | null,
@@ -328,7 +329,7 @@ export default function FramedArtPreviewPage() {
     track(ANALYTICS_EVENTS.FRAME_ADDED_TO_CART);
     try {
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("adding_to_cart", "1");
+        markAddingToCart();
       }
     } catch {}
 

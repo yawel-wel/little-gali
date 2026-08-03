@@ -34,8 +34,10 @@ type QaTabsSectionProps = {
   /** Subset of framed Q&A keys for home (shorter list). */
   framedItemIds?: string[];
   className?: string;
-  /** Hide books/framed tabs and show book Q&A only. */
+  /** Hide books/framed tabs and show a single Q&A list. */
   hideTabs?: boolean;
+  /** Which Q&A list to show while tabs are hidden. */
+  hiddenTab?: QaTab;
 };
 
 const BOOK_ITEMS: QaItem[] = [
@@ -118,6 +120,7 @@ export function QaTabsSection({
   framedItemIds,
   className,
   hideTabs = false,
+  hiddenTab = "books",
 }: QaTabsSectionProps) {
   const { t, locale } = useLanguage();
   const [tab, setTab] = useState<QaTab>("books");
@@ -128,7 +131,8 @@ export function QaTabsSection({
     ? FRAMED_ITEMS.filter((item) => framedItemIds.includes(item.id))
     : FRAMED_ITEMS;
 
-  const items = hideTabs || tab === "books" ? bookItems : framedItems;
+  const activeTab = hideTabs ? hiddenTab : tab;
+  const items = activeTab === "books" ? bookItems : framedItems;
 
   return (
     <div className={className}>

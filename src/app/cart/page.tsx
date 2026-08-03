@@ -33,6 +33,7 @@ import { CartLineItemHeader } from "@/components/cart-line-item-header";
 import { CartLineItemDetails } from "@/components/cart-line-item-details";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 import { getCartItemLinePricing } from "@/lib/cart-line-pricing";
+import { isAddingToCart } from "@/lib/cart-add-pending";
 import { cartLineIdsMatch } from "@/lib/shopify/cart-line-id-match";
 
 function getLineId(item: CartItem): string {
@@ -93,7 +94,7 @@ function readAddingToCartFlag(): boolean {
     return false;
   }
   try {
-    return sessionStorage.getItem("adding_to_cart") === "1";
+    return isAddingToCart();
   } catch {
     return false;
   }

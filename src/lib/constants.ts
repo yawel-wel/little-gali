@@ -6,9 +6,9 @@ export const BOOK_PRICE = 190;
 export const DISCOUNTED_BOOK_PRICE = 139;
 
 /** Single framed-art line item (Shopify discount may reduce multi-item carts). */
-export const FRAMED_ART_UNIT_PRICE = 129;
-export const FRAMED_ART_TWO_PRICE = 218;
-export const FRAMED_ART_THREE_PRICE = 289;
+export const FRAMED_ART_UNIT_PRICE = 119;
+export const FRAMED_ART_TWO_PRICE = 219;
+export const FRAMED_ART_THREE_PRICE = 299;
 
 /** Soft book Shopify variant IDs (numeric strings). */
 export const BOOK_VARIANT_IDS = {
