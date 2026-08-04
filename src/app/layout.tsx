@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     siteName: "Little Gali",
     images: [
       {
-        url: "https://res.cloudinary.com/dysgpkvl4/image/upload/v1763613635/little-gali/gzqsbjh01tqeeqo7tkwp.jpg",
-        width: 1200,
-        height: 630,
+        url: "https://www.littlegali.com/social-share.JPG",
+        width: 6000,
+        height: 4000,
         alt: "Little Gali Baby Book",
       },
     ],
@@ -54,9 +54,7 @@ export const metadata: Metadata = {
     title: "Little Gali – ספרון אישי לתינוק שלך",
     description:
       "ספרון שחור־לבן וצבעוני בהתאמה אישית – חיזוק קשר, סקרנות והתפתחות מהחודשים הראשונים 💫",
-    images: [
-      "https://res.cloudinary.com/dysgpkvl4/image/upload/v1763613635/little-gali/gzqsbjh01tqeeqo7tkwp.jpg",
-    ],
+    images: ["https://www.littlegali.com/social-share.JPG"],
   },
 };
 
