@@ -3,16 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  MessageCircleQuestion,
-  Star,
-} from "lucide-react";
+import { MessageCircleQuestion } from "lucide-react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { HomeCtaButton } from "@/components/home-cta-button";
 import { FreePreviewNote } from "@/components/feature-pill";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { QaPreviewSection } from "@/components/qa-preview-section";
+import { LooxProductRating } from "@/components/loox-widget-section";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
@@ -26,10 +24,6 @@ import {
 import { useLanguage } from "@/lib/LanguageContext";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-
-const GOOGLE_REVIEW_COUNT = 22;
-const GOOGLE_REVIEWS_URL =
-  "https://www.google.com/search?q=little+gali&rlz=1C5CHFA_enIL1050IL1050&oq=li&gs_lcrp=EgZjaHJvbWUqCAgAEEUYJxg7MggIABBFGCcYOzIMCAEQABhDGIAEGIoFMhIIAhAuGEMYxwEY0QMYgAQYigUyBggDEEUYOTIGCAQQRRg7MgYIBRAjGCcyDAgGEAAYQxiABBiKBTIMCAcQABhDGIAEGIoFMgwICBAAGEMYgAQYigUyDAgJEAAYQxiABBiKBdIBCTIyNTJqMGoxNagCDLACAfEFYzFfNDCzkwbxBWMxXzQws5MG&sourceid=chrome&ie=UTF-8#mpd=~2188930366782340558/customers/reviews";
 
 const DESCRIPTION_BULLET_KEYS = [
   "product.book.description.bullet1",
@@ -222,41 +216,12 @@ export default function SoftBookProductPage() {
 
               {/* Product info */}
               <div className={cn("order-2 flex flex-col gap-5 lg:order-1", textAlign)}>
-                <div className="order-1 space-y-3">
+                <div className="order-1 space-y-1.5">
                   <h1 className="text-2xl font-heading font-bold text-dark-gray sm:text-3xl lg:text-4xl leading-tight">
                     {t("product.book.name")}
                   </h1>
 
-                  <div
-                    className="flex items-center justify-start gap-2"
-                    dir={isHe ? "rtl" : "ltr"}
-                    aria-label={t("product.book.ratingAria").replace(
-                      "{count}",
-                      String(GOOGLE_REVIEW_COUNT),
-                    )}
-                  >
-                    <div className="flex items-center gap-0.5" aria-hidden="true">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className="size-4 fill-amber-400 text-amber-400"
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-body text-medium-gray">
-                        ({GOOGLE_REVIEW_COUNT})
-                      </span>
-                      <a
-                        href={GOOGLE_REVIEWS_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-body text-medium-gray underline underline-offset-2 hover:text-dark-gray"
-                      >
-                        {t("product.book.reviewsLink")}
-                      </a>
-                    </div>
-                  </div>
+                  <LooxProductRating />
                 </div>
 
                 <div
