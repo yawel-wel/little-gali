@@ -9,21 +9,23 @@ export const BOOK_COLOR_SWATCHES: Record<BookColor, string> = {
   light: "/book-color-swatch-light.png",
 };
 
-/** Product page gallery — 5 images per color variant. */
+/** Product page gallery — 6 images per color variant. */
 export const BOOK_PRODUCT_GALLERY: Record<BookColor, readonly string[]> = {
   light: [
     "/book-product-light-1.JPG",
     "/book-product-light-2.JPG",
-    "/book-product-light-3.JPG",
+    "/book-product-light-3.jpg",
     "/book-product-light-4.jpg",
     "/book-product-light-5.JPG",
+    "/book-product-light-6.JPG",
   ],
   dark: [
     "/book-product-dark-1.JPG",
     "/book-product-dark-2.JPG",
-    "/book-product-dark-3.JPG",
+    "/book-product-dark-3.jpg",
     "/book-product-dark-4.JPG",
     "/book-product-dark-5.JPG",
+    "/book-product-dark-6.JPG",
   ],
 };
 

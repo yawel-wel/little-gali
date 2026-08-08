@@ -32,6 +32,7 @@ const DESCRIPTION_BULLET_KEYS = [
   "product.book.description.bullet4",
   "product.book.description.bullet5",
   "product.book.description.bullet6",
+  "product.book.description.bullet7",
 ] as const;
 
 type ProductTab = "description" | "goodToKnow";
