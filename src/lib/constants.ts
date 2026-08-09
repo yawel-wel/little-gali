@@ -3,7 +3,7 @@
  */
 
 export const BOOK_PRICE = 190;
-export const DISCOUNTED_BOOK_PRICE = 139;
+export const DISCOUNTED_BOOK_PRICE = 159;
 
 /** Single framed-art line item (Shopify discount may reduce multi-item carts). */
 export const FRAMED_ART_UNIT_PRICE = 119;
@@ -19,7 +19,6 @@ export const BOOK_VARIANT_IDS = {
 // Gift Card Configuration
 export const GIFT_CARD_OPTIONS = [
   { id: 'one_with_shipping', price: 220, labelKey: 'giftCard.option2' },
-  { id: 'two_with_shipping', price: 358, labelKey: 'giftCard.option4' },
 ] as const;
 
 // Environment variables

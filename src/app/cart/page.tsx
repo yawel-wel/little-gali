@@ -120,26 +120,36 @@ export default function CartPage() {
   // Refresh cart when opening /cart. Defer fetch while an add is in flight so we
   // don't overwrite the cart with stale data or clear the pending UI too early.
   useEffect(() => {
-    const savedCartId = localStorage.getItem("shopify_cart_id");
-    if (!savedCartId) {
-      return;
-    }
+    let cancelled = false;
 
-    const runFetch = () => {
-      void fetchCart(savedCartId);
+    const runFetch = (options?: { silent?: boolean }) => {
+      if (cancelled) return;
+      // Re-read after pending clears — add-to-cart may have written a new cart id.
+      const savedCartId = localStorage.getItem("shopify_cart_id");
+      if (!savedCartId) {
+        return;
+      }
+      void fetchCart(savedCartId, options);
     };
 
     if (readAddingToCartFlag()) {
       const interval = window.setInterval(() => {
         if (!readAddingToCartFlag()) {
           window.clearInterval(interval);
-          runFetch();
+          // Silent: context often already holds the just-added cart.
+          runFetch({ silent: true });
         }
       }, 200);
-      return () => window.clearInterval(interval);
+      return () => {
+        cancelled = true;
+        window.clearInterval(interval);
+      };
     }
 
     runFetch();
+    return () => {
+      cancelled = true;
+    };
   }, [fetchCart]);
 
   useEffect(() => {

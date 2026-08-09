@@ -119,9 +119,7 @@ export function GiftCardSection() {
               dir={locale === "he" ? "rtl" : "ltr"}
               className="mx-auto mb-2 grid max-w-md grid-cols-2 gap-3"
             >
-              <span className="text-start text-sm font-body text-medium-gray">
-                {t("giftCard.selectOption")}
-              </span>
+              <span aria-hidden="true" />
               <span className="text-end text-sm font-body text-primary-orange">
                 {t("giftCard.feature4")}
               </span>
@@ -129,7 +127,7 @@ export function GiftCardSection() {
 
             <div
               dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto grid max-w-md grid-cols-2 gap-3"
+              className="mx-auto grid max-w-md grid-cols-1 gap-3"
             >
               {GIFT_CARD_OPTIONS.map((option) => {
                 const isSelected = selectedOption === option.id;

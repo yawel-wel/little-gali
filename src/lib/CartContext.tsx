@@ -308,9 +308,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (seq !== fetchCartSeqRef.current) {
           return;
         }
-        // Cart not found or expired, clear it
-        localStorage.removeItem("shopify_cart_id");
-        setCart(null);
+        // Only drop a missing/expired cart. Other errors must not wipe a
+        // cart id that was just written by a concurrent add-to-cart.
+        if (response.status === 404) {
+          localStorage.removeItem("shopify_cart_id");
+          setCart(null);
+        }
       }
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -382,9 +385,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const mixpanelDistinctId = getMixpanelDistinctId();
+      // Prefer React state, but fall back to localStorage — cart may not be
+      // hydrated yet when the user adds from preview (idle fetch still pending).
+      let existingCartId = cart?.id ?? null;
+      if (!existingCartId) {
+        try {
+          existingCartId = localStorage.getItem("shopify_cart_id");
+        } catch {
+          existingCartId = null;
+        }
+      }
+
+      const addPayload = {
+        imageUrls,
+        quantity,
+        bookId,
+        phoneNumber,
+        style: style || "cartoon",
+        bookColor,
+        bookFlow: fulfillment?.bookFlow,
+        locale,
+        originalUrls: fulfillment?.originalUrls,
+        generatedBwUrls: fulfillment?.generatedBwUrls,
+        generatedColorUrls: fulfillment?.generatedColorUrls,
+        previewSessionId: fulfillment?.previewSessionId,
+        generationStats: fulfillment?.generationStats,
+        mixpanelDistinctId,
+      };
+
       let response;
-      if (cart?.id) {
-        // Add to existing cart
+      if (existingCartId) {
         console.log("📤 CartContext: Sending to API - style:", style);
         response = await fetch("/api/shopify/cart/add", {
           method: "POST",
@@ -392,52 +422,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            cartId: cart.id,
-            imageUrls,
-            quantity,
-            bookId,
-            phoneNumber,
-            style: style || "cartoon",
-            bookColor,
-            bookFlow: fulfillment?.bookFlow,
-            locale,
-            originalUrls: fulfillment?.originalUrls,
-            generatedBwUrls: fulfillment?.generatedBwUrls,
-            generatedColorUrls: fulfillment?.generatedColorUrls,
-            previewSessionId: fulfillment?.previewSessionId,
-            generationStats: fulfillment?.generationStats,
-            mixpanelDistinctId,
+            cartId: existingCartId,
+            ...addPayload,
           }),
         });
       } else {
-        // Create new cart
         response = await fetch("/api/shopify/cart/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            imageUrls,
-            quantity,
-            bookId,
-            phoneNumber,
-            style: style || "cartoon",
-            bookColor,
-            bookFlow: fulfillment?.bookFlow,
-            locale,
-            originalUrls: fulfillment?.originalUrls,
-            generatedBwUrls: fulfillment?.generatedBwUrls,
-            generatedColorUrls: fulfillment?.generatedColorUrls,
-            previewSessionId: fulfillment?.previewSessionId,
-            generationStats: fulfillment?.generationStats,
-            mixpanelDistinctId,
-          }),
+          body: JSON.stringify(addPayload),
         });
       }
 
       if (response.ok) {
         const data = await response.json();
         if (data.cart) {
+          // Invalidate in-flight fetchCart calls so a stale get cannot overwrite
+          // or clear this just-created/updated cart.
+          fetchCartSeqRef.current += 1;
+
           // Build cart state directly from the API response — no second fetch needed.
           // The create/add routes already return full cart data including imageUrls and style.
           // For existing lines (add-to-cart case), merge imageUrls/style from current cart state
