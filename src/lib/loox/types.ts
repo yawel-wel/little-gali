@@ -6,6 +6,12 @@ export interface LooxStorefrontReview {
   reviewer: {
     name: string;
   };
+  product?: {
+    id: string;
+    name?: string;
+    url?: string;
+    imageUrl?: string;
+  };
   media?: Array<{
     type: string;
     url: string;

@@ -59,5 +59,11 @@ export async function fetchLooxProductReviews(options?: {
     page += 1;
   }
 
-  return reviews.map(toTestimonial);
+  // Loox's productId query can still return reviews for other products
+  // (e.g. framed art mixed into soft-book results). Filter strictly.
+  const productReviews = productId
+    ? reviews.filter((review) => review.product?.id === productId)
+    : reviews;
+
+  return productReviews.map(toTestimonial);
 }
