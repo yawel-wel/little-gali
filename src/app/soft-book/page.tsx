@@ -25,15 +25,41 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-const DESCRIPTION_BULLET_KEYS = [
-  "product.book.description.bullet1",
-  "product.book.description.bullet2",
-  "product.book.description.bullet3",
-  "product.book.description.bullet4",
-  "product.book.description.bullet5",
-  "product.book.description.bullet6",
-  "product.book.description.bullet7",
-] as const;
+const DESCRIPTION_FEATURE_ITEMS: {
+  key:
+    | "product.book.description.bullet2"
+    | "product.book.description.bullet3"
+    | "product.book.description.bullet4"
+    | "product.book.description.bullet5"
+    | "product.book.description.bullet6"
+    | "product.book.description.bullet7";
+  iconSrc: string;
+}[] = [
+  {
+    key: "product.book.description.bullet2",
+    iconSrc: "/soft-book-features/swap.png",
+  },
+  {
+    key: "product.book.description.bullet3",
+    iconSrc: "/soft-book-features/mirror.png",
+  },
+  {
+    key: "product.book.description.bullet4",
+    iconSrc: "/soft-book-features/sparkle.png",
+  },
+  {
+    key: "product.book.description.bullet5",
+    iconSrc: "/soft-book-features/shield.png",
+  },
+  {
+    key: "product.book.description.bullet6",
+    iconSrc: "/soft-book-features/baby.png",
+  },
+  {
+    key: "product.book.description.bullet7",
+    iconSrc: "/soft-book-features/gift.png",
+  },
+];
 
 type ProductTab = "description" | "goodToKnow";
 
@@ -129,7 +155,7 @@ export default function SoftBookProductPage() {
         className="flex-1"
         style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto w-full min-w-0 px-4 sm:px-6 lg:px-8">
           {/* Breadcrumbs */}
           <nav
             aria-label={t("product.book.breadcrumbAria")}
@@ -153,19 +179,19 @@ export default function SoftBookProductPage() {
             </ol>
           </nav>
 
-          <div className="mx-auto max-w-6xl">
-            <div className="grid items-start gap-8 pb-8 lg:grid-cols-2 lg:gap-14 lg:pb-8">
+          <div className="mx-auto w-full max-w-6xl min-w-0">
+            <div className="grid w-full min-w-0 items-start gap-8 pb-8 lg:grid-cols-2 lg:gap-14 lg:pb-8">
               {/* Image gallery */}
-              <div className="order-1 lg:order-2 lg:sticky lg:top-[calc(72px+var(--banner-height,0px)+1.5rem)]">
+              <div className="order-1 w-full min-w-0 lg:order-2 lg:sticky lg:top-[calc(72px+var(--banner-height,0px)+1.5rem)]">
                 <div
                   className={cn(
-                    "flex flex-col gap-3 sm:flex-row sm:items-stretch",
+                    "flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch",
                     isHe ? "sm:flex-row-reverse" : "",
                   )}
                 >
                   {/* Main image */}
-                  <div className="relative order-1 min-w-0 flex-1 sm:order-2">
-                    <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#F3EEE8]">
+                  <div className="relative order-1 w-full min-w-0 flex-1 sm:order-2">
+                    <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[#F3EEE8]">
                       <Image
                         src={currentImageSrc}
                         alt={galleryAlt(imageIndex)}
@@ -180,7 +206,7 @@ export default function SoftBookProductPage() {
                   {/* Thumbnails */}
                   <div
                     className={cn(
-                      "order-2 flex shrink-0 gap-2 sm:order-1 sm:flex-col sm:justify-start",
+                      "order-2 flex w-full min-w-0 gap-2 overflow-x-auto pb-0.5 sm:order-1 sm:w-auto sm:flex-col sm:justify-start sm:overflow-visible",
                       isHe ? "flex-row-reverse sm:flex-col" : "",
                     )}
                     dir={isHe ? "rtl" : "ltr"}
@@ -195,7 +221,7 @@ export default function SoftBookProductPage() {
                           aria-label={galleryAlt(index)}
                           aria-pressed={isActive}
                           className={cn(
-                            "relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-[#F3EEE8] sm:size-[4.5rem]",
+                            "relative size-14 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-[#F3EEE8] sm:size-[4.5rem]",
                             isActive
                               ? "border-2 border-[#2d3748]"
                               : "border border-[#E8DFD4] hover:border-primary-orange/60",
@@ -216,7 +242,12 @@ export default function SoftBookProductPage() {
               </div>
 
               {/* Product info */}
-              <div className={cn("order-2 flex flex-col gap-5 lg:order-1", textAlign)}>
+              <div
+                className={cn(
+                  "order-2 flex w-full min-w-0 max-w-full flex-col gap-5 lg:order-1",
+                  textAlign,
+                )}
+              >
                 <div className="order-1 space-y-1.5">
                   <h1 className="text-2xl font-heading font-bold text-dark-gray sm:text-3xl lg:text-4xl leading-tight">
                     {t("product.book.name")}
@@ -241,25 +272,40 @@ export default function SoftBookProductPage() {
                   </span>
                 </div>
 
-                <div className="order-4 space-y-3 lg:order-3">
-                  <p className="font-body text-medium-gray leading-snug whitespace-pre-line">
+                <div className="order-4 w-full min-w-0 space-y-4 lg:order-3">
+                  <p className="max-w-full break-words font-body text-medium-gray leading-snug whitespace-pre-line">
                     {t("product.book.description.intro")}
                   </p>
                   <ul
                     className={cn(
-                      "list-disc space-y-0.5 font-body text-medium-gray leading-snug",
-                      isHe ? "mr-4 text-right" : "ml-4 text-left",
+                      "grid w-fit max-w-full grid-cols-3 gap-x-3 gap-y-3 sm:gap-x-4 sm:gap-y-3.5",
+                      isHe ? "ml-auto" : "mr-auto",
                     )}
                     dir={isHe ? "rtl" : "ltr"}
                   >
-                    {DESCRIPTION_BULLET_KEYS.map((key) => (
-                      <li key={key}>{t(key)}</li>
+                    {DESCRIPTION_FEATURE_ITEMS.map(({ key, iconSrc }) => (
+                      <li
+                        key={key}
+                        className="flex min-w-0 max-w-[6.5rem] flex-col items-center gap-1 text-center sm:max-w-[7.25rem]"
+                      >
+                        <Image
+                          src={iconSrc}
+                          alt=""
+                          width={32}
+                          height={32}
+                          className="h-7 w-7 object-contain sm:h-8 sm:w-8"
+                          aria-hidden
+                        />
+                        <span className="font-handwritten max-w-full break-words text-[11px] leading-tight text-dark-gray sm:text-xs">
+                          {t(key)}
+                        </span>
+                      </li>
                     ))}
                   </ul>
                 </div>
 
                 {/* Color selector */}
-                <div className="order-3 w-full space-y-2.5 lg:order-4">
+                <div className="order-3 w-full min-w-0 space-y-2.5 lg:order-4">
                   <p className="text-sm font-body-bold text-dark-gray">
                     {t("product.book.colorLabel")}:{" "}
                     <span className="font-body text-medium-gray">
@@ -301,10 +347,10 @@ export default function SoftBookProductPage() {
                 </div>
 
                 {/* CTA */}
-                <div className="order-5 space-y-3 pt-2">
+                <div className="order-5 w-full min-w-0 space-y-3 pt-2">
                   <Link
                     href={uploadHref}
-                    className="block"
+                    className="block w-full max-w-full"
                     aria-label={t("home.book.ctaAriaLabel")}
                     onClick={handleFlowStart}
                   >
@@ -312,8 +358,9 @@ export default function SoftBookProductPage() {
                       fullWidth
                       sx={{
                         borderRadius: "9999px",
-                        py: 1.75,
-                        fontSize: "1rem",
+                        px: { xs: 2.5, sm: 5 },
+                        py: { xs: 1.25, sm: 1.75 },
+                        fontSize: { xs: "0.9375rem", sm: "1rem" },
                       }}
                     >
                       {t("product.book.ctaSecondary")}
@@ -427,32 +474,6 @@ export default function SoftBookProductPage() {
               </div>
             </div>
           </section>
-
-        {/* Book in use video */}
-        <section
-          className="w-full bg-[#FAF7F4] py-10 sm:py-14"
-          aria-labelledby="product-book-in-use-heading"
-        >
-          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2
-              id="product-book-in-use-heading"
-              className="mb-6 text-center font-heading text-2xl font-bold text-dark-gray sm:mb-8 sm:text-3xl"
-            >
-              {t("product.book.inUseVideo.title")}
-            </h2>
-            <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-2xl bg-neutral-100 shadow-sm sm:max-w-[320px]">
-              <video
-                className="aspect-[9/16] w-full object-cover"
-                controls
-                playsInline
-                preload="metadata"
-                poster="/book-in-use-poster.jpg"
-                src="https://res.cloudinary.com/dvexwgpjf/video/upload/v1784375629/book-in-use_iujgu3.mp4"
-                aria-label={t("product.book.inUseVideo.ariaLabel")}
-              />
-            </div>
-          </div>
-        </section>
 
         <BookInUseSection />
 

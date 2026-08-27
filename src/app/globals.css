@@ -59,6 +59,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-assistant);
   --font-mono: var(--font-assistant);
+  --font-handwritten: "Playpen Sans Hebrew", var(--font-assistant), sans-serif;
   --color-dark-blue: #1e3a8a;
   --color-darker-blue: #1e293b;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -360,6 +361,11 @@
     font-family: var(--font-assistant), sans-serif;
     font-weight: 500;
     font-size: 0.875rem;
+  }
+
+  .font-handwritten {
+    font-family: "Playpen Sans Hebrew", var(--font-assistant), sans-serif;
+    font-weight: 500;
   }
 
   /* Dark Blue Colors for Footer */
