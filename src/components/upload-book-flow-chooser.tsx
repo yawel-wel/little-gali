@@ -9,7 +9,7 @@ import {
   type TouchEvent,
   type TransitionEvent,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import type { BookFlow } from "@/lib/preview-session/book-flow";
 import { PreviousPreviewSessions } from "@/components/previous-preview-sessions";
@@ -26,6 +26,20 @@ type UploadBookFlowChooserProps = {
 };
 
 type ChooserCardImage = { name: string; src: string };
+
+const CLASSIC_FEATURE_KEYS = [
+  "upload.chooser.classicFeature1",
+  "upload.chooser.classicFeature2",
+  "upload.chooser.classicFeature3",
+  "upload.chooser.classicFeature4",
+] as const;
+
+const COLORFUL_FEATURE_KEYS = [
+  "upload.chooser.colorfulFeature1",
+  "upload.chooser.colorfulFeature2",
+  "upload.chooser.colorfulFeature3",
+  "upload.chooser.colorfulFeature4",
+] as const;
 
 const CLASSIC_CARD_IMAGES_LIGHT: ChooserCardImage[] = [
   { name: "classic-card-1", src: "/chooser-classic-1.JPG" },
@@ -74,6 +88,7 @@ function BookFlowCard({
   title,
   description,
   badge,
+  featureKeys,
   createLabel,
   onSelect,
 }: {
@@ -82,6 +97,7 @@ function BookFlowCard({
   title: string;
   description: string;
   badge: string;
+  featureKeys: readonly string[];
   createLabel: string;
   onSelect: (flow: BookFlow) => void;
 }) {
@@ -276,6 +292,21 @@ function BookFlowCard({
         <p className="mt-1 whitespace-pre-line font-body text-[13px] leading-snug text-medium-gray md:text-sm">
           {description}
         </p>
+        <ul className="mt-2 space-y-1">
+          {featureKeys.map((key) => (
+            <li
+              key={key}
+              className="flex items-start gap-1.5 font-body text-[12px] leading-snug text-dark-gray md:text-[13px]"
+            >
+              <Check
+                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black"
+                strokeWidth={2.5}
+                aria-hidden
+              />
+              <span>{t(key)}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="flex items-end px-3 pb-2.5 pt-2.5 sm:px-3.5 md:px-4 md:pb-3">
@@ -357,6 +388,7 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
           title={t("upload.chooser.classicTitle")}
           description={t("upload.chooser.classicDescription")}
           badge={t("upload.chooser.classicBadge")}
+          featureKeys={CLASSIC_FEATURE_KEYS}
           createLabel={t("upload.chooser.create")}
           onSelect={onSelect}
         />
@@ -367,6 +399,7 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
           title={t("upload.chooser.colorfulTitle")}
           description={t("upload.chooser.colorfulDescription")}
           badge={t("upload.chooser.colorfulBadge")}
+          featureKeys={COLORFUL_FEATURE_KEYS}
           createLabel={t("upload.chooser.create")}
           onSelect={onSelect}
         />
