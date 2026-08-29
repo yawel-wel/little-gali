@@ -1,8 +1,8 @@
 import type { StyleType } from "@/components/style-selector";
 import {
   allSlotsHaveColorForStyle,
-  DEFAULT_COLOR_STYLE,
   getColorCandidateForStyle,
+  getDefaultColorStyle,
 } from "./color-by-style";
 import { effectiveChangeCreditsRemaining } from "./credits";
 import { parseBookFlow } from "./book-flow";
@@ -23,10 +23,15 @@ const STALE_COLOR_IN_FLIGHT_MS = 4 * 60 * 1000;
 function resolveSessionColorStyle(
   style: StyleType | undefined | null,
 ): StyleType {
-  if (style === "pencil" || style === "cartoon" || style === "watercolor") {
+  if (
+    style === "pencil" ||
+    style === "cartoon" ||
+    style === "watercolor" ||
+    style === "pens"
+  ) {
     return style;
   }
-  return DEFAULT_COLOR_STYLE;
+  return getDefaultColorStyle();
 }
 
 /**
@@ -210,7 +215,7 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     })),
     selectedColorStyle:
       isColorful && session.selectedColorStyle === "colorful"
-        ? "watercolor"
+        ? getDefaultColorStyle()
         : session.selectedColorStyle,
     pendingColorRegenSlotIndexes: session.pendingColorRegenSlotIndexes ?? [],
     frozenStyleStripThumbnails: session.frozenStyleStripThumbnails,

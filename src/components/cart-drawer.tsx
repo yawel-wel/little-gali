@@ -37,7 +37,8 @@ function getLineId(item: CartItem): string {
 function getStyleLabel(
   style: CartItem["style"],
   t: (key: string) => string,
-): string {
+): string | undefined {
+  if (style === "pens" || !style) return undefined;
   if (style === "cartoon") return t("cart.style.cartoon");
   if (style === "pencil") return t("cart.style.pencil");
   if (style === "watercolor") return t("cart.style.watercolor");
@@ -287,7 +288,11 @@ export function CartDrawer() {
                                   ? undefined
                                   : getStyleLabel(item.style, t)
                               }
-                              showStyleRow={!item.isGiftCard}
+                              showStyleRow={
+                                !item.isGiftCard &&
+                                item.style !== "pens" &&
+                                Boolean(item.style)
+                              }
                               typeValue={
                                 item.isGiftCard || item.isFramedArt
                                   ? undefined

@@ -65,12 +65,15 @@ Style: The result should look like it was drawn by hand with colored markers - p
 
 The final result includes only the main subject/s, background is replaced with pure white background.`;
 
-/** Colorful 9-image booklet flow (no B&W / no style strip). */
-export const COLORFUL_BOOK_PROMPT = `Transform this photo into a pen colored illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
+/** Single colorful style (`pens`) and legacy colorful-book prompt. */
+export const PENS_COLOR_PROMPT = `Transform this photo into a pen colored illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
 
 Style: The result should look like it was drawn by hand with colored markers - playful, clean, and emotionally warm.
 
 The final result includes only the main subject/s, background is replaced with pure white background.`;
+
+/** @deprecated Prefer PENS_COLOR_PROMPT; kept for StyleType "colorful" mapping. */
+export const COLORFUL_BOOK_PROMPT = PENS_COLOR_PROMPT;
 
 export const WATERCOLOR_COLOR_PROMPT = `Transform this photo into a watercolor illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
 Style: ink outlines with hand-drawn feel, vibrant watercolor fills.

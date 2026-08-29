@@ -3,6 +3,11 @@ import { Redis } from "@upstash/redis";
 type KvClient = {
   get<T>(key: string): Promise<T | null>;
   set(key: string, value: unknown, options?: { ex?: number }): Promise<void>;
+  setNx(
+    key: string,
+    value: unknown,
+    options?: { ex?: number },
+  ): Promise<boolean>;
   del(key: string): Promise<void>;
   incr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<void>;
@@ -32,6 +37,24 @@ class MemoryKv implements KvClient {
       value: JSON.stringify(value),
       expiresAt: options?.ex ? Date.now() + options.ex * 1000 : undefined,
     });
+  }
+
+  async setNx(
+    key: string,
+    value: unknown,
+    options?: { ex?: number },
+  ): Promise<boolean> {
+    if (this.isExpired(key)) {
+      this.data.delete(key);
+    }
+    if (this.data.has(key)) {
+      return false;
+    }
+    this.data.set(key, {
+      value: JSON.stringify(value),
+      expiresAt: options?.ex ? Date.now() + options.ex * 1000 : undefined,
+    });
+    return true;
   }
 
   async del(key: string): Promise<void> {
@@ -138,6 +161,12 @@ function getRedisClient(): KvClient {
       }
       await redis.set(key, value);
     },
+    setNx: async (key, value, options) => {
+      const result = options?.ex
+        ? await redis.set(key, value, { nx: true, ex: options.ex })
+        : await redis.set(key, value, { nx: true });
+      return result === "OK";
+    },
     del: async (key) => {
       await redis.del(key);
     },
@@ -197,6 +226,15 @@ export async function kvSet(
   options?: { ex?: number },
 ): Promise<void> {
   return withKv((client) => client.set(key, value, options));
+}
+
+/** SET key NX — returns true only when this caller created the key. */
+export async function kvSetNx(
+  key: string,
+  value: unknown,
+  options?: { ex?: number },
+): Promise<boolean> {
+  return withKv((client) => client.setNx(key, value, options));
 }
 
 export async function kvDel(key: string): Promise<void> {

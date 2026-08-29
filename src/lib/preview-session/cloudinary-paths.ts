@@ -122,7 +122,7 @@ export function previewPublicIdFromClean(cleanPublicId: string): string {
     return cleanPublicId.replace("/outputs/bw/", "/outputs/watermark/bw/");
   }
   if (
-    /\/outputs\/color\/(cartoon|pencil|watercolor|colorful)\//.test(
+    /\/outputs\/color\/(cartoon|pencil|watercolor|colorful|pens)\//.test(
       cleanPublicId,
     )
   ) {

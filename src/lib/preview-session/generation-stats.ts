@@ -126,12 +126,13 @@ export function isValidBookCartImageCount(count: number): boolean {
 
 export function isValidBookCartStyle(
   style: unknown,
-): style is "cartoon" | "pencil" | "watercolor" | "colorful" {
+): style is "cartoon" | "pencil" | "watercolor" | "colorful" | "pens" {
   return (
     style === "cartoon" ||
     style === "pencil" ||
     style === "watercolor" ||
-    style === "colorful"
+    style === "colorful" ||
+    style === "pens"
   );
 }
 

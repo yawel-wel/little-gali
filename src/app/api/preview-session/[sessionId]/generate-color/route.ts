@@ -4,8 +4,8 @@ import { assertGenerationRateLimit } from "@/lib/rate-limit/generation-limiter";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import { parseBookFlow } from "@/lib/preview-session/book-flow";
 import {
-  DEFAULT_COLOR_STYLE,
-  PREVIEW_COLOR_STYLES,
+  getDefaultColorStyle,
+  getPreviewColorStyles,
 } from "@/lib/preview-session/color-by-style";
 import {
   runColorGeneration,
@@ -70,20 +70,13 @@ export async function POST(
     );
   }
 
+  // Classic color generation starts only after approve-bw (server pipeline).
+  // Allowing it during bw_review raced with that pipeline and doubled Gemini calls.
   if (session.phase === "bw_review" && !isColorful) {
-    const allSlotsReady = session.slots.every((slot) => {
-      const active = slot.candidates.find(
-        (candidate) =>
-          candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
-      );
-      return Boolean(active?.previewUrl && !active.error);
-    });
-    if (!allSlotsReady) {
-      return NextResponse.json(
-        { error: "B&W preview is not ready for color generation" },
-        { status: 409 },
-      );
-    }
+    return NextResponse.json(
+      { error: "Approve B&W before generating color" },
+      { status: 409 },
+    );
   }
 
   if (allStylesForSlot) {
@@ -100,24 +93,21 @@ export async function POST(
     return NextResponse.json({ session: toPublicView(latest) });
   }
 
-  const style = body.style ?? DEFAULT_COLOR_STYLE;
-  const allowedStyles: StyleType[] = [...PREVIEW_COLOR_STYLES];
+  const style = body.style ?? getDefaultColorStyle();
+  const allowedStyles: StyleType[] = [...getPreviewColorStyles()];
   if (!allowedStyles.includes(style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }
 
-  const isFullBookRequest =
-    slotIndexes.length === session.slots.length &&
-    defaultIndexes.every((i) => slotIndexes.includes(i));
-
-  if (isFullBookRequest) {
-    const targetSlotsInFlight = slotIndexes.some(
-      (index) => session.slots[index]?.colorInFlight,
-    );
-    if (targetSlotsInFlight) {
-      return NextResponse.json({ session: toPublicView(session) });
-    }
+  // Never start a second color run while the pipeline still owns these slots.
+  // Per-slot Redis claims in the runner are the money lock; this is a fast no-op.
+  const anyTargetInFlight = slotIndexes.some(
+    (index) => session.slots[index]?.colorInFlight,
+  );
+  if (anyTargetInFlight) {
+    return NextResponse.json({ session: toPublicView(session) });
   }
+
   session.selectedColorStyle = style;
   await savePreviewSession(session);
 

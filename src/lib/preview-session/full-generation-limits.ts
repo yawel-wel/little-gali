@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { getFullGenerationRateLimitConfig } from "@/lib/rate-limit/config";
 import { getRequestIp, hashClientIp } from "./hash";
 import {
-  isPreviewLimitsBypassed,
+  isFullGenerationLimitBypassed,
   isPreviewLimitsDevResetAllowed,
 } from "./preview-limits-bypass";
 import {
@@ -11,7 +11,7 @@ import {
 } from "./rate-limit";
 
 function limitsMeta() {
-  const limitsBypassed = isPreviewLimitsBypassed();
+  const limitsBypassed = isFullGenerationLimitBypassed();
   return {
     limitsBypassed,
     limitsEnforced: !limitsBypassed,
@@ -54,7 +54,7 @@ export async function getPreviewLimitsSnapshot(
   const { windowSeconds, windowHours, fullGenerationLimit } =
     getPreviewLimitsConfig();
 
-  if (isPreviewLimitsBypassed()) {
+  if (isFullGenerationLimitBypassed()) {
     return {
       windowHours,
       fullGenerationLimit,

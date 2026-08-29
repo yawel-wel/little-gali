@@ -1,13 +1,30 @@
 import type { StyleType } from "@/components/style-selector";
+import { isPreviewSingleColorStyleEnabled } from "@/lib/feature-flags";
 import type { PreviewCandidate, PreviewSession, PreviewSlot } from "./types";
 
 export const COLOR_STYLES: StyleType[] = ["pencil", "cartoon", "watercolor"];
 
-/** Color styles available in the booklet preview flow (excludes cartoon). */
+/** Dual-mode color styles (kept for rollback when single-style flag is off). */
 export const PREVIEW_COLOR_STYLES: StyleType[] = ["pencil", "watercolor"];
 
-/** Style shown first on the preview color tab when the user has not picked one yet. */
+/** Dual-mode default; prefer getDefaultColorStyle() at runtime. */
 export const DEFAULT_COLOR_STYLE: StyleType = "watercolor";
+
+export const SINGLE_PREVIEW_COLOR_STYLE: StyleType = "pens";
+
+/** Active preview color styles based on NEXT_PUBLIC_PREVIEW_SINGLE_COLOR_STYLE. */
+export function getPreviewColorStyles(): StyleType[] {
+  return isPreviewSingleColorStyleEnabled()
+    ? [SINGLE_PREVIEW_COLOR_STYLE]
+    : PREVIEW_COLOR_STYLES;
+}
+
+/** Default color style for the active preview mode. */
+export function getDefaultColorStyle(): StyleType {
+  return isPreviewSingleColorStyleEnabled()
+    ? SINGLE_PREVIEW_COLOR_STYLE
+    : DEFAULT_COLOR_STYLE;
+}
 
 export const BOOK_SLOT_INDEX = 0;
 

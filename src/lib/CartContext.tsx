@@ -41,7 +41,7 @@ export interface CartItem {
   previewSessionId?: string;
   title?: string;
   lineId?: string;
-  style?: "cartoon" | "pencil" | "watercolor" | "colorful";
+  style?: "cartoon" | "pencil" | "watercolor" | "colorful" | "pens";
   bookColor?: BookColor;
   bookFlow?: "classic" | "colorful";
   variantId?: string;
@@ -90,7 +90,7 @@ interface CartContextType {
     quantity?: number,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor" | "colorful",
+    style?: "cartoon" | "pencil" | "watercolor" | "colorful" | "pens",
     bookColor?: BookColor,
     fulfillment?: BookFulfillmentImages
   ) => Promise<void>;
@@ -378,7 +378,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number = 1,
     bookId?: string,
     phoneNumber?: string,
-    style?: "cartoon" | "pencil" | "watercolor" | "colorful",
+    style?: "cartoon" | "pencil" | "watercolor" | "colorful" | "pens",
     bookColor?: BookColor,
     fulfillment?: BookFulfillmentImages
   ) => {
@@ -499,6 +499,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           try {
             if (typeof window !== "undefined") {
               clearAddingToCart();
+              window.dispatchEvent(
+                new Event("lg:preview-limits-refresh"),
+              );
             }
           } catch {}
 

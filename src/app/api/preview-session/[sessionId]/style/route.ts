@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import { parseBookFlow } from "@/lib/preview-session/book-flow";
-import { PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
+import { getPreviewColorStyles } from "@/lib/preview-session/color-by-style";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 import type { StyleType } from "@/components/style-selector";
 
@@ -16,7 +16,7 @@ export async function POST(
   if (auth instanceof NextResponse) return auth;
 
   const body = (await request.json()) as { style?: StyleType };
-  const allowedStyles: StyleType[] = [...PREVIEW_COLOR_STYLES];
+  const allowedStyles: StyleType[] = [...getPreviewColorStyles()];
 
   if (!body.style || !allowedStyles.includes(body.style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });

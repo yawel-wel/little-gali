@@ -29,6 +29,12 @@ const STYLE_EXAMPLES: Record<
     labelKey: "styleSelector.cartoon",
     descriptionKey: "styleSelector.cartoonDescription",
   },
+  // Not shown in framed picker; required for StyleType completeness.
+  pens: {
+    src: "/style-example-cartoon.png",
+    labelKey: "styleSelector.cartoon",
+    descriptionKey: "styleSelector.cartoonDescription",
+  },
 };
 
 type FramedArtStylePickerProps = {

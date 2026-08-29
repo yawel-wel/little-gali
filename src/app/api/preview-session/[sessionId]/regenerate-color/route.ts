@@ -10,7 +10,7 @@ import {
   hasChangeCredits,
 } from "@/lib/preview-session/credits";
 import { parseBookFlow } from "@/lib/preview-session/book-flow";
-import { DEFAULT_COLOR_STYLE, PREVIEW_COLOR_STYLES } from "@/lib/preview-session/color-by-style";
+import { getDefaultColorStyle, getPreviewColorStyles } from "@/lib/preview-session/color-by-style";
 import { slotColorActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
@@ -40,9 +40,9 @@ export async function POST(
   const style =
     body.style ??
     auth.session.selectedColorStyle ??
-    DEFAULT_COLOR_STYLE;
+    getDefaultColorStyle();
   const requestedFreeRetry = body.freeRetry === true;
-  const allowedStyles: StyleType[] = [...PREVIEW_COLOR_STYLES];
+  const allowedStyles: StyleType[] = [...getPreviewColorStyles()];
   const maxSlotIndex = Math.max(0, auth.session.slots.length - 1);
 
   if (

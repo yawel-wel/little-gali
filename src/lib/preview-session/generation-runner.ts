@@ -3,6 +3,11 @@ import { nextBwVersion } from "./cloudinary-paths";
 import { uploadCleanAndWatermarkedOutputs } from "./upload-preview-outputs";
 import { generateBwImageBuffer, toGenerationError } from "./generate-bw";
 import {
+  bwGenerationClaimKey,
+  releaseGenerationClaim,
+  tryClaimGeneration,
+} from "./generation-claim";
+import {
   logPreviewGenerationFailure,
   logPreviewGenerationSuccess,
   logPreviewGenerationSummary,
@@ -14,6 +19,32 @@ import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackGenerationStepDuration } from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
 import type { PreviewCandidate, PreviewSession } from "./types";
+
+function slotHasSuccessfulBwForSource(
+  slot: PreviewSession["slots"][number],
+  sourceUrl: string,
+): boolean {
+  return slot.candidates.some(
+    (candidate) =>
+      candidate.kind === "bw" &&
+      candidate.sourceUrl === sourceUrl &&
+      Boolean(candidate.previewUrl) &&
+      !candidate.error,
+  );
+}
+
+function getSuccessfulBwForSource(
+  slot: PreviewSession["slots"][number],
+  sourceUrl: string,
+): PreviewCandidate | undefined {
+  return slot.candidates.find(
+    (candidate) =>
+      candidate.kind === "bw" &&
+      candidate.sourceUrl === sourceUrl &&
+      Boolean(candidate.previewUrl) &&
+      !candidate.error,
+  );
+}
 
 async function buildCandidate(
   sessionId: string,
@@ -101,35 +132,63 @@ export async function runSlotGeneration(
     throw new Error("Invalid slot index");
   }
 
+  // Intentional new versions (regen/replace) always claim a fresh run.
+  // Initial path should never re-bill if success already exists.
+  if (trigger === "initial" && slotHasSuccessfulBwForSource(slot, sourceUrl)) {
+    const existing = getSuccessfulBwForSource(slot, sourceUrl);
+    if (existing) {
+      slot.activeCandidateId = existing.id;
+      slot.inFlight = false;
+      await savePreviewSession(session);
+      return session;
+    }
+  }
+
+  const claimKey = bwGenerationClaimKey(session.id, slotIndex, sourceUrl);
+  if (trigger === "initial") {
+    const claimed = await tryClaimGeneration(claimKey);
+    if (!claimed) {
+      slot.inFlight = false;
+      await savePreviewSession(session);
+      return session;
+    }
+  }
+
   slot.inFlight = true;
   await savePreviewSession(session);
 
   const startedAt = Date.now();
-  const version = nextBwVersion(slot);
-  const candidate = await buildCandidate(
-    session.id,
-    slotIndex,
-    sourceUrl,
-    version,
-    trigger,
-  );
-  slot.candidates.push(candidate);
-  slot.activeCandidateId = candidate.id;
-  slot.nextBwVersion = version + 1;
-  slot.inFlight = false;
-  slot.pendingIdempotencyKey = undefined;
-  await savePreviewSession(session);
+  try {
+    const version = nextBwVersion(slot);
+    const candidate = await buildCandidate(
+      session.id,
+      slotIndex,
+      sourceUrl,
+      version,
+      trigger,
+    );
+    slot.candidates.push(candidate);
+    slot.activeCandidateId = candidate.id;
+    slot.nextBwVersion = version + 1;
+    slot.inFlight = false;
+    slot.pendingIdempotencyKey = undefined;
+    await savePreviewSession(session);
 
-  if (trigger !== "initial") {
-    trackGenerationStepDuration({
-      generation_type: "booklet_regen",
-      startedAt,
-      results: [candidate],
-      context: analyticsContextFromSession(session),
-    });
+    if (trigger !== "initial") {
+      trackGenerationStepDuration({
+        generation_type: "booklet_regen",
+        startedAt,
+        results: [candidate],
+        context: analyticsContextFromSession(session),
+      });
+    }
+
+    return session;
+  } finally {
+    if (trigger === "initial") {
+      await releaseGenerationClaim(claimKey);
+    }
   }
-
-  return session;
 }
 
 export async function runInitialParallelGeneration(
@@ -146,17 +205,75 @@ export async function runInitialParallelGeneration(
 
   const startedAt = Date.now();
   const results = await Promise.all(
-    session.slots.map((slot, index) => {
-      const version = nextBwVersion(slot);
-      return buildCandidate(sessionId, index, slot.originalUrl, version, "initial");
+    session.slots.map(async (slot, index) => {
+      const sourceUrl = slot.originalUrl;
+      if (!sourceUrl) {
+        return null;
+      }
+
+      // Already have a successful B&W for this source — never call Gemini again.
+      if (slotHasSuccessfulBwForSource(slot, sourceUrl)) {
+        return getSuccessfulBwForSource(slot, sourceUrl) ?? null;
+      }
+
+      const claimKey = bwGenerationClaimKey(sessionId, index, sourceUrl);
+      const claimed = await tryClaimGeneration(claimKey);
+      if (!claimed) {
+        // Another worker owns this slot; do not bill again.
+        return null;
+      }
+
+      try {
+        // Re-check after claim in case the other worker finished between checks.
+        const fresh = await loadPreviewSession(sessionId);
+        const freshSlot = fresh?.slots[index];
+        if (
+          freshSlot &&
+          slotHasSuccessfulBwForSource(freshSlot, sourceUrl)
+        ) {
+          return getSuccessfulBwForSource(freshSlot, sourceUrl) ?? null;
+        }
+
+        const version = nextBwVersion(slot);
+        return await buildCandidate(
+          sessionId,
+          index,
+          sourceUrl,
+          version,
+          "initial",
+        );
+      } finally {
+        await releaseGenerationClaim(claimKey);
+      }
     }),
   );
 
   const latest = await loadPreviewSession(sessionId);
   if (!latest) return null;
 
+  const newlyGenerated: PreviewCandidate[] = [];
   latest.slots = latest.slots.map((slot, index) => {
     const candidate = results[index];
+    if (!candidate) {
+      return {
+        ...slot,
+        inFlight: false,
+        pendingIdempotencyKey: undefined,
+      };
+    }
+
+    const alreadyHave = slotHasSuccessfulBwForSource(slot, candidate.sourceUrl);
+    if (alreadyHave) {
+      const existing = getSuccessfulBwForSource(slot, candidate.sourceUrl);
+      return {
+        ...slot,
+        activeCandidateId: existing?.id ?? slot.activeCandidateId,
+        inFlight: false,
+        pendingIdempotencyKey: undefined,
+      };
+    }
+
+    newlyGenerated.push(candidate);
     return {
       ...slot,
       candidates: [...slot.candidates, candidate],
@@ -166,25 +283,31 @@ export async function runInitialParallelGeneration(
       pendingIdempotencyKey: undefined,
     };
   });
-  const succeeded = results.filter((candidate) => candidate.previewUrl).length;
-  const failed = results.filter((candidate) => candidate.error).length;
+
+  const billedResults = results.filter(
+    (candidate): candidate is PreviewCandidate => Boolean(candidate),
+  );
+  const succeeded = billedResults.filter((candidate) => candidate.previewUrl).length;
+  const failed = billedResults.filter((candidate) => candidate.error).length;
   logPreviewGenerationSummary(
     "bw",
     {
       sessionId,
       succeeded,
       failed,
-      total: results.length,
+      total: billedResults.length,
       trigger: "initial",
     },
     { sessionId, trigger: "initial", side: "bw" },
   );
-  trackGenerationStepDuration({
-    generation_type: "booklet_bw",
-    startedAt,
-    results,
-    context: analyticsContextFromSession(latest),
-  });
+  if (newlyGenerated.length > 0) {
+    trackGenerationStepDuration({
+      generation_type: "booklet_bw",
+      startedAt,
+      results: newlyGenerated,
+      context: analyticsContextFromSession(latest),
+    });
+  }
   await savePreviewSession(latest);
   return latest;
 }

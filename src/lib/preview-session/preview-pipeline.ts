@@ -3,10 +3,15 @@ import { trackServerError } from "@/lib/analytics-server";
 import type { StyleType } from "@/components/style-selector";
 import {
   allSlotsHaveColorForStyle,
-  DEFAULT_COLOR_STYLE,
+  getDefaultColorStyle,
   getColorCandidateForStyle,
   syncColorPreviewToStyle,
 } from "./color-by-style";
+import {
+  approveBwClaimKey,
+  pipelineScheduleClaimKey,
+  releaseGenerationClaim,
+} from "./generation-claim";
 import {
   copyCloudinaryUrlToPublicId,
   uploadFileToCloudinaryPublicId,
@@ -64,7 +69,7 @@ export function syncGenerationStatus(session: PreviewSession): void {
 function syncColorGenerationStatus(session: PreviewSession): void {
   const defaultColorReady = allSlotsHaveColorForStyle(
     session,
-    DEFAULT_COLOR_STYLE,
+    getDefaultColorStyle(),
   );
   if (defaultColorReady) {
     session.generationStatus = "complete";
@@ -101,7 +106,7 @@ async function finalizeColorPipelineSession(
   }
 
   for (let attempt = 0; attempt < COLOR_PIPELINE_RELOAD_ATTEMPTS; attempt += 1) {
-    syncColorPreviewToStyle(session, DEFAULT_COLOR_STYLE);
+    syncColorPreviewToStyle(session, getDefaultColorStyle());
     syncColorGenerationStatus(session);
     if (session.generationStatus === "complete") {
       if (attempt > 0) {
@@ -141,6 +146,10 @@ export async function markSessionPipelineFailed(
     colorInFlight: false,
   }));
   await savePreviewSession(session);
+  await Promise.all([
+    releaseGenerationClaim(pipelineScheduleClaimKey(sessionId)),
+    releaseGenerationClaim(approveBwClaimKey(sessionId)),
+  ]);
   trackServerError(
     {
       step: "booklet_generation",
@@ -178,7 +187,7 @@ async function applyOriginalUploads(
   session.initializationError = undefined;
   if (isColorful) {
     session.phase = "bw_approved";
-    session.selectedColorStyle = DEFAULT_COLOR_STYLE;
+    session.selectedColorStyle = getDefaultColorStyle();
   }
   await savePreviewSession(session);
 }
@@ -188,10 +197,10 @@ async function finalizeAfterInitialPipeline(sessionId: string): Promise<void> {
   if (!session) return;
 
   if (parseBookFlow(session.bookFlow) === "colorful") {
-    syncColorPreviewToStyle(session, DEFAULT_COLOR_STYLE);
+    syncColorPreviewToStyle(session, getDefaultColorStyle());
     const colorReady = allSlotsHaveColorForStyle(
       session,
-      DEFAULT_COLOR_STYLE,
+      getDefaultColorStyle(),
     );
     if (colorReady) {
       session.generationStatus = "complete";
@@ -210,6 +219,7 @@ async function finalizeAfterInitialPipeline(sessionId: string): Promise<void> {
     }
   }
   await savePreviewSession(session);
+  await releaseGenerationClaim(pipelineScheduleClaimKey(sessionId));
 }
 
 export async function runPreviewPipelineFromMultipart(
@@ -278,9 +288,9 @@ export async function runColorPipelineForApprovedSession(
     session.generationStatus = "failed";
     session.initializationError = message;
     logPreviewColorPipelineIncomplete(sessionId, {
-      style: DEFAULT_COLOR_STYLE,
+      style: getDefaultColorStyle(),
       phase: session.phase,
-      slots: collectColorPipelineSlotDiagnostics(session, DEFAULT_COLOR_STYLE),
+      slots: collectColorPipelineSlotDiagnostics(session, getDefaultColorStyle()),
       colorInFlightCount: session.slots.filter((slot) => slot.colorInFlight)
         .length,
       reloadAttempts: COLOR_PIPELINE_RELOAD_ATTEMPTS,
@@ -300,4 +310,5 @@ export async function runColorPipelineForApprovedSession(
     colorInFlight: false,
   }));
   await savePreviewSession(session);
+  await releaseGenerationClaim(approveBwClaimKey(sessionId));
 }

@@ -19,6 +19,12 @@ import {
   parseBookFlow,
   type BookFlow,
 } from "@/lib/preview-session/book-flow";
+import { getDefaultColorStyle } from "@/lib/preview-session/color-by-style";
+import {
+  pipelineScheduleClaimKey,
+  PIPELINE_CLAIM_TTL_SECONDS,
+  tryClaimGeneration,
+} from "@/lib/preview-session/generation-claim";
 import { getRequestIp, hashClientIp } from "@/lib/preview-session/hash";
 import {
   markSessionPipelineFailed,
@@ -131,7 +137,7 @@ async function createNewPreviewSession(
         ? { ...slot, inFlight: false, colorInFlight: true }
         : slot,
     ),
-    selectedColorStyle: isColorful ? "watercolor" : undefined,
+    selectedColorStyle: isColorful ? getDefaultColorStyle() : undefined,
     createdAt: now,
     updatedAt: now,
     clientIpHash: ipHash,
@@ -214,7 +220,7 @@ async function prepareSessionForPipelineStart(
     );
     existing.displayOrder = defaultDisplayOrder(bookFlow);
     existing.phase = isColorful ? "bw_approved" : "bw_review";
-    existing.selectedColorStyle = isColorful ? "watercolor" : undefined;
+    existing.selectedColorStyle = isColorful ? getDefaultColorStyle() : undefined;
     existing.initializationError = undefined;
     existing.generationStatus = "not_started";
     await savePreviewSession(existing);
@@ -308,7 +314,12 @@ export async function POST(request: NextRequest) {
 
       if (!shouldSchedule) {
         const genStatus = resolveGenerationStatus(sessionForPipeline);
-        if (genStatus === "complete" || genStatus === "running") {
+        // While a pipeline is running, never mint a second session / Gemini run.
+        if (genStatus === "running") {
+          return respondWithSession(sessionForPipeline);
+        }
+        // Complete session + new upload → fresh session (intentional new book).
+        if (genStatus === "complete") {
           const priorSession = sessionForPipeline;
           const fresh = await startFreshPreviewSessionForNewUpload(
             request,
@@ -345,6 +356,14 @@ export async function POST(request: NextRequest) {
           fileName: file.name || "image.jpg",
         })),
       );
+
+      const scheduleClaimed = await tryClaimGeneration(
+        pipelineScheduleClaimKey(sessionForPipeline.id),
+        PIPELINE_CLAIM_TTL_SECONDS,
+      );
+      if (!scheduleClaimed) {
+        return respondWithSession(sessionForPipeline);
+      }
 
       await markPipelineRunning(sessionForPipeline);
       scheduleMultipartPipeline(sessionForPipeline.id, pendingUploads);
@@ -411,27 +430,32 @@ export async function POST(request: NextRequest) {
 
     if (!shouldSchedule) {
       const genStatus = resolveGenerationStatus(sessionForPipeline);
-        if (genStatus === "complete" || genStatus === "running") {
-          const priorSession = sessionForPipeline;
-          const fresh = await startFreshPreviewSessionForNewUpload(
-            request,
-            bookFlow,
-          );
-          sessionForPipeline = fresh.session;
-          inheritSupportGrants(priorSession, sessionForPipeline);
-          await savePreviewSession(sessionForPipeline);
-          shouldSchedule = true;
-          const freshGenerationLimit = await assertGenerationRateLimit(
-            sessionForPipeline.id,
-            sessionForPipeline.id,
-          );
-          if (freshGenerationLimit) {
-            return freshGenerationLimit;
-          }
-        } else {
-          return respondWithSession(sessionForPipeline);
-        }
+      // While a pipeline is running, never mint a second session / Gemini run.
+      if (genStatus === "running") {
+        return respondWithSession(sessionForPipeline);
       }
+      // Complete session + new upload → fresh session (intentional new book).
+      if (genStatus === "complete") {
+        const priorSession = sessionForPipeline;
+        const fresh = await startFreshPreviewSessionForNewUpload(
+          request,
+          bookFlow,
+        );
+        sessionForPipeline = fresh.session;
+        inheritSupportGrants(priorSession, sessionForPipeline);
+        await savePreviewSession(sessionForPipeline);
+        shouldSchedule = true;
+        const freshGenerationLimit = await assertGenerationRateLimit(
+          sessionForPipeline.id,
+          sessionForPipeline.id,
+        );
+        if (freshGenerationLimit) {
+          return freshGenerationLimit;
+        }
+      } else {
+        return respondWithSession(sessionForPipeline);
+      }
+    }
 
     const rateLimit = await assertCanStartFullGeneration(
       request,
@@ -439,6 +463,14 @@ export async function POST(request: NextRequest) {
     );
     if ("error" in rateLimit) {
       return rateLimitedJson(rateLimit.error, sessionForPipeline.id);
+    }
+
+    const scheduleClaimed = await tryClaimGeneration(
+      pipelineScheduleClaimKey(sessionForPipeline.id),
+      PIPELINE_CLAIM_TTL_SECONDS,
+    );
+    if (!scheduleClaimed) {
+      return respondWithSession(sessionForPipeline);
     }
 
     await markPipelineRunning(sessionForPipeline);

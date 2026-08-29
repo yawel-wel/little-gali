@@ -5,7 +5,12 @@ import { X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Image from "next/image";
 
-export type StyleType = "cartoon" | "pencil" | "watercolor" | "colorful";
+export type StyleType =
+  | "cartoon"
+  | "pencil"
+  | "watercolor"
+  | "colorful"
+  | "pens";
 
 interface StyleSelectorProps {
   selectedStyle: StyleType;
@@ -61,6 +66,16 @@ const outputImages: Record<StyleType, Array<{ src: string; alt: string }>> = {
     { src: "/cartoon-output-image-5.png", alt: "Colorful style result" },
     { src: "/cartoon-output-image-6.png", alt: "Colorful style result" },
     { src: "/cartoon-output-image-7.png", alt: "Colorful style result" },
+  ],
+  // Not shown in StyleSelector UI; used when NEXT_PUBLIC_PREVIEW_SINGLE_COLOR_STYLE=true.
+  pens: [
+    { src: "/cartoon-output-image-1.png", alt: "Pens style result" },
+    { src: "/cartoon-output-image-2.png", alt: "Pens style result" },
+    { src: "/cartoon-output-image-3.png", alt: "Pens style result" },
+    { src: "/cartoon-output-image-4.png", alt: "Pens style result" },
+    { src: "/cartoon-output-image-5.png", alt: "Pens style result" },
+    { src: "/cartoon-output-image-6.png", alt: "Pens style result" },
+    { src: "/cartoon-output-image-7.png", alt: "Pens style result" },
   ],
 };
 

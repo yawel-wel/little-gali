@@ -20,6 +20,7 @@ import {
 import { parseBookFlow, bookFlowFromLineAttributes, type BookFlow } from "@/lib/preview-session/book-flow";
 import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
 import { markPreviewSessionCartAdded } from "@/lib/preview-session/store";
+import { resetFullGenerationLimitAfterBookCart } from "@/lib/preview-session/reset-full-generation-after-cart";
 
 export const runtime = "nodejs";
 
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       quantity?: number;
       bookId?: string;
       phoneNumber?: string;
-      style?: "cartoon" | "pencil" | "watercolor" | "colorful";
+      style?: "cartoon" | "pencil" | "watercolor" | "colorful" | "pens";
       bookColor?: BookColor;
       bookFlow?: BookFlow;
       locale?: string;
@@ -189,19 +190,25 @@ export async function POST(request: NextRequest) {
             { key: "_line_group", value: lineUid },
             ...bookFlowShopifyAttributes(bookFlow),
             ...primaryImageUrlsShopifyAttributes(urls),
-            // Always include style attribute (default to "cartoon" if not provided)
-            // Ensure style is valid before saving
+            // Style: always store hidden _style; visible "style" omitted for pens (single-style mode)
             ...(isValidBookCartStyle(style)
-              ? [
-                  {
-                    key: "_style",
-                    value: style,
-                  },
-                  {
-                    key: "style",
-                    value: style,
-                  },
-                ]
+              ? style === "pens"
+                ? [
+                    {
+                      key: "_style",
+                      value: style,
+                    },
+                  ]
+                : [
+                    {
+                      key: "_style",
+                      value: style,
+                    },
+                    {
+                      key: "style",
+                      value: style,
+                    },
+                  ]
               : [
                   {
                     key: "_style",
@@ -363,6 +370,7 @@ export async function POST(request: NextRequest) {
     }
 
     await markPreviewSessionCartAdded(previewSessionId);
+    await resetFullGenerationLimitAfterBookCart(request);
 
     // Return cart with all line items - we'll need to fetch images for existing lines
     // but include images for the newly added line immediately
@@ -381,6 +389,7 @@ export async function POST(request: NextRequest) {
           | "pencil"
           | "watercolor"
           | "colorful"
+          | "pens"
           | undefined = undefined;
         if (Array.isArray(node.attributes)) {
           const styleAttr = node.attributes.find(

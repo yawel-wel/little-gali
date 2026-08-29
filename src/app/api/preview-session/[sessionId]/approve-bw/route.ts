@@ -1,5 +1,10 @@
 import { after, NextResponse } from "next/server";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
+import {
+  approveBwClaimKey,
+  PIPELINE_CLAIM_TTL_SECONDS,
+  tryClaimGeneration,
+} from "@/lib/preview-session/generation-claim";
 import { logPreviewPipelineBackgroundFailed } from "@/lib/preview-session/generation-log";
 import {
   markSessionPipelineFailed,
@@ -22,6 +27,20 @@ export async function POST(
   const view = toPublicView(session);
   if (!view.canApproveBw) {
     return NextResponse.json({ error: "B&W preview is not ready to approve" }, { status: 409 });
+  }
+
+  // Only one approve → color pipeline may run per session.
+  const claimed = await tryClaimGeneration(
+    approveBwClaimKey(sessionId),
+    PIPELINE_CLAIM_TTL_SECONDS,
+  );
+  if (!claimed) {
+    return NextResponse.json({ session: toPublicView(session) });
+  }
+
+  // Already past BW review (e.g. concurrent approve) — do not schedule again.
+  if (session.phase !== "bw_review") {
+    return NextResponse.json({ session: toPublicView(session) });
   }
 
   session.phase = "bw_approved";

@@ -6,6 +6,7 @@ import {
   COLORFUL_BOOK_PROMPT,
   GENERATION_SYSTEM_INSTRUCTION,
   PENCIL_COLOR_PROMPT,
+  PENS_COLOR_PROMPT,
   WATERCOLOR_COLOR_PROMPT,
 } from "@/lib/prompts/constants";
 import { classifyGenerationError, shouldStopGeminiRetry } from "./generation-errors";
@@ -33,6 +34,7 @@ const STYLE_PROMPTS: Record<StyleType, string> = {
   cartoon: CARTOON_COLOR_PROMPT,
   watercolor: WATERCOLOR_COLOR_PROMPT,
   colorful: COLORFUL_BOOK_PROMPT,
+  pens: PENS_COLOR_PROMPT,
 };
 
 function resolveColorPrompt(style: StyleType): string {

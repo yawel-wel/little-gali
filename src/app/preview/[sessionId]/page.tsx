@@ -32,9 +32,10 @@ import {
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import {
   BOOK_SLOT_INDEX,
-  DEFAULT_COLOR_STYLE,
+  getDefaultColorStyle,
   getColorCandidateForStyleFromPublicSlot,
 } from "@/lib/preview-session/color-by-style";
+import { isPreviewSingleColorStyleEnabled } from "@/lib/feature-flags";
 import {
   COLORFUL_SLOT_COUNT,
   getSlotCount,
@@ -201,6 +202,9 @@ function slotHasColorPreviewForStylePublic(
 function frozenStripThumbnailsReady(
   session: PreviewSessionPublicView | null,
 ): boolean {
+  if (isPreviewSingleColorStyleEnabled()) {
+    return true;
+  }
   const frozen = session?.frozenStyleStripThumbnails;
   return Boolean(
     frozen?.pencil?.previewUrl && frozen?.watercolor?.previewUrl,
@@ -244,6 +248,9 @@ function stripThumbnailsReady(
   session: PreviewSessionPublicView | null,
   bookSlot: PreviewSessionPublicView["slots"][number] | undefined,
 ): boolean {
+  if (isPreviewSingleColorStyleEnabled()) {
+    return true;
+  }
   if (frozenStripThumbnailsReady(session)) {
     return true;
   }
@@ -274,10 +281,15 @@ function isColorfulPreviewSession(
 function resolvePreviewColorStyle(
   style: StyleType | undefined | null,
 ): StyleType {
-  if (style === "pencil" || style === "cartoon" || style === "watercolor") {
+  if (
+    style === "pencil" ||
+    style === "cartoon" ||
+    style === "watercolor" ||
+    style === "pens"
+  ) {
     return style;
   }
-  return DEFAULT_COLOR_STYLE;
+  return getDefaultColorStyle();
 }
 
 function translateOrFallback(
@@ -385,8 +397,8 @@ export default function PreviewPage() {
   const [displayedBookSide, setDisplayedBookSide] =
     useState<PreviewBookSide>("bw");
   const [isTabCardsVisible, setIsTabCardsVisible] = useState(true);
-  const [selectedStyle, setSelectedStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
-  const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(DEFAULT_COLOR_STYLE);
+  const [selectedStyle, setSelectedStyle] = useState<StyleType>(getDefaultColorStyle());
+  const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(getDefaultColorStyle());
   const [selectedBookColor, setSelectedBookColor] =
     useState<BookColor | null>(null);
   const [bookColorError, setBookColorError] = useState(false);
@@ -938,10 +950,10 @@ export default function PreviewPage() {
     const bookSlot = session.slots.find((slot) => slot.index === BOOK_SLOT_INDEX);
     if (
       bookSlot &&
-      !slotHasColorPreviewForStylePublic(bookSlot, DEFAULT_COLOR_STYLE) &&
+      !slotHasColorPreviewForStylePublic(bookSlot, getDefaultColorStyle()) &&
       (session.generationStatus === "running" || bookSlot.colorInFlight)
     ) {
-      loading.add(DEFAULT_COLOR_STYLE);
+      loading.add(getDefaultColorStyle());
     }
     return loading;
   }, [session, styleStripLoading]);
@@ -1096,7 +1108,10 @@ export default function PreviewPage() {
   }, [stripThumbnailsAreReady]);
 
   const prefetchStripThumbnailsIfNeeded = useCallback(async () => {
-    if (!session) {
+    if (!session || isPreviewSingleColorStyleEnabled()) {
+      return;
+    }
+    if (session.generationStatus === "running") {
       return;
     }
 
@@ -1149,6 +1164,18 @@ export default function PreviewPage() {
   const ensureColorStyleGenerated = useCallback(
     (style: StyleType) => {
       if (!session) {
+        return;
+      }
+      // Classic color is owned by approve-bw's pipeline until color phase.
+      if (
+        !isColorfulPreviewSession(session) &&
+        session.phase !== "bw_approved" &&
+        session.phase !== "style_selected"
+      ) {
+        return;
+      }
+      // Server pipeline owns initial color — do not start a parallel client run.
+      if (session.generationStatus === "running") {
         return;
       }
       if (allSlotsHaveColorForStylePublic(session, style)) {
@@ -1227,10 +1254,17 @@ export default function PreviewPage() {
     ],
   );
 
-  // Resume on-demand style generation after refresh / timed-out workers
-  // (colorful books only pre-generate watercolor + one pencil thumb).
+  // Resume on-demand style generation after refresh / timed-out workers.
+  // Classic: only after BW approve (color phase). Starting earlier races with
+  // approve-bw's pipeline and produces duplicate Gemini color candidates.
   useEffect(() => {
     if (!session || showInitialLoadingScreen || loadFailed) {
+      return;
+    }
+    if (
+      session.phase !== "bw_approved" &&
+      session.phase !== "style_selected"
+    ) {
       return;
     }
     const style = resolvePreviewColorStyle(activeColorStyle);
@@ -1734,11 +1768,7 @@ export default function PreviewPage() {
         latest.displayOrder,
       );
       const originalUrls = orderedSlots.map((slot) => slot.originalUrl);
-      const cartStyle = colorful
-        ? resolvePreviewColorStyle(activeColorStyle) === "pencil"
-          ? "pencil"
-          : "watercolor"
-        : resolvePreviewColorStyle(activeColorStyle);
+      const cartStyle = resolvePreviewColorStyle(activeColorStyle);
       const generatedColorUrls = orderedSlots.map((slot) => {
         const active = getColorCandidateForStyleFromPublicSlot(
           slot,
@@ -1956,20 +1986,7 @@ export default function PreviewPage() {
               </div>
             ) : session ? (
               <div>
-                {isColorPhase ? (
-                  <p className="mx-auto max-w-xl text-center font-body text-base leading-relaxed text-dark-gray">
-                    {t("preview.colorPhaseDescription")
-                      .split("\n")
-                      .map((line, index) => (
-                        <span
-                          key={index}
-                          className={cn("block", index > 0 && "mt-1")}
-                        >
-                          {line}
-                        </span>
-                      ))}
-                  </p>
-                ) : (
+                {!isColorPhase && !isColorfulFlow ? (
                   <p className="mx-auto max-w-xl text-center font-body text-base leading-relaxed text-dark-gray">
                     {t("preview.bwPhaseDescription")
                       .split("\n")
@@ -1982,7 +1999,7 @@ export default function PreviewPage() {
                         </span>
                       ))}
                   </p>
-                )}
+                ) : null}
                 <div className="mt-4 flex justify-center md:mt-5">
                   {session.changeCreditsRemaining > 0 ? (
                     <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-sm font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
@@ -2634,7 +2651,8 @@ export default function PreviewPage() {
                       </div>
                         {session && isColorPhase ? (
                           <div className="flex flex-col items-center">
-                            {displayedBookSide === "color" ? (
+                            {displayedBookSide === "color" &&
+                            !isPreviewSingleColorStyleEnabled() ? (
                               <PreviewColorStyleStrip
                                 session={session}
                                 frozenThumbnails={session.frozenStyleStripThumbnails}

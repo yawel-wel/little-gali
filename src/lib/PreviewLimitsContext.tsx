@@ -87,6 +87,17 @@ export function PreviewLimitsProvider({ children }: { children: ReactNode }) {
     void refreshLimits();
   }, [refreshLimits]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onRefresh = () => {
+      void refreshLimits();
+    };
+    window.addEventListener("lg:preview-limits-refresh", onRefresh);
+    return () => {
+      window.removeEventListener("lg:preview-limits-refresh", onRefresh);
+    };
+  }, [refreshLimits]);
+
   const value = useMemo(
     () => ({ limits, refreshLimits }),
     [limits, refreshLimits],

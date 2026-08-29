@@ -1130,8 +1130,7 @@ const hebrewTranslations = {
   "preview.bwPhaseTitle": "הצד השחור לבן",
   "preview.colorPhaseTitle": "הספרון המלא שלכם",
   "preview.colorPhaseTitleHighlight": "שלכם",
-  "preview.colorPhaseDescription":
-    "עברו בין הצדדים של הספרון לצפייה בתוצאה המלאה.\nבצד הצבעוני ניתן לבחור בין שני סגנונות איור שונים.",
+  "preview.colorPhaseDescription": "",
   "preview.bwPhaseDescription":
     "גרסאות השחור־לבן של התמונות שלכם מוכנות ✨\nשימו לב - לאחר המעבר לשלב הבא לא יהיה ניתן להעלות תמונות חדשות.",
   "preview.bwApproveAbove": "אהבתם? ממשיכים לצד הצבעוני",
@@ -2361,8 +2360,7 @@ const englishTranslations = {
   "preview.bwPhaseTitle": "The Black & White Side",
   "preview.colorPhaseTitle": "Your Complete Booklet",
   "preview.colorPhaseTitleHighlight": "Your",
-  "preview.colorPhaseDescription":
-    "Switch between the book sides to view the full result.\nOn the color side you can choose between two different illustration styles.",
+  "preview.colorPhaseDescription": "",
   "preview.bwPhaseDescription":
     "Your black & white versions are ready ✨\nNote: after moving to the next step, you won't be able to upload new photos.",
   "preview.bwApproveAbove": "Happy with it? Continue to the color side",

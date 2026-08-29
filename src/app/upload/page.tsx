@@ -44,7 +44,6 @@ import { logPreviewFullGenerationRateLimited } from "@/lib/preview-session/log-p
 import { PREVIEW_RATE_LIMIT_ERROR_CODE } from "@/lib/preview-session/constants";
 import { usePreviewLimits } from "@/lib/PreviewLimitsContext";
 import {
-  formatLastFullGenerationWarning,
   formatPreviewRateLimitMessage,
 } from "@/lib/preview-session/preview-limit-messages";
 import { buildPreviewRateLimitContactHref } from "@/lib/preview-session/preview-contact-url";
@@ -193,6 +192,7 @@ function UploadPageContent() {
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const [showPreviewLoader, setShowPreviewLoader] = useState(false);
   const [previewLoaderLineIndex, setPreviewLoaderLineIndex] = useState(0);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -645,23 +645,6 @@ function UploadPageContent() {
     [t, limits.windowHours, limits.fullGenerationLimit],
   );
 
-  const lastGenerationWarning = useMemo(() => {
-    if (!limits.isLastFullGenerationAvailable) {
-      return null;
-    }
-    return formatLastFullGenerationWarning(
-      t,
-      { windowHours: limits.windowHours, resetAt: limits.resetAt },
-      locale,
-    );
-  }, [
-    t,
-    locale,
-    limits.isLastFullGenerationAvailable,
-    limits.windowHours,
-    limits.resetAt,
-  ]);
-
   const previewRateLimitContactHref = useMemo(
     () => buildPreviewRateLimitContactHref(getKnownPreviewSessionIds()),
     [limits.fullGenerationsRemaining, limits.fullGenerationsUsed],
@@ -805,6 +788,9 @@ function UploadPageContent() {
   };
 
   const handleContinueToPreview = async () => {
+    if (submitLockRef.current) {
+      return;
+    }
     if (!bookFlow || images.length !== slotCount) {
       setSubmitStatus({
         type: "error",
@@ -815,6 +801,7 @@ function UploadPageContent() {
       return;
     }
 
+    submitLockRef.current = true;
     setIsSubmitting(true);
     if (!previewBlockedCode && !readUploadPreviewBlocked()) {
       setSubmitStatus({ type: null, message: "" });
@@ -839,6 +826,7 @@ function UploadPageContent() {
           previewSessionId,
           "upload_client_check",
         );
+        submitLockRef.current = false;
         setIsSubmitting(false);
         return;
       }
@@ -870,6 +858,7 @@ function UploadPageContent() {
           persistLgSessionId(previewData.sessionId);
         }
         setUploadingImages(new Set());
+        submitLockRef.current = false;
         setIsSubmitting(false);
         setShowPreviewLoader(false);
         applyPreviewStartBlockedState(
@@ -883,6 +872,7 @@ function UploadPageContent() {
 
       if (!previewData.session?.id) {
         setUploadingImages(new Set());
+        submitLockRef.current = false;
         setIsSubmitting(false);
         setShowPreviewLoader(false);
         setSubmitStatus({
@@ -917,6 +907,7 @@ function UploadPageContent() {
         type: "error",
         message: t("upload.serverError"),
       });
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -1271,15 +1262,6 @@ function UploadPageContent() {
                           />
                         </div>
                       )}
-
-                      {lastGenerationWarning &&
-                        previewEnabled &&
-                        !showWithoutPreviewCartPath &&
-                        images.length === slotCount && (
-                          <div className="w-full rounded-lg border border-amber-200 bg-amber-50 p-4 text-center font-body text-sm text-dark-gray">
-                            {lastGenerationWarning}
-                          </div>
-                        )}
 
                       <Button
                         variant="contained"

@@ -357,7 +357,7 @@ export default function SoftBookProductPage() {
                     <HomeCtaButton
                       fullWidth
                       sx={{
-                        borderRadius: "9999px",
+                        borderRadius: "5px",
                         px: { xs: 2.5, sm: 5 },
                         py: { xs: 1.25, sm: 1.75 },
                         fontSize: { xs: "0.9375rem", sm: "1rem" },
