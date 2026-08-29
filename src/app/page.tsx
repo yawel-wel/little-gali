@@ -13,7 +13,10 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
 // import { TestimonialsSection } from "@/components/testimonials-section";
-import { LooxWidgetSection } from "@/components/loox-widget-section";
+import {
+  LooxWidgetSection,
+  LOOX_PRODUCT_ID,
+} from "@/components/loox-widget-section";
 import { GiftCardSection } from "@/components/gift-card-section";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
@@ -383,7 +386,11 @@ export default function Home() {
 
         <BookInUseSection />
 
-        <LooxWidgetSection showComparisonLabel={false} />
+        <LooxWidgetSection
+          variant="cards-carousel"
+          productId={LOOX_PRODUCT_ID}
+          showComparisonLabel={false}
+        />
 
         {/* הספרון שלנו Section */}
         <motion.section

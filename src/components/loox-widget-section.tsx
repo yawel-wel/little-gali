@@ -17,7 +17,7 @@ import { Title } from "./title";
 
 const LOOX_SHOP_DOMAIN =
   process.env.NEXT_PUBLIC_LOOX_SHOP_DOMAIN ?? "gjvyew-zk.myshopify.com";
-const LOOX_PRODUCT_ID =
+export const LOOX_PRODUCT_ID =
   process.env.NEXT_PUBLIC_LOOX_PRODUCT_ID ?? "7647868387431";
 
 /**
@@ -220,9 +220,11 @@ function initLooxWidget(variant: LooxWidgetVariant) {
 function LooxCarouselContainer({
   id,
   slideType,
+  productIds,
 }: {
   id: string;
   slideType: "testimonial" | "card" | "gallery";
+  productIds?: string;
 }) {
   return (
     <div id="loox-default-carousel">
@@ -230,15 +232,22 @@ function LooxCarouselContainer({
         className="loox-v2-carousel-container"
         id={id}
         data-slide-type={slideType}
+        {...(productIds ? { "data-product-ids": productIds } : {})}
       />
     </div>
   );
 }
 
-function LooxWidgetMarkup({ variant }: { variant: LooxWidgetVariant }) {
+function LooxWidgetMarkup({
+  variant,
+  productId,
+}: {
+  variant: LooxWidgetVariant;
+  productId?: string;
+}) {
   switch (variant) {
     case "reviews-product":
-      return <div id="looxReviews" data-product-id={LOOX_PRODUCT_ID} />;
+      return <div id="looxReviews" data-product-id={productId ?? LOOX_PRODUCT_ID} />;
     case "reviews-aggregate":
       return <div id="looxReviews" data-loox-aggregate />;
     case "testimonials-carousel":
@@ -246,17 +255,23 @@ function LooxWidgetMarkup({ variant }: { variant: LooxWidgetVariant }) {
         <LooxCarouselContainer
           id="LOOX-V2_CAROUSEL-testimonial"
           slideType="testimonial"
+          productIds={productId}
         />
       );
     case "cards-carousel":
       return (
-        <LooxCarouselContainer id="LOOX-V2_CAROUSEL-card" slideType="card" />
+        <LooxCarouselContainer
+          id="LOOX-V2_CAROUSEL-card"
+          slideType="card"
+          productIds={productId}
+        />
       );
     case "gallery-carousel":
       return (
         <LooxCarouselContainer
           id="LOOX-V2_CAROUSEL-gallery"
           slideType="gallery"
+          productIds={productId}
         />
       );
     case "dynamic-carousel":
@@ -300,11 +315,14 @@ function LooxWidgetMarkup({ variant }: { variant: LooxWidgetVariant }) {
 interface LooxWidgetSectionProps {
   variant?: LooxWidgetVariant;
   showComparisonLabel?: boolean;
+  /** When set, carousel/review widgets only show reviews for this Shopify product id. */
+  productId?: string;
 }
 
 export function LooxWidgetSection({
   variant = resolveVariant(),
   showComparisonLabel = true,
+  productId,
 }: LooxWidgetSectionProps) {
   const { t } = useLanguage();
   const scriptLoadedRef = useRef(false);
@@ -348,7 +366,7 @@ export function LooxWidgetSection({
           </div>
 
           <div className="max-w-5xl mx-auto min-h-[200px]">
-            <LooxWidgetMarkup variant={variant} />
+            <LooxWidgetMarkup variant={variant} productId={productId} />
           </div>
         </div>
       </section>
