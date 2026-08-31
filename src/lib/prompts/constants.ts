@@ -65,12 +65,13 @@ Style: The result should look like it was drawn by hand with colored markers - p
 
 The final result includes only the main subject/s, background is replaced with pure white background.`;
 
-/** Single colorful style (`pens`) and legacy colorful-book prompt. */
-export const PENS_COLOR_PROMPT = `Transform this photo into a pen colored illustration. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
+const DEFAULT_PENS_COLOR_PROMPT = `Transform this photo into a colored pencil drawing. The person in this photo will receive the result as a gift, so it must look like them and match the original photo exactly — same framing, same crop, same scale, nothing cut off or faded.
+Style: vibrant pencil strokes, playful hand-drawn texture, colored outlines only, no black lines, no border, no vignette, no soft edges, no fading anywhere.
+Background should be completely removed and replaced with pure white background.`;
 
-Style: The result should look like it was drawn by hand with colored markers - playful, clean, and emotionally warm.
-
-The final result includes only the main subject/s, background is replaced with pure white background.`;
+/** Single colorful style (`pens`). Override via PENS_COLOR_PROMPT. */
+export const PENS_COLOR_PROMPT =
+  process.env.PENS_COLOR_PROMPT?.trim() || DEFAULT_PENS_COLOR_PROMPT;
 
 /** @deprecated Prefer PENS_COLOR_PROMPT; kept for StyleType "colorful" mapping. */
 export const COLORFUL_BOOK_PROMPT = PENS_COLOR_PROMPT;
