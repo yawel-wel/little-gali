@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   bookColorFromVariantId,
   isValidBookColor,
-  resolveBookVariantGid,
   type BookColor,
 } from "@/lib/book-color";
+import {
+  birthPackageShopifyAttributes,
+  isBirthPackageFromAttributes,
+  isBirthPackageVariantId,
+  resolveCartMerchandiseGid,
+  blanketPatternFromLineAttributes,
+  bookColorFromLineAttributes,
+} from "@/lib/birth-package";
+import { isBlanketPattern, type BlanketPattern } from "@/lib/blanket";
 import {
   bookFlowShopifyAttributes,
   formatSelectedGenerationBySlot,
@@ -42,6 +50,8 @@ export async function POST(request: NextRequest) {
       bookColor,
       bookFlow: bookFlowRaw,
       mixpanelDistinctId,
+      isBirthPackage,
+      blanketPattern,
     } = body as {
       imageUrls: string[];
       quantity?: number;
@@ -57,6 +67,8 @@ export async function POST(request: NextRequest) {
       previewSessionId?: string;
       generationStats?: PreviewGenerationStats;
       mixpanelDistinctId?: string;
+      isBirthPackage?: boolean;
+      blanketPattern?: BlanketPattern;
     };
 
     if (!imageUrls || !isValidBookCartImageCount(imageUrls.length)) {
@@ -85,9 +97,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const productVariantId = resolveBookVariantGid(
-      isValidBookColor(bookColor) ? bookColor : undefined,
-    );
+    const giftSet = Boolean(isBirthPackage);
+    const resolvedPattern = isBlanketPattern(blanketPattern)
+      ? blanketPattern
+      : undefined;
+
+    const productVariantId = resolveCartMerchandiseGid({
+      isBirthPackage: giftSet,
+      bookColor: isValidBookColor(bookColor) ? bookColor : undefined,
+      blanketPattern: resolvedPattern,
+    });
 
     // Validate image URLs
     const urls = imageUrls as string[];
@@ -215,6 +234,11 @@ export async function POST(request: NextRequest) {
               ),
               ...originalUrlsShopifyAttributes(originalUrls),
               ...generatedColorUrlsShopifyAttributes(generatedColorUrls),
+              ...birthPackageShopifyAttributes({
+                isBirthPackage: giftSet,
+                blanketPattern: resolvedPattern,
+                bookColor: isValidBookColor(bookColor) ? bookColor : undefined,
+              }),
             ],
           },
         ],
@@ -393,10 +417,18 @@ export async function POST(request: NextRequest) {
         }
 
         const variantId = node.merchandise?.id;
-        const itemBookColor = bookColorFromVariantId(variantId);
+        const itemBookColor =
+          bookColorFromVariantId(variantId) ??
+          bookColorFromLineAttributes(node.attributes);
         const itemBookFlow = isNewLine
           ? bookFlow
           : bookFlowFromLineAttributes(node.attributes);
+        const itemIsBirthPackage =
+          isBirthPackageVariantId(variantId) ||
+          isBirthPackageFromAttributes(node.attributes);
+        const itemBlanketPattern = blanketPatternFromLineAttributes(
+          node.attributes,
+        );
 
         return {
           id: node.id,
@@ -412,6 +444,8 @@ export async function POST(request: NextRequest) {
           bookFlow: itemBookFlow,
           variantId: variantId ?? undefined,
           bookColor: itemBookColor ?? undefined,
+          isBirthPackage: itemIsBirthPackage || undefined,
+          blanketPattern: itemBlanketPattern,
         };
       }) || [];
 

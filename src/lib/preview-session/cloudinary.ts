@@ -1,3 +1,5 @@
+import { formatUnknownError } from "./generation-errors";
+
 export interface CloudinaryUploadResult {
   secureUrl: string;
   publicId: string;
@@ -19,6 +21,22 @@ function getCloudinaryApiCredentials(): {
 
 export function canSignCloudinaryUploads(): boolean {
   return getCloudinaryApiCredentials() !== null;
+}
+
+async function postCloudinaryUpload(
+  cloudName: string,
+  formData: FormData,
+  headers?: HeadersInit,
+): Promise<Response> {
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+  try {
+    return await fetch(url, { method: "POST", body: formData, headers });
+  } catch (error) {
+    throw new Error(
+      `Cloudinary upload connect failed: ${formatUnknownError(error)}`,
+      { cause: error },
+    );
+  }
 }
 
 function normalizeFullPublicId(publicId: string): string {
@@ -92,10 +110,7 @@ async function uploadToCloudinary(
   formData.append("upload_preset", uploadPreset);
   formData.append("folder", folder);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: "POST", body: formData },
-  );
+  const response = await postCloudinaryUpload(cloudName, formData);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -152,10 +167,7 @@ async function uploadNamedToCloudinary(
     formData.append("tags", tags.join(","));
   }
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: "POST", body: formData },
-  );
+  const response = await postCloudinaryUpload(cloudName, formData);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -267,14 +279,9 @@ export async function overwriteCloudinaryAsset(
 
   const basicAuth = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    {
-      method: "POST",
-      headers: { Authorization: `Basic ${basicAuth}` },
-      body: formData,
-    },
-  );
+  const response = await postCloudinaryUpload(cloudName, formData, {
+    Authorization: `Basic ${basicAuth}`,
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -292,7 +299,15 @@ export async function copyCloudinaryUrlToPublicId(
   sourceUrl: string,
   assetPath: string,
 ): Promise<CloudinaryUploadResult> {
-  const response = await fetch(sourceUrl);
+  let response: Response;
+  try {
+    response = await fetch(sourceUrl);
+  } catch (error) {
+    throw new Error(
+      `Failed to fetch Cloudinary source: ${formatUnknownError(error)}`,
+      { cause: error },
+    );
+  }
   if (!response.ok) {
     throw new Error(`Failed to fetch Cloudinary source: ${response.status}`);
   }

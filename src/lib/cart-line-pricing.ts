@@ -3,6 +3,8 @@ import {
   BOOK_PRICE,
   DISCOUNTED_BOOK_PRICE,
   FRAMED_ART_UNIT_PRICE,
+  BLANKET_PRICE,
+  BIRTH_PACKAGE_PRICE,
 } from "@/lib/constants";
 import { resolveCartLinePrice } from "@/components/cart-line-price";
 
@@ -22,6 +24,12 @@ function getCatalogUnitPrice(
   if (item.isFramedArt) {
     return FRAMED_ART_UNIT_PRICE;
   }
+  if (item.isBambooBlanket) {
+    return BLANKET_PRICE;
+  }
+  if (item.isBirthPackage) {
+    return BIRTH_PACKAGE_PRICE;
+  }
   if (bookDisplayIndex != null) {
     const bookFallback = getBookLinePriceFallback(bookDisplayIndex);
     return bookFallback.compare ?? bookFallback.total;
@@ -40,6 +48,10 @@ export function getCartItemLinePricing(
     fallback = { total: item.giftCardAmount ?? 0 };
   } else if (item.isFramedArt) {
     fallback = { total: FRAMED_ART_UNIT_PRICE };
+  } else if (item.isBambooBlanket) {
+    fallback = { total: BLANKET_PRICE * quantity };
+  } else if (item.isBirthPackage) {
+    fallback = { total: BIRTH_PACKAGE_PRICE * quantity };
   } else if (bookDisplayIndex != null) {
     fallback = getBookLinePriceFallback(bookDisplayIndex);
   }

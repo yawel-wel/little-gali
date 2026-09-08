@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bookColorFromVariantId } from "@/lib/book-color";
+import { bookColorFromLineAttributes } from "@/lib/birth-package";
 import {
   extractImagesFromLineAttributes,
   representativeLineIdsForImageLoad,
@@ -146,7 +147,9 @@ export async function POST(request: NextRequest) {
           cartAttributes,
         );
         const variantId = node.merchandise?.id;
-        const bookColor = bookColorFromVariantId(variantId);
+        const bookColor =
+          bookColorFromVariantId(variantId) ??
+          bookColorFromLineAttributes(node.attributes);
 
         return {
           id: node.id,

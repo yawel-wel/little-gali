@@ -16,6 +16,27 @@ export const BOOK_VARIANT_IDS = {
   dark: "43869379854439",
 } as const;
 
+/** Matching bamboo blanket (soft-book upsell). */
+export const BLANKET_PRICE = 89;
+export const BLANKET_VARIANT_IDS = {
+  leopard: "44510336057447",
+  dots: "44510336090215",
+} as const;
+
+/** Soft book + bamboo blanket birth package (gift set). */
+export const BIRTH_PACKAGE_PRICE = 259;
+export const BIRTH_PACKAGE_PRODUCT_ID = "7751448199271";
+export const BIRTH_PACKAGE_VARIANT_IDS = {
+  dots: "44525569704039",
+  leopard: "44525569736807",
+} as const;
+
+export function birthPackageVariantGid(
+  pattern: keyof typeof BIRTH_PACKAGE_VARIANT_IDS = "dots",
+): string {
+  return `gid://shopify/ProductVariant/${BIRTH_PACKAGE_VARIANT_IDS[pattern]}`;
+}
+
 // Gift Card Configuration
 export const GIFT_CARD_OPTIONS = [
   { id: 'one_with_shipping', price: 220, labelKey: 'giftCard.option2' },

@@ -74,9 +74,9 @@ export function BookInUseSection() {
     <section
       id="book-in-use"
       aria-labelledby="book-in-use-heading"
-      className="pt-8 pb-12 lg:pt-10 lg:pb-20 bg-white"
+      className="pt-6 pb-12 lg:pb-20 bg-white"
     >
-      <div className="text-center mb-8 lg:mb-12 px-4">
+      <div className="text-center mb-6 px-4">
         <Title
           as="h2"
           id="book-in-use-heading"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BookOpen, Frame } from "lucide-react";
+import { BookOpen, Frame, Layers } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { isFramedArtEnabled } from "@/lib/feature-flags";
 
@@ -21,7 +21,7 @@ function SuggestProductButton({
       type="button"
       dir="ltr"
       onClick={onClick}
-      className="flex w-full flex-1 items-center justify-between rounded-lg border border-gray-200 bg-[#F7F6F2] px-4 py-3.5 cursor-pointer transition-colors hover:bg-[#efede8]"
+      className="flex w-full min-w-[min(100%,14rem)] flex-1 items-center justify-between rounded-lg border border-gray-200 bg-[#F7F6F2] px-4 py-3.5 cursor-pointer transition-colors hover:bg-[#efede8]"
     >
       <span className="text-xl leading-none text-medium-gray" aria-hidden>
         +
@@ -60,7 +60,7 @@ export function CartSuggestProducts() {
         {t("cart.suggest.title")}
       </h2>
 
-      <div className="mt-3 flex w-full gap-2 justify-start">
+      <div className="mt-3 flex w-full flex-wrap gap-2 justify-start">
         <SuggestProductButton
           title={t("cart.suggest.bookTitle")}
           promo={t("cart.suggest.bookPromo")}
@@ -75,6 +75,12 @@ export function CartSuggestProducts() {
             onClick={() => router.push("/framed-art/upload")}
           />
         )}
+        <SuggestProductButton
+          title={t("cart.suggest.blanketTitle")}
+          promo={t("cart.suggest.blanketPromo")}
+          icon={<Layers className={iconClass} strokeWidth={iconStroke} />}
+          onClick={() => router.push("/bamboo-blanket")}
+        />
       </div>
     </section>
   );

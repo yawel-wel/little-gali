@@ -82,7 +82,20 @@ async function generateWithGemini(
     throw error;
   }
 
-  const { base64, mimeType } = prefetched ?? await downloadImageAsBase64ForGemini(imageUrl);
+  let source;
+  try {
+    source =
+      prefetched ?? (await downloadImageAsBase64ForGemini(imageUrl));
+  } catch (error) {
+    logPreviewGenerationFailure(
+      "color",
+      { model: COLOR_MODEL, stage: "download" },
+      error,
+      generationContext,
+    );
+    throw error;
+  }
+  const { base64, mimeType } = source;
   // Would be sent to the API as systemInstruction (disabled for prompt testing).
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 

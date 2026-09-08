@@ -8,18 +8,46 @@ export function isProhibitedContentErrorMessage(message: string): boolean {
   return message.includes("PROHIBITED_CONTENT");
 }
 
-export function classifyGenerationError(error: unknown): GenerationError {
-  const message =
-    error instanceof Error ? error.message : "Unknown generation error";
+function errorCode(error: object): string | undefined {
+  if (!("code" in error)) return undefined;
+  const code = error.code;
+  return typeof code === "string" || typeof code === "number"
+    ? String(code)
+    : undefined;
+}
 
-  if (isProhibitedContentErrorMessage(message)) {
+/** Walks Error.cause so Node `fetch failed` includes UND_ERR_CONNECT_TIMEOUT etc. */
+export function formatUnknownError(error: unknown, depth = 0): string {
+  if (error == null) {
+    return "unknown";
+  }
+  if (typeof error !== "object") {
+    return String(error);
+  }
+
+  const name = error instanceof Error ? error.name : undefined;
+  const message = error instanceof Error ? error.message : String(error);
+  const code = errorCode(error);
+  const head = [name, message].filter(Boolean).join(": ");
+  const withCode = code ? `${head} (${code})` : head;
+
+  if (error instanceof Error && error.cause && depth < 4) {
+    return `${withCode} <- ${formatUnknownError(error.cause, depth + 1)}`;
+  }
+  return withCode;
+}
+
+export function classifyGenerationError(error: unknown): GenerationError {
+  const detail = formatUnknownError(error);
+  const lower = detail.toLowerCase();
+
+  if (isProhibitedContentErrorMessage(detail)) {
     return {
       code: "prohibited_content",
       message: PROHIBITED_CONTENT_ERROR_MESSAGE,
     };
   }
 
-  const lower = message.toLowerCase();
   if (
     lower.includes("safety") ||
     lower.includes("blocked") ||
@@ -32,16 +60,24 @@ export function classifyGenerationError(error: unknown): GenerationError {
         "לא הצלחנו לעבד את התמונה. נסו תמונה אחרת עם פחות רגישות לפרטיות.",
     };
   }
-  if (lower.includes("timeout") || lower.includes("timed out")) {
+  if (
+    lower.includes("timeout") ||
+    lower.includes("timed out") ||
+    lower.includes("etimedout") ||
+    lower.includes("und_err_connect_timeout")
+  ) {
     return {
       code: "timeout",
-      message: "העיבוד לקח יותר מדי זמן. נסו שוב בעוד רגע.",
+      message:
+        process.env.NODE_ENV === "development"
+          ? detail.slice(0, 500)
+          : "העיבוד לקח יותר מדי זמן. נסו שוב בעוד רגע.",
     };
   }
   if (process.env.NODE_ENV === "development") {
     return {
       code: "generic",
-      message: message.slice(0, 500),
+      message: detail.slice(0, 500),
     };
   }
   return {

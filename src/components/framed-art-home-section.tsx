@@ -49,7 +49,7 @@ export function FramedArtHomeSection() {
     <motion.section
       id="framed-art"
       aria-label={t("home.framedArt.ariaLabel")}
-      className="relative bg-white pb-12 pt-8 lg:pb-16 lg:pt-4"
+      className="relative bg-white pb-12 pt-0 lg:pb-16"
       {...reveal.section}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

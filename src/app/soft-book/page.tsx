@@ -11,6 +11,7 @@ import { FreePreviewNote } from "@/components/feature-pill";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { QaPreviewSection } from "@/components/qa-preview-section";
 import { LooxProductRating } from "@/components/loox-widget-section";
+import { SoftBookFeatureHighlights } from "@/components/soft-book-feature-highlights";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
@@ -21,45 +22,10 @@ import {
   getPreferredBookColor,
   setPreferredBookColor,
 } from "@/lib/book-color";
+import { clearGiftSetFlow } from "@/lib/gift-set";
 import { useLanguage } from "@/lib/LanguageContext";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-
-const DESCRIPTION_FEATURE_ITEMS: {
-  key:
-    | "product.book.description.bullet2"
-    | "product.book.description.bullet3"
-    | "product.book.description.bullet4"
-    | "product.book.description.bullet5"
-    | "product.book.description.bullet6"
-    | "product.book.description.bullet7";
-  iconSrc: string;
-}[] = [
-  {
-    key: "product.book.description.bullet2",
-    iconSrc: "/soft-book-features/swap.png",
-  },
-  {
-    key: "product.book.description.bullet3",
-    iconSrc: "/soft-book-features/mirror.png",
-  },
-  {
-    key: "product.book.description.bullet4",
-    iconSrc: "/soft-book-features/sparkle.png",
-  },
-  {
-    key: "product.book.description.bullet5",
-    iconSrc: "/soft-book-features/shield.png",
-  },
-  {
-    key: "product.book.description.bullet6",
-    iconSrc: "/soft-book-features/baby.png",
-  },
-  {
-    key: "product.book.description.bullet7",
-    iconSrc: "/soft-book-features/gift.png",
-  },
-];
 
 type ProductTab = "description" | "goodToKnow";
 
@@ -135,6 +101,7 @@ export default function SoftBookProductPage() {
   };
 
   const handleFlowStart = () => {
+    clearGiftSetFlow();
     setPreferredBookColor(selectedColor);
     track(ANALYTICS_EVENTS.BOOKLET_FLOW_STARTED, {
       book_color: selectedColor,
@@ -258,7 +225,7 @@ export default function SoftBookProductPage() {
 
                 <div
                   className={cn(
-                    "order-2 flex items-baseline",
+                    "order-2 -my-3 flex items-baseline",
                     isHe ? "justify-start" : "justify-start",
                   )}
                   dir={isHe ? "rtl" : "ltr"}
@@ -276,32 +243,16 @@ export default function SoftBookProductPage() {
                   <p className="max-w-full break-words font-body text-medium-gray leading-snug whitespace-pre-line">
                     {t("product.book.description.intro")}
                   </p>
-                  <ul
+                  <div
                     className={cn(
-                      "grid w-fit max-w-full grid-cols-3 gap-x-3 gap-y-3 sm:gap-x-4 sm:gap-y-3.5",
-                      isHe ? "ml-auto" : "mr-auto",
+                      "w-full lg:w-fit lg:max-w-full",
+                      isHe ? "lg:ml-auto" : "lg:mr-auto",
                     )}
-                    dir={isHe ? "rtl" : "ltr"}
                   >
-                    {DESCRIPTION_FEATURE_ITEMS.map(({ key, iconSrc }) => (
-                      <li
-                        key={key}
-                        className="flex min-w-0 max-w-[6.5rem] flex-col items-center gap-1 text-center sm:max-w-[7.25rem]"
-                      >
-                        <Image
-                          src={iconSrc}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="h-7 w-7 object-contain sm:h-8 sm:w-8"
-                          aria-hidden
-                        />
-                        <span className="font-handwritten max-w-full break-words text-[11px] leading-tight text-dark-gray sm:text-xs">
-                          {t(key)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                    <SoftBookFeatureHighlights
+                      className={isHe ? "lg:ml-0" : "lg:mr-0"}
+                    />
+                  </div>
                 </div>
 
                 {/* Color selector */}

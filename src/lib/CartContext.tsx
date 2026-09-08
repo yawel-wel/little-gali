@@ -16,7 +16,7 @@ import {
   extractColorUrlsFromAttributes,
   extractImagesFromLineAttributes,
 } from "./cart-line-images";
-import { FRAMED_ART_UNIT_PRICE } from "./constants";
+import { FRAMED_ART_UNIT_PRICE, BLANKET_PRICE, BIRTH_PACKAGE_PRICE } from "./constants";
 import { isValidBookCartImageCount, isValidBookCartStyle } from "./preview-session/generation-stats";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
 import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
@@ -34,6 +34,24 @@ import {
   saveCartGiftNote,
 } from "./shopify/cart-gift-note";
 import { hideResumeSessionId } from "./preview-session/preview-session-id-history";
+import {
+  BLANKET_PRODUCT_IMAGES,
+  blanketPatternFromVariantId,
+  isBlanketPattern,
+  type BlanketPattern,
+} from "./blanket";
+import {
+  blanketPatternFromBirthPackageVariantId,
+  blanketPatternFromLineAttributes,
+  bookColorFromLineAttributes,
+  isBirthPackageFromAttributes,
+  isBirthPackageVariantId,
+} from "./birth-package";
+import {
+  clearGiftSetFlow,
+  getGiftSetBlanketPattern,
+  isGiftSetFlow,
+} from "./gift-set";
 
 export interface CartItem {
   id: string;
@@ -53,6 +71,9 @@ export interface CartItem {
   giftCardAmount?: number;
   isFramedArt?: boolean;
   framedImageUrl?: string;
+  isBambooBlanket?: boolean;
+  isBirthPackage?: boolean;
+  blanketPattern?: BlanketPattern;
   /** Line total after Shopify discounts (from Storefront API). */
   lineTotalAmount?: number;
   /** Line subtotal before discounts, when greater than lineTotalAmount. */
@@ -75,6 +96,8 @@ export interface BookFulfillmentImages {
   previewSessionId?: string;
   generationStats?: PreviewGenerationStats;
   bookFlow?: "classic" | "colorful";
+  isBirthPackage?: boolean;
+  blanketPattern?: BlanketPattern;
 }
 
 export interface Cart {
@@ -104,6 +127,7 @@ interface CartContextType {
     sessionId: string,
     style: "cartoon" | "pencil" | "watercolor",
   ) => Promise<void>;
+  addBlanketToCart: (pattern: BlanketPattern) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   fetchCart: (cartId: string, options?: { silent?: boolean }) => Promise<void>;
@@ -111,6 +135,9 @@ interface CartContextType {
   clearCart: () => void;
   /** Wipes local cart immediately; best-effort Shopify line cleanup in background. */
   resetCart: () => Promise<void>;
+  isCartOpen: boolean;
+  openCart: () => void;
+  setCartOpen: (open: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -120,7 +147,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   // Start in loading state to avoid initial empty-state flicker until we check localStorage
   const [isLoading, setIsLoading] = useState(true);
+  const [isCartOpen, setCartOpen] = useState(false);
   const fetchCartSeqRef = useRef(0);
+
+  const openCart = useCallback(() => {
+    setCartOpen(true);
+  }, []);
 
   // Helper function to ensure checkoutUrl always has the current locale
   const ensureLocaleInCheckoutUrl = useCallback((checkoutUrl: string): string => {
@@ -199,6 +231,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               ),
             );
 
+            const patternAttr = line.attributes?.find(
+              (attr) => attr.key === "_pattern" || attr.key === "_blanket_pattern",
+            )?.value;
+            const isBambooBlanket = Boolean(
+              line.attributes?.some(
+                (attr) =>
+                  attr.key === "_product_type" &&
+                  attr.value === "bamboo_blanket",
+              ) || blanketPatternFromVariantId(line.variantId),
+            );
+            const isBirthPackage = Boolean(
+              isBirthPackageFromAttributes(line.attributes) ||
+                isBirthPackageVariantId(line.variantId),
+            );
+            const blanketPattern: BlanketPattern | undefined = isBambooBlanket
+              ? isBlanketPattern(patternAttr)
+                ? patternAttr
+                : blanketPatternFromVariantId(line.variantId) ?? "dots"
+              : isBirthPackage
+                ? blanketPatternFromLineAttributes(line.attributes) ??
+                  blanketPatternFromBirthPackageVariantId(line.variantId)
+                : undefined;
+
+            if (isBambooBlanket && blanketPattern) {
+              imageUrls = [BLANKET_PRODUCT_IMAGES[blanketPattern]];
+            }
+
             let giftCardAmount: number | undefined;
             if (isGiftCard && line.attributes) {
               const amountAttr = line.attributes.find(
@@ -215,7 +274,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
 
             let style = stored?.style;
-            if (!style && line.attributes && !isGiftCard) {
+            if (
+              !style &&
+              line.attributes &&
+              !isGiftCard &&
+              !isBambooBlanket
+            ) {
               const styleAttr = line.attributes.find(
                 (attr) => attr.key === "style" || attr.key === "_style",
               );
@@ -236,17 +300,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 ? bookFlowAttr.value
                 : undefined;
             const bookFlow =
-              bookFlowFromAttr ??
-              (style === "colorful"
-                ? ("colorful" as const)
-                : imageUrls.length === 9
-                  ? ("colorful" as const)
-                  : ("classic" as const));
+              isGiftCard || isFramedArt || isBambooBlanket
+                ? undefined
+                : bookFlowFromAttr ??
+                  (style === "colorful"
+                    ? ("colorful" as const)
+                    : imageUrls.length === 9
+                      ? ("colorful" as const)
+                      : ("classic" as const));
 
             const bookColor =
-              line.bookColor ??
-              bookColorFromVariantId(line.variantId) ??
-              undefined;
+              isGiftCard || isFramedArt || isBambooBlanket
+                ? undefined
+                : (line.bookColor ??
+                  bookColorFromVariantId(line.variantId) ??
+                  bookColorFromLineAttributes(line.attributes) ??
+                  undefined);
 
             const framedImageUrl =
               isFramedArt && imageUrls[0]
@@ -260,9 +329,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 attr.key === "_preview_session_id" ||
                 attr.key === "preview_session_id",
             )?.value;
-            const previewSessionId = isGiftCard
-              ? undefined
-              : stored?.previewSessionId ?? previewSessionIdFromAttr;
+            const previewSessionId =
+              isGiftCard || isBambooBlanket
+                ? undefined
+                : stored?.previewSessionId ?? previewSessionIdFromAttr;
 
             return {
               id: line.id,
@@ -270,18 +340,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               quantity: line.quantity,
               title: line.title,
               imageUrls: isGiftCard ? [] : imageUrls,
-              originalUrls: isGiftCard ? undefined : stored?.originalUrls,
-              generatedBwUrls: isGiftCard ? undefined : stored?.generatedBwUrls,
-              generatedColorUrls: isGiftCard ? undefined : generatedColorUrls,
+              originalUrls:
+                isGiftCard || isBambooBlanket
+                  ? undefined
+                  : stored?.originalUrls,
+              generatedBwUrls:
+                isGiftCard || isBambooBlanket
+                  ? undefined
+                  : stored?.generatedBwUrls,
+              generatedColorUrls:
+                isGiftCard || isBambooBlanket
+                  ? undefined
+                  : generatedColorUrls,
               previewSessionId,
-              style: isGiftCard ? undefined : style,
-              bookFlow: isGiftCard || isFramedArt ? undefined : bookFlow,
-              bookColor: isGiftCard || isFramedArt ? undefined : bookColor,
+              style: isGiftCard || isBambooBlanket ? undefined : style,
+              bookFlow,
+              bookColor,
               variantId: line.variantId,
               isGiftCard,
               giftCardAmount,
               isFramedArt,
               framedImageUrl,
+              isBambooBlanket,
+              isBirthPackage: isBirthPackage || undefined,
+              blanketPattern,
               lineTotalAmount: linePricing?.total,
               lineCompareAmount: linePricing?.compare,
               attributes: line.attributes,
@@ -300,6 +382,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
           }
 
+          const visibleItems = displayItems.filter((item) => item.quantity > 0);
+
           setCart({
             id: data.cart.id,
             checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
@@ -307,7 +391,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             totalQuantity: data.cart.totalQuantity,
             totalAmount: data.cart.totalAmount,
             currencyCode: data.cart.currencyCode,
-            items: displayItems,
+            items: visibleItems,
           });
           localStorage.setItem("shopify_cart_id", data.cart.id);
         }
@@ -348,6 +432,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
           if (isAddingToCart()) {
             // Avoid a stale fetch racing with add-to-cart; /cart refreshes when done.
+            setIsLoading(false);
             return;
           }
         } catch {}
@@ -403,6 +488,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      const birthPackage =
+        fulfillment?.isBirthPackage === true || isGiftSetFlow();
+      const resolvedBlanketPattern =
+        (isBlanketPattern(fulfillment?.blanketPattern)
+          ? fulfillment?.blanketPattern
+          : undefined) ??
+        (birthPackage ? getGiftSetBlanketPattern() : undefined);
+
       const addPayload = {
         imageUrls,
         quantity,
@@ -418,6 +511,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         previewSessionId: fulfillment?.previewSessionId,
         generationStats: fulfillment?.generationStats,
         mixpanelDistinctId,
+        isBirthPackage: birthPackage || undefined,
+        blanketPattern: resolvedBlanketPattern,
       };
 
       let response;
@@ -485,13 +580,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 generatedColorUrls: fulfillment.generatedColorUrls,
                 previewSessionId: fulfillment.previewSessionId,
                 bookFlow: fulfillment.bookFlow ?? base.bookFlow,
+                isBirthPackage:
+                  item.isBirthPackage ?? birthPackage ?? base.isBirthPackage,
+                blanketPattern:
+                  item.blanketPattern ??
+                  resolvedBlanketPattern ??
+                  base.blanketPattern,
               };
             }
-            return base;
+            return {
+              ...base,
+              isBirthPackage: item.isBirthPackage ?? existingItem?.isBirthPackage,
+              blanketPattern:
+                item.blanketPattern ?? existingItem?.blanketPattern,
+            };
           });
 
           if (fulfillment?.previewSessionId) {
             hideResumeSessionId(fulfillment.previewSessionId);
+          }
+
+          if (birthPackage) {
+            clearGiftSetFlow();
           }
 
           setCart({
@@ -516,9 +626,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // Track Meta Pixel AddToCart event
           try {
             trackAddToCart(
-              "Little Gali Baby Book",
+              birthPackage ? "Birth Package" : "Little Gali Baby Book",
               bookId || "custom-book",
-              quantity * 149,
+              quantity * (birthPackage ? BIRTH_PACKAGE_PRICE : 149),
               quantity
             );
           } catch (err) {
@@ -635,6 +745,107 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw error;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addBlanketToCart = async (pattern: BlanketPattern) => {
+    const previousCart = cart;
+    const optimisticId = `optimistic-blanket-${pattern}-${Date.now()}`;
+    const optimisticItem: CartItem = {
+      id: optimisticId,
+      lineId: optimisticId,
+      quantity: 1,
+      imageUrls: [BLANKET_PRODUCT_IMAGES[pattern]],
+      isBambooBlanket: true,
+      blanketPattern: pattern,
+      lineTotalAmount: BLANKET_PRICE,
+      attributes: [
+        { key: "_product_type", value: "bamboo_blanket" },
+        { key: "_pattern", value: pattern },
+      ],
+    };
+
+    setCart((current) => {
+      if (!current) {
+        return {
+          id: "optimistic",
+          checkoutUrl: "",
+          totalQuantity: 1,
+          totalAmount: String(BLANKET_PRICE),
+          items: [optimisticItem],
+        };
+      }
+      const prevTotal = current.totalAmount
+        ? parseFloat(current.totalAmount)
+        : 0;
+      const nextTotal = (Number.isFinite(prevTotal) ? prevTotal : 0) + BLANKET_PRICE;
+      return {
+        ...current,
+        totalQuantity: current.totalQuantity + 1,
+        totalAmount: String(nextTotal),
+        items: [...current.items, optimisticItem],
+      };
+    });
+    openCart();
+
+    try {
+      const response = await fetch("/api/shopify/cart/add-blanket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: previousCart?.id?.startsWith("gid://")
+            ? previousCart.id
+            : undefined,
+          pattern,
+          locale,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(
+          (error as { error?: string }).error ||
+            "Failed to add blanket to cart",
+        );
+      }
+
+      const data = await response.json();
+      if (data.cart?.id) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("shopify_cart_id", data.cart.id);
+        }
+        // Promote off the optimistic placeholder immediately so checkout is usable
+        // even if the full line hydrate is slow.
+        setCart((current) => ({
+          id: data.cart.id,
+          checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl ?? ""),
+          totalQuantity:
+            data.cart.totalQuantity ?? current?.totalQuantity ?? 1,
+          totalAmount:
+            data.cart.totalAmount ??
+            current?.totalAmount ??
+            String(BLANKET_PRICE),
+          currencyCode: data.cart.currencyCode ?? current?.currencyCode,
+          items: current?.items ?? [optimisticItem],
+        }));
+        setIsLoading(false);
+        await fetchCart(data.cart.id, { silent: true });
+        try {
+          trackAddToCart(
+            "Bamboo Blanket",
+            pattern,
+            BLANKET_PRICE,
+            1,
+          );
+        } catch (err) {
+          console.error("Error tracking blanket AddToCart:", err);
+        }
+      }
+    } catch (error) {
+      console.error("Error adding blanket to cart:", error);
+      setCart(previousCart);
+      setIsLoading(false);
+      throw error;
     }
   };
 
@@ -825,12 +1036,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         addToCart,
         addGiftCardToCart,
         addFramedArtToCart,
+        addBlanketToCart,
         removeFromCart,
         updateQuantity,
         fetchCart,
         updateCartNote,
         clearCart,
         resetCart,
+        isCartOpen,
+        openCart,
+        setCartOpen,
       }}
     >
       {children}

@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import {
-  motion,
-  useReducedMotion,
-  useMotionValue,
-  animate,
-} from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
@@ -20,13 +14,11 @@ import {
 import { GiftCardSection } from "@/components/gift-card-section";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
-import { BOOK_PRICE } from "@/lib/constants";
-import { isAiPreviewEnabled, isFramedArtEnabled } from "@/lib/feature-flags";
-import { BookFeaturePills, FreePreviewNote } from "@/components/feature-pill";
-import { FramedArtHomeSection } from "@/components/framed-art-home-section";
+import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import { QaPreviewSection } from "@/components/qa-preview-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { HomeCtaButton } from "@/components/home-cta-button";
+import { HomeCategoryBento } from "@/components/home-category-bento";
 import { Eye, Gift, Heart, ShieldCheck, type LucideIcon } from "lucide-react";
 
 const HERO_IMAGE_MOBILE = "/hero-image-mobile.png";
@@ -83,7 +75,6 @@ export default function Home() {
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
   const previewOn = isAiPreviewEnabled();
-  const framedOn = isFramedArtEnabled();
   const howItWorksSteps = previewOn
     ? [
         {
@@ -130,34 +121,7 @@ export default function Home() {
         },
       ];
   const reveal = useScrollReveal(easeOwlet);
-  const bookImages = [
-    { src: "/our-book-light.JPG", labelKey: "home.book.bwSide" as const },
-    { src: "/our-book-dark.JPG", labelKey: "home.book.colorSide" as const },
-  ];
-  const [bookImageIndex, setBookImageIndex] = useState(0);
-  const bookCarouselRef = useRef<HTMLDivElement>(null);
   const specialScrollRef = useRef<HTMLDivElement>(null);
-  const bookX = useMotionValue(0);
-  const [bookStep, setBookStep] = useState(0);
-
-  // Compute and keep the carousel step (80% of container width) up to date
-  useEffect(() => {
-    const update = () => {
-      if (bookCarouselRef.current) {
-        setBookStep(bookCarouselRef.current.offsetWidth * 0.8);
-      }
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  // Animate bookX whenever the index changes (from labels, dots, or drag)
-  useEffect(() => {
-    if (bookStep === 0) return;
-    const targetX = locale === "he" ? bookImageIndex * bookStep : -bookImageIndex * bookStep;
-    animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
-  }, [bookImageIndex, locale, bookStep]);
 
   useEffect(() => {
     const container = specialScrollRef.current;
@@ -179,31 +143,6 @@ export default function Home() {
       container.scrollBy({ left: delta, top: 0 });
     });
   }, [locale]);
-
-  const handleBookDragEnd = (_: any, info: any) => {
-    const step = (bookCarouselRef.current?.offsetWidth ?? bookStep / 0.8) * 0.8;
-    const threshold = step * 0.25;
-    const { offset, velocity } = info;
-    let newIndex = bookImageIndex;
-    if (locale === "he") {
-      // RTL: drag right (positive) reveals color at +step
-      if (offset.x > threshold || velocity.x > 300) {
-        newIndex = Math.min(bookImageIndex + 1, bookImages.length - 1);
-      } else if (offset.x < -threshold || velocity.x < -300) {
-        newIndex = Math.max(bookImageIndex - 1, 0);
-      }
-    } else {
-      // LTR: drag left (negative) reveals color at -step
-      if (offset.x < -threshold || velocity.x < -300) {
-        newIndex = Math.min(bookImageIndex + 1, bookImages.length - 1);
-      } else if (offset.x > threshold || velocity.x > 300) {
-        newIndex = Math.max(bookImageIndex - 1, 0);
-      }
-    }
-    setBookImageIndex(newIndex);
-    const targetX = locale === "he" ? newIndex * step : -newIndex * step;
-    animate(bookX, targetX, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
-  };
 
   // Handle hash scrolling on page load and when hash changes
   useEffect(() => {
@@ -386,238 +325,19 @@ export default function Home() {
 
         <BookInUseSection />
 
+        <HomeCategoryBento />
+
         <LooxWidgetSection
           variant="cards-carousel"
           productId={LOOX_PRODUCT_ID}
           showComparisonLabel={false}
         />
 
-        {/* הספרון שלנו Section */}
-        <motion.section
-          id="book"
-          aria-label={t("home.book.ariaLabel")}
-          className="relative -mt-0 pt-8 lg:pt-0 pb-12 lg:pb-16 bg-white"
-          {...reveal.section}
-        >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                {/* Left Column - Text Content */}
-                <div className="order-1 lg:order-1 space-y-6">
-                  {/* Section header */}
-                  <div
-                    className={`-mt-3 ${
-                      locale === "en"
-                        ? "text-center lg:text-left"
-                        : "text-center lg:text-right"
-                    }`}
-                  >
-                    <p className="text-base lg:text-lg font-heading text-primary-orange">
-                      {t("home.book.title")}
-                    </p>
-                    <h2 className="mt-0.5 lg:mt-0 text-[22px] sm:text-3xl lg:text-4xl font-heading font-bold text-dark-gray leading-tight">
-                      {t("home.book.subtitle")
-                        .split("|")
-                        .map((line, i, lines) => (
-                          <span key={i}>
-                            {line}
-                            {i < lines.length - 1 && <br />}
-                          </span>
-                        ))}
-                    </h2>
-                  </div>
-
-                  {/* Description Text */}
-                  <div
-                    className={`-mt-3 space-y-3 ${
-                      locale === "en"
-                        ? "text-center lg:text-left"
-                        : "text-center lg:text-right"
-                    }`}
-                  >
-                    <p className="font-body text-medium-gray leading-relaxed">
-                      {t("home.book.description")}
-                    </p>
-                    <BookFeaturePills t={t} locale={locale} />
-                  </div>
-
-                  {/* Price & CTA */}
-                  <div
-                    className={
-                      locale === "en"
-                        ? "text-center lg:text-left"
-                        : "text-center lg:text-right"
-                    }
-                  >
-                    <div
-                      className={`inline-flex w-full max-w-md flex-col gap-4 lg:w-auto lg:min-w-[17rem] items-center ${
-                        locale === "en"
-                          ? "lg:mr-auto lg:items-start"
-                          : "lg:ml-auto lg:items-end"
-                      }`}
-                    >
-                    <div
-                      className={`w-full ${
-                        locale === "en"
-                          ? "text-center lg:text-left"
-                          : "text-center lg:text-right"
-                      }`}
-                    >
-                      <span className="text-sm font-body text-medium-gray block mb-1">
-                        {t("home.book.price")}
-                      </span>
-                      <div
-                        className={`inline-flex items-baseline justify-center gap-0 font-heading font-bold text-dark-gray lg:justify-start ${
-                          locale === "he" ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        <span className="text-2xl">₪</span>
-                        <span className="text-[32px] leading-none">{BOOK_PRICE}</span>
-                      </div>
-                    </div>
-
-                    <p
-                      className={`-mt-3 w-full font-body text-medium-gray text-sm sm:text-base ${
-                        locale === "en"
-                          ? "text-center lg:text-left"
-                          : "text-center lg:text-right"
-                      }`}
-                    >
-                      <span className="inline-flex items-center gap-1.5">
-                        <svg
-                          className="w-4 h-4 shrink-0 text-[#693430]"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="M7.5 12.5l3 3 5.5-6" />
-                        </svg>
-                        <span>{t("home.book.secondBook")}</span>
-                      </span>
-                    </p>
-
-                    <a
-                      href="/soft-book"
-                      aria-label={t("home.book.ctaAriaLabel")}
-                      className="block w-full"
-                    >
-                      <HomeCtaButton fullWidth>
-                        {t("home.book.cta")}
-                      </HomeCtaButton>
-                    </a>
-
-                    <FreePreviewNote
-                      label={t("home.book.freePreview")}
-                      locale={locale}
-                      className={`-mt-2 w-full ${
-                        locale === "en"
-                          ? "text-center lg:text-left"
-                          : "text-center lg:text-right"
-                      }`}
-                    />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Two Images with Toggle */}
-                <div className="order-2 lg:order-2">
-                  <div className="w-full">
-                    {/* Label Tabs */}
-                    <div className="flex gap-2 mb-3 justify-center lg:pt-[52px]">
-                      {bookImages.map((img, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setBookImageIndex(i)}
-                          aria-pressed={bookImageIndex === i}
-                          className="text-sm font-body-bold px-4 py-1.5 rounded-full transition-colors bg-gray-100 text-gray-900 lg:cursor-pointer lg:hover:opacity-70"
-                          style={{
-                            border: bookImageIndex === i ? "2px solid #693430" : "2px solid transparent",
-                          }}
-                        >
-                          {t(img.labelKey)}
-                        </button>
-                      ))}
-                    </div>
-                    {/* Image carousel — active image fills ~88%, other peeks from the side */}
-                    <div
-                      ref={bookCarouselRef}
-                      className="overflow-hidden rounded-lg aspect-square select-none"
-                    >
-                      <motion.div
-                        className="flex h-full"
-                        style={{ width: "180%", gap: "2.22%", x: bookX }}
-                        drag="x"
-                        dragConstraints={{
-                          left: locale === "he" ? 0 : -bookStep,
-                          right: locale === "he" ? bookStep : 0,
-                        }}
-                        dragElastic={0.08}
-                        onDragEnd={handleBookDragEnd}
-                      >
-                        {bookImages.map((img, i) => (
-                          <div
-                            key={i}
-                            className="relative h-full flex-shrink-0 cursor-pointer"
-                            style={{ width: "48.89%" }}
-                            onClick={() => setBookImageIndex(i)}
-                          >
-                            <Image
-                              src={img.src}
-                              alt={t(img.labelKey)}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 80vw, 45vw"
-                            />
-                          </div>
-                        ))}
-                      </motion.div>
-                    </div>
-
-                    {/* Dot indicators — explicit left/right placement independent of RTL flex */}
-                    <div className="flex justify-center gap-2 mt-3" style={{ direction: "ltr" }}>
-                      {/* Left dot — always the visually left image */}
-                      <motion.button
-                        type="button"
-                        onClick={() => setBookImageIndex(locale === "he" ? 1 : 0)}
-                        className="block shrink-0 h-2 rounded-full lg:cursor-pointer lg:hover:opacity-70"
-                        variants={dotVariants}
-                        animate={bookImageIndex === (locale === "he" ? 1 : 0) ? "active" : "inactive"}
-                        style={{
-                          backgroundColor: bookImageIndex === (locale === "he" ? 1 : 0) ? "#693430" : "#9ca3af",
-                        }}
-                        aria-label={t(bookImages[locale === "he" ? 1 : 0].labelKey)}
-                      />
-                      {/* Right dot — always the visually right image */}
-                      <motion.button
-                        type="button"
-                        onClick={() => setBookImageIndex(locale === "he" ? 0 : 1)}
-                        className="block shrink-0 h-2 rounded-full lg:cursor-pointer lg:hover:opacity-70"
-                        variants={dotVariants}
-                        animate={bookImageIndex === (locale === "he" ? 0 : 1) ? "active" : "inactive"}
-                        style={{
-                          backgroundColor: bookImageIndex === (locale === "he" ? 0 : 1) ? "#693430" : "#9ca3af",
-                        }}
-                        aria-label={t(bookImages[locale === "he" ? 0 : 1].labelKey)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
         {/* How It Works Section */}
         <motion.section
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
-          className="relative bg-[#FAF7F4] pb-16 lg:pb-24"
+          className="relative bg-[#FAF7F4] pb-6"
           {...reveal.section}
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -700,8 +420,6 @@ export default function Home() {
             </motion.div>
           </div>
         </motion.section>
-
-        {framedOn && <FramedArtHomeSection />}
 
         {/* Custom testimonials from Loox API */}
         {/* <TestimonialsSection /> */}

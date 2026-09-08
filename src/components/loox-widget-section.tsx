@@ -348,9 +348,9 @@ export function LooxWidgetSection({
         onLoad={handleScriptLoad}
       />
 
-      <section className="relative bg-[#FAFAFA] py-16 lg:py-20">
+      <section className="relative bg-[#FAFAFA] py-3">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
+          <div className="text-center">
             <Title
               highlightText={t("home.testimonials.titleHighlight")}
               size="lg"
@@ -365,7 +365,7 @@ export function LooxWidgetSection({
             )}
           </div>
 
-          <div className="max-w-5xl mx-auto min-h-[200px]">
+          <div className="max-w-5xl mx-auto min-h-[200px] -mt-4">
             <LooxWidgetMarkup variant={variant} productId={productId} />
           </div>
         </div>

@@ -66,7 +66,19 @@ async function generateWithGemini(
     throw error;
   }
 
-  const { base64, mimeType } = await downloadImageAsBase64ForGemini(imageUrl);
+  let source;
+  try {
+    source = await downloadImageAsBase64ForGemini(imageUrl);
+  } catch (error) {
+    logPreviewGenerationFailure(
+      "bw",
+      { model: getBwImageModel(), stage: "download" },
+      error,
+      generationContext,
+    );
+    throw error;
+  }
+  const { base64, mimeType } = source;
   // Would be sent to the API as systemInstruction (disabled for prompt testing).
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
   const bwModel = getBwImageModel();

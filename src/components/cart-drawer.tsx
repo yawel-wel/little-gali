@@ -30,6 +30,11 @@ import { CartLineItemDetails } from "@/components/cart-line-item-details";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 import { getCartItemLinePricing } from "@/lib/cart-line-pricing";
 import { giftMessageFromCartNote } from "@/lib/shopify/cart-gift-note";
+import {
+  BLANKET_PATTERN_LABEL_KEYS,
+  BLANKET_SWATCH_IMAGES,
+} from "@/lib/blanket";
+import Image from "next/image";
 
 function getLineId(item: CartItem): string {
   return item.lineId || item.id;
@@ -70,15 +75,22 @@ function getBookColorDisplay(
 }
 
 export function CartDrawer() {
-  const { cart, isLoading, removeFromCart, updateQuantity, resetCart, updateCartNote } =
-    useCart();
+  const {
+    cart,
+    isLoading,
+    removeFromCart,
+    updateQuantity,
+    resetCart,
+    updateCartNote,
+    isCartOpen,
+    setCartOpen,
+  } = useCart();
   const { t, locale } = useLanguage();
   const [busyLineId, setBusyLineId] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [isResettingCart, setIsResettingCart] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const router = useRouter();
 
@@ -175,10 +187,13 @@ export function CartDrawer() {
 
   const cartItemCount = cart?.totalQuantity || 0;
 
-  const showDrawerSpinner = isLoading && !busyLineId;
+  // Prefer showing known items over a full-drawer spinner while a refresh runs.
+  const showDrawerSpinner = isLoading && !(cart?.items?.length);
+  const isCheckoutBusy = busyLineId !== null;
+  const canCheckout = Boolean(cart?.checkoutUrl);
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isCartOpen} onOpenChange={setCartOpen}>
       <SheetTrigger asChild>
         <Button
           variant="text"
@@ -227,7 +242,13 @@ export function CartDrawer() {
                   const reversedItems = [...cart.items].reverse();
                   const paperBooksBeforeThis = reversedItems
                     .slice(0, reversedIndex + 1)
-                    .filter((i) => !i.isGiftCard && !i.isFramedArt).length;
+                    .filter(
+                      (i) =>
+                        !i.isGiftCard &&
+                        !i.isFramedArt &&
+                        !i.isBambooBlanket &&
+                        !i.isBirthPackage,
+                    ).length;
                   const displayIndex = paperBooksBeforeThis;
                   const lineId = getLineId(item);
                   const isLineBusy = busyLineId === lineId;
@@ -252,8 +273,9 @@ export function CartDrawer() {
                           <Loader2 className="w-6 h-6 animate-spin text-primary-orange" />
                         </div>
                       )}
-                      {isOpen &&
+                      {isCartOpen &&
                         !item.isFramedArt &&
+                        !item.isBambooBlanket &&
                         getCartItemAvatarPreview(item).expectedCount > 0 && (
                           <CartItemGeneratedAvatars
                             item={item}
@@ -267,7 +289,10 @@ export function CartDrawer() {
                         {(() => {
                           const pricing = getCartItemLinePricing(
                             item,
-                            item.isGiftCard || item.isFramedArt
+                            item.isGiftCard ||
+                              item.isFramedArt ||
+                              item.isBambooBlanket ||
+                              item.isBirthPackage
                               ? undefined
                               : displayIndex,
                           );
@@ -277,30 +302,53 @@ export function CartDrawer() {
                             item.bookColor,
                             t,
                           );
+                          const blanketPattern = item.blanketPattern ?? "dots";
+                          const bookTypeLabel = getBookTypeLabel(
+                            item.bookFlow,
+                            t,
+                          );
                           const details = (
                             <CartLineItemDetails
                               locale={locale}
-                              colorValue={bookColorDisplay.label}
-                              colorSwatchSrc={bookColorDisplay.swatch}
+                              colorValue={
+                                item.isBambooBlanket
+                                  ? t(BLANKET_PATTERN_LABEL_KEYS[blanketPattern])
+                                  : bookColorDisplay.label
+                              }
+                              colorSwatchSrc={
+                                item.isBambooBlanket
+                                  ? BLANKET_SWATCH_IMAGES[blanketPattern]
+                                  : bookColorDisplay.swatch
+                              }
                               showColorRow={
-                                !item.isGiftCard && !item.isFramedArt
+                                (!item.isGiftCard && !item.isFramedArt) ||
+                                Boolean(item.isBambooBlanket)
                               }
                               styleValue={
-                                item.isGiftCard
+                                item.isGiftCard || item.isBambooBlanket
                                   ? undefined
                                   : getStyleLabel(item.style, t)
                               }
                               showStyleRow={
                                 !item.isGiftCard &&
+                                !item.isBambooBlanket &&
                                 item.style !== "pens" &&
                                 Boolean(item.style)
                               }
                               typeValue={
-                                item.isGiftCard || item.isFramedArt
+                                item.isGiftCard ||
+                                item.isFramedArt ||
+                                item.isBambooBlanket
                                   ? undefined
-                                  : getBookTypeLabel(item.bookFlow, t)
+                                  : item.isBirthPackage
+                                    ? `${bookTypeLabel} · ${t(BLANKET_PATTERN_LABEL_KEYS[blanketPattern])}`
+                                    : bookTypeLabel
                               }
-                              showTypeRow={!item.isGiftCard && !item.isFramedArt}
+                              showTypeRow={
+                                !item.isGiftCard &&
+                                !item.isFramedArt &&
+                                !item.isBambooBlanket
+                              }
                               quantity={quantity}
                               unitPrice={pricing.unitPrice}
                               lineTotal={pricing.lineTotal}
@@ -318,6 +366,35 @@ export function CartDrawer() {
                                 />
                                 {details}
                               </>
+                            );
+                          }
+
+                          if (item.isBambooBlanket) {
+                            return (
+                              <div
+                                className="flex items-start gap-2.5"
+                                dir={locale === "he" ? "rtl" : "ltr"}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <CartLineItemHeader
+                                    title={t("cart.blanketTitle")}
+                                    unitPrice={pricing.unitPrice}
+                                    locale={locale}
+                                  />
+                                  {details}
+                                </div>
+                                {item.imageUrls?.[0] ? (
+                                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-[#F3EEE8]">
+                                    <Image
+                                      src={item.imageUrls[0]}
+                                      alt=""
+                                      fill
+                                      className="object-cover"
+                                      sizes="64px"
+                                    />
+                                  </div>
+                                ) : null}
+                              </div>
                             );
                           }
 
@@ -352,7 +429,18 @@ export function CartDrawer() {
                           return (
                             <>
                               <CartLineItemHeader
-                                title={t("cart.book")}
+                                title={
+                                  item.isBirthPackage
+                                    ? t("cart.birthPackageTitle").replace(
+                                        "{pattern}",
+                                        t(
+                                          BLANKET_PATTERN_LABEL_KEYS[
+                                            blanketPattern
+                                          ],
+                                        ),
+                                      )
+                                    : t("cart.book")
+                                }
                                 unitPrice={pricing.unitPrice}
                                 locale={locale}
                               />
@@ -412,7 +500,7 @@ export function CartDrawer() {
                 color="primary"
                 onClick={() => void handleCheckout()}
                 className="w-full cursor-pointer"
-                disabled={isLoading || isCheckingOut || busyLineId !== null}
+                disabled={isCheckoutBusy || isCheckingOut || !canCheckout}
                 sx={{
                   textTransform: "none",
                   fontSize: "0.9rem",
@@ -422,12 +510,12 @@ export function CartDrawer() {
                   minHeight: 38,
                   mb: "8px",
                   cursor:
-                    isLoading || isCheckingOut || busyLineId !== null
+                    isCheckoutBusy || isCheckingOut || !canCheckout
                       ? "not-allowed"
                       : "pointer",
                 }}
               >
-                {isLoading || isCheckingOut || busyLineId !== null ? (
+                {isCheckoutBusy || isCheckingOut ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     {isCheckingOut ? t("cart.checkoutProgress") : t("cart.loading")}
@@ -439,7 +527,10 @@ export function CartDrawer() {
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={() => router.push("/cart")}
+                onClick={() => {
+                  setCartOpen(false);
+                  router.push("/cart");
+                }}
                 className="w-full cursor-pointer"
                 sx={{
                   textTransform: "none",
@@ -461,7 +552,7 @@ export function CartDrawer() {
                   setRemoveError(null);
                   try {
                     await resetCart();
-                    setIsOpen(false);
+                    setCartOpen(false);
                   } catch (error) {
                     console.error("Error resetting cart:", error);
                   } finally {

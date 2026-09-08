@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { formatUnknownError } from "./generation-errors";
 
 type PreviewGenerationKind = "bw" | "color";
 
@@ -194,7 +195,7 @@ export function logPreviewGenerationFailure(
   error: unknown,
   generationContext?: PreviewGenerationContext,
 ): void {
-  const detail = error instanceof Error ? error.message : String(error);
+  const detail = formatUnknownError(error);
   console.error(
     `[preview-${kind}] failed ${formatContext(context)} detail=${detail}`,
   );

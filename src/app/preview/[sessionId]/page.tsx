@@ -19,6 +19,7 @@ import { MobileImageEditor } from "@/components/mobile-image-editor";
 import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
 import { PreviewBookColorPicker } from "@/components/preview-book-color-picker";
 import { PreviewColorStyleStrip } from "@/components/preview-color-style-strip";
+import { PrintPatternPicker } from "@/components/print-pattern-picker";
 import { PreviewPhaseFooter } from "@/components/preview-phase-footer";
 import { PreviewSlotAlternateVersions } from "@/components/preview-slot-alternate-versions";
 import { PreviewSlotGenerationError } from "@/components/preview-slot-generation-error";
@@ -49,6 +50,15 @@ import {
   setPreferredBookColor,
   type BookColor,
 } from "@/lib/book-color";
+import {
+  getGiftSetBlanketPattern,
+  isGiftSetFlow,
+  setGiftSetBlanketPattern,
+} from "@/lib/gift-set";
+import {
+  DEFAULT_BLANKET_PATTERN,
+  type BlanketPattern,
+} from "@/lib/blanket";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useCart } from "@/lib/CartContext";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
@@ -402,6 +412,9 @@ export default function PreviewPage() {
   const [selectedBookColor, setSelectedBookColor] =
     useState<BookColor | null>(null);
   const [bookColorError, setBookColorError] = useState(false);
+  const [isGiftSet, setIsGiftSet] = useState(false);
+  const [giftSetBlanketPattern, setGiftSetBlanketPatternState] =
+    useState<BlanketPattern>(DEFAULT_BLANKET_PATTERN);
   const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
     () => new Set(),
   );
@@ -416,6 +429,17 @@ export default function PreviewPage() {
   const [error, setError] = useState<ReactNode | null>(null);
 
   useEffect(() => {
+    const giftSet = isGiftSetFlow();
+    setIsGiftSet(giftSet);
+    if (giftSet) {
+      const pattern = getGiftSetBlanketPattern();
+      setGiftSetBlanketPatternState(pattern);
+      // Gift-set UI pairs package type with book fabric: dots→light, leopard→dark
+      const pairedColor: BookColor = pattern === "leopard" ? "dark" : "light";
+      setSelectedBookColor(pairedColor);
+      setPreferredBookColor(pairedColor);
+      return;
+    }
     const preferred = getPreferredBookColor();
     if (preferred) {
       setSelectedBookColor(preferred);
@@ -1816,6 +1840,8 @@ export default function PreviewPage() {
           previewSessionId: sessionId,
           generationStats: buildPreviewGenerationStats(latest),
           bookFlow: colorful ? "colorful" : "classic",
+          isBirthPackage: isGiftSet || undefined,
+          blanketPattern: isGiftSet ? giftSetBlanketPattern : undefined,
         },
       );
 
@@ -2666,20 +2692,39 @@ export default function PreviewPage() {
                                 disabled={isSubmitting}
                               />
                             ) : null}
-                            <PreviewBookColorPicker
-                              selectedColor={selectedBookColor}
-                              onSelectColor={(color) => {
-                                setSelectedBookColor(color);
-                                setPreferredBookColor(color);
-                                setBookColorError(false);
-                              }}
-                              disabled={isSubmitting}
-                              errorMessage={
-                                bookColorError
-                                  ? t("preview.bookColor.required")
-                                  : undefined
-                              }
-                            />
+                            {isGiftSet ? (
+                              <div className="mt-8 w-full max-w-md px-2">
+                                <PrintPatternPicker
+                                  pattern={giftSetBlanketPattern}
+                                  labelKey="product.birthPackage.packageTypeLabel"
+                                  onPatternChange={(pattern) => {
+                                    setGiftSetBlanketPatternState(pattern);
+                                    setGiftSetBlanketPattern(pattern);
+                                    const pairedColor: BookColor =
+                                      pattern === "leopard" ? "dark" : "light";
+                                    setSelectedBookColor(pairedColor);
+                                    setPreferredBookColor(pairedColor);
+                                    setBookColorError(false);
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                              </div>
+                            ) : (
+                              <PreviewBookColorPicker
+                                selectedColor={selectedBookColor}
+                                onSelectColor={(color) => {
+                                  setSelectedBookColor(color);
+                                  setPreferredBookColor(color);
+                                  setBookColorError(false);
+                                }}
+                                disabled={isSubmitting}
+                                errorMessage={
+                                  bookColorError
+                                    ? t("preview.bookColor.required")
+                                    : undefined
+                                }
+                              />
+                            )}
                           </div>
                         ) : null}
                       </div>

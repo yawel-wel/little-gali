@@ -39,6 +39,11 @@ import {
   giftMessageFromCartNote,
   GIFT_MESSAGE_MAX_LENGTH,
 } from "@/lib/shopify/cart-gift-note";
+import {
+  BLANKET_PATTERN_LABEL_KEYS,
+  BLANKET_SWATCH_IMAGES,
+} from "@/lib/blanket";
+import Image from "next/image";
 
 function getLineId(item: CartItem): string {
   return item.lineId || item.id;
@@ -411,7 +416,13 @@ export default function CartPage() {
                       const reversedItems = [...cart.items].reverse();
                       const paperBooksBeforeThis = reversedItems
                         .slice(0, reversedIndex + 1)
-                        .filter((i) => !i.isGiftCard && !i.isFramedArt).length;
+                        .filter(
+                          (i) =>
+                            !i.isGiftCard &&
+                            !i.isFramedArt &&
+                            !i.isBambooBlanket &&
+                            !i.isBirthPackage,
+                        ).length;
                       const displayIndex = paperBooksBeforeThis;
                       const lineId = getLineId(item);
                       const isLineBusy = busyLineId === lineId;
@@ -426,6 +437,7 @@ export default function CartPage() {
                             </div>
                           )}
                           {!item.isFramedArt &&
+                            !item.isBambooBlanket &&
                             getCartItemAvatarPreview(item).expectedCount > 0 && (
                             <CartItemGeneratedAvatars
                               item={item}
@@ -438,7 +450,10 @@ export default function CartPage() {
                             {(() => {
                               const pricing = getCartItemLinePricing(
                                 item,
-                                item.isGiftCard || item.isFramedArt
+                                item.isGiftCard ||
+                                  item.isFramedArt ||
+                                  item.isBambooBlanket ||
+                                  item.isBirthPackage
                                   ? undefined
                                   : displayIndex,
                               );
@@ -448,31 +463,57 @@ export default function CartPage() {
                                 item.bookColor,
                                 t,
                               );
+                              const blanketPattern =
+                                item.blanketPattern ?? "dots";
+                              const bookTypeLabel = getBookTypeLabel(
+                                item.bookFlow,
+                                t,
+                              );
                               const details = (
                                 <CartLineItemDetails
                                   locale={locale}
-                                  colorValue={bookColorDisplay.label}
-                                  colorSwatchSrc={bookColorDisplay.swatch}
+                                  colorValue={
+                                    item.isBambooBlanket
+                                      ? t(
+                                          BLANKET_PATTERN_LABEL_KEYS[
+                                            blanketPattern
+                                          ],
+                                        )
+                                      : bookColorDisplay.label
+                                  }
+                                  colorSwatchSrc={
+                                    item.isBambooBlanket
+                                      ? BLANKET_SWATCH_IMAGES[blanketPattern]
+                                      : bookColorDisplay.swatch
+                                  }
                                   showColorRow={
-                                    !item.isGiftCard && !item.isFramedArt
+                                    (!item.isGiftCard && !item.isFramedArt) ||
+                                    Boolean(item.isBambooBlanket)
                                   }
                                   styleValue={
-                                    item.isGiftCard
+                                    item.isGiftCard || item.isBambooBlanket
                                       ? undefined
                                       : getStyleLabel(item.style, t)
                                   }
                                   showStyleRow={
                                     !item.isGiftCard &&
+                                    !item.isBambooBlanket &&
                                     item.style !== "pens" &&
                                     Boolean(item.style)
                                   }
                                   typeValue={
-                                    item.isGiftCard || item.isFramedArt
+                                    item.isGiftCard ||
+                                    item.isFramedArt ||
+                                    item.isBambooBlanket
                                       ? undefined
-                                      : getBookTypeLabel(item.bookFlow, t)
+                                      : item.isBirthPackage
+                                        ? `${bookTypeLabel} · ${t(BLANKET_PATTERN_LABEL_KEYS[blanketPattern])}`
+                                        : bookTypeLabel
                                   }
                                   showTypeRow={
-                                    !item.isGiftCard && !item.isFramedArt
+                                    !item.isGiftCard &&
+                                    !item.isFramedArt &&
+                                    !item.isBambooBlanket
                                   }
                                   quantity={quantity}
                                   unitPrice={pricing.unitPrice}
@@ -491,6 +532,35 @@ export default function CartPage() {
                                     />
                                     {details}
                                   </>
+                                );
+                              }
+
+                              if (item.isBambooBlanket) {
+                                return (
+                                  <div
+                                    className="flex items-start gap-3"
+                                    dir={locale === "he" ? "rtl" : "ltr"}
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <CartLineItemHeader
+                                        title={t("cart.blanketTitle")}
+                                        unitPrice={pricing.unitPrice}
+                                        locale={locale}
+                                      />
+                                      {details}
+                                    </div>
+                                    {item.imageUrls?.[0] ? (
+                                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-[#F3EEE8]">
+                                        <Image
+                                          src={item.imageUrls[0]}
+                                          alt=""
+                                          fill
+                                          className="object-cover"
+                                          sizes="80px"
+                                        />
+                                      </div>
+                                    ) : null}
+                                  </div>
                                 );
                               }
 
@@ -533,7 +603,18 @@ export default function CartPage() {
                               return (
                                 <>
                                   <CartLineItemHeader
-                                    title={t("cart.book")}
+                                    title={
+                                      item.isBirthPackage
+                                        ? t("cart.birthPackageTitle").replace(
+                                            "{pattern}",
+                                            t(
+                                              BLANKET_PATTERN_LABEL_KEYS[
+                                                blanketPattern
+                                              ],
+                                            ),
+                                          )
+                                        : t("cart.book")
+                                    }
                                     unitPrice={pricing.unitPrice}
                                     locale={locale}
                                   />

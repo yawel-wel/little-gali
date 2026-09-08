@@ -7,6 +7,10 @@ export function getCartItemAvatarPreview(item: CartItem): {
   slots: CartItemAvatarSlot[];
   expectedCount: number;
 } {
+  if (item.isBambooBlanket || item.isGiftCard) {
+    return { slots: [], expectedCount: 0 };
+  }
+
   if (item.isFramedArt) {
     const url = item.framedImageUrl ?? item.imageUrls?.[0] ?? null;
     return {
