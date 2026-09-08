@@ -164,9 +164,6 @@ export async function POST(request: NextRequest) {
             value: urls[4],
           },
         ],
-        note: `ספר מותאם אישית${bookId ? ` - ${bookId}` : ""}
-
-תמונות נשמרו בתכונות העגלה (cart attributes).`,
       },
     };
 

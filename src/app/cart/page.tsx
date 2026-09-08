@@ -20,7 +20,7 @@ import {
 } from "@/lib/book-color";
 import { ArrowRight, Loader2, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
@@ -35,6 +35,10 @@ import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 import { getCartItemLinePricing } from "@/lib/cart-line-pricing";
 import { isAddingToCart } from "@/lib/cart-add-pending";
 import { cartLineIdsMatch } from "@/lib/shopify/cart-line-id-match";
+import {
+  giftMessageFromCartNote,
+  GIFT_MESSAGE_MAX_LENGTH,
+} from "@/lib/shopify/cart-gift-note";
 
 function getLineId(item: CartItem): string {
   return item.lineId || item.id;
@@ -102,8 +106,15 @@ function readAddingToCartFlag(): boolean {
 }
 
 export default function CartPage() {
-  const { cart, isLoading, removeFromCart, updateQuantity, fetchCart, resetCart } =
-    useCart();
+  const {
+    cart,
+    isLoading,
+    removeFromCart,
+    updateQuantity,
+    fetchCart,
+    resetCart,
+    updateCartNote,
+  } = useCart();
   const router = useRouter();
   const { t, locale } = useLanguage();
   const [isOptimisticAdding, setIsOptimisticAdding] = useState(readAddingToCartFlag);
@@ -116,6 +127,10 @@ export default function CartPage() {
   const [isResettingCart, setIsResettingCart] = useState(false);
   const [addGiftMessage, setAddGiftMessage] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
+  const giftHydratedRef = useRef(false);
+  const giftTouchedRef = useRef(false);
+  const giftMessageRef = useRef("");
+  const addGiftMessageRef = useRef(false);
   const isPendingAdd = isOptimisticAdding || readAddingToCartFlag();
 
   // Refresh cart when opening /cart. Defer fetch while an add is in flight so we
@@ -165,15 +180,65 @@ export default function CartPage() {
     return () => window.clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    giftMessageRef.current = giftMessage;
+  }, [giftMessage]);
+
+  useEffect(() => {
+    addGiftMessageRef.current = addGiftMessage;
+  }, [addGiftMessage]);
+
+  useEffect(() => {
+    if (!cart || giftHydratedRef.current || cart.note === undefined) {
+      return;
+    }
+    giftHydratedRef.current = true;
+    if (giftTouchedRef.current) {
+      return;
+    }
+    const message = giftMessageFromCartNote(cart.note);
+    if (message) {
+      setAddGiftMessage(true);
+      setGiftMessage(message);
+    }
+  }, [cart]);
+
+  const persistGiftNote = useCallback(
+    async (note: string) => {
+      if (!cart?.id) {
+        return;
+      }
+      if (!giftHydratedRef.current && !giftTouchedRef.current) {
+        return;
+      }
+      await updateCartNote(note);
+    },
+    [cart?.id, updateCartNote],
+  );
+
   const handleGiftMessageCheckboxChange = (checked: boolean) => {
+    giftTouchedRef.current = true;
     setAddGiftMessage(checked);
     if (!checked) {
       setGiftMessage("");
+      void persistGiftNote("").catch((error) => {
+        console.error("Error saving gift message:", error);
+      });
     }
   };
 
   const handleGiftMessageChange = (message: string) => {
-    setGiftMessage(message.slice(0, 200));
+    giftTouchedRef.current = true;
+    setGiftMessage(message.slice(0, GIFT_MESSAGE_MAX_LENGTH));
+  };
+
+  const handleGiftMessageBlur = () => {
+    if (!addGiftMessageRef.current) {
+      return;
+    }
+    void persistGiftNote(giftMessageRef.current).catch((error) => {
+      console.error("Error saving gift message:", error);
+    });
   };
 
   const handleRemoveClick = (lineId: string) => {
@@ -269,33 +334,13 @@ export default function CartPage() {
   // Edit functionality removed: books can only be created via normal flow and not edited from cart
 
   const handleCheckout = async () => {
-    if (!cart?.checkoutUrl) return;
+    if (!cart?.id) return;
 
     setIsCheckingOut(true);
 
     try {
-      if (cart.id) {
-        const attributes = [
-          {
-            key: "_gift_message_enabled",
-            value: addGiftMessage ? "true" : "false",
-          },
-          {
-            key: "_gift_message",
-            value: addGiftMessage ? giftMessage : "",
-          },
-        ];
-
-        const response = await fetch("/api/shopify/cart/update-attributes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cartId: cart.id, attributes }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to save gift message");
-        }
-      }
+      const note = addGiftMessage ? giftMessage : "";
+      const checkoutUrl = await updateCartNote(note);
 
       try {
         const totalValue = cart.totalAmount ? parseFloat(cart.totalAmount) : 0;
@@ -304,14 +349,6 @@ export default function CartPage() {
         console.error("Error tracking InitiateCheckout:", err);
       }
 
-      let checkoutUrl = cart.checkoutUrl;
-      try {
-        const url = new URL(checkoutUrl);
-        url.searchParams.set("locale", locale);
-        checkoutUrl = url.toString();
-      } catch (e) {
-        console.error("Error parsing checkout URL:", e);
-      }
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error("Error proceeding to checkout:", error);
@@ -536,6 +573,7 @@ export default function CartPage() {
                         isLoading={isLoading || isPendingAdd}
                         onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
                         onGiftMessageChange={handleGiftMessageChange}
+                        onGiftMessageBlur={handleGiftMessageBlur}
                         onCheckout={() => void handleCheckout()}
                         giftCheckboxId="addGiftMessage"
                       />
@@ -553,6 +591,7 @@ export default function CartPage() {
                       isLoading={isLoading || isPendingAdd}
                       onGiftMessageCheckboxChange={handleGiftMessageCheckboxChange}
                       onGiftMessageChange={handleGiftMessageChange}
+                      onGiftMessageBlur={handleGiftMessageBlur}
                       onCheckout={() => void handleCheckout()}
                       giftCheckboxId="addGiftMessageMobile"
                     />

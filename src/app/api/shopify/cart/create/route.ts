@@ -237,7 +237,6 @@ export async function POST(request: NextRequest) {
             : []),
           // Do NOT set image_1...image_N here - they will be set as namespaced attributes after we get the lineId
         ],
-        note: `ספר מותאם אישית${bookId ? ` - ${bookId}` : ""}`,
       },
     };
 

@@ -29,6 +29,7 @@ import { CartLineItemHeader } from "@/components/cart-line-item-header";
 import { CartLineItemDetails } from "@/components/cart-line-item-details";
 import { getCartItemAvatarPreview } from "@/lib/cart-item-preview-urls";
 import { getCartItemLinePricing } from "@/lib/cart-line-pricing";
+import { giftMessageFromCartNote } from "@/lib/shopify/cart-gift-note";
 
 function getLineId(item: CartItem): string {
   return item.lineId || item.id;
@@ -69,7 +70,8 @@ function getBookColorDisplay(
 }
 
 export function CartDrawer() {
-  const { cart, isLoading, removeFromCart, updateQuantity, resetCart } = useCart();
+  const { cart, isLoading, removeFromCart, updateQuantity, resetCart, updateCartNote } =
+    useCart();
   const { t, locale } = useLanguage();
   const [busyLineId, setBusyLineId] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -77,6 +79,7 @@ export function CartDrawer() {
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [isResettingCart, setIsResettingCart] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const router = useRouter();
 
   const handleRemoveClick = (lineId: string) => {
@@ -145,29 +148,28 @@ export function CartDrawer() {
     setItemToRemove(null);
   };
 
-  const handleCheckout = () => {
-    if (cart?.checkoutUrl) {
-      // Track Meta Pixel InitiateCheckout event
+  const handleCheckout = async () => {
+    if (!cart?.id) {
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      const checkoutUrl = await updateCartNote(
+        giftMessageFromCartNote(cart.note),
+      );
+
       try {
         const totalValue = cart.totalAmount ? parseFloat(cart.totalAmount) : 0;
         trackInitiateCheckout(totalValue, cart.totalQuantity);
       } catch (err) {
         console.error("Error tracking InitiateCheckout:", err);
       }
-      
-      // The checkoutUrl in cart state should already have the locale
-      // But ensure it's there as a safety measure
-      let checkoutUrl = cart.checkoutUrl;
-      try {
-        const url = new URL(checkoutUrl);
-        // Always ensure locale is set to current locale
-        url.searchParams.set("locale", locale);
-        checkoutUrl = url.toString();
-      } catch (e) {
-        // If URL parsing fails, use original URL
-        console.error("Error parsing checkout URL:", e);
-      }
+
       window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error("Error proceeding to checkout:", error);
+      setIsCheckingOut(false);
     }
   };
 
@@ -408,9 +410,9 @@ export function CartDrawer() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleCheckout}
+                onClick={() => void handleCheckout()}
                 className="w-full cursor-pointer"
-                disabled={isLoading || busyLineId !== null}
+                disabled={isLoading || isCheckingOut || busyLineId !== null}
                 sx={{
                   textTransform: "none",
                   fontSize: "0.9rem",
@@ -420,15 +422,15 @@ export function CartDrawer() {
                   minHeight: 38,
                   mb: "8px",
                   cursor:
-                    isLoading || busyLineId !== null
+                    isLoading || isCheckingOut || busyLineId !== null
                       ? "not-allowed"
                       : "pointer",
                 }}
               >
-                {isLoading || busyLineId !== null ? (
+                {isLoading || isCheckingOut || busyLineId !== null ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    {t("cart.loading")}
+                    {isCheckingOut ? t("cart.checkoutProgress") : t("cart.loading")}
                   </>
                 ) : (
                   t("cart.checkout")

@@ -15,6 +15,7 @@ type CartOrderSummaryProps = {
   isLoading: boolean;
   onGiftMessageCheckboxChange: (checked: boolean) => void;
   onGiftMessageChange: (message: string) => void;
+  onGiftMessageBlur: () => void;
   onCheckout: () => void;
   giftCheckboxId?: string;
 };
@@ -28,6 +29,7 @@ export function CartOrderSummary({
   isLoading,
   onGiftMessageCheckboxChange,
   onGiftMessageChange,
+  onGiftMessageBlur,
   onCheckout,
   giftCheckboxId = "addGiftMessage",
 }: CartOrderSummaryProps) {
@@ -152,6 +154,7 @@ export function CartOrderSummary({
                 placeholder={t("cart.giftMessagePlaceholder")}
                 value={giftMessage}
                 onChange={(e) => onGiftMessageChange(e.target.value)}
+                onBlur={onGiftMessageBlur}
                 inputProps={{
                   maxLength: 200,
                   dir: isHe ? "rtl" : "ltr",

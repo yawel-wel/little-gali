@@ -29,6 +29,10 @@ import {
   isAddingToCart,
   markAddingToCart,
 } from "./cart-add-pending";
+import {
+  checkoutUrlWithLocale,
+  saveCartGiftNote,
+} from "./shopify/cart-gift-note";
 import { hideResumeSessionId } from "./preview-session/preview-session-id-history";
 
 export interface CartItem {
@@ -76,6 +80,7 @@ export interface BookFulfillmentImages {
 export interface Cart {
   id: string;
   checkoutUrl: string;
+  note?: string;
   totalQuantity: number;
   totalAmount?: string;
   currencyCode?: string;
@@ -102,6 +107,7 @@ interface CartContextType {
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   fetchCart: (cartId: string, options?: { silent?: boolean }) => Promise<void>;
+  updateCartNote: (note: string) => Promise<string>;
   clearCart: () => void;
   /** Wipes local cart immediately; best-effort Shopify line cleanup in background. */
   resetCart: () => Promise<void>;
@@ -297,6 +303,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setCart({
             id: data.cart.id,
             checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
+            note: data.cart.note ?? "",
             totalQuantity: data.cart.totalQuantity,
             totalAmount: data.cart.totalAmount,
             currencyCode: data.cart.currencyCode,
@@ -490,6 +497,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setCart({
             id: data.cart.id,
             checkoutUrl: ensureLocaleInCheckoutUrl(data.cart.checkoutUrl),
+            note: cart?.note,
             totalQuantity: data.cart.totalQuantity,
             totalAmount: data.cart.totalAmount,
             currencyCode: data.cart.currencyCode,
@@ -756,6 +764,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateCartNote = async (note: string): Promise<string> => {
+    if (!cart?.id) {
+      throw new Error("Cart is not available");
+    }
+
+    const result = await saveCartGiftNote(cart.id, note);
+    const checkoutUrl = checkoutUrlWithLocale(result.checkoutUrl, locale);
+
+    setCart((current) =>
+      current
+        ? {
+            ...current,
+            note: result.note,
+            checkoutUrl,
+          }
+        : current,
+    );
+
+    return checkoutUrl;
+  };
+
   const clearCart = () => {
     setCart(null);
     try {
@@ -799,6 +828,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeFromCart,
         updateQuantity,
         fetchCart,
+        updateCartNote,
         clearCart,
         resetCart,
       }}

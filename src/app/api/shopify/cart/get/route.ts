@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
         cart(id: $id) {
           id
           checkoutUrl
+          note
           totalQuantity
           cost {
             totalAmount {
@@ -209,6 +210,7 @@ export async function POST(request: NextRequest) {
       cart: {
         id: cart.id,
         checkoutUrl: checkoutUrl,
+        note: cart.note ?? "",
         totalQuantity: cart.totalQuantity,
         totalAmount: cart.cost?.totalAmount?.amount,
         currencyCode: cart.cost?.totalAmount?.currencyCode,
