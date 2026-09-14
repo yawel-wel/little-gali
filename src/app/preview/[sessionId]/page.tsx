@@ -705,6 +705,8 @@ export default function PreviewPage() {
           sessionId,
           detail: failureDetail,
           status: failureStatus,
+          pageUrl: window.location.href,
+          referrer: document.referrer,
         }),
       }),
     ).catch((reportError) => {

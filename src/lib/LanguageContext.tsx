@@ -611,6 +611,7 @@ const hebrewTranslations = {
   "product.blanket.breadcrumbProduct": "טטרת במבוק גדולה",
   "product.blanket.gallery.imageAlt": "טטרת במבוק גדולה {pattern} - תמונה {num}",
   "product.birthPackage.name": "מארז לידה",
+  "product.birthPackage.badge": "חדש",
   "product.birthPackage.printLabel": "הדפס",
   "product.birthPackage.packageTypeLabel": "סגנון המארז",
   "product.birthPackage.description":
@@ -1887,6 +1888,7 @@ const englishTranslations = {
   "product.blanket.breadcrumbProduct": "Large bamboo blanket",
   "product.blanket.gallery.imageAlt": "Large bamboo blanket {pattern} - image {num}",
   "product.birthPackage.name": "Birth package",
+  "product.birthPackage.badge": "New",
   "product.birthPackage.printLabel": "Print",
   "product.birthPackage.packageTypeLabel": "Package style",
   "product.birthPackage.description":

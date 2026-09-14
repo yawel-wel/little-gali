@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { diagnosePreviewLoadFailure } from "@/lib/preview-session/diagnose-load-failure";
 
 export const runtime = "nodejs";
 
@@ -22,15 +23,24 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (character) => map[character]);
 }
 
+function trimText(value: unknown, maxLength = 500): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, maxLength);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
       sessionId?: string;
       detail?: string;
       status?: number;
+      pageUrl?: string;
+      referrer?: string;
     };
     const sessionId = body.sessionId?.trim();
-    const detail = body.detail?.trim() || "לא צוין פירוט נוסף";
+    const clientDetail = trimText(body.detail, 1000) || "לא צוין פירוט נוסף";
     const status =
       typeof body.status === "number" ? String(body.status) : "לא ידוע";
 
@@ -38,23 +48,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
     }
 
+    const diagnosis = await diagnosePreviewLoadFailure({
+      sessionId,
+      status: typeof body.status === "number" ? body.status : undefined,
+      clientDetail,
+    });
+
+    const pageUrl = trimText(body.pageUrl) ?? request.headers.get("referer") ?? "";
+    const referrer = trimText(body.referrer) ?? "";
+    const userAgent = request.headers.get("user-agent") ?? "";
+
+    const contextLines = [
+      `סיבה: ${diagnosis.reason}`,
+      `קוד שגיאה: ${status}`,
+      pageUrl ? `כתובת הדף: ${pageUrl}` : "",
+      referrer ? `דף קודם (referrer): ${referrer}` : "דף קודם (referrer): אין",
+      userAgent ? `דפדפן: ${userAgent}` : "",
+      `הודעה שהוצגה למשתמש: ${clientDetail}`,
+    ].filter(Boolean);
+
+    const text = [
+      diagnosis.headline,
+      "",
+      diagnosis.explanation,
+      "",
+      "פרטים טכניים:",
+      ...diagnosis.technicalLines.map((line) => `- ${line}`),
+      "",
+      "הקשר:",
+      ...contextLines.map((line) => `- ${line}`),
+    ].join("\n");
+
     const resend = getResend();
     const { error } = await resend.emails.send({
       from: "Little Gali <onboarding@resend.dev>",
       to: ["yaelromashkano@gmail.com"],
-      subject: "תצוגה מקדימה נכשלה - Little Gali",
+      subject: `${diagnosis.headline} - Little Gali`,
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="color: #E5543D;">התצוגה המקדימה נכשלה</h2>
+          <h2 style="color: #E5543D;">${escapeHtml(diagnosis.headline)}</h2>
+          <p style="margin-top: 12px; line-height: 1.5;">${escapeHtml(diagnosis.explanation)}</p>
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 20px;">
-            <p><strong>מזהה סשן:</strong> ${escapeHtml(sessionId)}</p>
-            <p><strong>קוד שגיאה:</strong> ${escapeHtml(status)}</p>
-            <p><strong>פירוט:</strong></p>
-            <p style="white-space: pre-wrap; margin-top: 10px;">${escapeHtml(detail)}</p>
+            <p><strong>פרטים טכניים</strong></p>
+            ${diagnosis.technicalLines
+              .map((line) => `<p style="margin: 6px 0;">${escapeHtml(line)}</p>`)
+              .join("")}
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;" />
+            <p><strong>הקשר</strong></p>
+            ${contextLines
+              .map((line) => `<p style="margin: 6px 0;">${escapeHtml(line)}</p>`)
+              .join("")}
           </div>
         </div>
       `,
-      text: `התצוגה המקדימה נכשלה\nמזהה סשן: ${sessionId}\nקוד שגיאה: ${status}\nפירוט: ${detail}`,
+      text,
     });
 
     if (error) {

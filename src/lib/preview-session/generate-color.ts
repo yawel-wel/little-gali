@@ -96,7 +96,6 @@ async function generateWithGemini(
     throw error;
   }
   const { base64, mimeType } = source;
-  // Would be sent to the API as systemInstruction (disabled for prompt testing).
   const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 
   let lastError: unknown;
@@ -120,7 +119,7 @@ async function generateWithGemini(
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
-          // systemInstruction, // would send GENERATION_SYSTEM_INSTRUCTION (disabled for prompt testing)
+          systemInstruction,
           imageConfig: {
             aspectRatio: "1:1",
           },

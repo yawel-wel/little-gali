@@ -223,7 +223,10 @@ export default function BirthPackagesProductPage() {
                   textAlign,
                 )}
               >
-                <div className="order-1 space-y-1.5">
+                <div className="order-1 space-y-0">
+                  <span className="mt-0 inline-block w-fit rounded-full bg-[#F0DCC8] px-[12px] py-[4px] font-body-bold text-sm text-accent-burgundy sm:mt-3">
+                    {t("product.birthPackage.badge")}
+                  </span>
                   <h1 className="text-2xl font-heading font-bold leading-tight text-dark-gray sm:text-3xl lg:text-4xl">
                     {t("product.birthPackage.name")}
                   </h1>
