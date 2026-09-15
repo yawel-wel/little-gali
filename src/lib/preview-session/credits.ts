@@ -4,12 +4,31 @@ import { isFreeGenerationError } from "./generation-errors";
 import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type { GenerationError, PreviewSession } from "./types";
 
-export const INITIAL_CHANGE_CREDITS = 5;
+const DEFAULT_CHANGE_CREDITS = 5;
+
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  if (!value?.trim()) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(value.trim(), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+/** Allowed regenerate/replace credits per preview session. Override via PREVIEW_CHANGE_CREDITS. */
+export function getInitialChangeCredits(): number {
+  return parsePositiveInt(
+    process.env.PREVIEW_CHANGE_CREDITS,
+    DEFAULT_CHANGE_CREDITS,
+  );
+}
 
 export function effectiveChangeCreditsRemaining(
   session: PreviewSession,
 ): number {
-  return Math.min(session.changeCreditsRemaining, INITIAL_CHANGE_CREDITS);
+  return Math.min(session.changeCreditsRemaining, getInitialChangeCredits());
 }
 
 export function hasChangeCredits(session: PreviewSession): boolean {

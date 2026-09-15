@@ -12,7 +12,7 @@ import {
   signPreviewSessionId,
   verifyPreviewSessionCookie,
 } from "@/lib/preview-session/cookies";
-import { INITIAL_CHANGE_CREDITS } from "@/lib/preview-session/credits";
+import { getInitialChangeCredits } from "@/lib/preview-session/credits";
 import {
   defaultDisplayOrder,
   getSlotCount,
@@ -131,7 +131,7 @@ async function createNewPreviewSession(
     generationStatus: "not_started",
     bookFlow,
     displayOrder: defaultDisplayOrder(bookFlow),
-    changeCreditsRemaining: INITIAL_CHANGE_CREDITS,
+    changeCreditsRemaining: getInitialChangeCredits(),
     slots: createPendingSlots(getSlotCount(bookFlow)).map((slot) =>
       isColorful
         ? { ...slot, inFlight: false, colorInFlight: true }

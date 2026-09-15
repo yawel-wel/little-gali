@@ -69,7 +69,7 @@ import {
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
 import { logPreviewColorStyleSelected } from "@/lib/preview-session/generation-log";
 import { buildPreviewGenerationStats } from "@/lib/preview-session/generation-stats";
-import { INITIAL_CHANGE_CREDITS } from "@/lib/preview-session/credits";
+import { getInitialChangeCredits } from "@/lib/preview-session/credits";
 import {
   GenerationRateLimitError,
   getGenerationRateLimitMessage,
@@ -653,7 +653,7 @@ export default function PreviewPage() {
     }
     changesExhaustedTrackedRef.current = true;
     track(ANALYTICS_EVENTS.BOOKLET_CHANGES_EXHAUSTED, {
-      changes_used: INITIAL_CHANGE_CREDITS,
+      changes_used: getInitialChangeCredits(),
     });
   }, [session?.changeCreditsRemaining]);
 
@@ -1825,7 +1825,7 @@ export default function PreviewPage() {
       } catch {}
 
       track(ANALYTICS_EVENTS.BOOKLET_ADDED_TO_CART, {
-        changes_used: INITIAL_CHANGE_CREDITS - latest.changeCreditsRemaining,
+        changes_used: getInitialChangeCredits() - latest.changeCreditsRemaining,
       });
 
       const addPromise = addToCart(

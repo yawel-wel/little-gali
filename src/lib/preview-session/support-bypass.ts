@@ -1,4 +1,4 @@
-import { INITIAL_CHANGE_CREDITS } from "./credits";
+import { getInitialChangeCredits } from "./credits";
 import { getRequestIp, hashClientIp } from "./hash";
 import { recordFullGenerationUse } from "./rate-limit";
 import { loadPreviewSession, savePreviewSession } from "./store";
@@ -9,7 +9,8 @@ import type { PreviewSession } from "./types";
  * `"supportAllowNextPreviewRound": true`
  *
  * Activates once at the start of POST /api/preview-session (before rate checks).
- * Grants 3 change credits, one full-generation bypass, and 3 technical-limit bypasses.
+ * Grants the configured change-credit count, one full-generation bypass, and
+ * matching technical-limit bypasses.
  * The round flag is cleared on activation; full-generation bypass is consumed when
  * the pipeline actually starts and always records the per-IP quota.
  */
@@ -25,9 +26,9 @@ export async function applySupportNextPreviewRoundIfRequested(
   }
 
   session.supportAllowNextPreviewRound = false;
-  session.changeCreditsRemaining = INITIAL_CHANGE_CREDITS;
+  session.changeCreditsRemaining = getInitialChangeCredits();
   session.supportAllowFullGeneration = true;
-  session.supportGenerationBypassCallsRemaining = INITIAL_CHANGE_CREDITS;
+  session.supportGenerationBypassCallsRemaining = getInitialChangeCredits();
   await savePreviewSession(session);
 }
 
