@@ -14,6 +14,7 @@ import {
   logPreviewGenerationFailure,
   type PreviewGenerationContext,
 } from "./generation-log";
+import { fetchStorageBuffer } from "@/lib/storage/objects";
 import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
 const DEFAULT_BW_IMAGE_MODEL = "gemini-2.5-flash-image";
@@ -37,11 +38,7 @@ function isMockGenerationEnabled(): boolean {
 }
 
 async function createMockBwImage(sourceUrl: string): Promise<Buffer> {
-  const response = await fetch(sourceUrl);
-  if (!response.ok) {
-    throw new Error("Failed to download source image for mock generation");
-  }
-  const sourceBuffer = Buffer.from(await response.arrayBuffer());
+  const { buffer: sourceBuffer } = await fetchStorageBuffer(sourceUrl);
   return sharp(sourceBuffer)
     .grayscale()
     .threshold(170)

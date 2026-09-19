@@ -1,9 +1,27 @@
+import { randomUUID } from "crypto";
 import { formatUnknownError } from "./generation-errors";
+import { isR2Configured } from "@/lib/storage/r2-config";
+import {
+  contentTypeFromFile,
+  copyUrlToKey,
+  putObject,
+  type StorageUploadResult,
+} from "@/lib/storage/objects";
+import {
+  SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH,
+  buildStorageDeliveryUrl,
+  isAllowedStorageUrl,
+  publicIdFromStorageUrl,
+} from "@/lib/storage/urls";
 
-export interface CloudinaryUploadResult {
-  secureUrl: string;
-  publicId: string;
-}
+export type CloudinaryUploadResult = StorageUploadResult;
+
+export {
+  SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH,
+  isAllowedStorageUrl as isAllowedCloudinaryUrl,
+  publicIdFromStorageUrl as publicIdFromCloudinaryUrl,
+  buildStorageDeliveryUrl as buildCloudinaryDeliveryUrl,
+};
 
 function getCloudinaryApiCredentials(): {
   cloudName: string;
@@ -20,7 +38,7 @@ function getCloudinaryApiCredentials(): {
 }
 
 export function canSignCloudinaryUploads(): boolean {
-  return getCloudinaryApiCredentials() !== null;
+  return isR2Configured() || getCloudinaryApiCredentials() !== null;
 }
 
 async function postCloudinaryUpload(
@@ -40,59 +58,18 @@ async function postCloudinaryUpload(
 }
 
 function normalizeFullPublicId(publicId: string): string {
-  return publicId.replace(/\.(jpg|jpeg|png)$/i, "");
+  return publicId.replace(/\.(jpg|jpeg|png|webp|gif|json)$/i, "");
 }
 
-/** Shopify line item property values are limited to 255 characters. */
-export const SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH = 255;
-
-/** Extract Cloudinary public_id from a delivery URL (unsigned or transformed). */
-export function publicIdFromCloudinaryUrl(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-    const uploadMarker = "/upload/";
-    const markerIndex = parsed.pathname.indexOf(uploadMarker);
-    if (markerIndex === -1) {
-      return null;
-    }
-    let rest = parsed.pathname.slice(markerIndex + uploadMarker.length);
-    // Strip version segment (v1234567890/)
-    rest = rest.replace(/^v\d+\//, "");
-    // Strip transformation segments (comma-separated transforms before the asset path)
-    const segments = rest.split("/");
-    while (segments.length > 1 && segments[0]?.includes(",")) {
-      segments.shift();
-    }
-    const publicId = decodeURIComponent(segments.join("/"));
-    return publicId || null;
-  } catch {
-    return null;
-  }
-}
-
-export function buildCloudinaryDeliveryUrl(publicId: string): string {
-  const cloudName =
-    process.env.CLOUDINARY_CLOUD_NAME?.trim() ||
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim();
-  if (!cloudName) {
-    throw new Error("Cloudinary cloud name is not configured");
-  }
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
-}
-
-export function isAllowedCloudinaryUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    if (!cloudName) return false;
-    return (
-      parsed.protocol === "https:" &&
-      parsed.hostname === "res.cloudinary.com" &&
-      parsed.pathname.startsWith(`/${cloudName}/`)
-    );
-  } catch {
-    return false;
-  }
+function extensionFromFile(file: File | Blob, fallback = ".jpg"): string {
+  const name = file instanceof File && file.name.includes(".")
+    ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()
+    : "";
+  if (name) return name;
+  if (file.type === "image/png") return ".png";
+  if (file.type === "image/webp") return ".webp";
+  if (file.type === "application/json") return ".json";
+  return fallback;
 }
 
 async function uploadToCloudinary(
@@ -160,8 +137,6 @@ async function uploadNamedToCloudinary(
   formData.append("file", namedFile);
   formData.append("upload_preset", uploadPreset);
   formData.append("folder", folder);
-  // Unsigned presets often ignore folder for the stored public_id; setting public_id + tags
-  // keeps session-scoped assets findable in Media Library search (incl. color outputs).
   formData.append("public_id", fileName);
   if (tags.length > 0) {
     formData.append("tags", tags.join(","));
@@ -181,10 +156,30 @@ async function uploadNamedToCloudinary(
   return { secureUrl: data.secure_url, publicId: data.public_id };
 }
 
+async function uploadNamed(
+  file: File | Blob,
+  assetPath: string,
+  extraTags: string[] = [],
+): Promise<CloudinaryUploadResult> {
+  if (isR2Configured()) {
+    return putObject(
+      assetPath.replace(/^\/+/, ""),
+      file,
+      contentTypeFromFile(file),
+    );
+  }
+  return uploadNamedToCloudinary(file, assetPath, extraTags);
+}
+
 export async function uploadImageFileToCloudinary(
   file: File | Blob,
-  folder = "little-gali",
+  folder = "little-gali/uploads",
 ): Promise<string> {
+  if (isR2Configured()) {
+    const key = `${folder.replace(/\/+$/, "")}/${randomUUID()}${extensionFromFile(file)}`;
+    const uploaded = await putObject(key, file, contentTypeFromFile(file));
+    return uploaded.secureUrl;
+  }
   return uploadToCloudinary(file, folder);
 }
 
@@ -195,6 +190,14 @@ export async function uploadBufferToCloudinary(
 ): Promise<string> {
   const bytes = Uint8Array.from(buffer);
   const file = new File([bytes], `${filenamePrefix}.png`, { type: "image/png" });
+  if (isR2Configured()) {
+    const uploaded = await putObject(
+      `${folder.replace(/\/+$/, "")}/${filenamePrefix}.png`,
+      file,
+      "image/png",
+    );
+    return uploaded.secureUrl;
+  }
   return uploadToCloudinary(file, folder);
 }
 
@@ -207,7 +210,7 @@ export async function uploadBufferToCloudinaryPublicId(
   const file = new File([bytes], `${assetPath.split("/").pop() ?? "image"}.png`, {
     type: "image/png",
   });
-  return uploadNamedToCloudinary(file, assetPath, extraTags);
+  return uploadNamed(file, assetPath, extraTags);
 }
 
 export async function uploadFileToCloudinaryPublicId(
@@ -215,7 +218,7 @@ export async function uploadFileToCloudinaryPublicId(
   assetPath: string,
   extraTags: string[] = [],
 ): Promise<CloudinaryUploadResult> {
-  return uploadNamedToCloudinary(file, assetPath, extraTags);
+  return uploadNamed(file, assetPath, extraTags);
 }
 
 export async function uploadJsonToCloudinaryPublicId(
@@ -229,13 +232,9 @@ export async function uploadJsonToCloudinaryPublicId(
   const file = new File([bytes], `${fileName}.json`, {
     type: "application/json",
   });
-  return uploadNamedToCloudinary(file, assetPath, extraTags);
+  return uploadNamed(file, assetPath, extraTags);
 }
 
-/**
- * Replaces an existing Cloudinary asset in place (requires API secret).
- * Unsigned presets cannot pass overwrite; use this for preview crop saves.
- */
 export async function overwriteCloudinaryBuffer(
   buffer: Buffer,
   fullPublicId: string,
@@ -251,6 +250,14 @@ export async function overwriteCloudinaryAsset(
   file: File | Blob,
   fullPublicId: string,
 ): Promise<CloudinaryUploadResult> {
+  if (isR2Configured()) {
+    return putObject(
+      fullPublicId.replace(/^\/+/, ""),
+      file,
+      contentTypeFromFile(file),
+    );
+  }
+
   const credentials = getCloudinaryApiCredentials();
   if (!credentials) {
     throw new Error("Cloudinary signed upload is not configured");
@@ -299,6 +306,10 @@ export async function copyCloudinaryUrlToPublicId(
   sourceUrl: string,
   assetPath: string,
 ): Promise<CloudinaryUploadResult> {
+  if (isR2Configured()) {
+    return copyUrlToKey(sourceUrl, assetPath.replace(/^\/+/, ""));
+  }
+
   let response: Response;
   try {
     response = await fetch(sourceUrl);

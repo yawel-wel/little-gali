@@ -1,6 +1,7 @@
 import type { Area } from "react-easy-crop";
 import sharp from "sharp";
 import { isAllowedCloudinaryUrl } from "@/lib/preview-session/cloudinary";
+import { fetchStorageBuffer } from "@/lib/storage/objects";
 
 export async function downloadAndCropCloudinaryImage(
   imageUrl: string,
@@ -10,12 +11,7 @@ export async function downloadAndCropCloudinaryImage(
     throw new Error("Invalid image URL");
   }
 
-  const response = await fetch(imageUrl, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error("Failed to download image for cropping");
-  }
-
-  const source = Buffer.from(await response.arrayBuffer());
+  const { buffer: source } = await fetchStorageBuffer(imageUrl);
   const metadata = await sharp(source).metadata();
   const width = metadata.width ?? 0;
   const height = metadata.height ?? 0;

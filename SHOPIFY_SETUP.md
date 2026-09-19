@@ -21,7 +21,14 @@ SHOPIFY_GIFT_CARD_VARIANT_ID_ONE_WITH_SHIPPING=gid://shopify/ProductVariant/YOUR
 SHOPIFY_GIFT_CARD_VARIANT_ID_TWO_NO_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
 SHOPIFY_GIFT_CARD_VARIANT_ID_TWO_WITH_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
 
-# Cloudinary Image Storage (Required - for storing images)
+# Cloudflare R2 Image Storage (primary)
+R2_ACCOUNT_ID=your_cloudflare_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key_id
+R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+R2_BUCKET=little-gali-images
+R2_PUBLIC_BASE_URL=https://images.littlegali.com
+
+# Cloudinary (legacy reads for old Shopify order URLs; optional once R2 is live)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_UPLOAD_PRESET=your_upload_preset
 
@@ -83,30 +90,25 @@ Add the same environment variables in your Vercel project settings:
 4. Shopify will generate a webhook secret - save this value
 5. Alternatively, you can set a custom secret when creating the webhook
 
-### 5. CLOUDINARY_CLOUD_NAME & CLOUDINARY_UPLOAD_PRESET
+### 5. Cloudflare R2 (image storage)
 
-**Why Cloudinary?** Base64 images are too large for Shopify cart attributes (64KB limit). Cloudinary stores images permanently and provides URLs.
+Shopify line properties store public https URLs (max 255 characters). New uploads go to R2 when the `R2_*` env vars are set. Old order URLs on Cloudinary keep working until those orders are fulfilled.
 
-**Setup Steps:**
+**Setup steps:**
 
-1. Sign up for free at [Cloudinary](https://cloudinary.com/)
-2. Go to your Dashboard
-3. Copy your **Cloud Name** (visible at the top of the dashboard)
-4. Go to **Settings** → **Upload** → **Upload presets**
-5. Click **Add upload preset**
-6. Configure:
-   - **Preset name**: `little-gali-upload` (or any name)
-   - **Signing mode**: **Unsigned** (important for client-side uploads)
-   - **Folder**: `little-gali` (optional, for organization)
-7. Click **Save**
-8. Copy the preset name
+1. In Cloudflare: R2 → Create bucket `little-gali-images` (Standard storage).
+2. Create an R2 API token with Object Read & Write. Save Access Key ID + Secret.
+3. Enable public access and attach custom domain `images.littlegali.com`.
+4. Put the same `R2_*` vars on **both** Vercel projects (`little-gali` and `little-gali-processing`).
+5. Apply CORS + lifecycle (14-day sessions/uploads, 365-day fulfillment):
 
-**Environment Variables:**
+```bash
+node scripts/setup-r2.mjs
+```
 
-- `CLOUDINARY_CLOUD_NAME`: Your cloud name from dashboard (e.g., `dxyz123abc`)
-- `CLOUDINARY_UPLOAD_PRESET`: The preset name you created (e.g., `little-gali-upload`)
+**Cutover:** Once production writes go to R2, downgrade Cloudinary to Free. Do not bulk-delete Cloudinary assets still referenced by open orders. Cancel Cloudinary after fulfillment lag (60–90 days).
 
-**Free Tier:** 25GB storage, 25GB bandwidth/month - more than enough for most use cases!
+**Legacy Cloudinary vars** (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_UPLOAD_PRESET`) remain for reading old URLs and as a local fallback if R2 is unset.
 
 ### 6. Gift Card Product Variant IDs
 

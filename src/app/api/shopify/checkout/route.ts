@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { promoteBookCartImagesToFulfillment } from "@/lib/storage/fulfillment";
 
 export const runtime = "nodejs";
 
@@ -108,15 +109,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Invalid image URLs. Images should be uploaded to Cloudinary first.",
+            "Invalid image URLs. Images should be uploaded first.",
         },
         { status: 400 }
       );
     }
 
-    console.log(
-      "Image URLs validated - all are HTTP/HTTPS URLs from Cloudinary"
-    );
+    const promoted = await promoteBookCartImagesToFulfillment({
+      imageUrls: urls,
+    });
+    const fulfillmentUrls = promoted.imageUrls;
+
+    console.log("Image URLs validated - all are HTTP/HTTPS URLs");
 
     const variables = {
       input: {
@@ -145,23 +149,23 @@ export async function POST(request: NextRequest) {
             : []),
           {
             key: "image_1",
-            value: urls[0],
+            value: fulfillmentUrls[0],
           },
           {
             key: "image_2",
-            value: urls[1],
+            value: fulfillmentUrls[1],
           },
           {
             key: "image_3",
-            value: urls[2],
+            value: fulfillmentUrls[2],
           },
           {
             key: "image_4",
-            value: urls[3],
+            value: fulfillmentUrls[3],
           },
           {
             key: "image_5",
-            value: urls[4],
+            value: fulfillmentUrls[4],
           },
         ],
       },

@@ -31,6 +31,11 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     qualities: [75, 85, 90],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.littlegali.com" },
+      { protocol: "https", hostname: "*.r2.dev" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+    ],
   },
 };
 

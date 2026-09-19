@@ -16,6 +16,7 @@ import {
   logPreviewGenerationFailure,
   type PreviewGenerationContext,
 } from "./generation-log";
+import { fetchStorageBuffer } from "@/lib/storage/objects";
 import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
 const COLOR_MODEL = "gemini-2.5-flash-image";
@@ -52,11 +53,7 @@ function isMockGenerationEnabled(): boolean {
 }
 
 async function createMockColorImage(sourceUrl: string): Promise<Buffer> {
-  const response = await fetch(sourceUrl);
-  if (!response.ok) {
-    throw new Error("Failed to download source image for mock generation");
-  }
-  const sourceBuffer = Buffer.from(await response.arrayBuffer());
+  const { buffer: sourceBuffer } = await fetchStorageBuffer(sourceUrl);
   return sharp(sourceBuffer)
     .modulate({ saturation: 1.35, brightness: 1.05 })
     .png()

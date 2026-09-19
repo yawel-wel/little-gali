@@ -405,7 +405,7 @@ export async function POST(request: NextRequest) {
 
     if (!originalUrls.every(isAllowedCloudinaryUrl)) {
       return NextResponse.json(
-        { error: "All images must be uploaded to Cloudinary first" },
+        { error: "All images must be uploaded first" },
         { status: 400 },
       );
     }

@@ -29,6 +29,7 @@ import { parseBookFlow, bookFlowFromLineAttributes, type BookFlow } from "@/lib/
 import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
 import { markPreviewSessionCartAdded } from "@/lib/preview-session/store";
 import { resetFullGenerationLimitAfterBookCart } from "@/lib/preview-session/reset-full-generation-after-cart";
+import { promoteBookCartImagesToFulfillment } from "@/lib/storage/fulfillment";
 
 export const runtime = "nodejs";
 
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Invalid image URLs. Images should be uploaded to Cloudinary first.",
+            "Invalid image URLs. Images should be uploaded first.",
         },
         { status: 400 }
       );
@@ -144,12 +145,22 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              "Invalid color image URLs. Images should be uploaded to Cloudinary first.",
+              "Invalid color image URLs. Images should be uploaded first.",
           },
           { status: 400 },
         );
       }
     }
+
+    const promoted = await promoteBookCartImagesToFulfillment({
+      sessionId: previewSessionId,
+      imageUrls: urls,
+      originalUrls,
+      generatedColorUrls,
+    });
+    const fulfillmentImageUrls = promoted.imageUrls;
+    const fulfillmentOriginalUrls = promoted.originalUrls;
+    const fulfillmentColorUrls = promoted.generatedColorUrls;
 
     const cartLinesAddMutation = `
       mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
@@ -208,7 +219,7 @@ export async function POST(request: NextRequest) {
             { key: "_uid", value: lineUid },
             { key: "_line_group", value: lineUid },
             ...bookFlowShopifyAttributes(bookFlow),
-            ...primaryImageUrlsShopifyAttributes(urls),
+            ...primaryImageUrlsShopifyAttributes(fulfillmentImageUrls),
             // Style: always store hidden _style; visible "style" omitted for pens (single-style mode)
             ...(isValidBookCartStyle(style)
               ? style === "pens"
@@ -259,8 +270,8 @@ export async function POST(request: NextRequest) {
               generationStats,
               resolvedMixpanelDistinctId,
             ),
-            ...originalUrlsShopifyAttributes(originalUrls),
-            ...generatedColorUrlsShopifyAttributes(generatedColorUrls),
+            ...originalUrlsShopifyAttributes(fulfillmentOriginalUrls),
+            ...generatedColorUrlsShopifyAttributes(fulfillmentColorUrls),
             ...birthPackageShopifyAttributes({
               isBirthPackage: giftSet,
               blanketPattern: resolvedPattern,
@@ -362,11 +373,11 @@ export async function POST(request: NextRequest) {
             body: JSON.stringify({
               cartId: cart.id,
               lineId: lineId,
-              imageUrls: urls,
+              imageUrls: fulfillmentImageUrls,
               style: styleToStore,
-              originalUrls,
+              originalUrls: fulfillmentOriginalUrls,
               generatedBwUrls,
-              generatedColorUrls,
+              generatedColorUrls: fulfillmentColorUrls,
               previewSessionId,
               previewGenTotal: generationStats?.totalGenerations,
               previewGenSelected: generationStats
@@ -446,7 +457,7 @@ export async function POST(request: NextRequest) {
             node.merchandise?.product?.title ||
             node.merchandise?.title ||
             "ספר מותאם אישית",
-          imageUrls: isNewLine ? urls : [], // Include images for the newly added line
+          imageUrls: isNewLine ? fulfillmentImageUrls : [], // Include images for the newly added line
           style:
             itemStyle || (isNewLine ? styleToStore || "cartoon" : undefined), // Include style for new line
           bookFlow: itemBookFlow,

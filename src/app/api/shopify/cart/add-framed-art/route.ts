@@ -8,6 +8,7 @@ import {
 import { saveFramedArtSession } from "@/lib/framed-art/store";
 import { saveCartImages } from "@/lib/cart-images-store";
 import { nudgeShopifyCartDiscounts } from "@/lib/shopify/nudge-cart-discounts";
+import { promoteFramedArtUrlsToFulfillment } from "@/lib/storage/fulfillment";
 
 export const runtime = "nodejs";
 
@@ -129,7 +130,16 @@ export async function POST(request: NextRequest) {
         { status: 409 },
       );
     }
-    const fulfillment = fulfillmentResult.data;
+    const fulfillment = {
+      ...fulfillmentResult.data,
+      ...(await promoteFramedArtUrlsToFulfillment({
+        sessionId: fulfillmentResult.data.sessionId,
+        originalImageUrl: fulfillmentResult.data.originalImageUrl,
+        printImageUrl: fulfillmentResult.data.printImageUrl,
+        originalPublicId: fulfillmentResult.data.originalPublicId,
+        printPublicId: fulfillmentResult.data.printPublicId,
+      })),
+    };
 
     const storeDomain = process.env.SHOPIFY_STORE_DOMAIN;
     const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
