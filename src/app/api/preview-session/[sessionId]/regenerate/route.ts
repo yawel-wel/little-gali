@@ -66,6 +66,14 @@ export async function POST(
     return NextResponse.json({ error: "Slot is busy" }, { status: 409 });
   }
 
+  const hasBwAttempt = slot.candidates.some((candidate) => candidate.kind === "bw");
+  if (!hasBwAttempt) {
+    return NextResponse.json(
+      { error: "B&W generation has not started" },
+      { status: 409 },
+    );
+  }
+
   const freeRetry =
     requestedFreeRetry && slotBwActiveHasRetryableError(slot);
   if (!freeRetry && !hasChangeCredits(session)) {

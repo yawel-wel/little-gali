@@ -124,20 +124,19 @@ async function createNewPreviewSession(
 ): Promise<PreviewSession> {
   const ipHash = hashClientIp(getRequestIp(request));
   const now = new Date().toISOString();
-  const isColorful = bookFlow === "colorful";
   const session: PreviewSession = {
     id: sessionId,
-    phase: isColorful ? "bw_approved" : "bw_review",
+    phase: "bw_approved",
     generationStatus: "not_started",
     bookFlow,
     displayOrder: defaultDisplayOrder(bookFlow),
     changeCreditsRemaining: getInitialChangeCredits(),
-    slots: createPendingSlots(getSlotCount(bookFlow)).map((slot) =>
-      isColorful
-        ? { ...slot, inFlight: false, colorInFlight: true }
-        : slot,
-    ),
-    selectedColorStyle: isColorful ? getDefaultColorStyle() : undefined,
+    slots: createPendingSlots(getSlotCount(bookFlow)).map((slot) => ({
+      ...slot,
+      inFlight: false,
+      colorInFlight: true,
+    })),
+    selectedColorStyle: getDefaultColorStyle(),
     createdAt: now,
     updatedAt: now,
     clientIpHash: ipHash,
@@ -211,16 +210,15 @@ async function prepareSessionForPipelineStart(
   }
 
   if (status === "failed") {
-    const isColorful = bookFlow === "colorful";
     existing.bookFlow = bookFlow;
-    existing.slots = createPendingSlots(getSlotCount(bookFlow)).map((slot) =>
-      isColorful
-        ? { ...slot, inFlight: false, colorInFlight: true }
-        : slot,
-    );
+    existing.slots = createPendingSlots(getSlotCount(bookFlow)).map((slot) => ({
+      ...slot,
+      inFlight: false,
+      colorInFlight: true,
+    }));
     existing.displayOrder = defaultDisplayOrder(bookFlow);
-    existing.phase = isColorful ? "bw_approved" : "bw_review";
-    existing.selectedColorStyle = isColorful ? getDefaultColorStyle() : undefined;
+    existing.phase = "bw_approved";
+    existing.selectedColorStyle = getDefaultColorStyle();
     existing.initializationError = undefined;
     existing.generationStatus = "not_started";
     await savePreviewSession(existing);

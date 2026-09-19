@@ -123,6 +123,8 @@ export interface PreviewSessionPublicView {
   canRegenerate: boolean;
   canReplace: boolean;
   canApproveBw: boolean;
+  /** Classic: color is ready and B&W has not finished yet (user may start it). */
+  canStartBw: boolean;
   canRegenerateColor: boolean;
   canSelectStyle: boolean;
   canAddToCart: boolean;

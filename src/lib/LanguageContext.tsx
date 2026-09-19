@@ -1181,9 +1181,9 @@ const hebrewTranslations = {
   "preview.colorPhaseDescription": "",
   "preview.bwPhaseDescription":
     "גרסאות השחור־לבן של התמונות שלכם מוכנות ✨\nשימו לב - לאחר המעבר לשלב הבא לא יהיה ניתן להעלות תמונות חדשות.",
-  "preview.bwApproveAbove": "אהבתם? ממשיכים לצד הצבעוני",
+  "preview.bwApproveAbove": "אהבתם? ממשיכים לצד השחור לבן",
   "preview.bwApproveBelowBefore": "משהו לא יצא כמו שציפיתם? ",
-  "preview.approveBwButton": "לעבור לצד הצבעוני",
+  "preview.approveBwButton": "עברו לצד השחור לבן",
   "preview.colorCartAbove": "מוכנים להוסיף לעגלה?",
   "preview.bwLoadingTitle": "יוצרים את התמונות שלכם",
   "preview.bwLoadingLine1": "מעבדים את התמונות שלכם",
@@ -2459,9 +2459,9 @@ const englishTranslations = {
   "preview.colorPhaseDescription": "",
   "preview.bwPhaseDescription":
     "Your black & white versions are ready ✨\nNote: after moving to the next step, you won't be able to upload new photos.",
-  "preview.bwApproveAbove": "Happy with it? Continue to the color side",
+  "preview.bwApproveAbove": "Happy with it? Continue to the black & white side",
   "preview.bwApproveBelowBefore": "Something didn't turn out as expected? ",
-  "preview.approveBwButton": "Move to the color side",
+  "preview.approveBwButton": "Continue to the black & white side",
   "preview.colorCartAbove": "Ready to add to cart?",
   "preview.bwLoadingTitle": "Creating your images",
   "preview.bwLoadingLine1": "Processing your photos",

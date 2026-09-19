@@ -702,13 +702,13 @@ function UploadPageContent() {
     previewEnabled,
   ]);
 
-  const bwLoadingLines = useMemo(
+  const colorLoadingLines = useMemo(
     () => [
-      t("preview.bwLoadingLine1"),
-      t("preview.bwLoadingLine2"),
-      t("preview.bwLoadingLine3"),
-      t("preview.bwLoadingLine4"),
-      t("preview.bwLoadingLine5"),
+      t("preview.colorLoadingLine1"),
+      t("preview.colorLoadingLine2"),
+      t("preview.colorLoadingLine3"),
+      t("preview.colorLoadingLine4"),
+      t("preview.colorLoadingLine5"),
     ],
     [t],
   );
@@ -725,7 +725,7 @@ function UploadPageContent() {
 
   const activeLoadingLines = isColorfulFlow
     ? colorfulLoadingLines
-    : bwLoadingLines;
+    : colorLoadingLines;
 
   useEffect(() => {
     if (!showPreviewLoader || activeLoadingLines.length === 0) {
@@ -1435,16 +1435,16 @@ function UploadPageContent() {
               ? (colorfulLoadingLines[
                   previewLoaderLineIndex % colorfulLoadingLines.length
                 ] ?? colorfulLoadingLines[0])
-              : (bwLoadingLines[
-                  previewLoaderLineIndex % bwLoadingLines.length
-                ] ?? bwLoadingLines[0])
+              : (colorLoadingLines[
+                  previewLoaderLineIndex % colorLoadingLines.length
+                ] ?? colorLoadingLines[0])
           }
           slowText={t("preview.loadingSlow")}
           standardText={t("preview.loadingDuration")}
           title={
             isColorfulFlow
               ? t("preview.colorfulLoadingTitle")
-              : t("preview.bwLoadingTitle")
+              : t("preview.colorLoadingTitle")
           }
           locale={locale}
         />

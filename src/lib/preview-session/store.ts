@@ -150,6 +150,18 @@ function slotHasBwResult(slot: PreviewSlot): boolean {
   return Boolean(active?.previewUrl || active?.error);
 }
 
+export function slotHasSuccessfulBw(slot: PreviewSlot): boolean {
+  const active = slot.candidates.find(
+    (candidate) =>
+      candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
+  );
+  return Boolean(active?.previewUrl && !active.error);
+}
+
+export function allSlotsHaveSuccessfulBw(session: PreviewSession): boolean {
+  return session.slots.every(slotHasSuccessfulBw);
+}
+
 export function resolveGenerationStatus(
   session: PreviewSession,
 ): PreviewGenerationStatus {
@@ -222,21 +234,21 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     initializationError: session.initializationError,
     canRegenerate:
       !isColorful &&
-      (inBwReview || inColorPhase) &&
+      inColorPhase &&
       noBwInFlight &&
-      hasCredits,
-    canReplace: inBwReview && noBwInFlight && hasCredits,
+      hasCredits &&
+      session.slots.some(slotHasSuccessfulBw),
+    canReplace: false,
     canApproveBw:
       inBwReview &&
       noBwInFlight &&
       allSlotsReady &&
-      session.slots.every((slot) => {
-        const active = slot.candidates.find(
-          (candidate) =>
-            candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
-        );
-        return Boolean(active?.previewUrl && !active.error);
-      }),
+      session.slots.every(slotHasSuccessfulBw),
+    canStartBw:
+      !isColorful &&
+      inColorPhase &&
+      session.phase !== "cart_added" &&
+      !allSlotsHaveSuccessfulBw(session),
     canRegenerateColor: inColorPhase && noColorInFlight && hasCredits,
     canSelectStyle: inColorPhase && generationStatus === "complete",
     canAddToCart:
@@ -248,7 +260,9 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
             session,
             resolveSessionColorStyle(session.selectedColorStyle),
           )
-        : noColorInFlight && generationStatus === "complete"),
+        : noColorInFlight &&
+          generationStatus === "complete" &&
+          allSlotsHaveSuccessfulBw(session)),
   };
 }
 

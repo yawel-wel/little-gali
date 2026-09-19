@@ -9,8 +9,11 @@ import {
 } from "./color-by-style";
 import {
   approveBwClaimKey,
+  generateBwClaimKey,
   pipelineScheduleClaimKey,
+  PIPELINE_CLAIM_TTL_SECONDS,
   releaseGenerationClaim,
+  tryClaimGeneration,
 } from "./generation-claim";
 import {
   copyCloudinaryUrlToPublicId,
@@ -26,10 +29,11 @@ import { runInitialParallelGeneration } from "./generation-runner";
 import {
   logPreviewColorPipelineIncomplete,
   logPreviewColorPipelineRecovered,
+  logPreviewPipelineBackgroundFailed,
   type ColorPipelineSlotDiagnostic,
 } from "./generation-log";
-import { loadPreviewSession, savePreviewSession } from "./store";
-import type { PreviewSession, PreviewSlot } from "./types";
+import { loadPreviewSession, savePreviewSession, slotHasSuccessfulBw } from "./store";
+import type { PreviewSession } from "./types";
 
 export interface PendingUpload {
   buffer: Buffer;
@@ -44,26 +48,6 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function slotHasBwResult(slot: PreviewSlot): boolean {
-  const active = slot.candidates.find(
-    (candidate) =>
-      candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
-  );
-  return Boolean(active?.previewUrl || active?.error);
-}
-
-function slotHasColorResult(slot: PreviewSlot): boolean {
-  return Boolean(slot.colorPreview?.previewUrl || slot.colorPreview?.error);
-}
-
-export function syncGenerationStatus(session: PreviewSession): void {
-  const allBwDone = session.slots.every(slotHasBwResult);
-  if (allBwDone) {
-    session.generationStatus = "complete";
-    session.initializationError = undefined;
-  }
 }
 
 function syncColorGenerationStatus(session: PreviewSession): void {
@@ -149,6 +133,7 @@ export async function markSessionPipelineFailed(
   await Promise.all([
     releaseGenerationClaim(pipelineScheduleClaimKey(sessionId)),
     releaseGenerationClaim(approveBwClaimKey(sessionId)),
+    releaseGenerationClaim(generateBwClaimKey(sessionId)),
   ]);
   trackServerError(
     {
@@ -176,8 +161,8 @@ async function applyOriginalUploads(
     originalUrl: originalUrls[index]?.secureUrl ?? slot.originalUrl,
     originalPublicId: originalUrls[index]?.publicId ?? slot.originalPublicId,
     inputVersion: 1,
-    inFlight: !isColorful,
-    colorInFlight: isColorful,
+    inFlight: false,
+    colorInFlight: true,
     candidates: [],
     activeCandidateId: undefined,
     colorCandidates: [],
@@ -185,8 +170,8 @@ async function applyOriginalUploads(
   }));
   session.generationStatus = "running";
   session.initializationError = undefined;
-  if (isColorful) {
-    session.phase = "bw_approved";
+  session.phase = "bw_approved";
+  if (isColorful || !session.selectedColorStyle) {
     session.selectedColorStyle = getDefaultColorStyle();
   }
   await savePreviewSession(session);
@@ -196,27 +181,18 @@ async function finalizeAfterInitialPipeline(sessionId: string): Promise<void> {
   const session = await loadPreviewSession(sessionId);
   if (!session) return;
 
-  if (parseBookFlow(session.bookFlow) === "colorful") {
-    syncColorPreviewToStyle(session, getDefaultColorStyle());
-    const colorReady = allSlotsHaveColorForStyle(
-      session,
-      getDefaultColorStyle(),
-    );
-    if (colorReady) {
-      session.generationStatus = "complete";
-      session.initializationError = undefined;
-    } else {
-      session.generationStatus = "failed";
-      session.initializationError =
-        session.initializationError ?? "Preview generation did not complete";
-    }
+  syncColorPreviewToStyle(session, getDefaultColorStyle());
+  const colorReady = allSlotsHaveColorForStyle(
+    session,
+    getDefaultColorStyle(),
+  );
+  if (colorReady) {
+    session.generationStatus = "complete";
+    session.initializationError = undefined;
   } else {
-    syncGenerationStatus(session);
-    if (session.generationStatus !== "complete") {
-      session.generationStatus = "failed";
-      session.initializationError =
-        session.initializationError ?? "Preview generation did not complete";
-    }
+    session.generationStatus = "failed";
+    session.initializationError =
+      session.initializationError ?? "Preview generation did not complete";
   }
   await savePreviewSession(session);
   await releaseGenerationClaim(pipelineScheduleClaimKey(sessionId));
@@ -244,7 +220,7 @@ export async function runPreviewPipelineFromMultipart(
   if (parseBookFlow(session.bookFlow) === "colorful") {
     await runColorfulBookColorGeneration(sessionId);
   } else {
-    await runInitialParallelGeneration(sessionId);
+    await runColorPipelineForApprovedSession(sessionId);
   }
 
   await finalizeAfterInitialPipeline(sessionId);
@@ -268,7 +244,7 @@ export async function runPreviewPipelineFromRemoteUrls(
   if (parseBookFlow(session.bookFlow) === "colorful") {
     await runColorfulBookColorGeneration(sessionId);
   } else {
-    await runInitialParallelGeneration(sessionId);
+    await runColorPipelineForApprovedSession(sessionId);
   }
 
   await finalizeAfterInitialPipeline(sessionId);
@@ -311,4 +287,120 @@ export async function runColorPipelineForApprovedSession(
   }));
   await savePreviewSession(session);
   await releaseGenerationClaim(approveBwClaimKey(sessionId));
+}
+
+/**
+ * Leftover classic sessions that were created in the old B&W-first flow.
+ * Advance them into the color-first UI without starting extra B&W work.
+ */
+export async function maybeMigrateLegacyClassicBwReview(
+  session: PreviewSession,
+): Promise<{ session: PreviewSession; scheduledColor: boolean }> {
+  if (parseBookFlow(session.bookFlow) !== "classic") {
+    return { session, scheduledColor: false };
+  }
+  if (session.phase !== "bw_review") {
+    return { session, scheduledColor: false };
+  }
+
+  session.phase = "bw_approved";
+  if (!session.selectedColorStyle) {
+    session.selectedColorStyle = getDefaultColorStyle();
+  }
+
+  const colorReady = allSlotsHaveColorForStyle(
+    session,
+    getDefaultColorStyle(),
+  );
+  const colorInFlight = session.slots.some((slot) => slot.colorInFlight);
+
+  if (colorReady || colorInFlight) {
+    await savePreviewSession(session);
+    return { session, scheduledColor: false };
+  }
+
+  const claimed = await tryClaimGeneration(
+    approveBwClaimKey(session.id),
+    PIPELINE_CLAIM_TTL_SECONDS,
+  );
+  if (!claimed) {
+    const latest = await loadPreviewSession(session.id);
+    return { session: latest ?? session, scheduledColor: false };
+  }
+
+  session.generationStatus = "running";
+  session.slots = session.slots.map((slot) => ({
+    ...slot,
+    colorInFlight: true,
+  }));
+  await savePreviewSession(session);
+  return { session, scheduledColor: true };
+}
+
+/**
+ * Starts classic B&W generation only after an explicit user action.
+ * Does not change generationStatus (that flag drives the color loading screen).
+ */
+export async function startClassicBwGeneration(
+  session: PreviewSession,
+): Promise<{ session: PreviewSession; scheduled: boolean }> {
+  if (parseBookFlow(session.bookFlow) !== "classic") {
+    return { session, scheduled: false };
+  }
+  if (session.phase === "cart_added" || session.phase === "bw_review") {
+    return { session, scheduled: false };
+  }
+
+  const colorReady = allSlotsHaveColorForStyle(
+    session,
+    session.selectedColorStyle ?? getDefaultColorStyle(),
+  );
+  if (!colorReady) {
+    return { session, scheduled: false };
+  }
+
+  const pendingIndexes = session.slots
+    .map((slot, index) => ({ slot, index }))
+    .filter(({ slot }) => !slotHasSuccessfulBw(slot) && !slot.inFlight)
+    .map(({ index }) => index);
+
+  if (pendingIndexes.length === 0) {
+    return { session, scheduled: false };
+  }
+
+  const claimed = await tryClaimGeneration(
+    generateBwClaimKey(session.id),
+    PIPELINE_CLAIM_TTL_SECONDS,
+  );
+  if (!claimed) {
+    return { session, scheduled: false };
+  }
+
+  const pending = new Set(pendingIndexes);
+  session.slots = session.slots.map((slot, index) =>
+    pending.has(index) ? { ...slot, inFlight: true } : slot,
+  );
+  await savePreviewSession(session);
+  return { session, scheduled: true };
+}
+
+export async function runClassicBwPipelineForSession(
+  sessionId: string,
+): Promise<void> {
+  try {
+    await runInitialParallelGeneration(sessionId);
+  } catch (error) {
+    console.error("Background B&W pipeline failed:", sessionId, error);
+    logPreviewPipelineBackgroundFailed(sessionId, "bw", error);
+  } finally {
+    const latest = await loadPreviewSession(sessionId);
+    if (latest) {
+      latest.slots = latest.slots.map((slot) => ({
+        ...slot,
+        inFlight: false,
+      }));
+      await savePreviewSession(latest);
+    }
+    await releaseGenerationClaim(generateBwClaimKey(sessionId));
+  }
 }

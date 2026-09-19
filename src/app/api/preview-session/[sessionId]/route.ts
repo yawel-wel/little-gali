@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { applyMixpanelDistinctIdFromRequest } from "@/lib/analytics-context";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
+import { logPreviewPipelineBackgroundFailed } from "@/lib/preview-session/generation-log";
+import {
+  markSessionPipelineFailed,
+  maybeMigrateLegacyClassicBwReview,
+  runColorPipelineForApprovedSession,
+} from "@/lib/preview-session/preview-pipeline";
 import {
   clearStaleColorInFlight,
   savePreviewSession,
@@ -8,6 +14,7 @@ import {
 } from "@/lib/preview-session/store";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function GET(
   request: NextRequest,
@@ -28,5 +35,18 @@ export async function GET(
     await savePreviewSession(auth.session);
   }
 
-  return NextResponse.json({ session: toPublicView(auth.session) });
+  const migrated = await maybeMigrateLegacyClassicBwReview(auth.session);
+  if (migrated.scheduledColor) {
+    after(async () => {
+      try {
+        await runColorPipelineForApprovedSession(sessionId);
+      } catch (error) {
+        console.error("Background color pipeline failed:", sessionId, error);
+        logPreviewPipelineBackgroundFailed(sessionId, "color", error);
+        await markSessionPipelineFailed(sessionId, error);
+      }
+    });
+  }
+
+  return NextResponse.json({ session: toPublicView(migrated.session) });
 }

@@ -55,6 +55,7 @@ export function framedArtSessionToPreviewView(
     canRegenerate: "canRegenerate" in session ? session.canRegenerate : !session.regenerateUsed,
     canReplace: false,
     canApproveBw: false,
+    canStartBw: false,
     canRegenerateColor: "canRegenerate" in session ? session.canRegenerate : !session.regenerateUsed,
     canSelectStyle: session.generationStatus === "complete",
     canAddToCart: session.generationStatus === "complete",

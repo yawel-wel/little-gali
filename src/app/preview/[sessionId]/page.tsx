@@ -192,6 +192,21 @@ function allSlotsHaveColorForStylePublic(
   );
 }
 
+function slotHasSuccessfulBwPublic(
+  slot: PreviewSessionPublicView["slots"][number],
+): boolean {
+  const active = slot.candidates.find(
+    (candidate) => candidate.id === slot.activeCandidateId,
+  );
+  return Boolean(active?.previewUrl && !active.error);
+}
+
+function allSlotsHaveSuccessfulBwPublic(
+  session: PreviewSessionPublicView,
+): boolean {
+  return session.slots.every(slotHasSuccessfulBwPublic);
+}
+
 function slotHasColorForStylePublic(
   slot: PreviewSessionPublicView["slots"][number],
   style: StyleType,
@@ -251,7 +266,7 @@ function canReplacePreviewSlot(
       return true;
     }
   }
-  return session.canReplace;
+  return false;
 }
 
 function stripThumbnailsReady(
@@ -322,27 +337,16 @@ function slotHasUsableColorPreview(
   return Boolean(candidate?.previewUrl || candidate?.error);
 }
 
-function sessionHasUsableBwPreview(
-  session: PreviewSessionPublicView,
-): boolean {
-  return session.slots.every((slot) =>
-    slot.candidates.some((candidate) => candidate.previewUrl || candidate.error),
-  );
-}
-
 function shouldRecoverFromInitializationError(
   session: PreviewSessionPublicView,
 ): boolean {
   if (!isPreviewColorPhase(session)) {
     return false;
   }
-  if (isColorfulPreviewSession(session)) {
-    const style = resolvePreviewColorStyle(session.selectedColorStyle);
-    return session.slots.every((slot) =>
-      slotHasUsableColorPreview(slot, style),
-    );
-  }
-  return sessionHasUsableBwPreview(session);
+  const style = resolvePreviewColorStyle(session.selectedColorStyle);
+  return session.slots.every((slot) =>
+    slotHasUsableColorPreview(slot, style),
+  );
 }
 
 function PreviewSlotLightboxActivator({
@@ -403,9 +407,9 @@ export default function PreviewPage() {
     }
   });
   const [session, setSession] = useState<PreviewSessionPublicView | null>(null);
-  const [bookSide, setBookSide] = useState<PreviewBookSide>("bw");
+  const [bookSide, setBookSide] = useState<PreviewBookSide>("color");
   const [displayedBookSide, setDisplayedBookSide] =
-    useState<PreviewBookSide>("bw");
+    useState<PreviewBookSide>("color");
   const [isTabCardsVisible, setIsTabCardsVisible] = useState(true);
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(getDefaultColorStyle());
   const [activeColorStyle, setActiveColorStyle] = useState<StyleType>(getDefaultColorStyle());
@@ -426,6 +430,7 @@ export default function PreviewPage() {
   const styleResumeRunningRef = useRef(false);
   const pendingColorRegenProcessingRef = useRef(false);
   const mutationInProgressRef = useRef(false);
+  const bwGenerateStartedRef = useRef(false);
   const [error, setError] = useState<ReactNode | null>(null);
 
   useEffect(() => {
@@ -480,6 +485,8 @@ export default function PreviewPage() {
     useState(false);
   const [keepColorLoadingVisible, setKeepColorLoadingVisible] =
     useState(false);
+  const [keepBwLoadingVisible, setKeepBwLoadingVisible] = useState(false);
+  const [bwGenerationRequested, setBwGenerationRequested] = useState(false);
   const [openSlotActionsIndex, setOpenSlotActionsIndex] = useState<number | null>(
     null,
   );
@@ -517,17 +524,6 @@ export default function PreviewPage() {
     setSession(next);
   }, []);
 
-  const bwLoadingLines = useMemo(
-    () => [
-      t("preview.bwLoadingLine1"),
-      t("preview.bwLoadingLine2"),
-      t("preview.bwLoadingLine3"),
-      t("preview.bwLoadingLine4"),
-      t("preview.bwLoadingLine5"),
-    ],
-    [t],
-  );
-
   const colorLoadingLines = useMemo(
     () => [
       t("preview.colorLoadingLine1"),
@@ -535,6 +531,17 @@ export default function PreviewPage() {
       t("preview.colorLoadingLine3"),
       t("preview.colorLoadingLine4"),
       t("preview.colorLoadingLine5"),
+    ],
+    [t],
+  );
+
+  const bwLoadingLines = useMemo(
+    () => [
+      t("preview.bwLoadingLine1"),
+      t("preview.bwLoadingLine2"),
+      t("preview.bwLoadingLine3"),
+      t("preview.bwLoadingLine4"),
+      t("preview.bwLoadingLine5"),
     ],
     [t],
   );
@@ -781,14 +788,9 @@ export default function PreviewPage() {
     !loadFailed &&
     (!session ||
       session.slots.some((slot) => {
-        if (isColorfulPreviewSession(session)) {
-          return !slotHasUsableColorPreview(
-            slot,
-            resolvePreviewColorStyle(session.selectedColorStyle),
-          );
-        }
-        return !slot.candidates.some(
-          (candidate) => candidate.previewUrl || candidate.error,
+        return !slotHasUsableColorPreview(
+          slot,
+          resolvePreviewColorStyle(session.selectedColorStyle),
         );
       }));
 
@@ -838,22 +840,64 @@ export default function PreviewPage() {
   }, [isColorGenerating, keepColorLoadingVisible]);
 
   const showColorLoadingScreen =
-    !showInitialLoadingScreen && (isColorGenerating || keepColorLoadingVisible);
+    !showInitialLoadingScreen &&
+    isColorfulFlow &&
+    (isColorGenerating || keepColorLoadingVisible);
   const isColorLoadingExiting = !isColorGenerating && keepColorLoadingVisible;
 
+  const allBwHaveResult = Boolean(
+    session &&
+      session.slots.every((slot) => {
+        const active = slot.candidates.find(
+          (candidate) => candidate.id === slot.activeCandidateId,
+        );
+        return Boolean(active?.previewUrl || active?.error);
+      }),
+  );
+  const isBwGenerating =
+    !loadFailed &&
+    !isColorfulFlow &&
+    session !== null &&
+    (bwGenerationRequested ||
+      session.slots.some((slot) => slot.inFlight)) &&
+    !allBwHaveResult;
+
+  useEffect(() => {
+    if (isBwGenerating) {
+      setKeepBwLoadingVisible(true);
+      return;
+    }
+    if (!keepBwLoadingVisible) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setKeepBwLoadingVisible(false);
+      setBookSide("bw");
+      setDisplayedBookSide("bw");
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [isBwGenerating, keepBwLoadingVisible]);
+
+  const showBwLoadingScreen =
+    !showInitialLoadingScreen &&
+    !showColorLoadingScreen &&
+    (isBwGenerating || keepBwLoadingVisible);
+  const isBwLoadingExiting = !isBwGenerating && keepBwLoadingVisible;
+
   const isLoadingScreenActive =
-    showInitialLoadingScreen || showColorLoadingScreen;
-  const activeLoadingLines = showColorLoadingScreen
-    ? isColorfulFlow
-      ? colorfulLoadingLines
-      : colorLoadingLines
+    showInitialLoadingScreen ||
+    showColorLoadingScreen ||
+    showBwLoadingScreen;
+  const activeLoadingLines = showBwLoadingScreen
+    ? bwLoadingLines
     : isColorfulFlow
       ? colorfulLoadingLines
-      : bwLoadingLines;
+      : colorLoadingLines;
   const activeLoadingLineCount = activeLoadingLines.length;
 
   const wasInitialLoadingScreenRef = useRef(false);
   const wasColorLoadingScreenRef = useRef(false);
+  const wasBwLoadingScreenRef = useRef(false);
 
   useEffect(() => {
     if (showInitialLoadingScreen && !wasInitialLoadingScreenRef.current) {
@@ -868,6 +912,13 @@ export default function PreviewPage() {
     }
     wasColorLoadingScreenRef.current = showColorLoadingScreen;
   }, [showColorLoadingScreen]);
+
+  useEffect(() => {
+    if (showBwLoadingScreen && !wasBwLoadingScreenRef.current) {
+      setLoadingLineIndex(0);
+    }
+    wasBwLoadingScreenRef.current = showBwLoadingScreen;
+  }, [showBwLoadingScreen]);
 
   useEffect(() => {
     if (!isLoadingScreenActive || activeLoadingLineCount === 0) {
@@ -896,25 +947,35 @@ export default function PreviewPage() {
         : !session.slots.some((slot) => slot.colorInFlight) &&
           session.canAddToCart),
   );
-
-  useEffect(() => {
-    if (!showInitialLoadingScreen && session && !bwPreviewTrackedRef.current) {
-      bwPreviewTrackedRef.current = true;
-      track(ANALYTICS_EVENTS.BOOKLET_BW_PREVIEW_VIEWED);
-    }
-  }, [showInitialLoadingScreen, session]);
+  const allBwReady = Boolean(
+    session && allSlotsHaveSuccessfulBwPublic(session),
+  );
+  const showAddToCartCta = isColorfulFlow || allBwReady || bookSide === "bw";
 
   useEffect(() => {
     if (
-      displayedBookSide === "color" &&
+      !showInitialLoadingScreen &&
       session &&
-      isColorPhase &&
+      displayedBookSide === "color" &&
       !colorPreviewTrackedRef.current
     ) {
       colorPreviewTrackedRef.current = true;
       track(ANALYTICS_EVENTS.BOOKLET_COLOR_PREVIEW_VIEWED);
     }
-  }, [displayedBookSide, isColorPhase, session]);
+  }, [displayedBookSide, session, showInitialLoadingScreen]);
+
+  useEffect(() => {
+    if (
+      displayedBookSide === "bw" &&
+      session &&
+      !isColorfulFlow &&
+      !showBwLoadingScreen &&
+      !bwPreviewTrackedRef.current
+    ) {
+      bwPreviewTrackedRef.current = true;
+      track(ANALYTICS_EVENTS.BOOKLET_BW_PREVIEW_VIEWED);
+    }
+  }, [displayedBookSide, isColorfulFlow, session, showBwLoadingScreen]);
 
   const sessionInitialPhotoUrls =
     session?.slots
@@ -965,7 +1026,10 @@ export default function PreviewPage() {
 
   const isDisplayedColorSideLoading =
     displayedBookSide === "color" &&
-    Boolean(session) &&
+    session !== null &&
+    !session.slots.every((slot) =>
+      slotHasUsableColorPreview(slot, displayColorStyle),
+    ) &&
     (isInitialColorPipelineRunning || isAwaitingStripAssetsOnColorSide("color"));
 
   const styleStripLoadingSet = useMemo(() => {
@@ -1192,7 +1256,7 @@ export default function PreviewPage() {
       if (!session) {
         return;
       }
-      // Classic color is owned by approve-bw's pipeline until color phase.
+      // Classic color is owned by the initial server pipeline.
       if (
         !isColorfulPreviewSession(session) &&
         session.phase !== "bw_approved" &&
@@ -1281,8 +1345,7 @@ export default function PreviewPage() {
   );
 
   // Resume on-demand style generation after refresh / timed-out workers.
-  // Classic: only after BW approve (color phase). Starting earlier races with
-  // approve-bw's pipeline and produces duplicate Gemini color candidates.
+  // Do not start while the initial color pipeline still owns generationStatus.
   useEffect(() => {
     if (!session || showInitialLoadingScreen || loadFailed) {
       return;
@@ -1744,12 +1807,38 @@ export default function PreviewPage() {
     }
   };
 
-  const handleApproveBw = async () => {
-    setIsSubmitting(true);
+  const ensureBwGenerationStarted = useCallback(async () => {
+    if (!session || isColorfulPreviewSession(session)) {
+      return;
+    }
+    if (allSlotsHaveSuccessfulBwPublic(session)) {
+      return;
+    }
+    if (
+      bwGenerateStartedRef.current &&
+      session.slots.some((slot) => slot.inFlight)
+    ) {
+      return;
+    }
+
+    bwGenerateStartedRef.current = true;
+    setBwGenerationRequested(true);
     setError(null);
+    setSession((current) => {
+      if (!current) {
+        return current;
+      }
+      return {
+        ...current,
+        slots: current.slots.map((slot) =>
+          slotHasSuccessfulBwPublic(slot) ? slot : { ...slot, inFlight: true },
+        ),
+      };
+    });
+
     try {
       const response = await fetch(
-        `/api/preview-session/${sessionId}/approve-bw`,
+        `/api/preview-session/${sessionId}/generate-bw`,
         withAnalyticsHeaders({ method: "POST" }),
       );
       const data = await response.json();
@@ -1758,10 +1847,14 @@ export default function PreviewPage() {
       }
       applySession(data.session);
     } catch (err) {
+      bwGenerateStartedRef.current = false;
+      setBwGenerationRequested(false);
       setError(err instanceof Error ? err.message : t("preview.sessionError"));
-    } finally {
-      setIsSubmitting(false);
     }
+  }, [applySession, session, sessionId, t]);
+
+  const handleGoToBwSide = () => {
+    handleSelectBookSide("bw");
   };
 
   const handleContinueToCart = async () => {
@@ -1860,6 +1953,10 @@ export default function PreviewPage() {
   };
 
   const handleSelectBookSide = (nextSide: PreviewBookSide) => {
+    if (nextSide === "bw") {
+      void ensureBwGenerationStarted();
+    }
+
     if (nextSide === bookSide) {
       return;
     }
@@ -1917,12 +2014,12 @@ export default function PreviewPage() {
             isExiting={isInitialLoadingExiting}
             isComplete={!isInitialLoading}
             loadingLine={
-              (isColorfulFlow ? colorfulLoadingLines : bwLoadingLines)[
+              (isColorfulFlow ? colorfulLoadingLines : colorLoadingLines)[
                 loadingLineIndex %
-                  (isColorfulFlow ? colorfulLoadingLines : bwLoadingLines)
+                  (isColorfulFlow ? colorfulLoadingLines : colorLoadingLines)
                     .length
               ] ??
-              (isColorfulFlow ? colorfulLoadingLines[0] : bwLoadingLines[0])
+              (isColorfulFlow ? colorfulLoadingLines[0] : colorLoadingLines[0])
             }
             slowText={t("preview.loadingSlow")}
             standardText={t("preview.loadingDuration")}
@@ -1933,7 +2030,7 @@ export default function PreviewPage() {
                     "preview.colorfulLoadingTitle",
                     "preview.colorLoadingTitle",
                   )
-                : t("preview.bwLoadingTitle")
+                : t("preview.colorLoadingTitle")
             }
             locale={locale}
           />
@@ -1965,22 +2062,30 @@ export default function PreviewPage() {
             }
             locale={locale}
           />
+        ) : showBwLoadingScreen ? (
+          <PreviewInitialLoadingScreen
+            imageUrls={initialLoadingPhotoUrls}
+            isExiting={isBwLoadingExiting}
+            isComplete={!isBwGenerating}
+            loadingLine={
+              bwLoadingLines[loadingLineIndex % bwLoadingLines.length] ??
+              bwLoadingLines[0]
+            }
+            slowText={t("preview.loadingSlow")}
+            standardText={t("preview.loadingDuration")}
+            title={t("preview.bwLoadingTitle")}
+            locale={locale}
+          />
         ) : (
           <section className="bg-warm-light pt-5 pb-0 max-md:pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-14">
             <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
               <Title
-                highlightText={
-                  isColorPhase
-                    ? t("preview.colorPhaseTitleHighlight")
-                    : t("preview.bwPhaseTitle")
-                }
+                highlightText={t("preview.colorPhaseTitleHighlight")}
                 size="xl"
                 roundedUnderline
                 className="text-center text-2xl font-bold md:text-4xl mb-6"
               >
-                {isColorPhase
-                  ? t("preview.colorPhaseTitle")
-                  : t("preview.bwPhaseTitle")}
+                {t("preview.colorPhaseTitle")}
               </Title>
 
             {error && !loadFailed && (
@@ -2014,20 +2119,6 @@ export default function PreviewPage() {
               </div>
             ) : session ? (
               <div>
-                {!isColorPhase && !isColorfulFlow ? (
-                  <p className="mx-auto max-w-xl text-center font-body text-base leading-relaxed text-dark-gray">
-                    {t("preview.bwPhaseDescription")
-                      .split("\n")
-                      .map((line, index) => (
-                        <span
-                          key={index}
-                          className={cn("block", index > 0 && "mt-1")}
-                        >
-                          {line}
-                        </span>
-                      ))}
-                  </p>
-                ) : null}
                 <div className="mt-4 flex justify-center md:mt-5">
                   {session.changeCreditsRemaining > 0 ? (
                     <span className="inline-flex rounded-full border border-gray-200 bg-white/45 px-3.5 py-1 font-body text-sm font-normal text-dark-gray/70 md:py-1.5 md:text-xs">
@@ -2091,20 +2182,6 @@ export default function PreviewPage() {
                     <button
                       type="button"
                       role="tab"
-                      aria-selected={bookSide === "bw"}
-                      onClick={() => handleSelectBookSide("bw")}
-                      className={cn(
-                        "relative -mb-px cursor-pointer px-1 pb-3 pt-1 font-body-bold text-sm transition-colors lg:hover:text-accent-burgundy",
-                        bookSide === "bw"
-                          ? "border-b-[3px] border-accent-burgundy text-dark-gray"
-                          : "border-b-[3px] border-transparent text-dark-gray/70 hover:text-dark-gray",
-                      )}
-                    >
-                      {t("preview.tabBw")}
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
                       aria-selected={bookSide === "color"}
                       onClick={() => handleSelectBookSide("color")}
                       className={cn(
@@ -2115,6 +2192,20 @@ export default function PreviewPage() {
                       )}
                     >
                       {t("preview.tabColor")}
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={bookSide === "bw"}
+                      onClick={() => handleSelectBookSide("bw")}
+                      className={cn(
+                        "relative -mb-px cursor-pointer px-1 pb-3 pt-1 font-body-bold text-sm transition-colors lg:hover:text-accent-burgundy",
+                        bookSide === "bw"
+                          ? "border-b-[3px] border-accent-burgundy text-dark-gray"
+                          : "border-b-[3px] border-transparent text-dark-gray/70 hover:text-dark-gray",
+                      )}
+                    >
+                      {t("preview.tabBw")}
                     </button>
                   </div>
                   )}
@@ -2386,13 +2477,14 @@ export default function PreviewPage() {
                                             >
                                               {t("preview.regenerate")}
                                             </button>
+                                            {canReplacePreviewSlot(
+                                              session,
+                                              slot.index,
+                                              activeColorStyle,
+                                            ) ? (
                                             <button
                                               type="button"
                                               disabled={
-                                                !canReplacePreviewSlot(
-                                                  session,
-                                                  slot.index,
-                                                ) ||
                                                 isSlotBusy ||
                                                 isSubmitting
                                               }
@@ -2404,6 +2496,7 @@ export default function PreviewPage() {
                                             >
                                               {t("preview.replaceImage")}
                                             </button>
+                                            ) : null}
                                             <button
                                               type="button"
                                               disabled={!activeCompareOutput}
@@ -2449,13 +2542,14 @@ export default function PreviewPage() {
                                         >
                                           {t("preview.regenerate")}
                                         </button>
+                                        {canReplacePreviewSlot(
+                                          session,
+                                          slot.index,
+                                          activeColorStyle,
+                                        ) ? (
                                         <button
                                           type="button"
                                           disabled={
-                                            !canReplacePreviewSlot(
-                                              session,
-                                              slot.index,
-                                            ) ||
                                             isSlotBusy ||
                                             isSubmitting
                                           }
@@ -2467,6 +2561,7 @@ export default function PreviewPage() {
                                         >
                                           {t("preview.replaceImage")}
                                         </button>
+                                        ) : null}
                                         <button
                                           type="button"
                                           disabled={!activeCompareOutput}
@@ -2743,7 +2838,7 @@ export default function PreviewPage() {
                   }
                 />
 
-                {isColorPhase ? (
+                {showAddToCartCta ? (
                   <>
                     <PreviewPhaseFooter
                       variant="fixedMobile"
@@ -2780,9 +2875,9 @@ export default function PreviewPage() {
                       variant="fixedMobile"
                       headline={t("preview.bwApproveAbove")}
                       buttonLabel={t("preview.approveBwButton")}
-                      buttonDisabled={!session.canApproveBw}
-                      isSubmitting={isSubmitting}
-                      onButtonClick={handleApproveBw}
+                      buttonDisabled={false}
+                      isSubmitting={false}
+                      onButtonClick={handleGoToBwSide}
                       contactBefore={t("preview.bwApproveBelowBefore")}
                       contactLinkLabel={t("preview.contactButton")}
                       onContactClick={() =>
@@ -2793,9 +2888,9 @@ export default function PreviewPage() {
                       variant="inline"
                       headline={t("preview.bwApproveAbove")}
                       buttonLabel={t("preview.approveBwButton")}
-                      buttonDisabled={!session.canApproveBw}
-                      isSubmitting={isSubmitting}
-                      onButtonClick={handleApproveBw}
+                      buttonDisabled={false}
+                      isSubmitting={false}
+                      onButtonClick={handleGoToBwSide}
                       contactBefore={t("preview.bwApproveBelowBefore")}
                       contactLinkLabel={t("preview.contactButton")}
                       onContactClick={() =>
@@ -2975,7 +3070,9 @@ export default function PreviewPage() {
         previousLabel={t("preview.lightboxPrevious")}
         nextLabel={t("preview.lightboxNext")}
       />
-      {!showInitialLoadingScreen && !showColorLoadingScreen && (
+      {!showInitialLoadingScreen &&
+        !showColorLoadingScreen &&
+        !showBwLoadingScreen && (
         <div className="max-md:hidden">
           <Footer />
         </div>

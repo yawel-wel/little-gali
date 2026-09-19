@@ -36,6 +36,10 @@ export function approveBwClaimKey(sessionId: string): string {
   return `preview:approve-bw:${sessionId}`;
 }
 
+export function generateBwClaimKey(sessionId: string): string {
+  return `preview:generate-bw:${sessionId}`;
+}
+
 /**
  * Acquire an exclusive claim before calling Gemini.
  * Returns false if another worker already owns this work unit.

@@ -70,13 +70,10 @@ export async function POST(
     );
   }
 
-  // Classic color generation starts only after approve-bw (server pipeline).
-  // Allowing it during bw_review raced with that pipeline and doubled Gemini calls.
-  if (session.phase === "bw_review" && !isColorful) {
-    return NextResponse.json(
-      { error: "Approve B&W before generating color" },
-      { status: 409 },
-    );
+  // Classic color generation is the initial pipeline; on-demand style fills
+  // must not run while that pipeline still owns generationStatus.
+  if (session.generationStatus === "running" && !isColorful) {
+    return NextResponse.json({ session: toPublicView(session) });
   }
 
   if (allStylesForSlot) {

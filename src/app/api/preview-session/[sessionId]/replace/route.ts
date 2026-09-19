@@ -104,8 +104,11 @@ export async function POST(
     session.selectedColorStyle,
   );
 
-  if (!fixingProhibited && session.phase !== "bw_review") {
-    return NextResponse.json({ error: "Session is not in B&W review" }, { status: 409 });
+  if (!fixingProhibited) {
+    return NextResponse.json(
+      { error: "Replacing photos is no longer available" },
+      { status: 409 },
+    );
   }
 
   if (!fixingProhibited && !hasChangeCredits(session)) {
