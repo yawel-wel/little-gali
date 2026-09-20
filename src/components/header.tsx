@@ -60,6 +60,7 @@ export function Header() {
     { nameKey: "nav.birthPackages", href: "/birth-packages", isAnchor: false },
     { nameKey: "nav.framedArt", href: "/framed-art", isAnchor: false },
     { nameKey: "nav.bambooBlanket", href: "/bamboo-blanket", isAnchor: false },
+    { nameKey: "nav.blog", href: "/blog", isAnchor: false },
     { nameKey: "nav.about", href: "/#about", isAnchor: true },
     { nameKey: "nav.giftCard", href: "/#gift-card", isAnchor: true },
     { nameKey: "nav.qa", href: "/qa", isAnchor: false },
@@ -67,7 +68,11 @@ export function Header() {
   ].map((item) => ({
     ...item,
     name: t(item.nameKey),
-    active: !item.isAnchor && pathname === item.href,
+    active:
+      !item.isAnchor &&
+      (item.href === "/blog"
+        ? pathname === "/blog" || pathname.startsWith("/blog/")
+        : pathname === item.href),
   }));
 
   return (

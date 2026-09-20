@@ -107,6 +107,7 @@ const hebrewTranslations = {
   "nav.birthPackages": "מארזי לידה",
   "nav.framedArt": "איור ממוסגר",
   "nav.bambooBlanket": "טטרות במבוק",
+  "nav.blog": "בלוג",
   "nav.about": "אודותינו",
   "nav.giftCard": "גיפט קארד",
   "nav.qa": "שאלות ותשובות",
@@ -1004,6 +1005,21 @@ const hebrewTranslations = {
   "qa.notFound": "לא מצאתם את התשובה שחיפשתם?",
   "qa.contact": "צרו איתנו קשר",
 
+  // Blog
+  "blog.title": "הבלוג שלנו",
+  "blog.titleHighlight": "שלנו",
+  "blog.subtitle": "רעיונות למתנות לידה, טיפים להורים, ומה שקורה בחודשים הראשונים",
+  "blog.breadcrumbAria": "ניווט מסלול",
+  "blog.breadcrumbHome": "בית",
+  "blog.breadcrumbBlog": "בלוג",
+  "blog.tags": "תגיות",
+  "blog.share": "שיתוף",
+  "blog.copied": "הקישור הועתק",
+  "blog.copyFailed": "לא הצלחנו להעתיק. הקישור:",
+  "blog.authorName": "יעל רומשקנו",
+  "blog.authorRole": "אמא של Little Gali",
+  "blog.authorImageAlt": "יעל רומשקנו",
+
   // Footer
   "footer.description":
     "ספרוני תינוקות מותאמים אישית\nעם איורים של האנשים שהתינוק\nשלכם הכי אוהב.",
@@ -1375,6 +1391,7 @@ const englishTranslations = {
   "nav.birthPackages": "Birth packages",
   "nav.framedArt": "Framed Illustration",
   "nav.bambooBlanket": "Bamboo Blankets",
+  "nav.blog": "Blog",
   "nav.about": "About Us",
   "nav.giftCard": "Gift Card",
   "nav.qa": "Q&A",
@@ -2282,6 +2299,21 @@ const englishTranslations = {
   "qa.answerUnsatisfied.linkText": "us",
   "qa.notFound": "Didn't find the answer you were looking for?",
   "qa.contact": "Contact Us",
+
+  // Blog
+  "blog.title": "Our blog",
+  "blog.titleHighlight": "blog",
+  "blog.subtitle": "Newborn gift ideas, notes for parents, and the first months",
+  "blog.breadcrumbAria": "Breadcrumb navigation",
+  "blog.breadcrumbHome": "Home",
+  "blog.breadcrumbBlog": "Blog",
+  "blog.tags": "Tags",
+  "blog.share": "Share",
+  "blog.copied": "Link copied",
+  "blog.copyFailed": "Couldn't copy. Link:",
+  "blog.authorName": "Yael Romashkano",
+  "blog.authorRole": "Mom of Little Gali",
+  "blog.authorImageAlt": "Yael Romashkano",
 
   // Footer
   "footer.description":

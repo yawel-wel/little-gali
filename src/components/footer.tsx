@@ -152,6 +152,7 @@ export function Footer() {
               links={[
                 { labelKey: "footer.howItWorks", href: "/#how-it-works" },
                 { labelKey: "nav.qa", href: "/qa" },
+                { labelKey: "nav.blog", href: "/blog" },
               ]}
               t={t}
               isRtl={isRtl}
