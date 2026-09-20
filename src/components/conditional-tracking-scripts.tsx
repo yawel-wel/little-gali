@@ -5,9 +5,13 @@ import Script from "next/script";
 
 interface ConditionalTrackingScriptsProps {
   metaPixelId: string;
+  klaviyoCompanyId: string;
 }
 
-export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingScriptsProps) {
+export function ConditionalTrackingScripts({
+  metaPixelId,
+  klaviyoCompanyId,
+}: ConditionalTrackingScriptsProps) {
   useEffect(() => {
     const handleConsentAccepted = () => {
       setHasConsent(true);
@@ -30,6 +34,15 @@ export function ConditionalTrackingScripts({ metaPixelId }: ConditionalTrackingS
 
   return (
     <>
+      {/* Klaviyo.js — required for published popups on this custom storefront */}
+      {/^[A-Za-z0-9]{6,12}$/.test(klaviyoCompanyId) && (
+        <Script
+          id="klaviyo-onsite"
+          src={`https://static.klaviyo.com/onsite/js/${klaviyoCompanyId}/klaviyo.js`}
+          strategy="afterInteractive"
+        />
+      )}
+
       {/* Meta Pixel — loads immediately, does not wait for cookie consent */}
       {metaPixelId && (
         <Script id="meta-pixel" strategy="afterInteractive">

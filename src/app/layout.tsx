@@ -67,6 +67,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || "";
+  const klaviyoCompanyId =
+    process.env.NEXT_PUBLIC_KLAVIYO_COMPANY_ID?.trim() || "";
   
   return (
     <html
@@ -120,7 +122,10 @@ export default function RootLayout({
                     <TopBanner />
                     {children}
                     <CookieConsent />
-                    <ConditionalTrackingScripts metaPixelId={metaPixelId} />
+                    <ConditionalTrackingScripts
+                      metaPixelId={metaPixelId}
+                      klaviyoCompanyId={klaviyoCompanyId}
+                    />
                   </UploadImagesProvider>
                 </PreviewLimitsProvider>
               </MixpanelProvider>
