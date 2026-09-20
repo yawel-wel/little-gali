@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Locale } from "@/lib/LanguageContext";
+import { GiftSetFlowBadge } from "@/components/gift-set-flow-badge";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
 import { cn } from "@/lib/utils";
 
@@ -116,6 +117,7 @@ export function PreviewInitialLoadingScreen({
           )}
         </div>
 
+        <GiftSetFlowBadge className="mb-1" />
         <h1 className="max-w-xl font-heading text-2xl leading-[1.15] text-accent-burgundy md:text-3xl">
           {title}
         </h1>

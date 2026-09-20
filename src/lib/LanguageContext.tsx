@@ -1090,6 +1090,8 @@ const hebrewTranslations = {
   "upload.chooser.title": "מה תרצו ליצור?",
   "upload.chooser.titleNew": "או התחילו ספרון חדש",
   "upload.chooser.subtitle": "בחרו את סוג הספרון והמשיכו להעלאת תמונות",
+  "upload.chooser.giftSet.title": "איזה ספרון תרצו ליצור",
+  "upload.chooser.giftSet.subtitle": "בחרו את סוג הספרון שיהיה במארז הלידה",
   "upload.chooser.classicTitle": "ספרון קלאסי",
   "upload.chooser.classicDescription":
     "אותן התמונות יופיעו בשני הצדדים",
@@ -2368,6 +2370,9 @@ const englishTranslations = {
   "upload.chooser.title": "Choose what to create",
   "upload.chooser.titleNew": "Or start a new booklet",
   "upload.chooser.subtitle": "Pick a booklet type, then upload your photos",
+  "upload.chooser.giftSet.title": "Which booklet would you like to create?",
+  "upload.chooser.giftSet.subtitle":
+    "Choose the booklet type that will be in the birth package",
   "upload.chooser.classicTitle": "Classic booklet",
   "upload.chooser.classicDescription":
     "The same photos appear on both sides",

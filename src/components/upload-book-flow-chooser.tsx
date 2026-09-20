@@ -13,6 +13,10 @@ import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import type { BookFlow } from "@/lib/preview-session/book-flow";
 import { PreviousPreviewSessions } from "@/components/previous-preview-sessions";
+import {
+  GiftSetFlowBadge,
+  useIsGiftSetFlow,
+} from "@/components/gift-set-flow-badge";
 import { isAiPreviewEnabled } from "@/lib/feature-flags";
 import {
   DEFAULT_BOOK_COLOR,
@@ -325,6 +329,7 @@ function BookFlowCard({
 export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) {
   const { t, locale } = useLanguage();
   const isHe = locale === "he";
+  const isGiftSet = useIsGiftSetFlow();
   const previewEnabled = isAiPreviewEnabled();
   const [hasPreviousSessions, setHasPreviousSessions] = useState(false);
   const [bookColor, setBookColor] = useState<BookColor>(DEFAULT_BOOK_COLOR);
@@ -344,12 +349,19 @@ export function UploadBookFlowChooser({ onSelect }: UploadBookFlowChooserProps) 
       dir={isHe ? "rtl" : "ltr"}
       aria-label={t("upload.chooser.ariaLabel")}
     >
-      <h1 className="text-center font-heading text-2xl text-dark-gray md:text-3xl">
-        {t("upload.chooser.title")}
-      </h1>
-      <p className="mt-2 text-center font-body text-sm text-medium-gray md:text-base">
-        {t("upload.chooser.subtitle")}
-      </p>
+      <div className="flex flex-col items-center text-center">
+        <GiftSetFlowBadge className="mb-1" />
+        <h1 className="font-heading text-2xl text-dark-gray md:text-3xl">
+          {isGiftSet
+            ? t("upload.chooser.giftSet.title")
+            : t("upload.chooser.title")}
+        </h1>
+        <p className="mt-2 font-body text-sm text-medium-gray md:text-base">
+          {isGiftSet
+            ? t("upload.chooser.giftSet.subtitle")
+            : t("upload.chooser.subtitle")}
+        </p>
+      </div>
 
       {previewEnabled ? (
         <div className="mx-auto mt-8 mb-2 w-full max-w-2xl">

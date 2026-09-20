@@ -14,6 +14,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Title } from "@/components/title";
+import { GiftSetFlowBadge } from "@/components/gift-set-flow-badge";
 import { StyleSelector, type StyleType } from "@/components/style-selector";
 import { MobileImageEditor } from "@/components/mobile-image-editor";
 import { PreviewImageCropModal } from "@/components/preview-image-crop-modal";
@@ -2079,14 +2080,17 @@ export default function PreviewPage() {
         ) : (
           <section className="bg-warm-light pt-5 pb-0 max-md:pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-14">
             <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-              <Title
-                highlightText={t("preview.colorPhaseTitleHighlight")}
-                size="xl"
-                roundedUnderline
-                className="text-center text-2xl font-bold md:text-4xl mb-6"
-              >
-                {t("preview.colorPhaseTitle")}
-              </Title>
+              <div className="mb-6 flex flex-col items-center text-center">
+                <GiftSetFlowBadge className="mb-1" />
+                <Title
+                  highlightText={t("preview.colorPhaseTitleHighlight")}
+                  size="xl"
+                  roundedUnderline
+                  className="text-2xl font-bold md:text-4xl"
+                >
+                  {t("preview.colorPhaseTitle")}
+                </Title>
+              </div>
 
             {error && !loadFailed && (
               <div

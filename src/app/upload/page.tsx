@@ -16,6 +16,7 @@ import {
 } from "react";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
 import { UploadBookFlowChooser } from "@/components/upload-book-flow-chooser";
+import { GiftSetFlowBadge } from "@/components/gift-set-flow-badge";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
 import Link from "next/link";
@@ -1109,7 +1110,8 @@ function UploadPageContent() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-visible pt-0 md:pt-0">
             <div className="max-w-3xl mx-auto space-y-8 overflow-visible">
               {/* Main Title */}
-              <div className="text-center md:mt-2">
+              <div className="flex flex-col items-center text-center md:mt-2">
+                <GiftSetFlowBadge className="mb-1" />
                 {images.length > 0 ? (
                   <Title
                     highlightText={t("upload.titleReadyHighlight")}
