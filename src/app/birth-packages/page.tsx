@@ -225,7 +225,7 @@ export default function BirthPackagesProductPage() {
                 )}
               >
                 <div className="order-1 space-y-0">
-                  <span className="mt-0 inline-block w-fit rounded-full bg-[#F0DCC8] px-[12px] py-[4px] font-body-bold text-sm text-accent-burgundy sm:mt-3">
+                  <span className="mt-0 mb-2 inline-block w-fit rounded-full bg-[#FBF3EC] px-[12px] py-[4px] font-body-bold text-sm text-accent-burgundy sm:mt-3 sm:mb-0">
                     {t("product.birthPackage.badge")}
                   </span>
                   <h1 className="text-2xl font-heading font-bold leading-tight text-dark-gray sm:text-3xl lg:text-4xl">
@@ -248,13 +248,13 @@ export default function BirthPackagesProductPage() {
                   </span>
                 </div>
 
-                <div className="order-4 w-full min-w-0 space-y-4 lg:order-3">
+                <div className="order-3 w-full min-w-0">
                   <p className="max-w-full whitespace-pre-line break-words font-body leading-snug text-medium-gray">
                     {t("product.birthPackage.description")}
                   </p>
                 </div>
 
-                <div className="order-3 w-full min-w-0 lg:order-4">
+                <div className="order-4 w-full min-w-0">
                   <PrintPatternPicker
                     pattern={printPattern}
                     onPatternChange={selectPrint}

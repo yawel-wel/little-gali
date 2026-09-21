@@ -32,7 +32,7 @@ export function PrintPatternPicker({
 
   return (
     <div className={cn("w-full min-w-0 space-y-2.5", className)}>
-      <p className="text-sm font-body-bold text-dark-gray">
+      <p className="text-base font-body-bold text-dark-gray">
         {t(labelKey)}:{" "}
         <span className="font-body text-medium-gray">
           {t(BLANKET_PATTERN_LABEL_KEYS[pattern])}
@@ -57,7 +57,7 @@ export function PrintPatternPicker({
                 label,
               )}
               className={cn(
-                "relative size-[2.7rem] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-12",
+                "relative size-[calc(2.7rem+14px)] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[62px]",
                 disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
                 isSelected
                   ? "border-2 border-[#2d3748]"
@@ -69,7 +69,7 @@ export function PrintPatternPicker({
                 alt={label}
                 fill
                 className="object-contain p-1"
-                sizes="48px"
+                sizes="62px"
               />
             </button>
           );

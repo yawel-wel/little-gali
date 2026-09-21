@@ -269,7 +269,7 @@ export default function SoftBookProductPage() {
                           aria-pressed={isSelected}
                           aria-label={label}
                           className={cn(
-                            "relative size-[calc(2.7rem+10px)] cursor-pointer overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[54px]",
+                            "relative size-[calc(2.7rem+14px)] cursor-pointer overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[62px]",
                             isSelected
                               ? "border-2 border-[#2d3748]"
                               : "border border-[#E8DFD4] hover:border-primary-orange/60",
@@ -280,7 +280,7 @@ export default function SoftBookProductPage() {
                             alt={label}
                             fill
                             className="object-contain p-1"
-                            sizes="54px"
+                            sizes="62px"
                           />
                         </button>
                       );
