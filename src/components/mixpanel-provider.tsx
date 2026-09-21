@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { initMixpanel, track, ANALYTICS_EVENTS } from "@/lib/analytics";
+import { initMixpanel, track, trackPageview, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { useCart } from "@/lib/CartContext";
 
 export function MixpanelProvider({ children }: { children: React.ReactNode }) {
@@ -10,10 +10,19 @@ export function MixpanelProvider({ children }: { children: React.ReactNode }) {
   const { cart } = useCart();
   const prevPathnameRef = useRef<string | null>(null);
   const abandonedTrackedRef = useRef(false);
+  const hasTrackedInitialPathRef = useRef(false);
 
   useEffect(() => {
     initMixpanel();
   }, []);
+
+  useEffect(() => {
+    if (!hasTrackedInitialPathRef.current) {
+      hasTrackedInitialPathRef.current = true;
+      return;
+    }
+    trackPageview();
+  }, [pathname]);
 
   useEffect(() => {
     const hasItems = Boolean(cart && cart.totalQuantity > 0);

@@ -96,7 +96,7 @@ export function Footer() {
   const isRtl = locale === "he";
 
   const productLinks: FooterLink[] = [
-    { labelKey: "footer.babyBooks", href: "/upload" },
+    { labelKey: "footer.babyBooks", href: "/choose" },
     { labelKey: "nav.giftCard", href: "/#gift-card" },
   ];
 

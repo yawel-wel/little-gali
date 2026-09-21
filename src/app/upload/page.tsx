@@ -15,7 +15,6 @@ import {
   useMemo,
 } from "react";
 import { PreviewInitialLoadingScreen } from "@/components/preview-initial-loading-screen";
-import { UploadBookFlowChooser } from "@/components/upload-book-flow-chooser";
 import { GiftSetFlowBadge } from "@/components/gift-set-flow-badge";
 import { MobileImageEditor, type CropState } from "@/components/mobile-image-editor";
 import type { Area } from "react-easy-crop";
@@ -182,14 +181,6 @@ function UploadPageContent() {
   const slotCount = bookFlow ? getSlotCount(bookFlow) : 5;
   const isColorfulFlow = bookFlow === "colorful";
 
-  const selectBookFlow = useCallback(
-    (flow: BookFlow) => {
-      clearImages();
-      setImages([]);
-      router.replace(`/upload?mode=${flow}`);
-    },
-    [clearImages, router, setImages],
-  );
   const [showModal, setShowModal] = useState(false);
   const [isFromUploadButton, setIsFromUploadButton] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1065,29 +1056,18 @@ function UploadPageContent() {
     void handleAddToCart();
   }, [bookFlow, handleAddToCart, images.length, isSubmitting, router, slotCount]);
 
+  useEffect(() => {
+    if (!bookFlow) {
+      router.replace("/choose");
+    }
+  }, [bookFlow, router]);
+
   if (!bookFlow) {
     return (
       <div
         className="min-h-screen"
         style={{ backgroundColor: "#F3EEE8" }}
-      >
-        <Header />
-        <main
-          id="main-content"
-          className="flex-1"
-          style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}
-        >
-          <section
-            className="relative pb-10 lg:pb-16 pt-6 lg:pt-10"
-            style={{ backgroundColor: "#F3EEE8" }}
-          >
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <UploadBookFlowChooser onSelect={selectBookFlow} />
-            </div>
-          </section>
-        </main>
-        <Footer />
-      </div>
+      />
     );
   }
 

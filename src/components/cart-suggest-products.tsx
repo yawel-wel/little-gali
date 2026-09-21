@@ -65,7 +65,7 @@ export function CartSuggestProducts() {
           title={t("cart.suggest.bookTitle")}
           promo={t("cart.suggest.bookPromo")}
           icon={<BookOpen className={iconClass} strokeWidth={iconStroke} />}
-          onClick={() => router.push("/upload")}
+          onClick={() => router.push("/choose")}
         />
         {isFramedArtEnabled() && (
           <SuggestProductButton

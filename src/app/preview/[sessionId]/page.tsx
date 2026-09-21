@@ -41,6 +41,7 @@ import { isPreviewSingleColorStyleEnabled } from "@/lib/feature-flags";
 import {
   COLORFUL_SLOT_COUNT,
   getSlotCount,
+  isBookFlow,
 } from "@/lib/preview-session/book-flow";
 import {
   displayPosition,
@@ -432,6 +433,7 @@ export default function PreviewPage() {
   const pendingColorRegenProcessingRef = useRef(false);
   const mutationInProgressRef = useRef(false);
   const bwGenerateStartedRef = useRef(false);
+  const initialGenerationCompletedRef = useRef(false);
   const [error, setError] = useState<ReactNode | null>(null);
 
   useEffect(() => {
@@ -785,7 +787,7 @@ export default function PreviewPage() {
     };
   }, [session, refreshSession]);
 
-  const isInitialLoading =
+  const awaitingFirstColorPreviews =
     !loadFailed &&
     (!session ||
       session.slots.some((slot) => {
@@ -794,6 +796,13 @@ export default function PreviewPage() {
           resolvePreviewColorStyle(session.selectedColorStyle),
         );
       }));
+  // Selecting an older B&W version clears that slot's color preview so color
+  // can regen later. That must not reopen the first-load full-page loader.
+  if (session && !awaitingFirstColorPreviews) {
+    initialGenerationCompletedRef.current = true;
+  }
+  const isInitialLoading =
+    !initialGenerationCompletedRef.current && awaitingFirstColorPreviews;
 
   useEffect(() => {
     if (isInitialLoading) {
@@ -1391,7 +1400,11 @@ export default function PreviewPage() {
   }, [bookLightboxOpen, bookLightboxSlides.length]);
 
   const handleContinueWithoutPreview = () => {
-    router.push("/upload?withoutPreview=1");
+    const params = new URLSearchParams({ withoutPreview: "1" });
+    if (isBookFlow(session?.bookFlow)) {
+      params.set("mode", session.bookFlow);
+    }
+    router.push(`/upload?${params.toString()}`);
   };
 
   const markSlotBusy = (slotIndex: number) => {
@@ -2798,6 +2811,7 @@ export default function PreviewPage() {
                                 <PrintPatternPicker
                                   pattern={giftSetBlanketPattern}
                                   labelKey="product.birthPackage.packageTypeLabel"
+                                  align="center"
                                   onPatternChange={(pattern) => {
                                     setGiftSetBlanketPatternState(pattern);
                                     setGiftSetBlanketPattern(pattern);

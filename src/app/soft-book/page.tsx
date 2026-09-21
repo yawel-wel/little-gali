@@ -109,7 +109,7 @@ export default function SoftBookProductPage() {
     });
   };
 
-  const uploadHref = "/upload";
+  const uploadHref = "/choose";
   const activeTabContent =
     PRODUCT_TABS.find((tab) => tab.id === activeTab)?.contentKey ??
     PRODUCT_TABS[0].contentKey;

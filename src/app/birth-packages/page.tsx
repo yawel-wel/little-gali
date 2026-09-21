@@ -263,7 +263,7 @@ export default function BirthPackagesProductPage() {
 
                 <div className="order-5 w-full min-w-0 space-y-3 pt-2">
                   <Link
-                    href="/upload"
+                    href="/choose"
                     className="block w-full max-w-full"
                     aria-label={t("home.book.ctaAriaLabel")}
                     onClick={handleFlowStart}

@@ -460,7 +460,7 @@ export function CartDrawer() {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => router.push("/upload")}
+                  onClick={() => router.push("/choose")}
                   className="cursor-pointer"
                   sx={{
                     mt: "16px",

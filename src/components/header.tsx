@@ -162,7 +162,7 @@ export function Header() {
                       </div>
                       {/* CTA Button */}
                       <div className="mt-6 pr-0">
-                        <a href="/upload" aria-label={t("nav.createBookAriaLabel")}>
+                        <a href="/choose" aria-label={t("nav.createBookAriaLabel")}>
                           <Button className="cursor-pointer bg-primary-orange hover:bg-primary-orange/90 text-white px-6 py-2 rounded-full font-body-bold text-sm transition-all duration-200">
                             {t("nav.createBook")}
                           </Button>

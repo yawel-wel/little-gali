@@ -138,6 +138,21 @@ export function registerPreviewSessionSuperProperties(sessionId: string): void {
   }
 }
 
+export function trackPageview(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    if (!initialized) {
+      initMixpanel();
+    }
+    mixpanel.track_pageview();
+  } catch (error) {
+    console.error("Analytics pageview failed:", error);
+  }
+}
+
 export function track<E extends AnalyticsEvent>(
   event: E,
   properties?: EventProperties[E],

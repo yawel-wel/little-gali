@@ -17,6 +17,7 @@ export type PrintPatternPickerProps = {
   className?: string;
   /** i18n key for the option label (default: product.birthPackage.printLabel). */
   labelKey?: string;
+  align?: "start" | "center";
 };
 
 /** Simple הדפס / Print swatch row (gift-set PDP + preview). */
@@ -26,20 +27,30 @@ export function PrintPatternPicker({
   disabled = false,
   className,
   labelKey = "product.birthPackage.printLabel",
+  align = "start",
 }: PrintPatternPickerProps) {
   const { t, locale } = useLanguage();
   const isHe = locale === "he";
+  const isCentered = align === "center";
 
   return (
     <div className={cn("w-full min-w-0 space-y-2.5", className)}>
-      <p className="text-base font-body-bold text-dark-gray">
+      <p
+        className={cn(
+          "text-base font-body-bold text-dark-gray",
+          isCentered && "text-center",
+        )}
+      >
         {t(labelKey)}:{" "}
         <span className="font-body text-medium-gray">
           {t(BLANKET_PATTERN_LABEL_KEYS[pattern])}
         </span>
       </p>
       <div
-        className="flex w-full flex-wrap justify-start gap-3"
+        className={cn(
+          "flex w-full flex-wrap gap-3",
+          isCentered ? "justify-center" : "justify-start",
+        )}
         dir={isHe ? "rtl" : "ltr"}
       >
         {BLANKET_PATTERNS.map((p) => {
@@ -57,7 +68,7 @@ export function PrintPatternPicker({
                 label,
               )}
               className={cn(
-                "relative size-[calc(2.7rem+14px)] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[62px]",
+                "relative size-[calc(2.7rem+20px)] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[68px]",
                 disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
                 isSelected
                   ? "border-2 border-[#2d3748]"
@@ -69,7 +80,7 @@ export function PrintPatternPicker({
                 alt={label}
                 fill
                 className="object-contain p-1"
-                sizes="62px"
+                sizes="68px"
               />
             </button>
           );

@@ -694,7 +694,7 @@ export default function CartPage() {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => router.push("/upload")}
+                    onClick={() => router.push("/choose")}
                     className="cursor-pointer"
                     sx={{
                       borderRadius: "12px",

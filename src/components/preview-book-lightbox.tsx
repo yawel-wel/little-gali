@@ -188,7 +188,7 @@ export function PreviewBookLightbox({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={overlayTransition}
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#F9F7EE] px-4 py-6 sm:px-6 sm:py-8"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#F9F7EE] px-1.5 py-2 sm:px-6 sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-label={activeSlide.alt}
@@ -201,9 +201,9 @@ export function PreviewBookLightbox({
             animate={{ opacity: 1, y: 0 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
             transition={panelTransition}
-            className="flex max-h-[min(92vh,720px)] w-full max-w-[min(92vw,22rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:max-w-[26rem] md:max-w-[28rem]"
+            className="flex max-h-[min(98dvh,720px)] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:max-h-[min(92vh,720px)] sm:max-w-[26rem] md:max-w-[28rem]"
           >
-            <div className="relative flex min-h-[min(58vh,520px)] flex-1 flex-col bg-[#EAE6E1] px-3 pb-4 pt-3 sm:min-h-[min(60vh,560px)] sm:px-4 sm:pb-5 sm:pt-4">
+            <div className="relative flex min-h-0 flex-1 flex-col bg-[#EAE6E1] px-1.5 pb-2 pt-2 sm:min-h-[min(60vh,560px)] sm:px-4 sm:pb-5 sm:pt-4">
               <button
                 type="button"
                 onClick={onClose}
@@ -218,7 +218,7 @@ export function PreviewBookLightbox({
                   <button
                     type="button"
                     onClick={goToPrevious}
-                    className={cn(navButtonClass, "left-2 sm:left-3")}
+                    className={cn(navButtonClass, "left-1.5 sm:left-3")}
                     aria-label={previousLabel}
                   >
                     <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2} />
@@ -226,7 +226,7 @@ export function PreviewBookLightbox({
                   <button
                     type="button"
                     onClick={goToNext}
-                    className={cn(navButtonClass, "right-2 sm:right-3")}
+                    className={cn(navButtonClass, "right-1.5 sm:right-3")}
                     aria-label={nextLabel}
                   >
                     <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
@@ -234,12 +234,11 @@ export function PreviewBookLightbox({
                 </>
               ) : null}
 
-              <div className="flex flex-1 items-center justify-center px-8 sm:px-10">
+              <div className="flex min-h-0 flex-1 items-center justify-center px-1 sm:px-10">
                 <div
-                  className="relative w-full overflow-hidden rounded-xl bg-[#EAE6E1]"
+                  className="relative w-full max-h-[min(78dvh,640px)] overflow-hidden rounded-xl bg-[#EAE6E1] sm:max-h-[min(48vh,480px)]"
                   style={{
                     aspectRatio: activeImageAspectRatio,
-                    maxHeight: "min(48vh, 480px)",
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchEnd={handleTouchEnd}
@@ -278,7 +277,7 @@ export function PreviewBookLightbox({
             </div>
 
             {slides.length > 1 ? (
-              <div className="shrink-0 bg-white px-4 py-4 sm:px-5 sm:py-5">
+              <div className="shrink-0 bg-white px-3 py-3 sm:px-5 sm:py-5">
                 <div className="flex justify-center gap-2 overflow-x-auto hide-scrollbar">
                   {slides.map((slide, index) => {
                     const isActive = index === activeIndex;

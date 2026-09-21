@@ -404,7 +404,7 @@ export default function StylesPage() {
               transition={{ duration: 0.6, ease: easeOwlet }}
               viewport={{ once: true }}
             >
-              <a href="/upload" aria-label={t("styles.ctaAriaLabel")}>
+              <a href="/choose" aria-label={t("styles.ctaAriaLabel")}>
                 <MuiButton
                   variant="contained"
                   color="primary"
