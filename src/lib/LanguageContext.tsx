@@ -979,7 +979,7 @@ const hebrewTranslations = {
     "לקבלת התוצאה הטובה ביותר מומלץ לבחור תמונות חדות וברורות שבהן הפנים נראות היטב.\n\nתמונות קרובות בדרך כלל יניבו את התוצאות הטובות ביותר, אך ניתן להשתמש גם בתמונות של מספר אנשים יחד, כל עוד הפנים גלויות וברורות.",
   "qa.questionFromBirth": "האם הספרון מתאים מגיל לידה?",
   "qa.answerFromBirth":
-    "כן.\n\nהספרון תוכנן במיוחד עבור תינוקות מגיל לידה. צד אחד כולל איורים בשחור־לבן עם ניגודיות גבוהה, המותאמים ליכולת הראייה של תינוקות בחודשים הראשונים, והצד השני כולל איורים צבעוניים שילוו את התינוק גם בהמשך.",
+    "כן. הספרון תוכנן לשימוש כבר מהחודשים הראשונים. צד אחד כולל איורים בשחור־לבן עם קונטרסט מודגש, שמתאים במיוחד לשלב שבו תינוקות נמשכים לניגודיות גבוהה, והצד השני כולל איורים צבעוניים שילוו את התינוק גם בהמשך.",
   "qa.questionDelivery": "כמה זמן לוקח לקבל את הספרון?",
   "qa.answerDelivery":
     "כל ספרון מיוצר באופן אישי לאחר ביצוע ההזמנה.\n\nאנחנו משתדלים לעמוד בזמני אספקה מהירים שעומדים על עד 7 ימי עסקים לרוב אזורי הארץ, ועד 14 ימי עסקים גם לאזורים מרוחקים יותר",
@@ -2280,7 +2280,7 @@ const englishTranslations = {
     "For the best results, we recommend choosing sharp, clear photos where faces are clearly visible.\n\nClose-up photos usually yield the best results, but you can also use photos of several people together, as long as the faces are visible and clear.",
   "qa.questionFromBirth": "Is the book suitable from birth?",
   "qa.answerFromBirth":
-    "Yes.\n\nThe book was designed especially for babies from birth. One side features high-contrast black and white illustrations, adapted for babies' vision in their first months, and the other side features colorful illustrations that will accompany your baby as they grow.",
+    "Yes. The book was designed for use from the first months. One side features black-and-white illustrations with emphasized contrast, especially suited to the stage when babies are drawn to high contrast, and the other side features colorful illustrations that will accompany the baby as they grow.",
   "qa.questionDelivery": "How long does it take to receive the book?",
   "qa.answerDelivery":
     "Each book is made to order after you place your order.\n\nProduction and delivery time is up to 7 business days.",
