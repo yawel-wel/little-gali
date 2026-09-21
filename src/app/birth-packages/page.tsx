@@ -11,6 +11,7 @@ import { FreePreviewNote } from "@/components/feature-pill";
 import { BookInUseSection } from "@/components/book-in-use-section";
 import { QaPreviewSection } from "@/components/qa-preview-section";
 import { SoftBookFeatureHighlights } from "@/components/soft-book-feature-highlights";
+import { PickupAvailabilityBox } from "@/components/pickup-availability-box";
 import { PrintPatternPicker } from "@/components/print-pattern-picker";
 import { BIRTH_PACKAGE_PRICE } from "@/lib/constants";
 import {
@@ -251,14 +252,6 @@ export default function BirthPackagesProductPage() {
                   <p className="max-w-full whitespace-pre-line break-words font-body leading-snug text-medium-gray">
                     {t("product.birthPackage.description")}
                   </p>
-                  <div
-                    className={cn(
-                      "w-full space-y-4 lg:w-fit lg:max-w-full",
-                      isHe ? "lg:ml-auto" : "lg:mr-auto",
-                    )}
-                  >
-                    <SoftBookFeatureHighlights />
-                  </div>
                 </div>
 
                 <div className="order-3 w-full min-w-0 lg:order-4">
@@ -293,6 +286,11 @@ export default function BirthPackagesProductPage() {
                     locale={locale}
                     className="text-center"
                   />
+                </div>
+
+                <div className="order-6 w-full min-w-0 space-y-4">
+                  <SoftBookFeatureHighlights />
+                  <PickupAvailabilityBox />
                 </div>
               </div>
             </div>

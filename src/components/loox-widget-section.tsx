@@ -45,9 +45,34 @@ const CAROUSEL_VARIANTS: LooxWidgetVariant[] = [
 
 export function LooxProductRating() {
   const { t, locale } = useLanguage();
+  const looxRef = useRef<HTMLDivElement>(null);
+  const [summary, setSummary] = useState<{ rating: number; count: number } | null>(
+    null,
+  );
   const [reviews, setReviews] = useState<Testimonial[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    const el = looxRef.current;
+    if (!el) return;
+
+    const read = () => {
+      const rating = Number.parseFloat(el.getAttribute("data-rating") ?? "");
+      const count = Number.parseInt(el.getAttribute("data-raters") ?? "", 10);
+      if (Number.isFinite(rating) && Number.isFinite(count)) {
+        setSummary({ rating, count });
+      }
+    };
+
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(el, {
+      attributes: true,
+      attributeFilter: ["data-rating", "data-raters"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const loadReviews = async () => {
     if (reviews !== null || isLoading) return;
@@ -81,19 +106,51 @@ export function LooxProductRating() {
           <button
             type="button"
             onClick={loadReviews}
-            className="min-h-5 cursor-pointer"
+            className="relative min-h-5 cursor-pointer"
             aria-label={t("product.book.openReviews")}
           >
             <div
+              ref={looxRef}
               className="loox-rating"
               data-fetch=""
               data-id={LOOX_PRODUCT_ID}
-              data-pattern={`[rating] · [count] ${t("product.book.reviewsLink")}`}
-              data-content-size="16"
-              data-alignment={locale === "he" ? "right" : "left"}
-              data-color-star="#fbbf24"
-              data-color-text="#6b7280"
+              aria-hidden="true"
+              style={
+                summary
+                  ? { display: "none" }
+                  : {
+                      position: "absolute",
+                      width: 1,
+                      height: 1,
+                      overflow: "hidden",
+                      opacity: 0,
+                      pointerEvents: "none",
+                    }
+              }
             />
+            {summary && (
+              <span
+                className="inline-flex items-center gap-1 whitespace-nowrap text-[16px] text-[#6b7280]"
+                dir={locale === "he" ? "rtl" : "ltr"}
+              >
+                <span className="inline-flex items-center" aria-hidden="true">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Star
+                      key={index}
+                      className={`size-4 ${
+                        index < Math.round(summary.rating)
+                          ? "fill-amber-400 text-amber-400"
+                          : "fill-gray-200 text-gray-200"
+                      }`}
+                    />
+                  ))}
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {summary.count} {t("product.book.reviewsLink")}
+                </span>
+              </span>
+            )}
           </button>
         </DialogTrigger>
 

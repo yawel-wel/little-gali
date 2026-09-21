@@ -11,15 +11,68 @@ import { GIFT_CARD_OPTIONS } from "@/lib/constants";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
 const easeOwlet = [0.16, 1, 0.3, 1] as const;
+const PRICE_CARD_ACCENT_CLASS = "text-[#D4C0A8]";
+
+function FourPointStar({
+  cx,
+  cy,
+  outer,
+  inner,
+}: {
+  cx: number;
+  cy: number;
+  outer: number;
+  inner: number;
+}) {
+  return (
+    <path
+      d={`M${cx} ${cy - outer} L${cx + inner} ${cy - inner} L${cx + outer} ${cy} L${cx + inner} ${cy + inner} L${cx} ${cy + outer} L${cx - inner} ${cy + inner} L${cx - outer} ${cy} L${cx - inner} ${cy - inner} Z`}
+    />
+  );
+}
+
+function GiftCardSparkles({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 52 52"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <FourPointStar cx={18} cy={27} outer={16} inner={4} />
+      <FourPointStar cx={40} cy={12} outer={8.5} inner={2.1} />
+      <FourPointStar cx={42} cy={38} outer={6.5} inner={1.6} />
+    </svg>
+  );
+}
+
+function GiftCardIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="8" y="20" width="32" height="20" rx="2.5" />
+      <path d="M8 28h32" />
+      <path d="M24 20v20" />
+      <path d="M24 20c0-5 4.5-8 8-5.2 2.4 1.9.6 5.2-8 7.2" />
+      <path d="M24 20c0-5-4.5-8-8-5.2-2.4 1.9-.6 5.2 8 7.2" />
+    </svg>
+  );
+}
 
 export function GiftCardSection() {
   const { t, locale } = useLanguage();
   const reveal = useScrollReveal(easeOwlet);
   const { addGiftCardToCart } = useCart();
   
-  const [selectedOption, setSelectedOption] = useState<string>(
-    GIFT_CARD_OPTIONS[0].id // Pre-select ₪220
-  );
+  const selectedOption = GIFT_CARD_OPTIONS[0].id;
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = async () => {
@@ -103,7 +156,7 @@ export function GiftCardSection() {
             </p>
           </motion.div>
 
-          {/* Option Selection */}
+          {/* Price card */}
           <motion.div
             className="mb-8"
             variants={{
@@ -115,48 +168,37 @@ export function GiftCardSection() {
               },
             }}
           >
-            <div
-              dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto mb-2 grid max-w-md grid-cols-2 gap-3"
-            >
-              <span aria-hidden="true" />
-              <span className="text-end text-sm font-body text-primary-orange">
-                {t("giftCard.feature4")}
-              </span>
-            </div>
-
-            <div
-              dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto grid max-w-md grid-cols-1 gap-3"
-            >
-              {GIFT_CARD_OPTIONS.map((option) => {
-                const isSelected = selectedOption === option.id;
-
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setSelectedOption(option.id)}
-                    className={`cursor-pointer rounded-xl bg-white px-4 py-4 transition-all hover:opacity-90 ${
-                      isSelected
-                        ? "border-2 border-primary-orange"
-                        : "border border-[#E8DFD4]"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1">
+            <div className="mx-auto grid max-w-md grid-cols-1 gap-3">
+              {GIFT_CARD_OPTIONS.map((option) => (
+                <div
+                  key={option.id}
+                  className="rounded-[20px] border border-[#D4C0A8] bg-[#FBF8F4] px-4 py-3 sm:px-5 sm:py-3.5"
+                >
+                  <div className="flex items-center gap-3.5" dir="ltr">
+                    <GiftCardSparkles
+                      className={`h-10 w-10 shrink-0 sm:h-11 sm:w-11 ${PRICE_CARD_ACCENT_CLASS}`}
+                    />
+                    <div className="h-11 w-px shrink-0 bg-[#D4C0A8] sm:h-12" />
+                    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1">
                       <span
-                        className="font-heading text-2xl font-bold text-dark-gray tabular-nums"
+                        className="font-heading text-4xl font-bold leading-none text-accent-burgundy tabular-nums sm:text-[2.5rem]"
                         dir="ltr"
                       >
                         ₪{option.price}
                       </span>
-                      <span className="text-center font-body text-xs leading-tight text-medium-gray">
+                      <span
+                        className="text-center font-body text-sm leading-tight text-accent-burgundy sm:text-base"
+                        dir={locale === "he" ? "rtl" : "ltr"}
+                      >
                         {t(option.labelKey)}
                       </span>
                     </div>
-                  </button>
-                );
-              })}
+                    <GiftCardIcon
+                      className={`h-10 w-10 shrink-0 sm:h-11 sm:w-11 ${PRICE_CARD_ACCENT_CLASS}`}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
 

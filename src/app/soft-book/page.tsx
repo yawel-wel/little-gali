@@ -12,6 +12,7 @@ import { BookInUseSection } from "@/components/book-in-use-section";
 import { QaPreviewSection } from "@/components/qa-preview-section";
 import { LooxProductRating } from "@/components/loox-widget-section";
 import { SoftBookFeatureHighlights } from "@/components/soft-book-feature-highlights";
+import { PickupAvailabilityBox } from "@/components/pickup-availability-box";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
@@ -239,25 +240,15 @@ export default function SoftBookProductPage() {
                   </span>
                 </div>
 
-                <div className="order-4 w-full min-w-0 space-y-4 lg:order-3">
+                <div className="order-3 w-full min-w-0">
                   <p className="max-w-full break-words font-body text-medium-gray leading-snug whitespace-pre-line">
                     {t("product.book.description.intro")}
                   </p>
-                  <div
-                    className={cn(
-                      "w-full lg:w-fit lg:max-w-full",
-                      isHe ? "lg:ml-auto" : "lg:mr-auto",
-                    )}
-                  >
-                    <SoftBookFeatureHighlights
-                      className={isHe ? "lg:ml-0" : "lg:mr-0"}
-                    />
-                  </div>
                 </div>
 
                 {/* Color selector */}
-                <div className="order-3 w-full min-w-0 space-y-2.5 lg:order-4">
-                  <p className="text-sm font-body-bold text-dark-gray">
+                <div className="order-4 w-full min-w-0 space-y-2.5">
+                  <p className="text-base font-body-bold text-dark-gray">
                     {t("product.book.colorLabel")}:{" "}
                     <span className="font-body text-medium-gray">
                       {t(BOOK_COLOR_LABEL_KEYS[selectedColor])}
@@ -278,7 +269,7 @@ export default function SoftBookProductPage() {
                           aria-pressed={isSelected}
                           aria-label={label}
                           className={cn(
-                            "relative size-[2.7rem] cursor-pointer overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-12",
+                            "relative size-[calc(2.7rem+10px)] cursor-pointer overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[54px]",
                             isSelected
                               ? "border-2 border-[#2d3748]"
                               : "border border-[#E8DFD4] hover:border-primary-orange/60",
@@ -289,7 +280,7 @@ export default function SoftBookProductPage() {
                             alt={label}
                             fill
                             className="object-contain p-1"
-                            sizes="48px"
+                            sizes="54px"
                           />
                         </button>
                       );
@@ -323,6 +314,11 @@ export default function SoftBookProductPage() {
                     locale={locale}
                     className="text-center"
                   />
+                </div>
+
+                <div className="order-6 w-full min-w-0 space-y-4">
+                  <SoftBookFeatureHighlights />
+                  <PickupAvailabilityBox />
                 </div>
               </div>
             </div>
