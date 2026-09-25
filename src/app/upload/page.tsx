@@ -28,7 +28,11 @@ import {
   UPLOAD_IMAGE_ACCEPT,
 } from "@/lib/allowed-image-types";
 import { compressImage, prepareImageForCrop, cn } from "@/lib/utils";
-import { isAiPreviewEnabled } from "@/lib/feature-flags";
+import {
+  isAiPreviewEnabled,
+  isPreviewSingleColorStyleEnabled,
+} from "@/lib/feature-flags";
+import { getDefaultColorStyle } from "@/lib/preview-session/color-by-style";
 import { useLanguage } from "@/lib/LanguageContext";
 import { getOrCreateLgSessionId, persistLgSessionId } from "@/lib/session-id";
 import {
@@ -996,7 +1000,9 @@ function UploadPageContent() {
       // Use ref to ensure we get the current value, not a stale closure
       const styleToAdd = isColorfulFlow
         ? "watercolor"
-        : selectedStyleRef.current || selectedStyle || "pencil";
+        : isPreviewSingleColorStyleEnabled()
+          ? getDefaultColorStyle()
+          : selectedStyleRef.current || selectedStyle || "pencil";
       console.log(
         "Adding to cart - selectedStyle state:",
         selectedStyle,
@@ -1231,7 +1237,8 @@ function UploadPageContent() {
                   {images.length >= slotCount && (
                     <div className="mt-10 flex flex-col gap-4 max-w-md mx-auto w-full sm:w-auto">
                       {(!previewEnabled || showWithoutPreviewCartPath) &&
-                        !isColorfulFlow && (
+                        !isColorfulFlow &&
+                        !isPreviewSingleColorStyleEnabled() && (
                         <div className="flex justify-center mt-6 mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
                           <StyleSelector
                             selectedStyle={selectedStyle}

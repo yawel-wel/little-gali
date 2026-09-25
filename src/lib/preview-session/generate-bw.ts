@@ -1,9 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
-import {
-  BLACK_AND_WHITE_PROMPT,
-  GENERATION_SYSTEM_INSTRUCTION,
-} from "@/lib/prompts/constants";
+import { BLACK_AND_WHITE_PROMPT } from "@/lib/prompts/constants";
 import {
   classifyGenerationError,
   shouldStopGeminiRetry,
@@ -76,7 +73,6 @@ async function generateWithGemini(
     throw error;
   }
   const { base64, mimeType } = source;
-  const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
   const bwModel = getBwImageModel();
 
   let lastError: unknown;
@@ -87,7 +83,6 @@ async function generateWithGemini(
         "bw",
         {
           model: bwModel,
-          systemInstruction,
           userPrompt: BLACK_AND_WHITE_PROMPT,
           attempt: attempt + 1,
         },
@@ -100,7 +95,6 @@ async function generateWithGemini(
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
-          systemInstruction,
           imageConfig: {
             aspectRatio: "1:1",
           },

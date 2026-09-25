@@ -526,7 +526,7 @@ const hebrewTranslations = {
   "home.hero.title": "המתנה שתגדל איתם",
   "home.hero.titleHighlight": "איתם",
   "home.hero.subtitle":
-    "ספרון אישי שנוצר מהתמונות שלכם - מהחודשים הראשונים ועד שלבי ההתפתחות הבאים",
+    "ספרון אישי שנוצר מהתמונות שלכם -\nמהחודשים הראשונים ועד שלבי ההתפתחות הבאים",
   "home.hero.cta": "התחילו כאן",
   "home.hero.ariaLabel": "קטע פתיחה",
   "home.hero.imageAlt": "דוגמאות לספרוני תינוקות",

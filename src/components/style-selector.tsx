@@ -204,53 +204,6 @@ export function StyleSelector({
             </span>
           </button>
 
-          {/* Cartoon Option */}
-          <button
-            onClick={() => handleStyleChange("cartoon")}
-            className={`flex flex-col items-center gap-2 sm:gap-4 p-2.5 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer flex-1 max-w-[140px] sm:max-w-[240px] bg-white ${
-              selectedStyle === "cartoon"
-                ? "border-[4px] border-primary-orange"
-                : "border-[2px] border-gray-300 hover:border-gray-400 hover:shadow-md"
-            }`}
-            style={{
-              transform: "scale(1)",
-              transition: "all 0.2s ease-in-out",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.02)";
-              if (selectedStyle !== "cartoon") {
-                e.currentTarget.style.boxShadow =
-                  "0 4px 12px rgba(0, 0, 0, 0.1)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "";
-            }}
-          >
-            {/* Cartoon Example Image */}
-            <div className="w-[85px] h-[85px] sm:w-[160px] sm:h-[160px] md:w-[180px] md:h-[180px] rounded-lg overflow-hidden bg-white">
-              <img
-                src="/style-example-cartoon.png"
-                alt={t("styleSelector.cartoonAlt")}
-                className="w-full h-full object-cover"
-                style={{ border: "none", outline: "none" }}
-                onError={(e) => {
-                  console.error("Failed to load cartoon style image");
-                  e.currentTarget.style.display = "none";
-                }}
-              />
-            </div>
-            {/* Label */}
-            <span className="font-body-bold text-sm sm:text-base md:text-lg text-dark-gray">
-              {t("styleSelector.cartoon")}
-            </span>
-            {/* Description */}
-            <span className="font-body text-xs sm:text-sm text-medium-gray text-center px-2 -mt-2">
-              {t("styleSelector.cartoonDescription")}
-            </span>
-          </button>
-
           {/* Watercolor Option */}
           <button
             onClick={() => handleStyleChange("watercolor")}

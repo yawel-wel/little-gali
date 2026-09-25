@@ -202,7 +202,7 @@ export default function Home() {
           <div className="absolute inset-0 z-10 flex items-start pt-6 md:pt-[130px]">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-xl text-start mt-4 md:mt-0">
-                <span className="mb-[8px] inline-flex w-fit items-center gap-2 rounded-full bg-[#ebe5e0]/25 backdrop-blur-sm px-4 py-1.5 text-sm font-body text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)] max-md:px-[15px] max-md:py-[5px] max-md:text-[12px]">
+                <span className="mb-[8px] hidden w-fit items-center gap-2 rounded-full bg-[#ebe5e0]/25 backdrop-blur-sm px-4 py-1.5 text-sm font-body text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)] md:inline-flex">
                   <svg
                     className="w-3.5 h-3.5 shrink-0"
                     viewBox="0 0 24 24"
@@ -219,7 +219,7 @@ export default function Home() {
                   const highlightText = t("home.hero.titleHighlight");
                   const titleParts = titleText.split("|");
                   const titleClassName =
-                    "m-0 max-md:text-[28px] text-4xl sm:text-4xl md:text-[40px] lg:text-[64px] font-heading font-bold !leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white md:-mt-1 lg:-mt-2";
+                    "m-0 max-md:text-[24px] text-4xl sm:text-4xl md:text-[40px] lg:text-[64px] font-heading font-bold !leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] text-white md:-mt-1 lg:-mt-2";
 
                   const renderHighlight = (text: string) => {
                     const highlightIndex = text.indexOf(highlightText);
@@ -293,7 +293,7 @@ export default function Home() {
                       highlightText={highlightText}
                       color="text-white"
                       size="2xl"
-                      className="m-0 !leading-none font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] max-md:text-[28px] md:text-[40px] lg:text-[64px] md:-mt-1 lg:-mt-2"
+                      className="m-0 !leading-none font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] max-md:text-[24px] md:text-[40px] lg:text-[64px] md:-mt-1 lg:-mt-2"
                       animateUnderline={true}
                     >
                       {titleText}
@@ -301,7 +301,7 @@ export default function Home() {
                   );
                 })()}
 
-                <p className="mt-2.5 font-body text-base sm:text-lg text-white/90 leading-relaxed max-w-md drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] md:hidden">
+                <p className="mt-2.5 whitespace-pre-line font-body-bold text-[14px] sm:text-base text-white/90 leading-relaxed max-w-md drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] md:hidden">
                   {t("home.hero.subtitle")}
                 </p>
 
@@ -309,7 +309,7 @@ export default function Home() {
                   <a href="/soft-book" aria-label={t("home.hero.ctaAriaLabel")}>
                     <HomeCtaButton
                       sx={{
-                        px: { xs: "30px", md: "36px" },
+                        px: { xs: "26px", md: "36px" },
                         py: { xs: "8px", md: "12px" },
                         fontSize: { xs: "12px", md: "14px" },
                       }}

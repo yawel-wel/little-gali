@@ -293,7 +293,6 @@ export function logGeminiRequest(
   kind: PreviewGenerationKind,
   options: {
     model: string;
-    systemInstruction: string;
     userPrompt: string;
     attempt?: number;
   },
@@ -306,9 +305,6 @@ export function logGeminiRequest(
     geminiPromptsLogged[kind] = true;
     console.info(
       `[preview-${kind}] gemini request (prompts logged once) model=${options.model}${attemptSuffix}`,
-    );
-    console.info(
-      `[preview-${kind}] gemini systemInstruction:\n${options.systemInstruction}`,
     );
     console.info(`[preview-${kind}] gemini userPrompt:\n${options.userPrompt}`);
   } else {

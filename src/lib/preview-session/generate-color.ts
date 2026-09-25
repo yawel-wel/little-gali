@@ -4,7 +4,6 @@ import type { StyleType } from "@/components/style-selector";
 import {
   CARTOON_COLOR_PROMPT,
   COLORFUL_BOOK_PROMPT,
-  GENERATION_SYSTEM_INSTRUCTION,
   PENCIL_COLOR_PROMPT,
   PENS_COLOR_PROMPT,
   WATERCOLOR_COLOR_PROMPT,
@@ -93,7 +92,6 @@ async function generateWithGemini(
     throw error;
   }
   const { base64, mimeType } = source;
-  const systemInstruction = GENERATION_SYSTEM_INSTRUCTION;
 
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
@@ -103,7 +101,6 @@ async function generateWithGemini(
         "color",
         {
           model: COLOR_MODEL,
-          systemInstruction,
           userPrompt: prompt,
           attempt: attempt + 1,
         },
@@ -116,7 +113,6 @@ async function generateWithGemini(
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
-          systemInstruction,
           imageConfig: {
             aspectRatio: "1:1",
           },
