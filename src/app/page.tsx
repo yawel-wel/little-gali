@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/header";
@@ -22,7 +22,10 @@ import { HomeCategoryBento } from "@/components/home-category-bento";
 import { Eye, Gift, Heart, ShieldCheck, type LucideIcon } from "lucide-react";
 
 const HERO_IMAGE_MOBILE = "/hero-image-mobile.jpg";
+const HERO_IMAGE_MOBILE_2 = "/hero-image-2-mobile.png";
 const HERO_IMAGE_DESKTOP = "/hero-image-desktop.JPG";
+const HERO_MOBILE_SLIDES = [HERO_IMAGE_MOBILE, HERO_IMAGE_MOBILE_2] as const;
+const HERO_SLIDE_MS = 5000;
 
 const SPECIAL_ICON_BG = "bg-white shadow-sm";
 
@@ -122,6 +125,19 @@ export default function Home() {
       ];
   const reveal = useScrollReveal(easeOwlet);
   const specialScrollRef = useRef<HTMLDivElement>(null);
+  const [heroSlide, setHeroSlide] = useState(0);
+  const heroTouchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    if (window.matchMedia("(min-width: 768px)").matches) return;
+
+    const id = window.setInterval(() => {
+      setHeroSlide((current) => (current + 1) % HERO_MOBILE_SLIDES.length);
+    }, HERO_SLIDE_MS);
+
+    return () => window.clearInterval(id);
+  }, [prefersReducedMotion, heroSlide]);
 
   useEffect(() => {
     const container = specialScrollRef.current;
@@ -175,16 +191,54 @@ export default function Home() {
 
       <main id="main-content" className="flex-1" style={{ paddingTop: "calc(72px + var(--banner-height, 0px))" }}>
         {/* Hero Section */}
-        <section id="hero" aria-label={t("home.hero.ariaLabel")} className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]">
+        <section
+          id="hero"
+          aria-label={t("home.hero.ariaLabel")}
+          className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] overflow-hidden pt-[120px]"
+          onTouchStart={(event) => {
+            if ((event.target as HTMLElement).closest("a, button")) return;
+            heroTouchStartX.current = event.touches[0]?.clientX ?? null;
+          }}
+          onTouchEnd={(event) => {
+            if (heroTouchStartX.current == null) return;
+            const endX = event.changedTouches[0]?.clientX;
+            const startX = heroTouchStartX.current;
+            heroTouchStartX.current = null;
+            if (endX == null || window.innerWidth >= 768) return;
+
+            const delta = endX - startX;
+            if (Math.abs(delta) < 40) return;
+
+            const forward = locale === "he" ? delta > 0 : delta < 0;
+            setHeroSlide((current) => {
+              const step = forward ? 1 : -1;
+              return (current + step + HERO_MOBILE_SLIDES.length) % HERO_MOBILE_SLIDES.length;
+            });
+          }}
+        >
           <div className="absolute inset-0">
-            <Image
-              src={HERO_IMAGE_MOBILE}
-              alt={t("home.hero.imageAlt")}
-              fill
-              priority
-              className="object-cover md:hidden"
-              sizes="100vw"
-            />
+            {HERO_MOBILE_SLIDES.map((src, index) => (
+              <motion.div
+                key={src}
+                className="absolute inset-0 md:hidden"
+                initial={false}
+                animate={{ opacity: heroSlide === index ? 1 : 0 }}
+                transition={{
+                  duration: prefersReducedMotion ? 0 : 0.6,
+                  ease: "easeInOut",
+                }}
+                aria-hidden={heroSlide !== index}
+              >
+                <Image
+                  src={src}
+                  alt={t("home.hero.imageAlt")}
+                  fill
+                  priority={index === 0}
+                  className="object-cover"
+                  sizes="100vw"
+                />
+              </motion.div>
+            ))}
             <Image
               src={HERO_IMAGE_DESKTOP}
               alt={t("home.hero.imageAlt")}
@@ -197,6 +251,27 @@ export default function Home() {
               className="absolute inset-0 bg-gradient-to-b from-black/12 via-black/8 to-black/0"
               aria-hidden="true"
             />
+          </div>
+          <div
+            className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2 md:hidden"
+            role="tablist"
+            aria-label={t("home.hero.ariaLabel")}
+          >
+            {HERO_MOBILE_SLIDES.map((src, index) => (
+              <button
+                key={src}
+                type="button"
+                role="tab"
+                aria-selected={heroSlide === index}
+                onClick={() => setHeroSlide(index)}
+                className={`h-2 rounded-full transition-all duration-200 ${
+                  heroSlide === index ? "w-5 bg-white" : "w-2 bg-white/55"
+                }`}
+                aria-label={t("home.hero.carouselDotAria")
+                  .replace("{num}", String(index + 1))
+                  .replace("{total}", String(HERO_MOBILE_SLIDES.length))}
+              />
+            ))}
           </div>
           {/* Content Overlay */}
           <div className="absolute inset-0 z-10 flex items-start pt-6 md:pt-[130px]">
