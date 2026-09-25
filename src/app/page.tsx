@@ -21,7 +21,7 @@ import { HomeCtaButton } from "@/components/home-cta-button";
 import { HomeCategoryBento } from "@/components/home-category-bento";
 import { Eye, Gift, Heart, ShieldCheck, type LucideIcon } from "lucide-react";
 
-const HERO_IMAGE_MOBILE = "/hero-image-mobile.png";
+const HERO_IMAGE_MOBILE = "/hero-image-mobile.jpg";
 const HERO_IMAGE_DESKTOP = "/hero-image-desktop.JPG";
 
 const SPECIAL_ICON_BG = "bg-white shadow-sm";
