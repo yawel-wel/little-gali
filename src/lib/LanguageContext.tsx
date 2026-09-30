@@ -309,114 +309,168 @@ const hebrewTranslations = {
   "privacy.title": "מדיניות פרטיות",
   "privacy.intro.title": "מבוא",
   "privacy.intro.p1":
-    "ב-Little Gali אנו מכבדים את פרטיות לקוחותינו ומחויבים להגן על המידע האישי שנמסר לנו.",
+    "ב-Little Gali אנו מכבדים את פרטיות לקוחותינו ומחויבים לשמור על המידע האישי שנמסר לנו.",
   "privacy.intro.p2":
-    "מדיניות פרטיות זו מסבירה אילו סוגי מידע אנו אוספים, כיצד אנו משתמשים בו, עם מי אנו עשויים לשתף אותו ומהן זכויותיך בקשר למידע זה.",
-  "privacy.intro.p3": "השימוש באתר מהווה הסכמה למדיניות פרטיות זו.",
+    "מדיניות פרטיות זו מסבירה איזה מידע אנו אוספים במסגרת השימוש באתר ובשירותים שלנו, כיצד אנו משתמשים בו, עם מי אנו עשויים לשתף אותו, למשך כמה זמן הוא עשוי להישמר ומהן זכויותיך ביחס למידע.",
+  "privacy.intro.p3":
+    "השימוש באתר ובשירותים המוצעים בו כפוף למדיניות פרטיות זו.",
   "privacy.collection.title": "איזה מידע אנו אוספים?",
-  "privacy.collection.youProvide.title": "מידע שאתה מוסר לנו",
+  "privacy.collection.youProvide.title": "מידע שנמסר לנו על ידך",
   "privacy.collection.youProvide.p1":
-    "בעת ביצוע הזמנה או יצירת קשר עם העסק, אנו עשויים לאסוף:",
+    "בעת ביצוע הזמנה, יצירת מוצר מותאם אישית, הרשמה לקבלת עדכונים או יצירת קשר איתנו, אנו עשויים לאסוף מידע כגון:",
   "privacy.collection.youProvide.li1": "שם מלא",
   "privacy.collection.youProvide.li2": "כתובת דואר אלקטרוני",
   "privacy.collection.youProvide.li3": "מספר טלפון",
   "privacy.collection.youProvide.li4": "כתובת למשלוח",
-  "privacy.collection.youProvide.li5": "פרטי ההזמנה",
-  "privacy.collection.youProvide.li6": "תמונות ותוכן שמועלים לאתר",
-  "privacy.collection.youProvide.p2":
-    "בעת שימוש בשירותי Little Gali, ניתן להעלות תמונות לצורך יצירת מוצרים מותאמים אישית, כגון ספרוני בד לתינוקות, איורים ותמונות ממוסגרות.",
-  "privacy.collection.youProvide.p3":
-    "התמונות משמשות לצורך הפקת המוצר שהוזמן בלבד.",
+  "privacy.collection.youProvide.li5": "פרטי ההזמנה והרכישה",
+  "privacy.collection.youProvide.li6": "מידע הנדרש לצורך תשלום וסליקה",
+  "privacy.collection.youProvide.li7": "תוכן של פניות לשירות הלקוחות",
+  "privacy.collection.photos.title": "תמונות ותוכן המועלים לאתר",
+  "privacy.collection.photos.p1":
+    "בעת שימוש בשירותי Little Gali ניתן להעלות תמונות לצורך יצירת מוצרים מותאמים אישית, כגון ספרוני בד לתינוקות, איורים ותמונות ממוסגרות.",
+  "privacy.collection.photos.p2":
+    "התמונות משמשות לצורך יצירת המוצר, הצגתו במסגרת תהליך ההזמנה, הפקתו ומתן שירות בקשר להזמנה.",
+  "privacy.collection.photos.p3":
+    "Little Gali אינה מקבלת או שומרת את פרטי כרטיס האשראי המלאים של הלקוח. התשלום מתבצע באמצעות ספקי שירותי תשלום וסליקה חיצוניים.",
   "privacy.collection.technical.title": "מידע טכני ונתוני שימוש",
-  "privacy.collection.technical.p1": "בעת הגלישה באתר אנו עשויים לאסוף מידע כגון:",
+  "privacy.collection.technical.p1":
+    "בעת הגלישה והשימוש באתר אנו וספקי שירות הפועלים מטעמנו עשויים לאסוף מידע טכני ונתוני שימוש, כגון:",
   "privacy.collection.technical.li1": "כתובת IP",
-  "privacy.collection.technical.li2": "סוג הדפדפן והמכשיר",
-  "privacy.collection.technical.li3": "עמודים שנצפו באתר",
-  "privacy.collection.technical.li4": "זמן השהייה באתר",
-  "privacy.collection.technical.li5":
-    "פעולות שבוצעו במהלך השימוש באתר, כגון צפייה בעמודים, לחיצות על כפתורים, העלאת תמונות, התחלת תהליך הזמנה, השלמת הזמנה ושימוש בפיצ'רים שונים באתר",
+  "privacy.collection.technical.li2": "סוג הדפדפן ומערכת ההפעלה",
+  "privacy.collection.technical.li3": "סוג המכשיר",
+  "privacy.collection.technical.li4": "עמודים שנצפו באתר",
+  "privacy.collection.technical.li5": "מקור ההגעה לאתר",
+  "privacy.collection.technical.li6": "זמן השהייה באתר",
+  "privacy.collection.technical.li7":
+    "פעולות ואירועים שבוצעו במהלך השימוש באתר, כגון לחיצות, מעבר בין שלבי ההזמנה, העלאת תמונות, יצירת תצוגות מקדימות, התחלת תהליך רכישה והשלמת הזמנה",
+  "privacy.collection.technical.li8":
+    "מזהים מקוונים ומידע הנאסף באמצעות עוגיות וטכנולוגיות דומות",
+  "privacy.collection.technical.p2":
+    "חלק מהמידע עשוי להיאסף באופן אוטומטי באמצעות כלי ניתוח, מדידה ופרסום שבהם אנו משתמשים.",
   "privacy.usage.title": "כיצד אנו משתמשים במידע?",
-  "privacy.usage.intro": "אנו משתמשים במידע שנאסף לצורך:",
-  "privacy.usage.li1": "עיבוד והפקת ההזמנות",
+  "privacy.usage.intro": "אנו עשויים להשתמש במידע לצורך:",
+  "privacy.usage.li1": "עיבוד, ניהול והפקת הזמנות",
   "privacy.usage.li2": "אספקת המוצרים והשירותים",
   "privacy.usage.li3": "יצירת איורים ועיבוד התמונות שהועלו",
-  "privacy.usage.li4": "מתן שירות לקוחות ומענה לפניות",
-  "privacy.usage.li5": "שיפור האתר וחוויית המשתמש",
-  "privacy.usage.li6": "אבטחת האתר ומניעת שימוש לרעה",
-  "privacy.usage.li7": "שליחת עדכונים הקשורים להזמנה",
-  "privacy.usage.li8": "שליחת תוכן שיווקי, בכפוף להסכמה כאשר נדרשת",
+  "privacy.usage.li4": "ביצוע תשלומים וסליקת עסקאות",
+  "privacy.usage.li5": "תיאום משלוחים ואספקה",
+  "privacy.usage.li6": "מתן שירות לקוחות ומענה לפניות",
+  "privacy.usage.li7": "תפעול האתר ושיפור חוויית המשתמש",
+  "privacy.usage.li8": "ניתוח אופן השימוש באתר ושיפור תהליך ההזמנה",
+  "privacy.usage.li9": "אבטחת האתר, מניעת הונאות ושימוש לרעה",
+  "privacy.usage.li10": "עמידה בדרישות חוקיות ורגולטוריות",
+  "privacy.usage.li11": "שליחת הודעות ועדכונים הקשורים להזמנה",
+  "privacy.usage.li12":
+    "שליחת תוכן שיווקי והצעות, בכפוף להסכמה כאשר היא נדרשת על פי דין",
+  "privacy.usage.li13": "מדידה ואופטימיזציה של פעילות שיווקית ופרסומית",
   "privacy.imageProcessing.title": "עיבוד תמונות ויצירת איורים",
   "privacy.imageProcessing.p1":
-    "לצורך יצירת המוצרים המותאמים אישית, התמונות המועלות לאתר עשויות לעבור עיבוד דיגיטלי או שימוש בכלים מבוססי בינה מלאכותית (AI).",
+    "לצורך יצירת המוצרים המותאמים אישית, התמונות המועלות לאתר עשויות לעבור עיבוד דיגיטלי, לרבות באמצעות שירותים וכלים המבוססים על בינה מלאכותית.",
   "privacy.imageProcessing.p2":
-    "העיבוד מבוצע אך ורק לצורך יצירת המוצר שהוזמן ואינו מקנה ל-Little Gali כל בעלות על התמונות שהועלו על ידי הלקוח.",
-  "privacy.analytics.title": "כלי ניתוח ומעקב",
+    "לצורך ביצוע העיבוד, התמונות עשויות להיות מועברות לספקי השירות הרלוונטיים במידה הנדרשת לצורך מתן השירות.",
+  "privacy.imageProcessing.p3":
+    "השימוש בתמונות על ידי Little Gali נעשה לצורך יצירת המוצר שהוזמן, הצגתו במסגרת תהליך ההזמנה, הפקתו ומתן שירות בקשר אליו, ואינו מקנה ל-Little Gali בעלות על התמונות שהועלו.",
+  "privacy.payments.title": "תשלומים וסליקה",
+  "privacy.payments.p1":
+    "התשלומים באתר מתבצעים באמצעות ספקי שירותי תשלום וסליקה חיצוניים, ובכלל זה PayMe וספקי סליקה וגופים פיננסיים הפועלים עמה.",
+  "privacy.payments.p2":
+    "לצורך ביצוע וניהול התשלום, מניעת הונאות, אימות עסקאות, ניהול סיכונים, ביצוע הליכי זיהוי ובדיקות נדרשות, טיפול בהכחשות עסקה, עמידה בדרישות חוקיות ורגולטוריות ומתן שירותי התשלום, מידע הקשור להזמנה וללקוח עשוי להיות מועבר לספקי התשלום ולגורמים פיננסיים רלוונטיים הפועלים במסגרת ביצוע העסקה.",
+  "privacy.payments.p3":
+    "ספקי התשלום עשויים לעבד ולשמור מידע בהתאם להוראות הדין ולמדיניות הפרטיות שלהם.",
+  "privacy.payments.p4":
+    "Little Gali אינה שומרת במערכותיה את פרטי כרטיס האשראי המלאים של הלקוחות.",
+  "privacy.analytics.title": "כלי ניתוח, מדידה ופרסום",
   "privacy.analytics.intro":
-    "האתר משתמש בכלים המסייעים לנו להבין כיצד מבקרים משתמשים באתר ולשפר את השירותים והמוצרים שלנו.",
+    "אנו משתמשים בשירותים של צדדים שלישיים לצורך הבנת אופן השימוש באתר, מדידת ביצועים, שיפור השירות והפרסום שלנו.",
   "privacy.analytics.ga.title": "Google Analytics",
   "privacy.analytics.ga.p":
-    "Google Analytics מספק מידע סטטיסטי על תנועת הגולשים באתר, עמודים שנצפו, מקורות תנועה ופעולות שבוצעו באתר.",
+    "אנו עשויים להשתמש בשירות Google Analytics לצורך קבלת מידע סטטיסטי על השימוש באתר, לרבות עמודים שנצפו, מקורות תנועה, מאפייני מכשיר ופעולות המתבצעות באתר.",
   "privacy.analytics.mixpanel.title": "Mixpanel",
   "privacy.analytics.mixpanel.p1":
-    "Mixpanel הוא כלי ניתוח התנהגות משתמשים המסייע לנו להבין כיצד מבקרים משתמשים באתר ובתהליך ההזמנה.",
+    "אנו משתמשים בשירות Mixpanel לצורך ניתוח אופן השימוש באתר ובתהליך יצירת המוצרים וההזמנה.",
   "privacy.analytics.mixpanel.p2":
-    "באמצעות Mixpanel אנו עשויים למדוד פעולות כגון צפייה בעמודים, לחיצות על כפתורים, התקדמות בשלבי ההזמנה, העלאת תמונות, יצירת תצוגות מקדימות ופעולות נוספות המתבצעות באתר.",
+    "באמצעות השירות אנו עשויים לאסוף ולנתח אירועים ונתוני שימוש כגון צפייה בעמודים, לחיצות, מעבר בין שלבי ההזמנה, העלאת תמונות, יצירת תצוגות מקדימות, התחלת תהליך רכישה והשלמת הזמנה, וכן מידע טכני הקשור למכשיר, לדפדפן ולשימוש באתר.",
   "privacy.analytics.mixpanel.p3":
-    "המידע משמש לצורך ניתוח ביצועים, זיהוי תקלות, שיפור חוויית המשתמש ושיפור תהליך ההזמנה.",
+    "המידע משמש לצורך הבנת אופן השימוש באתר, זיהוי תקלות ונקודות נטישה, מדידת ביצועים ושיפור חוויית המשתמש ותהליך ההזמנה.",
+  "privacy.analytics.mixpanel.p4":
+    "Mixpanel פועלת כספקית שירות המעבדת מידע עבורנו בהתאם לאופן שבו הגדרנו את השירות.",
   "privacy.analytics.meta.title": "Meta Pixel",
   "privacy.analytics.meta.p":
-    "Meta Pixel מאפשר למדוד את יעילות הפרסום שלנו בפייסבוק ובאינסטגרם, להבין אילו פעולות בוצעו באתר ולבצע אופטימיזציה של קמפיינים פרסומיים.",
+    "אנו עשויים להשתמש בשירות Meta Pixel לצורך מדידת יעילות הפרסום שלנו בפייסבוק ובאינסטגרם, הבנת פעולות שבוצעו באתר, יצירת קהלים ואופטימיזציה של קמפיינים פרסומיים.",
   "privacy.analytics.cookiesNote":
-    "כלים אלה עשויים לאסוף מידע באמצעות עוגיות (Cookies), מזהי מכשיר וטכנולוגיות דומות.",
-  "privacy.cookies.title": "עוגיות (Cookies)",
+    "שירותים אלה עשויים להשתמש בעוגיות, במזהים מקוונים ובטכנולוגיות דומות, ולאסוף מידע בהתאם להגדרות השירות ולמדיניות הפרטיות של אותם ספקים.",
+  "privacy.cookies.title": "עוגיות וטכנולוגיות דומות",
   "privacy.cookies.intro": "האתר משתמש בעוגיות ובטכנולוגיות דומות לצורך:",
   "privacy.cookies.li1": "תפעול תקין של האתר",
-  "privacy.cookies.li2": "שמירת העדפות משתמש",
-  "privacy.cookies.li3": "מדידת ביצועים",
-  "privacy.cookies.li4": "ניתוח תנועה",
-  "privacy.cookies.li5": "שיווק ופרסום",
+  "privacy.cookies.li2": "שמירת העדפות ופונקציונליות",
+  "privacy.cookies.li3": "אבטחה ומניעת שימוש לרעה",
+  "privacy.cookies.li4": "מדידת ביצועים וניתוח השימוש באתר",
+  "privacy.cookies.li5": "שיפור חוויית המשתמש",
+  "privacy.cookies.li6": "שיווק, מדידה ופרסום",
   "privacy.cookies.note":
-    "ניתן לחסום או למחוק עוגיות באמצעות הגדרות הדפדפן, אולם פעולה זו עלולה להשפיע על חלק מפונקציות האתר.",
+    "חלק מהעוגיות חיוניות לתפעול האתר, ואחרות משמשות לצורכי ניתוח, מדידה או פרסום.",
+  "privacy.cookies.note2":
+    "ניתן להגביל או למחוק עוגיות באמצעות הגדרות הדפדפן. חסימת עוגיות מסוימות עשויה להשפיע על חלק מהפונקציות באתר.",
   "privacy.sharing.title": "שיתוף מידע עם צדדים שלישיים",
-  "privacy.sharing.p1":
-    "איננו מוכרים או משכירים מידע אישי לצדדים שלישיים.",
-  "privacy.sharing.intro": "ייתכן שנשתף מידע עם:",
-  "privacy.sharing.li1": "ספקי שירות טכנולוגיים המסייעים בהפעלת האתר",
-  "privacy.sharing.li2": "ספקי אחסון ושירותי ענן",
-  "privacy.sharing.li3": "שירותי סליקה ותשלומים",
+  "privacy.sharing.p1": "איננו מוכרים או משכירים מידע אישי לצדדים שלישיים.",
+  "privacy.sharing.intro":
+    "אנו עשויים להעביר מידע או לאפשר גישה אליו לספקי שירות הפועלים עבורנו או מסייעים לנו בהפעלת העסק, במידה הנדרשת לצורך מתן השירות, לרבות:",
+  "privacy.sharing.li1": "ספקי אחסון, ענן ותשתיות טכנולוגיות",
+  "privacy.sharing.li2": "ספקי שירותים להפעלת האתר",
+  "privacy.sharing.li3":
+    "ספקי שירותי תשלום וסליקה, לרבות PayMe וספקי סליקה הפועלים עמה",
   "privacy.sharing.li4": "חברות שילוח ואספקה",
-  "privacy.sharing.li5": "ספקי ניתוח, מדידה ופרסום כגון Google, Mixpanel ו-Meta",
-  "privacy.sharing.li6":
-    "ספקי שירות המשמשים לעיבוד תמונות ויצירת איורים כחלק מתהליך הפקת המוצרים",
-  "privacy.sharing.li7": "רשויות מוסמכות כאשר הדבר נדרש על פי דין",
+  "privacy.sharing.li5": "ספקי שירות לקוחות ודיוור",
+  "privacy.sharing.li6": "ספקי ניתוח ומדידה, לרבות Google ו-Mixpanel",
+  "privacy.sharing.li7": "ספקי פרסום ושיווק, לרבות Meta",
+  "privacy.sharing.li8":
+    "ספקי שירות המשמשים לעיבוד תמונות וליצירת איורים, לרבות שירותים המבוססים על בינה מלאכותית",
+  "privacy.sharing.li9": "יועצים וספקים מקצועיים, ככל שנדרש לצורך ניהול העסק",
+  "privacy.sharing.li10":
+    "רשויות וגופים מוסמכים, כאשר מסירת המידע נדרשת או מותרת על פי דין",
   "privacy.sharing.p2":
-    "כל שיתוף מידע יתבצע רק במידה הנדרשת לצורך מתן השירות.",
+    "חלק מספקי השירות עשויים לעבד מידע מחוץ לישראל. כאשר מידע מועבר או מעובד מחוץ לישראל, הדבר נעשה בהתאם לדין החל ולמנגנונים הרלוונטיים להעברת מידע.",
   "privacy.retention.title": "שמירת מידע",
   "privacy.retention.p1":
-    "אנו שומרים מידע אישי למשך הזמן הנדרש לצורך אספקת השירות, עמידה בדרישות חוקיות, טיפול בפניות לקוחות וניהול העסק.",
+    "אנו שומרים מידע אישי למשך הזמן הנדרש לצורך המטרות שלשמן נאסף, לרבות אספקת השירות, ניהול העסק, טיפול בפניות, מניעת הונאות, ניהול מחלוקות ועמידה בדרישות חוקיות ורגולטוריות.",
   "privacy.retention.p2":
+    "תקופות השמירה עשויות להשתנות בהתאם לסוג המידע ולמטרת השימוש בו.",
+  "privacy.retention.p3":
     "תמונות שהועלו לאתר עשויות להישמר למשך תקופה סבירה לאחר השלמת ההזמנה לצורך טיפול בפניות שירות, תיקונים, הפקת הזמנות חוזרות או אספקת עותקים נוספים לבקשת הלקוח.",
+  "privacy.retention.p4":
+    "מידע עשוי להישמר לתקופה ארוכה יותר כאשר הדבר נדרש על פי דין או לצורך הגנה על זכויות משפטיות.",
   "privacy.security.title": "אבטחת מידע",
   "privacy.security.p1":
-    "אנו נוקטים באמצעי אבטחה סבירים ומקובלים לצורך הגנה על המידע האישי שברשותנו.",
+    "אנו נוקטים באמצעי אבטחה סבירים ומקובלים לצורך הגנה על המידע האישי שבאחריותנו מפני גישה, שימוש, שינוי או חשיפה בלתי מורשים.",
   "privacy.security.p2":
-    "עם זאת, אין אפשרות להבטיח אבטחה מוחלטת של מידע המועבר דרך האינטרנט, ולכן איננו יכולים להבטיח חסינות מלאה מפני גישה בלתי מורשית.",
+    "עם זאת, אין מערכת או העברת מידע באמצעות האינטרנט המאובטחת באופן מוחלט, ולכן איננו יכולים להבטיח חסינות מוחלטת מפני אירועי אבטחה.",
   "privacy.rights.title": "הזכויות שלך",
-  "privacy.rights.intro": "בכפוף להוראות הדין, באפשרותך:",
-  "privacy.rights.li1": "לבקש גישה למידע אישי אודותיך",
-  "privacy.rights.li2": "לבקש תיקון של מידע שגוי או לא מעודכן",
-  "privacy.rights.li3": "לבקש מחיקת מידע אישי",
-  "privacy.rights.li4": "לבקש להפסיק קבלת הודעות שיווקיות",
-  "privacy.rights.li5": "למשוך הסכמה שניתנה בעבר, ככל שהדבר רלוונטי",
-  "privacy.rights.contact": "למימוש זכויות אלה ניתן לפנות אלינו בדוא״ל:",
+  "privacy.rights.intro":
+    "בכפוף להוראות הדין החל, ניתן לפנות אלינו בנוגע למידע אישי המוחזק אודותיך, לרבות לצורך:",
+  "privacy.rights.li1": "בקשת עיון במידע",
+  "privacy.rights.li2": "בקשת תיקון של מידע שאינו נכון, שלם או מעודכן",
+  "privacy.rights.li3": "בקשת מחיקה, ככל שקיימת זכות לכך לפי דין",
+  "privacy.rights.li4": "בקשה להפסקת קבלת דיוור שיווקי",
+  "privacy.rights.li5":
+    "משיכת הסכמה, כאשר עיבוד מסוים מבוסס על הסכמה וניתן למשוך אותה על פי דין",
+  "privacy.rights.note":
+    "ייתכן שבמקרים מסוימים נידרש לשמור מידע מסוים גם לאחר בקשת מחיקה, למשל לצורך עמידה בחובה חוקית, ניהול חשבונות, מניעת הונאות או הגנה על זכויות משפטיות.",
+  "privacy.rights.contact":
+    "למימוש זכויות או לשאלות בנוגע למידע ניתן לפנות אלינו בדוא״ל:",
+  "privacy.photoSubjects.title": "פרטיות של אנשים המופיעים בתמונות",
+  "privacy.photoSubjects.p1":
+    "האדם שמעלה תמונה לאתר מצהיר כי הוא רשאי למסור ולעשות שימוש בתמונה לצורך יצירת המוצר המבוקש.",
+  "privacy.photoSubjects.p2":
+    "כאשר התמונות כוללות אנשים אחרים, לרבות ילדים, באחריות המשתמש לוודא כי הוא רשאי למסור את התמונות לצורך השירות המבוקש.",
   "privacy.changes.title": "שינויים במדיניות הפרטיות",
-  "privacy.changes.p1": "אנו רשאים לעדכן מדיניות זו מעת לעת.",
+  "privacy.changes.p1":
+    "אנו עשויים לעדכן מדיניות זו מעת לעת, בין היתר בעקבות שינויים בשירותים שאנו מציעים, בספקי השירות שלנו או בדרישות הדין.",
   "privacy.changes.p2":
-    "הגרסה העדכנית ביותר תפורסם באתר ותיכנס לתוקף במועד פרסומה.",
+    "הגרסה העדכנית ביותר תפורסם באתר ותציין את מועד העדכון האחרון.",
   "privacy.contact.title": "יצירת קשר",
   "privacy.contact.p1":
-    "לשאלות, בקשות או הבהרות בנוגע למדיניות הפרטיות ניתן לפנות אלינו:",
-  "privacy.contact.lastUpdated": "עודכן לאחרונה: יוני 2026",
+    "לשאלות, בקשות או הבהרות בנוגע למדיניות פרטיות זו ניתן לפנות אלינו בדוא״ל:",
+  "privacy.contact.lastUpdated": "עודכן לאחרונה: ספטמבר 2026",
 
   // Shipping Policy
   "shipping.title": "מדיניות משלוחים",
@@ -1605,118 +1659,172 @@ const englishTranslations = {
   "privacy.title": "Privacy Policy",
   "privacy.intro.title": "Introduction",
   "privacy.intro.p1":
-    "At Little Gali, we respect our customers' privacy and are committed to protecting the personal information you provide to us.",
+    "At Little Gali, we respect our customers' privacy and are committed to protecting the personal information provided to us.",
   "privacy.intro.p2":
-    "This privacy policy explains what types of information we collect, how we use it, with whom we may share it, and your rights regarding that information.",
+    "This privacy policy explains what information we collect when you use our website and services, how we use it, with whom we may share it, how long it may be kept, and your rights regarding that information.",
   "privacy.intro.p3":
-    "Use of the website constitutes acceptance of this privacy policy.",
-  "privacy.collection.title": "What Information Do We Collect?",
-  "privacy.collection.youProvide.title": "Information You Provide to Us",
+    "Use of the website and the services offered on it is subject to this privacy policy.",
+  "privacy.collection.title": "What information do we collect?",
+  "privacy.collection.youProvide.title": "Information you provide to us",
   "privacy.collection.youProvide.p1":
-    "When placing an order or contacting the business, we may collect:",
+    "When you place an order, create a personalized product, sign up for updates, or contact us, we may collect information such as:",
   "privacy.collection.youProvide.li1": "Full name",
   "privacy.collection.youProvide.li2": "Email address",
   "privacy.collection.youProvide.li3": "Phone number",
   "privacy.collection.youProvide.li4": "Shipping address",
-  "privacy.collection.youProvide.li5": "Order details",
-  "privacy.collection.youProvide.li6": "Photos and content uploaded to the website",
-  "privacy.collection.youProvide.p2":
-    "When using Little Gali services, you may upload photos to create personalized products such as fabric baby books, illustrations, and framed pictures.",
-  "privacy.collection.youProvide.p3":
-    "Photos are used solely to produce the ordered product.",
-  "privacy.collection.technical.title": "Technical Information and Usage Data",
+  "privacy.collection.youProvide.li5": "Order and purchase details",
+  "privacy.collection.youProvide.li6": "Information required for payment and processing",
+  "privacy.collection.youProvide.li7": "Content of customer service inquiries",
+  "privacy.collection.photos.title": "Photos and content uploaded to the website",
+  "privacy.collection.photos.p1":
+    "When using Little Gali services, you can upload photos to create personalized products, such as fabric baby books, illustrations, and framed pictures.",
+  "privacy.collection.photos.p2":
+    "The photos are used to create the product, display it during the ordering process, produce it, and provide service related to the order.",
+  "privacy.collection.photos.p3":
+    "Little Gali does not receive or store the customer's full credit card details. Payment is processed through external payment and processing service providers.",
+  "privacy.collection.technical.title": "Technical information and usage data",
   "privacy.collection.technical.p1":
-    "When browsing the website, we may collect information such as:",
+    "When you browse and use the website, we and service providers acting on our behalf may collect technical information and usage data, such as:",
   "privacy.collection.technical.li1": "IP address",
-  "privacy.collection.technical.li2": "Browser and device type",
-  "privacy.collection.technical.li3": "Pages viewed on the website",
-  "privacy.collection.technical.li4": "Time spent on the website",
-  "privacy.collection.technical.li5":
-    "Actions taken while using the website, such as viewing pages, clicking buttons, uploading photos, starting the ordering process, completing an order, and using various website features",
-  "privacy.usage.title": "How Do We Use the Information?",
-  "privacy.usage.intro": "We use the collected information to:",
-  "privacy.usage.li1": "Process and fulfill orders",
-  "privacy.usage.li2": "Deliver products and services",
+  "privacy.collection.technical.li2": "Browser type and operating system",
+  "privacy.collection.technical.li3": "Device type",
+  "privacy.collection.technical.li4": "Pages viewed on the website",
+  "privacy.collection.technical.li5": "How you reached the website",
+  "privacy.collection.technical.li6": "Time spent on the website",
+  "privacy.collection.technical.li7":
+    "Actions and events during use of the website, such as clicks, moving between ordering steps, uploading photos, creating previews, starting a purchase, and completing an order",
+  "privacy.collection.technical.li8":
+    "Online identifiers and information collected through cookies and similar technologies",
+  "privacy.collection.technical.p2":
+    "Some of this information may be collected automatically through analytics, measurement, and advertising tools we use.",
+  "privacy.usage.title": "How do we use the information?",
+  "privacy.usage.intro": "We may use the information to:",
+  "privacy.usage.li1": "Process, manage, and fulfill orders",
+  "privacy.usage.li2": "Provide the products and services",
   "privacy.usage.li3": "Create illustrations and process uploaded photos",
-  "privacy.usage.li4": "Provide customer service and respond to inquiries",
-  "privacy.usage.li5": "Improve the website and user experience",
-  "privacy.usage.li6": "Secure the website and prevent misuse",
-  "privacy.usage.li7": "Send order-related updates",
-  "privacy.usage.li8": "Send marketing content, subject to consent where required",
-  "privacy.imageProcessing.title": "Photo Processing and Illustration Creation",
+  "privacy.usage.li4": "Process payments and settle transactions",
+  "privacy.usage.li5": "Coordinate shipping and delivery",
+  "privacy.usage.li6": "Provide customer service and respond to inquiries",
+  "privacy.usage.li7": "Operate the website and improve the user experience",
+  "privacy.usage.li8": "Analyze how the website is used and improve the ordering process",
+  "privacy.usage.li9": "Secure the website and prevent fraud and misuse",
+  "privacy.usage.li10": "Comply with legal and regulatory requirements",
+  "privacy.usage.li11": "Send messages and updates related to an order",
+  "privacy.usage.li12":
+    "Send marketing content and offers, subject to consent where required by law",
+  "privacy.usage.li13": "Measure and optimize marketing and advertising activity",
+  "privacy.imageProcessing.title": "Photo processing and illustration creation",
   "privacy.imageProcessing.p1":
-    "To create personalized products, photos uploaded to the website may undergo digital processing or use of AI-based tools.",
+    "To create personalized products, photos uploaded to the website may undergo digital processing, including through services and tools based on artificial intelligence.",
   "privacy.imageProcessing.p2":
-    "Processing is performed solely to create the ordered product and does not grant Little Gali any ownership of photos uploaded by the customer.",
-  "privacy.analytics.title": "Analytics and Tracking Tools",
+    "To carry out that processing, the photos may be transferred to the relevant service providers to the extent required to provide the service.",
+  "privacy.imageProcessing.p3":
+    "Little Gali uses the photos to create the ordered product, display it during the ordering process, produce it, and provide related service. This use does not give Little Gali ownership of the uploaded photos.",
+  "privacy.payments.title": "Payments and processing",
+  "privacy.payments.p1":
+    "Payments on the website are made through external payment and processing service providers, including PayMe and the processing providers and financial institutions that work with it.",
+  "privacy.payments.p2":
+    "To process and manage payment, prevent fraud, verify transactions, manage risk, carry out identification and required checks, handle chargebacks, comply with legal and regulatory requirements, and provide payment services, information related to the order and the customer may be transferred to the payment providers and relevant financial parties involved in completing the transaction.",
+  "privacy.payments.p3":
+    "Payment providers may process and store information in accordance with applicable law and their own privacy policies.",
+  "privacy.payments.p4":
+    "Little Gali does not store customers' full credit card details in its systems.",
+  "privacy.analytics.title": "Analytics, measurement, and advertising tools",
   "privacy.analytics.intro":
-    "The website uses tools that help us understand how visitors use the site and improve our services and products.",
+    "We use third-party services to understand how the website is used, measure performance, and improve our service and advertising.",
   "privacy.analytics.ga.title": "Google Analytics",
   "privacy.analytics.ga.p":
-    "Google Analytics provides statistical information about website traffic, pages viewed, traffic sources, and actions taken on the site.",
+    "We may use Google Analytics to obtain statistical information about use of the website, including pages viewed, traffic sources, device characteristics, and actions taken on the website.",
   "privacy.analytics.mixpanel.title": "Mixpanel",
   "privacy.analytics.mixpanel.p1":
-    "Mixpanel is a user behavior analytics tool that helps us understand how visitors use the website and the ordering process.",
+    "We use Mixpanel to analyze how the website and the product-creation and ordering process are used.",
   "privacy.analytics.mixpanel.p2":
-    "Through Mixpanel, we may measure actions such as page views, button clicks, progress through ordering steps, photo uploads, preview generation, and other actions performed on the website.",
+    "Through this service we may collect and analyze events and usage data such as page views, clicks, moving between ordering steps, photo uploads, preview creation, starting a purchase, and completing an order, as well as technical information related to the device, browser, and use of the website.",
   "privacy.analytics.mixpanel.p3":
-    "The information is used for performance analysis, issue detection, improving user experience, and improving the ordering process.",
+    "The information is used to understand how the website is used, identify issues and drop-off points, measure performance, and improve the user experience and the ordering process.",
+  "privacy.analytics.mixpanel.p4":
+    "Mixpanel acts as a service provider that processes information for us according to how we have configured the service.",
   "privacy.analytics.meta.title": "Meta Pixel",
   "privacy.analytics.meta.p":
-    "Meta Pixel allows us to measure the effectiveness of our advertising on Facebook and Instagram, understand which actions were taken on the website, and optimize advertising campaigns.",
+    "We may use Meta Pixel to measure the effectiveness of our advertising on Facebook and Instagram, understand actions taken on the website, create audiences, and optimize advertising campaigns.",
   "privacy.analytics.cookiesNote":
-    "These tools may collect information through cookies, device identifiers, and similar technologies.",
-  "privacy.cookies.title": "Cookies",
-  "privacy.cookies.intro": "The website uses cookies and similar technologies for:",
-  "privacy.cookies.li1": "Proper operation of the website",
-  "privacy.cookies.li2": "Saving user preferences",
-  "privacy.cookies.li3": "Performance measurement",
-  "privacy.cookies.li4": "Traffic analysis",
-  "privacy.cookies.li5": "Marketing and advertising",
+    "These services may use cookies, online identifiers, and similar technologies, and may collect information according to the service settings and those providers' privacy policies.",
+  "privacy.cookies.title": "Cookies and similar technologies",
+  "privacy.cookies.intro":
+    "The website uses cookies and similar technologies to:",
+  "privacy.cookies.li1": "Operate the website properly",
+  "privacy.cookies.li2": "Save preferences and functionality",
+  "privacy.cookies.li3": "Provide security and prevent misuse",
+  "privacy.cookies.li4": "Measure performance and analyze use of the website",
+  "privacy.cookies.li5": "Improve the user experience",
+  "privacy.cookies.li6": "Support marketing, measurement, and advertising",
   "privacy.cookies.note":
-    "You can block or delete cookies through your browser settings; however, doing so may affect some website functionality.",
-  "privacy.sharing.title": "Sharing Information with Third Parties",
+    "Some cookies are essential for operating the website, and others are used for analytics, measurement, or advertising.",
+  "privacy.cookies.note2":
+    "You can limit or delete cookies through your browser settings. Blocking certain cookies may affect some website functions.",
+  "privacy.sharing.title": "Sharing information with third parties",
   "privacy.sharing.p1":
     "We do not sell or rent personal information to third parties.",
-  "privacy.sharing.intro": "We may share information with:",
-  "privacy.sharing.li1": "Technology service providers that help operate the website",
-  "privacy.sharing.li2": "Storage and cloud service providers",
-  "privacy.sharing.li3": "Payment processing services",
+  "privacy.sharing.intro":
+    "We may transfer information, or allow access to it, to service providers that work for us or help us operate the business, to the extent required to provide the service, including:",
+  "privacy.sharing.li1": "Storage, cloud, and technology infrastructure providers",
+  "privacy.sharing.li2": "Service providers that operate the website",
+  "privacy.sharing.li3":
+    "Payment and processing service providers, including PayMe and the processing providers that work with it",
   "privacy.sharing.li4": "Shipping and delivery companies",
-  "privacy.sharing.li5":
-    "Analytics, measurement, and advertising providers such as Google, Mixpanel, and Meta",
-  "privacy.sharing.li6":
-    "Service providers used for photo processing and illustration creation as part of the product production process",
-  "privacy.sharing.li7": "Authorized authorities when required by law",
+  "privacy.sharing.li5": "Customer service and mailing providers",
+  "privacy.sharing.li6": "Analytics and measurement providers, including Google and Mixpanel",
+  "privacy.sharing.li7": "Advertising and marketing providers, including Meta",
+  "privacy.sharing.li8":
+    "Service providers used to process photos and create illustrations, including services based on artificial intelligence",
+  "privacy.sharing.li9":
+    "Professional advisors and suppliers, where needed to manage the business",
+  "privacy.sharing.li10":
+    "Authorities and competent bodies, when disclosure is required or permitted by law",
   "privacy.sharing.p2":
-    "Any sharing of information will be done only to the extent necessary to provide the service.",
-  "privacy.retention.title": "Data Retention",
+    "Some service providers may process information outside Israel. When information is transferred or processed outside Israel, this is done in accordance with applicable law and the relevant mechanisms for transferring information.",
+  "privacy.retention.title": "Data retention",
   "privacy.retention.p1":
-    "We retain personal information for as long as necessary to provide the service, comply with legal requirements, handle customer inquiries, and manage the business.",
+    "We keep personal information for as long as needed for the purposes for which it was collected, including providing the service, managing the business, handling inquiries, preventing fraud, managing disputes, and complying with legal and regulatory requirements.",
   "privacy.retention.p2":
-    "Photos uploaded to the website may be retained for a reasonable period after order completion for customer service, corrections, repeat orders, or providing additional copies at the customer's request.",
-  "privacy.security.title": "Information Security",
+    "Retention periods may vary depending on the type of information and the purpose of its use.",
+  "privacy.retention.p3":
+    "Photos uploaded to the website may be kept for a reasonable period after an order is completed in order to handle service inquiries, corrections, repeat orders, or additional copies requested by the customer.",
+  "privacy.retention.p4":
+    "Information may be kept for a longer period when required by law or to protect legal rights.",
+  "privacy.security.title": "Information security",
   "privacy.security.p1":
-    "We take reasonable and accepted security measures to protect the personal information in our possession.",
+    "We take reasonable and accepted security measures to protect the personal information in our care against unauthorized access, use, alteration, or disclosure.",
   "privacy.security.p2":
-    "However, it is not possible to guarantee absolute security of information transmitted over the internet; therefore, we cannot guarantee complete immunity from unauthorized access.",
-  "privacy.rights.title": "Your Rights",
-  "privacy.rights.intro": "Subject to applicable law, you may:",
-  "privacy.rights.li1": "Request access to personal information about you",
-  "privacy.rights.li2": "Request correction of incorrect or outdated information",
-  "privacy.rights.li3": "Request deletion of personal information",
+    "However, no system or transmission of information over the internet is completely secure, and we cannot guarantee absolute immunity from security incidents.",
+  "privacy.rights.title": "Your rights",
+  "privacy.rights.intro":
+    "Subject to applicable law, you may contact us about personal information we hold about you, including to:",
+  "privacy.rights.li1": "Request to access the information",
+  "privacy.rights.li2":
+    "Request correction of information that is inaccurate, incomplete, or out of date",
+  "privacy.rights.li3": "Request deletion, where you have a right to do so under the law",
   "privacy.rights.li4": "Request to stop receiving marketing messages",
-  "privacy.rights.li5": "Withdraw previously given consent, where applicable",
+  "privacy.rights.li5":
+    "Withdraw consent, where a particular processing activity is based on consent and it can be withdrawn under the law",
+  "privacy.rights.note":
+    "In some cases we may need to keep certain information even after a deletion request, for example to comply with a legal obligation, keep accounts, prevent fraud, or protect legal rights.",
   "privacy.rights.contact":
-    "To exercise these rights, please contact us by email:",
-  "privacy.changes.title": "Changes to the Privacy Policy",
-  "privacy.changes.p1": "We may update this policy from time to time.",
+    "To exercise your rights or ask questions about your information, contact us by email:",
+  "privacy.photoSubjects.title": "Privacy of people who appear in photos",
+  "privacy.photoSubjects.p1":
+    "The person who uploads a photo to the website states that they are entitled to provide the photo and to use it to create the requested product.",
+  "privacy.photoSubjects.p2":
+    "When photos include other people, including children, it is the user's responsibility to make sure they are entitled to provide the photos for the requested service.",
+  "privacy.changes.title": "Changes to the privacy policy",
+  "privacy.changes.p1":
+    "We may update this policy from time to time, including because of changes in the services we offer, our service providers, or legal requirements.",
   "privacy.changes.p2":
-    "The most current version will be published on the website and will take effect upon publication.",
+    "The most current version will be published on the website and will state the date of the latest update.",
   "privacy.contact.title": "Contact",
   "privacy.contact.p1":
-    "For questions, requests, or clarifications regarding this privacy policy, please contact us:",
-  "privacy.contact.lastUpdated": "Last updated: June 2026",
+    "For questions, requests, or clarifications about this privacy policy, contact us by email:",
+  "privacy.contact.lastUpdated": "Last updated: September 2026",
 
   // Shipping Policy
   "shipping.title": "Shipping Policy",

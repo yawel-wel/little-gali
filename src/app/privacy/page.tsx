@@ -6,6 +6,13 @@ import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useState, useEffect } from "react";
 
+function sectionHeadingClass(locale: string, level: "h2" | "h3") {
+  const align = locale === "en" ? "text-left" : "text-right";
+  const size = level === "h2" ? "text-xl" : "text-lg";
+  const spacing = level === "h2" ? "mb-4" : "mb-3";
+  return `${spacing} ${size} font-heading font-bold text-dark-gray ${align}`;
+}
+
 function PrivacySection({
   title,
   paragraphs,
@@ -15,15 +22,9 @@ function PrivacySection({
   paragraphs: string[];
   locale: string;
 }) {
-  const align = locale === "en" ? "text-left" : "text-right";
-
   return (
     <section>
-      <h2
-        className={`mb-3 text-xl font-heading font-bold text-dark-gray ${align}`}
-      >
-        {title}
-      </h2>
+      <h2 className={sectionHeadingClass(locale, "h2")}>{title}</h2>
       {paragraphs.map((text, index) => (
         <p
           key={index}
@@ -36,23 +37,36 @@ function PrivacySection({
   );
 }
 
+function PrivacyEmail({ locale }: { locale: string }) {
+  const align = locale === "en" ? "text-left" : "text-right";
+
+  return (
+    <p className={align}>
+      <a
+        href="mailto:support@littlegali.com"
+        className="text-primary-orange hover:underline"
+        dir="ltr"
+      >
+        support@littlegali.com
+      </a>
+    </p>
+  );
+}
+
 function PrivacyList({
   items,
-  locale,
   className,
 }: {
   items: string[];
-  locale: string;
+  locale?: string;
   className?: string;
 }) {
-  const listMargin = locale === "en" ? "ml-4" : "mr-4";
-
   return (
-    <ul
-      className={`list-disc list-inside space-y-2 ${listMargin} ${className ?? ""}`}
-    >
+    <ul className={`list-disc list-outside space-y-2 ps-5 ${className ?? ""}`}>
       {items.map((item, index) => (
-        <li key={index}>{item}</li>
+        <li key={index} className="ps-1">
+          {item}
+        </li>
       ))}
     </ul>
   );
@@ -61,6 +75,7 @@ function PrivacyList({
 function PrivacyPageContent() {
   const { t, locale } = useLanguage();
   const textAlign = locale === "en" ? "text-left" : "text-right";
+  const direction = locale === "en" ? "ltr" : "rtl";
   const isHebrew = locale === "he";
 
   return (
@@ -85,6 +100,7 @@ function PrivacyPageContent() {
               </div>
 
               <div
+                dir={direction}
                 className={`space-y-8 font-body leading-relaxed text-medium-gray ${textAlign}`}
               >
                 <PrivacySection
@@ -98,14 +114,10 @@ function PrivacyPageContent() {
                 />
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.collection.title")}
                   </h2>
-                  <h3
-                    className={`mb-3 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h3 className={sectionHeadingClass(locale, "h3")}>
                     {t("privacy.collection.youProvide.title")}
                   </h3>
                   <p className="mb-4">
@@ -113,7 +125,7 @@ function PrivacyPageContent() {
                   </p>
                   <PrivacyList
                     locale={locale}
-                    className="mb-4"
+                    className="mb-6"
                     items={[
                       t("privacy.collection.youProvide.li1"),
                       t("privacy.collection.youProvide.li2"),
@@ -121,17 +133,16 @@ function PrivacyPageContent() {
                       t("privacy.collection.youProvide.li4"),
                       t("privacy.collection.youProvide.li5"),
                       t("privacy.collection.youProvide.li6"),
+                      t("privacy.collection.youProvide.li7"),
                     ]}
                   />
-                  <p className="mb-4">
-                    {t("privacy.collection.youProvide.p2")}
-                  </p>
-                  <p className="mb-6">
-                    {t("privacy.collection.youProvide.p3")}
-                  </p>
-                  <h3
-                    className={`mb-3 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h3 className={sectionHeadingClass(locale, "h3")}>
+                    {t("privacy.collection.photos.title")}
+                  </h3>
+                  <p className="mb-4">{t("privacy.collection.photos.p1")}</p>
+                  <p className="mb-4">{t("privacy.collection.photos.p2")}</p>
+                  <p className="mb-6">{t("privacy.collection.photos.p3")}</p>
+                  <h3 className={sectionHeadingClass(locale, "h3")}>
                     {t("privacy.collection.technical.title")}
                   </h3>
                   <p className="mb-4">
@@ -139,20 +150,23 @@ function PrivacyPageContent() {
                   </p>
                   <PrivacyList
                     locale={locale}
+                    className="mb-4"
                     items={[
                       t("privacy.collection.technical.li1"),
                       t("privacy.collection.technical.li2"),
                       t("privacy.collection.technical.li3"),
                       t("privacy.collection.technical.li4"),
                       t("privacy.collection.technical.li5"),
+                      t("privacy.collection.technical.li6"),
+                      t("privacy.collection.technical.li7"),
+                      t("privacy.collection.technical.li8"),
                     ]}
                   />
+                  <p>{t("privacy.collection.technical.p2")}</p>
                 </section>
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.usage.title")}
                   </h2>
                   <p className="mb-4">{t("privacy.usage.intro")}</p>
@@ -167,6 +181,11 @@ function PrivacyPageContent() {
                       t("privacy.usage.li6"),
                       t("privacy.usage.li7"),
                       t("privacy.usage.li8"),
+                      t("privacy.usage.li9"),
+                      t("privacy.usage.li10"),
+                      t("privacy.usage.li11"),
+                      t("privacy.usage.li12"),
+                      t("privacy.usage.li13"),
                     ]}
                   />
                 </section>
@@ -177,33 +196,38 @@ function PrivacyPageContent() {
                   paragraphs={[
                     t("privacy.imageProcessing.p1"),
                     t("privacy.imageProcessing.p2"),
+                    t("privacy.imageProcessing.p3"),
+                  ]}
+                />
+
+                <PrivacySection
+                  locale={locale}
+                  title={t("privacy.payments.title")}
+                  paragraphs={[
+                    t("privacy.payments.p1"),
+                    t("privacy.payments.p2"),
+                    t("privacy.payments.p3"),
+                    t("privacy.payments.p4"),
                   ]}
                 />
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.analytics.title")}
                   </h2>
                   <p className="mb-4">{t("privacy.analytics.intro")}</p>
-                  <h3
-                    className={`mb-2 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h3 className={sectionHeadingClass(locale, "h3")}>
                     {t("privacy.analytics.ga.title")}
                   </h3>
                   <p className="mb-4">{t("privacy.analytics.ga.p")}</p>
-                  <h3
-                    className={`mb-2 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h3 className={sectionHeadingClass(locale, "h3")}>
                     {t("privacy.analytics.mixpanel.title")}
                   </h3>
                   <p className="mb-4">{t("privacy.analytics.mixpanel.p1")}</p>
                   <p className="mb-4">{t("privacy.analytics.mixpanel.p2")}</p>
                   <p className="mb-4">{t("privacy.analytics.mixpanel.p3")}</p>
-                  <h3
-                    className={`mb-2 text-lg font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <p className="mb-4">{t("privacy.analytics.mixpanel.p4")}</p>
+                  <h3 className={sectionHeadingClass(locale, "h3")}>
                     {t("privacy.analytics.meta.title")}
                   </h3>
                   <p className="mb-4">{t("privacy.analytics.meta.p")}</p>
@@ -211,9 +235,7 @@ function PrivacyPageContent() {
                 </section>
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.cookies.title")}
                   </h2>
                   <p className="mb-4">{t("privacy.cookies.intro")}</p>
@@ -226,15 +248,15 @@ function PrivacyPageContent() {
                       t("privacy.cookies.li3"),
                       t("privacy.cookies.li4"),
                       t("privacy.cookies.li5"),
+                      t("privacy.cookies.li6"),
                     ]}
                   />
-                  <p>{t("privacy.cookies.note")}</p>
+                  <p className="mb-4">{t("privacy.cookies.note")}</p>
+                  <p>{t("privacy.cookies.note2")}</p>
                 </section>
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.sharing.title")}
                   </h2>
                   <p className="mb-4">{t("privacy.sharing.p1")}</p>
@@ -250,6 +272,9 @@ function PrivacyPageContent() {
                       t("privacy.sharing.li5"),
                       t("privacy.sharing.li6"),
                       t("privacy.sharing.li7"),
+                      t("privacy.sharing.li8"),
+                      t("privacy.sharing.li9"),
+                      t("privacy.sharing.li10"),
                     ]}
                   />
                   <p>{t("privacy.sharing.p2")}</p>
@@ -261,6 +286,8 @@ function PrivacyPageContent() {
                   paragraphs={[
                     t("privacy.retention.p1"),
                     t("privacy.retention.p2"),
+                    t("privacy.retention.p3"),
+                    t("privacy.retention.p4"),
                   ]}
                 />
 
@@ -274,9 +301,7 @@ function PrivacyPageContent() {
                 />
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.rights.title")}
                   </h2>
                   <p className="mb-4">{t("privacy.rights.intro")}</p>
@@ -291,17 +316,19 @@ function PrivacyPageContent() {
                       t("privacy.rights.li5"),
                     ]}
                   />
+                  <p className="mb-4">{t("privacy.rights.note")}</p>
                   <p className="mb-2">{t("privacy.rights.contact")}</p>
-                  <p>
-                    📧{" "}
-                    <a
-                      href="mailto:support@littlegali.com"
-                      className="text-primary-orange hover:underline"
-                    >
-                      support@littlegali.com
-                    </a>
-                  </p>
+                  <PrivacyEmail locale={locale} />
                 </section>
+
+                <PrivacySection
+                  locale={locale}
+                  title={t("privacy.photoSubjects.title")}
+                  paragraphs={[
+                    t("privacy.photoSubjects.p1"),
+                    t("privacy.photoSubjects.p2"),
+                  ]}
+                />
 
                 <PrivacySection
                   locale={locale}
@@ -313,21 +340,13 @@ function PrivacyPageContent() {
                 />
 
                 <section>
-                  <h2
-                    className={`mb-4 text-xl font-heading font-bold text-dark-gray ${textAlign}`}
-                  >
+                  <h2 className={sectionHeadingClass(locale, "h2")}>
                     {t("privacy.contact.title")}
                   </h2>
-                  <p className="mb-4">{t("privacy.contact.p1")}</p>
-                  <p className="mb-4">
-                    📧{" "}
-                    <a
-                      href="mailto:support@littlegali.com"
-                      className="text-primary-orange hover:underline"
-                    >
-                      support@littlegali.com
-                    </a>
-                  </p>
+                  <p className="mb-2">{t("privacy.contact.p1")}</p>
+                  <div className="mb-4">
+                    <PrivacyEmail locale={locale} />
+                  </div>
                   <p>{t("privacy.contact.lastUpdated")}</p>
                 </section>
               </div>
