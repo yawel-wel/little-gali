@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { BookOpen, Frame, Layers } from "lucide-react";
+import { DISCOUNTED_BOOK_PRICE } from "@/lib/constants";
 import { useLanguage } from "@/lib/LanguageContext";
 import { isFramedArtEnabled } from "@/lib/feature-flags";
 
@@ -63,7 +64,10 @@ export function CartSuggestProducts() {
       <div className="mt-3 flex w-full flex-wrap gap-2 justify-start">
         <SuggestProductButton
           title={t("cart.suggest.bookTitle")}
-          promo={t("cart.suggest.bookPromo")}
+          promo={t("cart.suggest.bookPromo").replace(
+            "{price}",
+            String(DISCOUNTED_BOOK_PRICE),
+          )}
           icon={<BookOpen className={iconClass} strokeWidth={iconStroke} />}
           onClick={() => router.push("/choose")}
         />

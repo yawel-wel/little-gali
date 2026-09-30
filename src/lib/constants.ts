@@ -2,8 +2,24 @@
  * Application-wide constants
  */
 
-export const BOOK_PRICE = 190;
-export const DISCOUNTED_BOOK_PRICE = 159;
+function priceFromEnv(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+}
+
+/** List price shown on the soft-book page. Checkout still charges the Shopify variant price. */
+export const BOOK_PRICE = priceFromEnv(process.env.NEXT_PUBLIC_BOOK_PRICE, 210);
+/** Second-book promo price. Shopify applies the actual discount at checkout. */
+export const DISCOUNTED_BOOK_PRICE = priceFromEnv(
+  process.env.NEXT_PUBLIC_SECOND_BOOK_PRICE,
+  170,
+);
+/** Gift card shown on the site. The charged amount is the Shopify gift-card variant. */
+export const GIFT_CARD_PRICE = priceFromEnv(
+  process.env.NEXT_PUBLIC_GIFT_CARD_PRICE,
+  240,
+);
 
 /** Single framed-art line item (Shopify discount may reduce multi-item carts). */
 export const FRAMED_ART_UNIT_PRICE = 119;
@@ -24,7 +40,10 @@ export const BLANKET_VARIANT_IDS = {
 } as const;
 
 /** Soft book + bamboo blanket birth package (gift set). */
-export const BIRTH_PACKAGE_PRICE = 259;
+export const BIRTH_PACKAGE_PRICE = priceFromEnv(
+  process.env.NEXT_PUBLIC_GIFT_SET_PRICE,
+  269,
+);
 export const BIRTH_PACKAGE_PRODUCT_ID = "7751448199271";
 export const BIRTH_PACKAGE_VARIANT_IDS = {
   dots: "44525569704039",
@@ -39,8 +58,12 @@ export function birthPackageVariantGid(
 
 // Gift Card Configuration
 export const GIFT_CARD_OPTIONS = [
-  { id: 'one_with_shipping', price: 220, labelKey: 'giftCard.option2' },
-] as const;
+  {
+    id: "one_with_shipping" as const,
+    price: GIFT_CARD_PRICE,
+    labelKey: "giftCard.option2" as const,
+  },
+];
 
 // Environment variables
 // Add these to your .env.local:
@@ -50,3 +73,7 @@ export const GIFT_CARD_OPTIONS = [
 // SHOPIFY_GIFT_CARD_VARIANT_ID_TWO_WITH_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
 // SHOPIFY_FRAMED_ART_VARIANT_ID=43836272607335
 // NEXT_PUBLIC_FRAMED_ART_ENABLED=true
+// NEXT_PUBLIC_BOOK_PRICE=210
+// NEXT_PUBLIC_SECOND_BOOK_PRICE=170
+// NEXT_PUBLIC_GIFT_CARD_PRICE=240
+// NEXT_PUBLIC_GIFT_SET_PRICE=269
