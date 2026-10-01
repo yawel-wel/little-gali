@@ -14,7 +14,7 @@ import {
 import { fetchStorageBuffer } from "@/lib/storage/objects";
 import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
-const DEFAULT_BW_IMAGE_MODEL = "gemini-2.5-flash-image";
+const DEFAULT_BW_IMAGE_MODEL = "gemini-3.1-flash-image";
 const MAX_RETRIES = 2;
 
 function getBwImageModel(): string {

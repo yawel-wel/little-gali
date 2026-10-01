@@ -18,8 +18,14 @@ import {
 import { fetchStorageBuffer } from "@/lib/storage/objects";
 import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
-const COLOR_MODEL = "gemini-2.5-flash-image";
+const DEFAULT_COLOR_IMAGE_MODEL = "gemini-3.1-flash-lite-image";
 const MAX_RETRIES = 2;
+
+/** Color image model. Override via GEMINI_COLOR_IMAGE_MODEL. */
+function getColorImageModel(): string {
+  const configured = process.env.GEMINI_COLOR_IMAGE_MODEL?.trim();
+  return configured || DEFAULT_COLOR_IMAGE_MODEL;
+}
 
 let _geminiClient: GoogleGenAI | undefined;
 function getGeminiClient(): GoogleGenAI {
@@ -65,13 +71,14 @@ async function generateWithGemini(
   generationContext?: PreviewGenerationContext,
   prefetched?: { base64: string; mimeType: string },
 ): Promise<Buffer> {
+  const colorModel = getColorImageModel();
   let ai: GoogleGenAI;
   try {
     ai = getGeminiClient();
   } catch (error) {
     logPreviewGenerationFailure(
       "color",
-      { model: COLOR_MODEL, stage: "config" },
+      { model: colorModel, stage: "config" },
       error,
       generationContext,
     );
@@ -85,7 +92,7 @@ async function generateWithGemini(
   } catch (error) {
     logPreviewGenerationFailure(
       "color",
-      { model: COLOR_MODEL, stage: "download" },
+      { model: colorModel, stage: "download" },
       error,
       generationContext,
     );
@@ -100,7 +107,7 @@ async function generateWithGemini(
       logGeminiRequest(
         "color",
         {
-          model: COLOR_MODEL,
+          model: colorModel,
           userPrompt: prompt,
           attempt: attempt + 1,
         },
@@ -109,7 +116,7 @@ async function generateWithGemini(
 
       geminiStartedAt = Date.now();
       const response = await ai.models.generateContent({
-        model: COLOR_MODEL,
+        model: colorModel,
         config: {
           topP: 1,
           responseModalities: ["IMAGE", "TEXT"],
@@ -139,7 +146,7 @@ async function generateWithGemini(
           logGeminiResponse(
             "color",
             {
-              model: COLOR_MODEL,
+              model: colorModel,
               attempt: attempt + 1,
               durationMs: Date.now() - geminiStartedAt,
               outcome: "success",
@@ -167,7 +174,7 @@ async function generateWithGemini(
       logPreviewGenerationFailure(
         "color",
         {
-          model: COLOR_MODEL,
+          model: colorModel,
           stage: "gemini",
           attempt: attempt + 1,
           code: classified.code,
