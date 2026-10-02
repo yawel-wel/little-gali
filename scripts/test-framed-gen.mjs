@@ -25,7 +25,7 @@ async function main() {
       slot: 0,
       trigger: "initial",
       side: "color",
-    });
+    }, undefined, "framed_art");
     console.log("   OK", buf.length, "bytes");
   } catch (e) {
     console.error("   GEMINI FAIL:", e?.message ?? e);

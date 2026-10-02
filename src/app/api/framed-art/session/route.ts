@@ -9,6 +9,7 @@ import {
   signFramedArtSessionId,
 } from "@/lib/framed-art/cookies";
 import type { StyleType } from "@/components/style-selector";
+import { FRAMED_ART_STYLES } from "@/lib/framed-art/parse-style-param";
 import { saveFramedArtSession, toPublicView } from "@/lib/framed-art/store";
 import type { FramedArtSession } from "@/lib/framed-art/types";
 import { peekFramedUploadLimit } from "@/lib/framed-art/upload-limits";
@@ -22,8 +23,6 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const FRAMED_UPLOAD_LIMIT_ERROR = "framed_upload_limit";
-
-const VALID_STYLES: StyleType[] = ["cartoon", "pencil", "watercolor"];
 
 export async function POST(request: NextRequest) {
   const disabled = assertFramedArtEnabled();
@@ -42,7 +41,7 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-  if (!style || !VALID_STYLES.includes(style)) {
+  if (!style || !FRAMED_ART_STYLES.includes(style)) {
     return NextResponse.json({ error: "A valid style is required" }, { status: 400 });
   }
 

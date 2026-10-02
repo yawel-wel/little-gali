@@ -1,7 +1,7 @@
 "use client";
 
 import type { StyleType } from "@/components/style-selector";
-import { COLOR_STYLES } from "@/lib/preview-session/color-by-style";
+import { FRAMED_ART_STYLES } from "@/lib/framed-art/parse-style-param";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const STYLE_EXAMPLES: Record<
@@ -52,7 +52,7 @@ export function FramedArtStylePicker({
 
   return (
     <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
-      {COLOR_STYLES.map((style) => {
+      {FRAMED_ART_STYLES.map((style) => {
         const example = STYLE_EXAMPLES[style];
         const isSelected = selectedStyle === style;
         return (

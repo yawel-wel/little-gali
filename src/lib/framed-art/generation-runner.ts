@@ -31,12 +31,18 @@ async function buildFramedStyleCandidate(
   };
 
   try {
-    const cleanBuffer = await generateColorImageBuffer(sourceUrl, style, {
-      sessionId,
-      slot: 0,
-      trigger: version > 1 ? "regenerate" : "initial",
-      side: "color",
-    });
+    const cleanBuffer = await generateColorImageBuffer(
+      sourceUrl,
+      style,
+      {
+        sessionId,
+        slot: 0,
+        trigger: version > 1 ? "regenerate" : "initial",
+        side: "color",
+      },
+      undefined,
+      "framed_art",
+    );
 
     const { cleanUpload, previewUpload } = await uploadFramedArtOutputs(
       cleanBuffer,

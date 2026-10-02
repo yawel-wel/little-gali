@@ -1,5 +1,6 @@
 import type { StyleType } from "@/components/style-selector";
 import { DEFAULT_COLOR_STYLE } from "@/lib/preview-session/color-by-style";
+import { FRAMED_ART_STYLES } from "./parse-style-param";
 import type {
   PreviewCandidate,
   PreviewSessionPublicView,
@@ -66,5 +67,5 @@ export function framedArtLoadingStyles(
   session: FramedArtSessionPublicView,
 ): Set<StyleType> {
   if (!session.inFlight) return new Set();
-  return new Set<StyleType>(["cartoon", "pencil", "watercolor"]);
+  return new Set<StyleType>(FRAMED_ART_STYLES);
 }

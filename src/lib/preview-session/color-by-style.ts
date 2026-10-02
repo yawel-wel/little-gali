@@ -2,8 +2,6 @@ import type { StyleType } from "@/components/style-selector";
 import { isPreviewSingleColorStyleEnabled } from "@/lib/feature-flags";
 import type { PreviewCandidate, PreviewSession, PreviewSlot } from "./types";
 
-export const COLOR_STYLES: StyleType[] = ["pencil", "cartoon", "watercolor"];
-
 /** Dual-mode color styles (kept for rollback when single-style flag is off). */
 export const PREVIEW_COLOR_STYLES: StyleType[] = ["pencil", "watercolor"];
 

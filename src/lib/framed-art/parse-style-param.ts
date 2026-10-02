@@ -1,10 +1,11 @@
 import type { StyleType } from "@/components/style-selector";
 
-const VALID_STYLES: StyleType[] = ["cartoon", "pencil", "watercolor"];
+/** Styles offered for framed art. */
+export const FRAMED_ART_STYLES: StyleType[] = ["pencil", "watercolor"];
 
 export function parseFramedArtStyleParam(
   value: string | null | undefined,
 ): StyleType | null {
   if (!value) return null;
-  return VALID_STYLES.includes(value as StyleType) ? (value as StyleType) : null;
+  return FRAMED_ART_STYLES.includes(value as StyleType) ? (value as StyleType) : null;
 }

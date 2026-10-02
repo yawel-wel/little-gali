@@ -4,6 +4,8 @@ import type { StyleType } from "@/components/style-selector";
 import {
   CARTOON_COLOR_PROMPT,
   COLORFUL_BOOK_PROMPT,
+  FRAMED_ART_PENCIL_PROMPT,
+  FRAMED_ART_WATERCOLOR_PROMPT,
   PENCIL_COLOR_PROMPT,
   PENS_COLOR_PROMPT,
   WATERCOLOR_COLOR_PROMPT,
@@ -21,8 +23,19 @@ import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 const DEFAULT_COLOR_IMAGE_MODEL = "gemini-3.1-flash-lite-image";
 const MAX_RETRIES = 2;
 
-/** Color image model. Override via GEMINI_COLOR_IMAGE_MODEL. */
-function getColorImageModel(): string {
+const DEFAULT_FRAMED_ART_IMAGE_MODEL = "gemini-3.1-flash-lite-image";
+
+export type ColorGenerationProduct = "book" | "framed_art";
+
+/**
+ * Color image model. Override via GEMINI_COLOR_IMAGE_MODEL, or
+ * GEMINI_FRAMED_ART_IMAGE_MODEL for framed art.
+ */
+function getColorImageModel(product: ColorGenerationProduct): string {
+  if (product === "framed_art") {
+    const configured = process.env.GEMINI_FRAMED_ART_IMAGE_MODEL?.trim();
+    return configured || DEFAULT_FRAMED_ART_IMAGE_MODEL;
+  }
   const configured = process.env.GEMINI_COLOR_IMAGE_MODEL?.trim();
   return configured || DEFAULT_COLOR_IMAGE_MODEL;
 }
@@ -43,8 +56,19 @@ const STYLE_PROMPTS: Record<StyleType, string> = {
   pens: PENS_COLOR_PROMPT,
 };
 
-function resolveColorPrompt(style: StyleType): string {
-  const prompt = STYLE_PROMPTS[style];
+/** Framed-art prompts; styles not listed use STYLE_PROMPTS. */
+const FRAMED_ART_STYLE_PROMPTS: Partial<Record<StyleType, string>> = {
+  pencil: FRAMED_ART_PENCIL_PROMPT,
+  watercolor: FRAMED_ART_WATERCOLOR_PROMPT,
+};
+
+function resolveColorPrompt(
+  style: StyleType,
+  product: ColorGenerationProduct,
+): string {
+  const prompt =
+    (product === "framed_art" ? FRAMED_ART_STYLE_PROMPTS[style] : undefined) ??
+    STYLE_PROMPTS[style];
   if (!prompt) {
     throw new Error(
       `Color generation prompt for style "${style}" is not configured.`,
@@ -70,8 +94,9 @@ async function generateWithGemini(
   prompt: string,
   generationContext?: PreviewGenerationContext,
   prefetched?: { base64: string; mimeType: string },
+  product: ColorGenerationProduct = "book",
 ): Promise<Buffer> {
-  const colorModel = getColorImageModel();
+  const colorModel = getColorImageModel(product);
   let ai: GoogleGenAI;
   try {
     ai = getGeminiClient();
@@ -199,13 +224,20 @@ export async function generateColorImageBuffer(
   style: StyleType,
   generationContext?: PreviewGenerationContext,
   prefetched?: { base64: string; mimeType: string },
+  product: ColorGenerationProduct = "book",
 ): Promise<Buffer> {
   if (isMockGenerationEnabled()) {
     return createMockColorImage(imageUrl);
   }
 
-  const prompt = resolveColorPrompt(style);
-  return generateWithGemini(imageUrl, prompt, generationContext, prefetched);
+  const prompt = resolveColorPrompt(style, product);
+  return generateWithGemini(
+    imageUrl,
+    prompt,
+    generationContext,
+    prefetched,
+    product,
+  );
 }
 
 export { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";

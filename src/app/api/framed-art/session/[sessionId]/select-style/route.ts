@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { StyleType } from "@/components/style-selector";
 import { requireFramedArtSession } from "@/lib/framed-art/auth";
+import { FRAMED_ART_STYLES } from "@/lib/framed-art/parse-style-param";
 import { saveFramedArtSession, toPublicView } from "@/lib/framed-art/store";
 
 export const runtime = "nodejs";
-
-const STYLES: StyleType[] = ["cartoon", "pencil", "watercolor"];
 
 export async function POST(
   request: NextRequest,
@@ -17,7 +16,7 @@ export async function POST(
 
   const body = (await request.json().catch(() => ({}))) as { style?: StyleType };
   const style = body.style;
-  if (!style || !STYLES.includes(style)) {
+  if (!style || !FRAMED_ART_STYLES.includes(style)) {
     return NextResponse.json({ error: "Invalid style" }, { status: 400 });
   }
 
