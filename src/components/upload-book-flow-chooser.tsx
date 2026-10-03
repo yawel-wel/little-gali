@@ -33,14 +33,12 @@ type ChooserCardImage = { name: string; src: string };
 
 const CLASSIC_FEATURE_KEYS = [
   "upload.chooser.classicFeature1",
-  "upload.chooser.classicFeature2",
   "upload.chooser.classicFeature3",
   "upload.chooser.classicFeature4",
 ] as const;
 
 const COLORFUL_FEATURE_KEYS = [
   "upload.chooser.colorfulFeature1",
-  "upload.chooser.colorfulFeature2",
   "upload.chooser.colorfulFeature3",
   "upload.chooser.colorfulFeature4",
 ] as const;
@@ -293,23 +291,29 @@ function BookFlowCard({
             {badge}
           </span>
         </div>
-        <p className="mt-1 whitespace-pre-line font-body text-[13px] leading-snug text-medium-gray md:text-sm">
-          {description}
-        </p>
         <ul className="mt-2 space-y-1">
-          {featureKeys.map((key) => (
-            <li
-              key={key}
-              className="flex items-start gap-1.5 font-body text-[12px] leading-snug text-dark-gray md:text-[13px]"
-            >
-              <Check
-                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black"
-                strokeWidth={2.5}
-                aria-hidden
-              />
-              <span>{t(key)}</span>
-            </li>
-          ))}
+          {[...featureKeys.map((key) => t(key)), description].map(
+            (text, index) => (
+              <li
+                key={text}
+                className={cn(
+                  "flex items-start gap-1.5 leading-snug text-dark-gray",
+                  index === 0
+                    ? "mb-2 whitespace-pre-line border-b border-[#EFE6DD] pb-2.5 font-body font-medium md:whitespace-normal text-[14px] md:text-[15px]"
+                    : "font-body text-[12px] md:text-[13px]",
+                )}
+              >
+                {index === 0 ? null : (
+                  <Check
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-black"
+                    strokeWidth={2.5}
+                    aria-hidden
+                  />
+                )}
+                <span>{text}</span>
+              </li>
+            ),
+          )}
         </ul>
       </div>
 
