@@ -410,6 +410,8 @@ export default function PreviewPage() {
   });
   const [session, setSession] = useState<PreviewSessionPublicView | null>(null);
   const [bookSide, setBookSide] = useState<PreviewBookSide>("color");
+  /** Sticky: once the user opened the B&W side, the full preview UI stays visible. */
+  const [hasVisitedBwSide, setHasVisitedBwSide] = useState(false);
   const [displayedBookSide, setDisplayedBookSide] =
     useState<PreviewBookSide>("color");
   const [isTabCardsVisible, setIsTabCardsVisible] = useState(true);
@@ -882,6 +884,7 @@ export default function PreviewPage() {
     }
     const timeout = setTimeout(() => {
       setKeepBwLoadingVisible(false);
+      setHasVisitedBwSide(true);
       setBookSide("bw");
       setDisplayedBookSide("bw");
     }, 400);
@@ -960,7 +963,11 @@ export default function PreviewPage() {
   const allBwReady = Boolean(
     session && allSlotsHaveSuccessfulBwPublic(session),
   );
-  const showAddToCartCta = isColorfulFlow || allBwReady || bookSide === "bw";
+  // Until the user has seen the B&W side, the preview shows only the color side
+  // and a "go to B&W" CTA (no tabs, no book color picker).
+  const hasSeenBothSides =
+    isColorfulFlow || allBwReady || hasVisitedBwSide || bookSide === "bw";
+  const showAddToCartCta = hasSeenBothSides;
 
   useEffect(() => {
     if (
@@ -1979,6 +1986,7 @@ export default function PreviewPage() {
 
   const handleSelectBookSide = (nextSide: PreviewBookSide) => {
     if (nextSide === "bw") {
+      setHasVisitedBwSide(true);
       void ensureBwGenerationStarted();
     }
 
@@ -2201,7 +2209,7 @@ export default function PreviewPage() {
                       : "mt-3 md:mt-6",
                   )}
                 >
-                  {isColorPhase && !isColorfulFlow && (
+                  {isColorPhase && !isColorfulFlow && hasSeenBothSides && (
                   <div
                     className="flex justify-center gap-8 border-b border-gray-200 pt-1 sm:gap-10 md:mt-2"
                     role="tablist"
@@ -2829,7 +2837,7 @@ export default function PreviewPage() {
                                 disabled={isSubmitting}
                               />
                             ) : null}
-                            {isGiftSet ? (
+                            {!hasSeenBothSides ? null : isGiftSet ? (
                               <div className="mt-8 w-full max-w-md px-2">
                                 <PrintPatternPicker
                                   pattern={giftSetBlanketPattern}
