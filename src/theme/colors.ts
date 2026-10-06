@@ -7,7 +7,7 @@
 // Base brand colors (single source of truth)
 export const brandColors = {
   // Main brand / CTA color (warm beige/tan)
-  primary: "#e1a27d",
+  primary: "#E1B093",
   
   // Secondary/accent (rich burgundy)
   accent: "#693430",

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { prohibitedContentErrorPublicId } from "./cloudinary-paths";
 import { uploadJsonToCloudinaryPublicId } from "./cloudinary";
 import { analyticsContextFromSession } from "@/lib/analytics-context";
@@ -32,6 +33,31 @@ function parseBlockReason(error: unknown): string | undefined {
     message.match(/finishReason=([A-Z_]+)/) ??
     message.match(/safety blocked: ([A-Z_]+)/);
   return match?.[1];
+}
+
+/**
+ * One Sentry warning issue per block reason (e.g. IMAGE_SAFETY), so the count is
+ * visible and alertable without mixing refusals into real errors.
+ */
+function reportContentRefusal(
+  finishReason: string,
+  params: ProhibitedContentLogParams,
+): void {
+  Sentry.withScope((scope) => {
+    scope.setLevel("warning");
+    scope.setFingerprint(["gemini-content-refusal", finishReason]);
+    scope.setTag("area", params.productType === "frame" ? "framed_art" : "preview");
+    scope.setTag("refusal_reason", finishReason);
+    scope.setTag("sessionId", params.sessionId);
+    scope.setContext("details", {
+      side: params.side,
+      slot: params.slotIndex,
+      trigger: params.trigger,
+      style: params.style,
+      productType: params.productType ?? "booklet",
+    });
+    Sentry.captureMessage(`Gemini content refusal: ${finishReason}`);
+  });
 }
 
 export async function logProhibitedContentEvent(
@@ -78,6 +104,8 @@ export async function logProhibitedContentEvent(
       cloudinaryError,
     );
   }
+
+  reportContentRefusal(finishReason, params);
 
   logPreviewProhibitedContent(
     {

@@ -130,7 +130,7 @@ export function Title({
         >
           <path
             d={pathData}
-            stroke="#e1a27d"
+            stroke="#E1B093"
             strokeWidth={height}
             fill="none"
             strokeLinecap="round"

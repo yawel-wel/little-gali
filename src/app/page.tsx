@@ -334,7 +334,7 @@ export default function Home() {
                             >
                               <path
                                 d="M 0 14 Q 50 10, 100 14"
-                                stroke="#e1a27d"
+                                stroke="#E1B093"
                                 strokeWidth="8"
                                 fill="none"
                                 strokeLinecap="round"
