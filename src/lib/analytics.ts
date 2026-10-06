@@ -13,6 +13,8 @@ export const ANALYTICS_EVENTS = {
   BOOKLET_STYLE_SELECTED: "booklet_style_selected",
   BOOKLET_IMAGE_REPLACED: "booklet_image_replaced",
   BOOKLET_REGENERATED: "booklet_regenerated",
+  BOOKLET_ORIGINAL_COMPARED: "booklet_original_compared",
+  BOOKLET_IMAGE_ENLARGED: "booklet_image_enlarged",
   BOOKLET_LIMIT_REACHED: "booklet_limit_reached",
   BOOKLET_CHANGES_EXHAUSTED: "booklet_changes_exhausted",
   BOOKLET_ADDED_TO_CART: "booklet_added_to_cart",
@@ -43,6 +45,8 @@ export type PreviewLimitType =
   | "preview_rate_limit"
   | "generation_rate_limit";
 
+export type BookletSide = "bw" | "color";
+
 /** Where the crop editor was opened from. */
 export type CropFlow = "upload_crop" | "upload_re_edit" | "replace";
 
@@ -54,7 +58,13 @@ export type EventProperties = {
   booklet_color_preview_viewed: Record<string, never>;
   booklet_style_selected: { style_name: string };
   booklet_image_replaced: Record<string, never>;
-  booklet_regenerated: Record<string, never>;
+  booklet_regenerated: { side: BookletSide };
+  booklet_original_compared: { side: BookletSide; page: number };
+  booklet_image_enlarged: {
+    side: BookletSide;
+    source: "zoom_button" | "image_click";
+    page?: number;
+  };
   booklet_limit_reached: { limit_type: PreviewLimitType };
   booklet_changes_exhausted: { changes_used: number };
   booklet_added_to_cart: { changes_used?: number };

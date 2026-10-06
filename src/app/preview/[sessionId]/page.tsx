@@ -1422,7 +1422,7 @@ export default function PreviewPage() {
   const runBwRegenerate = async (slotIndex: number, freeRetry: boolean) => {
     if (!freeRetry && !session?.canRegenerate) return;
     if (!freeRetry) {
-      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED);
+      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED, { side: "bw" });
     }
     markSlotBusy(slotIndex);
     mutationInProgressRef.current = true;
@@ -1478,7 +1478,7 @@ export default function PreviewPage() {
     if (!session) return;
     if (!freeRetry && !session.canRegenerateColor) return;
     if (!freeRetry) {
-      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED);
+      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED, { side: "color" });
     }
     markSlotBusy(slotIndex);
     mutationInProgressRef.current = true;
@@ -2257,6 +2257,10 @@ export default function PreviewPage() {
                           <button
                             type="button"
                             onClick={() => {
+                              track(ANALYTICS_EVENTS.BOOKLET_IMAGE_ENLARGED, {
+                                side: displayedBookSide,
+                                source: "zoom_button",
+                              });
                               setBookLightboxIndex(0);
                               setBookLightboxOpen(true);
                             }}
@@ -2348,6 +2352,11 @@ export default function PreviewPage() {
                           if (!currentPreviewUrl || lightboxIndex < 0) {
                             return;
                           }
+                          track(ANALYTICS_EVENTS.BOOKLET_IMAGE_ENLARGED, {
+                            side: displayedBookSide,
+                            source: "image_click",
+                            page: pageNum,
+                          });
                           setBookLightboxIndex(lightboxIndex);
                           setBookLightboxOpen(true);
                         };
@@ -2389,7 +2398,10 @@ export default function PreviewPage() {
                           if (!activeCompareOutput) {
                             return;
                           }
-
+                          track(ANALYTICS_EVENTS.BOOKLET_ORIGINAL_COMPARED, {
+                            side: displayedBookSide,
+                            page: pageNum,
+                          });
                           setCompareImageModal({
                             originalUrl: slot.originalUrl,
                             originalAlt: `${t("preview.originalPhoto")} ${pageNum}`,
