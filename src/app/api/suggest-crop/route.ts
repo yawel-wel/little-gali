@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import type { Area } from "react-easy-crop";
@@ -320,11 +321,11 @@ export async function POST(request: NextRequest) {
 
     if (!annotateRes.ok) {
       const errText = await annotateRes.text();
-      console.error("Vision API error:", annotateRes.status, errText.slice(0, 500));
+      reportError("Suggest crop fell back: Vision API HTTP error", errText.slice(0, 500), {
+        area: "suggest_crop",
+        status: annotateRes.status,
+      });
       if (annotateRes.status === 403) {
-        console.error(
-          "Cloud Vision API may be disabled for this GCP project. Enable it: https://console.cloud.google.com/apis/library/vision.googleapis.com",
-        );
         return NextResponse.json({
           ok: true,
           fallback: true,
@@ -337,7 +338,7 @@ export async function POST(request: NextRequest) {
     const visionJson = (await annotateRes.json()) as VisionResponse;
     const first = visionJson.responses?.[0];
     if (first?.error?.message) {
-      console.error("Vision API response error:", first.error.message);
+      reportError("Suggest crop fell back: Vision API response error", first.error.message, { area: "suggest_crop" });
       return NextResponse.json({
         ok: true,
         fallback: true,
@@ -422,7 +423,7 @@ export async function POST(request: NextRequest) {
       faceBoxes,
     });
   } catch (e) {
-    console.error("suggest-crop error:", e);
+    reportError("Suggest crop fell back: server error", e, { area: "suggest_crop" });
     return NextResponse.json({ ok: true, fallback: true, reason: "server_error" });
   }
 }

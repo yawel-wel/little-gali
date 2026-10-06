@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { isPreviewEnabled } from "@/lib/preview-session/auth";
 import { isUuid } from "@/lib/preview-session/cloudinary-paths";
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ allowed: true });
   } catch (error) {
-    console.error("Preview start check error:", error);
+    reportError("Preview start check failed", error, { area: "preview" });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },

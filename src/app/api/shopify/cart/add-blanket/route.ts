@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import {
   blanketVariantGid,
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
       const result = await response.json();
 
       if (result.errors) {
+        reportError("Add blanket to cart failed: Shopify API error", result.errors, { area: "cart" });
         return NextResponse.json(
           {
             error: `Shopify API error: ${
@@ -100,6 +102,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (!result.data?.cartCreate) {
+        reportError("Add blanket to cart failed: unexpected Shopify response", result, { area: "cart" });
         return NextResponse.json(
           { error: "Invalid response from Shopify" },
           { status: 500 },
@@ -108,6 +111,7 @@ export async function POST(request: NextRequest) {
 
       if (result.data.cartCreate.userErrors.length > 0) {
         const errors = result.data.cartCreate.userErrors;
+        reportError("Add blanket to cart failed: Shopify userErrors", errors, { area: "cart" });
         return NextResponse.json(
           { error: `Cart error: ${errors[0]?.message || "Unknown error"}` },
           { status: 400 },
@@ -174,6 +178,7 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (result.errors) {
+      reportError("Add blanket to cart failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Shopify API error: ${
@@ -185,6 +190,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.data?.cartLinesAdd) {
+      reportError("Add blanket to cart failed: unexpected Shopify response", result, { area: "cart" });
       return NextResponse.json(
         { error: "Invalid response from Shopify" },
         { status: 500 },
@@ -193,6 +199,7 @@ export async function POST(request: NextRequest) {
 
     if (result.data.cartLinesAdd.userErrors.length > 0) {
       const errors = result.data.cartLinesAdd.userErrors;
+      reportError("Add blanket to cart failed: Shopify userErrors", errors, { area: "cart" });
       return NextResponse.json(
         { error: `Cart error: ${errors[0]?.message || "Unknown error"}` },
         { status: 400 },
@@ -217,7 +224,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error("Add blanket to cart error:", error);
+    reportError("Add blanket to cart failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error:

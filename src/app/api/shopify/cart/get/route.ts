@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { bookColorFromVariantId } from "@/lib/book-color";
 import { bookColorFromLineAttributes } from "@/lib/birth-package";
@@ -101,6 +102,7 @@ export async function POST(request: NextRequest) {
     let result = await fetchCartFromShopify();
 
     if (result.errors) {
+      reportError("Get cart failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Shopify API error: ${
@@ -222,7 +224,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("Get cart error:", error);
+    reportError("Get cart failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error: error?.message || "Internal server error",

@@ -1,6 +1,5 @@
 import { prohibitedContentErrorPublicId } from "./cloudinary-paths";
 import { uploadJsonToCloudinaryPublicId } from "./cloudinary";
-import { isProhibitedContentErrorMessage } from "./generation-errors";
 import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackSensitiveContentError } from "@/lib/analytics-server";
 import { logPreviewProhibitedContent } from "./generation-log";
@@ -18,21 +17,32 @@ export type ProhibitedContentLogParams = {
   style?: StyleType;
   error: unknown;
   productType?: "booklet" | "frame";
+  errorCode: string;
 };
 
-function parseFinishReason(error: unknown): string | undefined {
+/** Codes for images Gemini refused on content grounds — expected, not bugs. */
+export function isContentBlockCode(code: string | undefined): boolean {
+  return code === "prohibited_content" || code === "safety";
+}
+
+/** e.g. IMAGE_SAFETY, PROHIBITED_CONTENT, IMAGE_PROHIBITED_CONTENT, or a prompt blockReason. */
+function parseBlockReason(error: unknown): string | undefined {
   const message = error instanceof Error ? error.message : String(error);
-  const match = message.match(/finishReason=([A-Z_]+)/);
+  const match =
+    message.match(/finishReason=([A-Z_]+)/) ??
+    message.match(/safety blocked: ([A-Z_]+)/);
   return match?.[1];
 }
 
 export async function logProhibitedContentEvent(
   params: ProhibitedContentLogParams,
 ): Promise<void> {
-  const finishReason = parseFinishReason(params.error) ?? "PROHIBITED_CONTENT";
+  const finishReason =
+    parseBlockReason(params.error) ??
+    (params.errorCode === "safety" ? "SAFETY" : "PROHIBITED_CONTENT");
   const payload = {
     type: "generation_error",
-    code: "prohibited_content",
+    code: params.errorCode,
     finishReason,
     sessionId: params.sessionId,
     slot: params.slotIndex,
@@ -98,6 +108,7 @@ export async function logProhibitedContentEvent(
       product_type: productType,
       session_id: params.sessionId,
       slot_index: params.slotIndex,
+      reason: finishReason,
     },
     analyticsContextFromSession(
       { id: params.sessionId },
@@ -107,16 +118,15 @@ export async function logProhibitedContentEvent(
 }
 
 export function maybeLogProhibitedContentEvent(
-  params: ProhibitedContentLogParams & { errorCode: string | undefined },
+  params: Omit<ProhibitedContentLogParams, "errorCode"> & {
+    errorCode: string | undefined;
+  },
 ): void {
-  if (params.errorCode !== "prohibited_content") {
+  const { errorCode } = params;
+  if (!errorCode || !isContentBlockCode(errorCode)) {
     return;
   }
-  const message = params.error instanceof Error ? params.error.message : "";
-  if (!isProhibitedContentErrorMessage(message) && params.errorCode === "prohibited_content") {
-    // Classified from message shape elsewhere; still log.
-  }
-  void logProhibitedContentEvent(params).catch((err) => {
+  void logProhibitedContentEvent({ ...params, errorCode }).catch((err) => {
     console.error("[preview] prohibited content log failed", err);
   });
 }

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("Resend error:", error);
+      reportError("Email signup not sent (Resend)", error, { area: "email" });
       return NextResponse.json(
         { error: "שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר." },
         { status: 500 }
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Email signup error:", error);
+    reportError("Email signup failed", error, { area: "email" });
     return NextResponse.json(
       { error: "שגיאה בשרת. אנא נסה שוב מאוחר יותר." },
       { status: 500 }

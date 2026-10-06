@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import type { StyleType } from "@/components/style-selector";
 import { assertFramedArtEnabled, requireFramedArtSession } from "@/lib/framed-art/auth";
@@ -217,6 +218,7 @@ export async function POST(request: NextRequest) {
 
       const result = await response.json();
       if (result.errors?.length) {
+        reportError("Add framed art to cart failed: Shopify API error", result.errors, { area: "cart" });
         return NextResponse.json(
           { error: result.errors[0]?.message || "Shopify API error" },
           { status: 500 },
@@ -311,6 +313,7 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
     if (result.errors?.length) {
+      reportError("Add framed art to cart failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         { error: result.errors[0]?.message || "Shopify API error" },
         { status: 500 },
@@ -397,7 +400,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error("Add framed art to cart error:", error);
+    reportError("Add framed art to cart failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Internal server error",

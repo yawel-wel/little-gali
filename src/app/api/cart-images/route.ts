@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import {
   deleteCartImages,
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("Store cart images error:", error);
+    reportError("Store cart images failed", error, { area: "cart_images" });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },
@@ -95,7 +96,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("Delete cart images error:", error);
+    reportError("Delete cart images failed", error, { area: "cart_images" });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(lineData);
   } catch (error: unknown) {
-    console.error("Get cart images error:", error);
+    reportError("Get cart images failed", error, { area: "cart_images" });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },

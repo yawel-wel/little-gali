@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { after, NextResponse } from "next/server";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import {
@@ -55,7 +56,7 @@ export async function POST(
     try {
       await runColorPipelineForApprovedSession(sessionId);
     } catch (error) {
-      console.error("Background color pipeline failed:", sessionId, error);
+      reportError("Color generation failed after B&W approval", error, { area: "preview", sessionId });
       logPreviewPipelineBackgroundFailed(sessionId, "color", error);
       await markSessionPipelineFailed(sessionId, error);
     }

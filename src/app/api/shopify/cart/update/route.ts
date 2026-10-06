@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { nudgeShopifyCartDiscounts } from "@/lib/shopify/nudge-cart-discounts";
 import { updateCartLineQuantity } from "@/lib/shopify/update-cart-line-quantity";
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error("Update cart error:", error);
+    reportError("Update cart failed", error, { area: "cart" });
     const message =
       error instanceof Error ? error.message : "Internal server error";
     const status =

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { GIFT_MESSAGE_MAX_LENGTH } from "@/lib/shopify/cart-gift-note";
 
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (result.errors) {
+      reportError("Update cart note failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Shopify API error: ${
@@ -76,6 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.data || !result.data.cartNoteUpdate) {
+      reportError("Update cart note failed: unexpected Shopify response", result, { area: "cart" });
       return NextResponse.json(
         { error: "Invalid response from Shopify" },
         { status: 500 },
@@ -87,6 +90,7 @@ export async function POST(request: NextRequest) {
       result.data.cartNoteUpdate.userErrors.length > 0
     ) {
       const errors = result.data.cartNoteUpdate.userErrors;
+      reportError("Update cart note failed: Shopify userErrors", errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Cart error: ${errors[0]?.message || "Unknown error"}`,
@@ -113,7 +117,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error("Update cart note error:", error);
+    reportError("Update cart note failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error:

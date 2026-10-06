@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createHmac } from "crypto";
@@ -102,10 +103,10 @@ async function trackMetaPurchase(orderData: any) {
     if (response.ok) {
       console.log("Meta Purchase event tracked successfully:", result);
     } else {
-      console.error("Failed to track Meta Purchase event:", result);
+      reportError("Meta Purchase event rejected", result, { area: "shopify_webhook", status: response.status });
     }
   } catch (error) {
-    console.error("Error tracking Meta Purchase event:", error);
+    reportError("Meta Purchase event failed", error, { area: "shopify_webhook" });
   }
 }
 
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
     const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
-      console.error("SHOPIFY_WEBHOOK_SECRET not configured");
+      reportError("Shopify webhook rejected", "SHOPIFY_WEBHOOK_SECRET not configured", { area: "shopify_webhook" });
       return NextResponse.json(
         { error: "Webhook secret not configured" },
         { status: 500 }
@@ -197,8 +198,7 @@ export async function POST(request: NextRequest) {
     console.log("Purchase tracked successfully");
     return NextResponse.json({ status: "success" });
   } catch (error: any) {
-    console.error("Error processing webhook:", error);
-    console.error("Error stack:", error?.stack);
+    reportError("Shopify webhook processing failed", error, { area: "shopify_webhook" });
     return NextResponse.json(
       { error: error?.message || "Internal server error" },
       { status: 500 }

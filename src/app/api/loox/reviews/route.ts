@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextResponse } from "next/server";
 import { fetchLooxProductReviews } from "@/lib/loox/fetch-product-reviews";
 
@@ -17,7 +18,7 @@ export async function GET() {
       },
     );
   } catch (error) {
-    console.error("Failed to fetch Loox reviews:", error);
+    reportError("Loox reviews fetch failed", error, { area: "loox" });
     return NextResponse.json(
       { error: "Failed to fetch reviews", reviews: [] },
       { status: 500 },

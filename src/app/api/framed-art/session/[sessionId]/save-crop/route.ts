@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import type { Area } from "react-easy-crop";
 import { NextRequest, NextResponse } from "next/server";
 import type { StyleType } from "@/components/style-selector";
@@ -96,7 +97,7 @@ export async function POST(
 
     return NextResponse.json({ session: toPublicView(auth.session) });
   } catch (error) {
-    console.error("Framed art save-crop error:", sessionId, error);
+    reportError("Framed art save crop failed", error, { area: "framed_art", sessionId });
     return NextResponse.json(
       {
         error:

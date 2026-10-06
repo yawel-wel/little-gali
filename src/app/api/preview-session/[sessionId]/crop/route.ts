@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { isAllowedUploadImageType } from "@/lib/allowed-image-types";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
@@ -182,7 +183,7 @@ export async function POST(
 
     return NextResponse.json({ session: publicView });
   } catch (error) {
-    console.error("Preview crop upload failed:", sessionId, candidateId, error);
+    reportError("Preview crop upload failed", error, { area: "preview", sessionId, candidateId });
     return NextResponse.json(
       { error: "Crop upload failed" },
       { status: 500 },

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { after, NextRequest, NextResponse } from "next/server";
 import { applyMixpanelDistinctIdFromRequest } from "@/lib/analytics-context";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
@@ -41,7 +42,7 @@ export async function GET(
       try {
         await runColorPipelineForApprovedSession(sessionId);
       } catch (error) {
-        console.error("Background color pipeline failed:", sessionId, error);
+        reportError("Color generation failed", error, { area: "preview", sessionId });
         logPreviewPipelineBackgroundFailed(sessionId, "color", error);
         await markSessionPipelineFailed(sessionId, error);
       }

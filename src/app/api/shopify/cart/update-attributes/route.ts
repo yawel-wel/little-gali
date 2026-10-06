@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (result.errors) {
+      reportError("Update cart attributes failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Shopify API error: ${
@@ -80,6 +82,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.data || !result.data.cartAttributesUpdate) {
+      reportError("Update cart attributes failed: unexpected Shopify response", result, { area: "cart" });
       return NextResponse.json(
         { error: "Invalid response from Shopify" },
         { status: 500 }
@@ -91,6 +94,7 @@ export async function POST(request: NextRequest) {
       result.data.cartAttributesUpdate.userErrors.length > 0
     ) {
       const errors = result.data.cartAttributesUpdate.userErrors;
+      reportError("Update cart attributes failed: Shopify userErrors", errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Cart error: ${errors[0]?.message || "Unknown error"}`,
@@ -116,7 +120,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("Update cart attributes error:", error);
+    reportError("Update cart attributes failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error: error?.message || "Internal server error",

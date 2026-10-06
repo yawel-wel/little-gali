@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { isPreviewEnabled } from "@/lib/preview-session/auth";
 import { getPreviewLimitsSnapshot } from "@/lib/preview-session/full-generation-limits";
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
       ...snapshot,
     });
   } catch (error) {
-    console.error("Preview limits error:", error);
+    reportError("Preview limits check failed", error, { area: "preview" });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },

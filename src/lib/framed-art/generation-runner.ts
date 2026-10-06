@@ -12,7 +12,11 @@ import {
 } from "./store";
 import type { FramedArtSession, FramedArtStyleCandidate } from "./types";
 import { logPreviewGenerationFailure } from "@/lib/preview-session/generation-log";
-import { maybeLogProhibitedContentEvent } from "@/lib/preview-session/prohibited-content-log";
+import {
+  isContentBlockCode,
+  maybeLogProhibitedContentEvent,
+} from "@/lib/preview-session/prohibited-content-log";
+import { reportError } from "@/lib/report-error";
 import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackGenerationStepDuration } from "@/lib/analytics-server";
 
@@ -88,6 +92,15 @@ async function buildFramedStyleCandidate(
       errorCode: candidate.error.code,
       productType: "frame",
     });
+    if (!isContentBlockCode(candidate.error.code)) {
+      reportError("Framed art generation failed", error, {
+        area: "framed_art",
+        sessionId,
+        style,
+        code: candidate.error.code,
+        version,
+      });
+    }
   }
 
   return candidate;

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { findDisallowedUploadImage } from "@/lib/allowed-image-types";
 import { uploadImageFileToCloudinary } from "@/lib/preview-session/cloudinary";
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
       imageUrls: imageUrls,
     });
   } catch (error: unknown) {
-    console.error("Image upload error:", error);
+    reportError("Image upload failed", error, { area: "upload" });
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to upload images",

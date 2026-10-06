@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import {
   bookColorFromVariantId,
@@ -300,6 +301,7 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (result.errors) {
+      reportError("Add to cart failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Shopify API error: ${
@@ -311,6 +313,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.data || !result.data.cartLinesAdd) {
+      reportError("Add to cart failed: unexpected Shopify response", result, { area: "cart" });
       return NextResponse.json(
         { error: "Invalid response from Shopify" },
         { status: 500 }
@@ -319,6 +322,7 @@ export async function POST(request: NextRequest) {
 
     if (result.data.cartLinesAdd.userErrors.length > 0) {
       const errors = result.data.cartLinesAdd.userErrors;
+      reportError("Add to cart failed: Shopify userErrors", errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Cart error: ${errors[0]?.message || "Unknown error"}`,
@@ -389,19 +393,20 @@ export async function POST(request: NextRequest) {
           }
         );
         if (!storeResponse.ok) {
-          console.error(
-            "Failed to store cart images:",
-            await storeResponse.text()
+          reportError(
+            "Add to cart: storing cart images failed",
+            await storeResponse.text(),
+            { area: "cart_images", status: storeResponse.status },
           );
         } else {
           console.log("Successfully stored cart images for lineId:", lineId);
         }
       } catch (error) {
-        console.error("Error storing cart images:", error);
+        reportError("Add to cart: cart images step failed", error, { area: "cart_images" });
         // Continue even if image storage fails
       }
     } else {
-      console.error("No lineId found after adding item to cart");
+      reportError("Add to cart: cart images not stored", "no matching line in Shopify cart", { area: "cart_images" });
     }
 
     await markPreviewSessionCartAdded(previewSessionId);
@@ -487,7 +492,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("Add to cart error:", error);
+    reportError("Add to cart failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error: error?.message || "Internal server error",

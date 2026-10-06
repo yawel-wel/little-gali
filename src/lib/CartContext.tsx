@@ -9,6 +9,7 @@ import React, {
   useRef,
 } from "react";
 import { useLanguage } from "./LanguageContext";
+import { reportError } from "./report-error";
 import { trackAddToCart, trackInitiateCheckout } from "./meta-pixel-events";
 import { parseShopifyLineCost } from "./shopify/cart-line-cost";
 import { cartLineIdsMatch } from "./shopify/cart-line-id-match";
@@ -640,7 +641,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         throw new Error(error.error || "Failed to add to cart");
       }
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      reportError("Add to cart failed in browser", error, { area: "cart" });
       try {
         clearAddingToCart();
       } catch {}
@@ -690,7 +691,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         } catch {}
       }
     } catch (error) {
-      console.error("Error adding framed art to cart:", error);
+      reportError("Add framed art to cart failed in browser", error, { area: "cart" });
       try {
         if (typeof window !== "undefined") {
           clearAddingToCart();
@@ -741,7 +742,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         throw new Error(error.error || "Failed to add gift card to cart");
       }
     } catch (error) {
-      console.error("Error adding gift card to cart:", error);
+      reportError("Add gift card to cart failed in browser", error, { area: "cart" });
       throw error;
     } finally {
       setIsLoading(false);
@@ -842,7 +843,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error) {
-      console.error("Error adding blanket to cart:", error);
+      reportError("Add blanket to cart failed in browser", error, { area: "cart" });
       setCart(previousCart);
       setIsLoading(false);
       throw error;

@@ -32,7 +32,11 @@ import {
   type PreviewGenerationContext,
   type PreviewGenerationTrigger,
 } from "./generation-log";
-import { maybeLogProhibitedContentEvent } from "./prohibited-content-log";
+import {
+  isContentBlockCode,
+  maybeLogProhibitedContentEvent,
+} from "./prohibited-content-log";
+import { reportError } from "@/lib/report-error";
 import { analyticsContextFromSession } from "@/lib/analytics-context";
 import { trackGenerationStepDuration } from "@/lib/analytics-server";
 import { loadPreviewSession, savePreviewSession } from "./store";
@@ -230,6 +234,16 @@ async function buildColorPreview(
         error,
         errorCode: candidate.error.code,
       });
+      if (!isContentBlockCode(candidate.error.code)) {
+        reportError("Color generation failed", error, {
+          area: "preview",
+          sessionId,
+          slot: slotIndex,
+          style,
+          code: candidate.error.code,
+          trigger,
+        });
+      }
     }
 
     return candidate;

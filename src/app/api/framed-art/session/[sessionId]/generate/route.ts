@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { requireFramedArtSession } from "@/lib/framed-art/auth";
 import { runFramedArtStyleGeneration } from "@/lib/framed-art/generation-runner";
@@ -70,7 +71,6 @@ export async function POST(
       }
       const detail =
         getFramedArtGenerationErrorMessage(updated) ?? "Generation failed";
-      console.error("Framed art generation failed:", sessionId, detail);
       trackServerError({
         step: "frame_generation",
         error_message: detail,
@@ -86,7 +86,7 @@ export async function POST(
       uploadsRemaining,
     });
   } catch (error: unknown) {
-    console.error("Framed art generate route error:", sessionId, error);
+    reportError("Framed art generate route failed", error, { area: "framed_art", sessionId });
     trackServerError({
       step: "frame_generation",
       error_message: error instanceof Error ? error.message : "Internal server error",

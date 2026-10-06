@@ -143,6 +143,8 @@ export function trackSensitiveContentError(
     product_type: ServerProductType;
     session_id?: string;
     slot_index?: number;
+    /** Gemini block reason, e.g. IMAGE_SAFETY or PROHIBITED_CONTENT. */
+    reason?: string;
   },
   context?: ServerAnalyticsContext,
 ): void {

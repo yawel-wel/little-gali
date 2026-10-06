@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { isPreviewEnabled } from "@/lib/preview-session/auth";
 import { isUuid } from "@/lib/preview-session/cloudinary-paths";
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ sessions });
   } catch (error) {
-    console.error("Preview resume list error:", error);
+    reportError("Preview resume list failed", error, { area: "preview" });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },

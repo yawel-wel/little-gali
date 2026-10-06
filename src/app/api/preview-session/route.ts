@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 import { after, NextRequest, NextResponse } from "next/server";
@@ -100,7 +101,7 @@ function scheduleMultipartPipeline(
     try {
       await runPreviewPipelineFromMultipart(sessionId, uploads);
     } catch (error) {
-      console.error("Background preview ingest failed:", sessionId, error);
+      reportError("Preview generation failed (upload ingest)", error, { area: "preview", sessionId });
       await markSessionPipelineFailed(sessionId, error);
     }
   });
@@ -111,7 +112,7 @@ function scheduleRemotePipeline(sessionId: string, originalUrls: string[]): void
     try {
       await runPreviewPipelineFromRemoteUrls(sessionId, originalUrls);
     } catch (error) {
-      console.error("Background preview remote ingest failed:", sessionId, error);
+      reportError("Preview generation failed (remote ingest)", error, { area: "preview", sessionId });
       await markSessionPipelineFailed(sessionId, error);
     }
   });
@@ -475,7 +476,7 @@ export async function POST(request: NextRequest) {
     scheduleRemotePipeline(sessionForPipeline.id, originalUrls);
     return respondWithSession(sessionForPipeline);
   } catch (error) {
-    console.error("Preview session start error:", error);
+    reportError("Preview session start failed", error, { area: "preview" });
     trackServerError(
       {
         step: "booklet_generation",

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { deleteCartImages } from "@/lib/cart-images-store";
 import { expandLineIdsToGroupMembers } from "@/lib/shopify/cart-line-group";
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (result.errors) {
+      reportError("Remove from cart failed: Shopify API error", result.errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Shopify API error: ${
@@ -114,6 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.data || !result.data.cartLinesRemove) {
+      reportError("Remove from cart failed: unexpected Shopify response", result, { area: "cart" });
       return NextResponse.json(
         { error: "Invalid response from Shopify" },
         { status: 500 }
@@ -122,6 +125,7 @@ export async function POST(request: NextRequest) {
 
     if (result.data.cartLinesRemove.userErrors.length > 0) {
       const errors = result.data.cartLinesRemove.userErrors;
+      reportError("Remove from cart failed: Shopify userErrors", errors, { area: "cart" });
       return NextResponse.json(
         {
           error: `Cart error: ${errors[0]?.message || "Unknown error"}`,
@@ -137,7 +141,7 @@ export async function POST(request: NextRequest) {
         normalizedLineIds.map((lineId) => deleteCartImages(cartId, lineId)),
       );
     } catch (error) {
-      console.error("Error cleaning up cart images:", error);
+      reportError("Remove from cart: cart images step failed", error, { area: "cart_images" });
     }
 
     // Append locale to checkout URL if provided
@@ -158,7 +162,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("Remove from cart error:", error);
+    reportError("Remove from cart failed", error, { area: "cart" });
     return NextResponse.json(
       {
         error: error?.message || "Internal server error",

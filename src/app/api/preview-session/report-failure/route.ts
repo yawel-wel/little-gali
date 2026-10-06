@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { diagnosePreviewLoadFailure } from "@/lib/preview-session/diagnose-load-failure";
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("Preview failure email error:", error);
+      reportError("Preview failure email not sent (Resend)", error, { area: "email" });
       return NextResponse.json(
         { error: "Failed to send preview failure email" },
         { status: 500 },
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Preview failure report error:", error);
+    reportError("Preview failure report failed", error, { area: "email" });
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Internal server error",

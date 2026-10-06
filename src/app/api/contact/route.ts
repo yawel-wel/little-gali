@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/report-error";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { buildContactEmailAttachments } from "@/lib/contact-attachments";
@@ -182,7 +183,7 @@ ${message}${attachmentText}${previewText}
     });
 
     if (error) {
-      console.error("Resend error:", error);
+      reportError("Contact form email not sent (Resend)", error, { area: "email" });
       return NextResponse.json(
         { error: "שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר." },
         { status: 500 },
@@ -194,7 +195,7 @@ ${message}${attachmentText}${previewText}
       { status: 200 },
     );
   } catch (error) {
-    console.error("Contact form error:", error);
+    reportError("Contact form failed", error, { area: "email" });
     return NextResponse.json(
       { error: "שגיאה בשרת. אנא נסה שוב מאוחר יותר." },
       { status: 500 },
