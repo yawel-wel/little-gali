@@ -22,8 +22,7 @@ export async function POST(request: NextRequest) {
       generatedBwUrls,
       generatedColorUrls,
       previewSessionId,
-      previewGenTotal,
-      previewGenSelected,
+      previewRegenerations,
       productType,
       framedImageUrl,
     } = body as {
@@ -35,8 +34,7 @@ export async function POST(request: NextRequest) {
       generatedBwUrls?: string[];
       generatedColorUrls?: string[];
       previewSessionId?: string;
-      previewGenTotal?: number;
-      previewGenSelected?: string;
+      previewRegenerations?: number;
       productType?: StoredCartImages["productType"];
       framedImageUrl?: string;
     };
@@ -64,8 +62,7 @@ export async function POST(request: NextRequest) {
       generatedBwUrls,
       generatedColorUrls,
       previewSessionId,
-      previewGenTotal,
-      previewGenSelected,
+      previewRegenerations,
       productType,
       framedImageUrl,
     });

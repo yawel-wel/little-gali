@@ -215,6 +215,7 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     bookFlow,
     displayOrder: normalizeDisplayOrder(session.displayOrder, bookFlow),
     changeCreditsRemaining: effectiveChangeCreditsRemaining(session),
+    regenerateCount: session.regenerateCount ?? 0,
     slots: session.slots.map((slot, index) => ({
       index,
       originalUrl: slot.originalUrl,

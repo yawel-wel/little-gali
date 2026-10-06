@@ -10,8 +10,7 @@ export interface StoredCartImages {
   generatedBwUrls?: string[];
   generatedColorUrls?: string[];
   previewSessionId?: string;
-  previewGenTotal?: number;
-  previewGenSelected?: string;
+  previewRegenerations?: number;
   style?: StyleType;
   productType?: "book" | "framed_art";
   framedImageUrl?: string;

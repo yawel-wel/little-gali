@@ -41,6 +41,7 @@ export function framedArtSessionToPreviewView(
     bookFlow: "classic",
     displayOrder: [0],
     changeCreditsRemaining: 0,
+    regenerateCount: 0,
     slots: [
       {
         index: 0,

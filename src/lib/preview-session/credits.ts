@@ -48,6 +48,11 @@ export function consumeChangeCredit(session: PreviewSession): void {
   session.changeCreditsRemaining -= 1;
 }
 
+/** Records one explicit Regenerate click on the session (caller saves it). */
+export function recordRegenerateClick(session: PreviewSession): void {
+  session.regenerateCount = (session.regenerateCount ?? 0) + 1;
+}
+
 export function consumeChangeCreditForResult(
   session: PreviewSession,
   error?: GenerationError,

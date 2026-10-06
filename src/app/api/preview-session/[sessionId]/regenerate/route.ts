@@ -9,6 +9,7 @@ import {
 import {
   consumeChangeCreditForResult,
   hasChangeCredits,
+  recordRegenerateClick,
 } from "@/lib/preview-session/credits";
 import { slotBwActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
@@ -100,6 +101,9 @@ export async function POST(
 
   try {
     slot.pendingIdempotencyKey = idempotencyKey;
+    if (!freeRetry) {
+      recordRegenerateClick(session);
+    }
     await savePreviewSession(session);
 
     const updated = await runSlotGeneration(session, slotIndex, slot.originalUrl, {

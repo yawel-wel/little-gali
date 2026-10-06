@@ -16,7 +16,6 @@ import {
 import { isBlanketPattern, type BlanketPattern } from "@/lib/blanket";
 import {
   bookFlowShopifyAttributes,
-  formatSelectedGenerationBySlot,
   generatedColorUrlsShopifyAttributes,
   hasInvalidHttpImageUrls,
   isValidBookCartImageCount,
@@ -383,12 +382,7 @@ export async function POST(request: NextRequest) {
               generatedBwUrls,
               generatedColorUrls: fulfillmentColorUrls,
               previewSessionId,
-              previewGenTotal: generationStats?.totalGenerations,
-              previewGenSelected: generationStats
-                ? formatSelectedGenerationBySlot(
-                    generationStats.selectedGenerationBySlot,
-                  )
-                : undefined,
+              previewRegenerations: generationStats?.regenerations,
             }),
           }
         );

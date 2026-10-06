@@ -8,6 +8,7 @@ import { logPreviewApiOperation } from "@/lib/preview-session/generation-log";
 import {
   consumeChangeCreditForResult,
   hasChangeCredits,
+  recordRegenerateClick,
 } from "@/lib/preview-session/credits";
 import { parseBookFlow } from "@/lib/preview-session/book-flow";
 import { getDefaultColorStyle, getPreviewColorStyles } from "@/lib/preview-session/color-by-style";
@@ -112,6 +113,11 @@ export async function POST(
   });
 
   try {
+    if (!freeRetry) {
+      // The color runner reloads the session from storage, so persist the click first.
+      recordRegenerateClick(session);
+      await savePreviewSession(session);
+    }
     const updated = await runSlotColorGeneration(sessionId, slotIndex, style, {
       trigger: "regenerate",
     });

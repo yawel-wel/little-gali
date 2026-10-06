@@ -69,6 +69,8 @@ export interface PreviewSession {
   /** Book page order on preview/cart; slot indices refer to fixed Cloudinary/upload slots. */
   displayOrder?: number[];
   changeCreditsRemaining: number;
+  /** Explicit Regenerate clicks (B&W and color). Free retries after a failed generation are not counted. */
+  regenerateCount?: number;
   slots: PreviewSlot[];
   selectedColorStyle?: StyleType;
   /** Slots awaiting all-styles color regen when user opens the color tab. */
@@ -104,6 +106,7 @@ export interface PreviewSessionPublicView {
   bookFlow: BookFlow;
   displayOrder: number[];
   changeCreditsRemaining: number;
+  regenerateCount: number;
   slots: Array<{
     index: number;
     originalUrl: string;

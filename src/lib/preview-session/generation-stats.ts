@@ -1,33 +1,16 @@
 import type { PreviewSession, PreviewSessionPublicView } from "./types";
 
 export interface PreviewGenerationStats {
-  totalGenerations: number;
-  selectedGenerationBySlot: number[];
+  /** Explicit Regenerate clicks during the preview session. */
+  regenerations: number;
 }
 
-type SessionWithSlots = PreviewSession | PreviewSessionPublicView;
+type SessionWithRegenerateCount = Pick<PreviewSession, "regenerateCount"> | PreviewSessionPublicView;
 
 export function buildPreviewGenerationStats(
-  session: SessionWithSlots,
+  session: SessionWithRegenerateCount,
 ): PreviewGenerationStats {
-  const selectedGenerationBySlot = session.slots.map((slot) => {
-    const index = slot.candidates.findIndex(
-      (candidate) => candidate.id === slot.activeCandidateId,
-    );
-    return index >= 0 ? index + 1 : 0;
-  });
-  const totalGenerations = session.slots.reduce(
-    (sum, slot) => sum + slot.candidates.length,
-    0,
-  );
-
-  return { totalGenerations, selectedGenerationBySlot };
-}
-
-export function formatSelectedGenerationBySlot(
-  selectedGenerationBySlot: number[],
-): string {
-  return selectedGenerationBySlot.join(",");
+  return { regenerations: session.regenerateCount ?? 0 };
 }
 
 export function mixpanelDistinctIdShopifyAttributes(
@@ -56,12 +39,8 @@ export function previewStatsShopifyAttributes(
 
   if (stats) {
     attributes.push({
-      key: "_preview_gen_total",
-      value: String(stats.totalGenerations),
-    });
-    attributes.push({
-      key: "_preview_gen_selected",
-      value: formatSelectedGenerationBySlot(stats.selectedGenerationBySlot),
+      key: "_preview_regenerations",
+      value: String(stats.regenerations),
     });
   }
 

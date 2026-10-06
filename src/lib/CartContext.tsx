@@ -86,8 +86,8 @@ export interface CartItem {
 }
 
 export interface PreviewGenerationStats {
-  totalGenerations: number;
-  selectedGenerationBySlot: number[];
+  /** Explicit Regenerate clicks during the preview session. */
+  regenerations: number;
 }
 
 export interface BookFulfillmentImages {
