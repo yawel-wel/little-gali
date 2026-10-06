@@ -2110,7 +2110,7 @@ export default function PreviewPage() {
             locale={locale}
           />
         ) : (
-          <section className="bg-warm-light pt-5 pb-0 max-md:pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-14">
+          <section className="bg-warm-light pt-5 pb-0 max-md:pb-[calc(8rem+env(safe-area-inset-bottom,0px))] md:pb-14">
             <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
               <div className="mb-6 flex flex-col items-center text-center">
                 <GiftSetFlowBadge className="mb-1" />
@@ -2879,13 +2879,6 @@ export default function PreviewPage() {
                   </div>
                 </div>
 
-                <PreviewPhaseFooter.MobileContact
-                  contactBefore={t("preview.bwApproveBelowBefore")}
-                  contactLinkLabel={t("preview.contactButton")}
-                  onContactClick={() =>
-                    router.push(`/contact?previewSessionId=${sessionId}`)
-                  }
-                />
 
                 {showAddToCartCta ? (
                   <>

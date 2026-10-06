@@ -96,6 +96,12 @@ export function PreviewPhaseFooter({
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-2">
           <p className="text-center font-body text-sm text-dark-gray">{headline}</p>
           {ctaButton}
+          <PreviewPhaseContactLine
+            contactBefore={contactBefore}
+            contactLinkLabel={contactLinkLabel}
+            onContactClick={onContactClick}
+            contactAfter={contactAfter}
+          />
         </div>
       </div>
     );
@@ -121,30 +127,3 @@ export function PreviewPhaseFooter({
     </div>
   );
 }
-
-export type PreviewPhaseMobileContactProps = {
-  contactBefore: string;
-  contactLinkLabel: string;
-  onContactClick: () => void;
-  contactAfter?: string;
-};
-
-export function PreviewPhaseMobileContact({
-  contactBefore,
-  contactLinkLabel,
-  onContactClick,
-  contactAfter,
-}: PreviewPhaseMobileContactProps) {
-  return (
-    <div className="mt-2 border-t border-[#E5DDD4] pt-4 max-md:pb-9 md:hidden">
-      <PreviewPhaseContactLine
-        contactBefore={contactBefore}
-        contactLinkLabel={contactLinkLabel}
-        onContactClick={onContactClick}
-        contactAfter={contactAfter}
-      />
-    </div>
-  );
-}
-
-PreviewPhaseFooter.MobileContact = PreviewPhaseMobileContact;
