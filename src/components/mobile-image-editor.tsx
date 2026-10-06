@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Loader2, X } from "lucide-react";
 import { FRAMED_ART_ARTWORK_INSET_PERCENT } from "@/lib/framed-art/frame-layout";
 import { useLanguage } from "@/lib/LanguageContext";
+import { track, ANALYTICS_EVENTS, type CropFlow } from "@/lib/analytics";
 import { anyFaceClippedByCrop } from "@/lib/smartCropGeometry";
 import { getCroppedBlob, type CropState } from "@/lib/image-crop";
 import { SENTRY_REPLAY_BLOCK_USER_IMAGE } from "@/lib/sentry-privacy";
@@ -20,6 +21,8 @@ type MobileImageEditorProps = {
   isSmartCropLoading?: boolean;
   initialSmartCropPixels?: Area;
   referenceFaceBoxes?: Area[];
+  /** When set, crop outcomes are tracked in Mixpanel under this flow. */
+  analyticsFlow?: CropFlow;
   onSave: (croppedUrl: string, cropState: CropState) => void;
   onCancel: () => void;
   onChangeImage?: () => void;
@@ -56,6 +59,7 @@ export function MobileImageEditor({
   isSmartCropLoading,
   initialSmartCropPixels,
   referenceFaceBoxes,
+  analyticsFlow,
   onSave,
   onCancel,
   onChangeImage,
@@ -84,6 +88,7 @@ export function MobileImageEditor({
   const [awaitingSecondDoneAfterFaceWarning, setAwaitingSecondDoneAfterFaceWarning] =
     useState(false);
   const [faceClipWarning, setFaceClipWarning] = useState(false);
+  const userAdjustedCropRef = useRef(false);
 
   const aspect = aspectRatio ?? 72 / 84;
   const aspectCss = aspectRatio != null ? String(aspectRatio) : "72 / 84";
@@ -111,7 +116,19 @@ export function MobileImageEditor({
     if (clipped && !awaitingSecondDoneAfterFaceWarning) {
       setFaceClipWarning(true);
       setAwaitingSecondDoneAfterFaceWarning(true);
+      if (analyticsFlow) {
+        track(ANALYTICS_EVENTS.CROP_FACE_WARNING_SHOWN, { flow: analyticsFlow });
+      }
       return;
+    }
+
+    if (analyticsFlow) {
+      track(ANALYTICS_EVENTS.CROP_SAVED, {
+        flow: analyticsFlow,
+        had_suggestion: Boolean(initialSmartCropPixels),
+        adjusted: userAdjustedCropRef.current,
+        saved_despite_face_warning: clipped && awaitingSecondDoneAfterFaceWarning,
+      });
     }
 
     setFaceClipWarning(false);
@@ -135,6 +152,8 @@ export function MobileImageEditor({
     zoom,
     referenceFaceBoxes,
     awaitingSecondDoneAfterFaceWarning,
+    analyticsFlow,
+    initialSmartCropPixels,
     deferCropExport,
     isSaving,
   ]);
@@ -142,6 +161,7 @@ export function MobileImageEditor({
   useEffect(() => {
     clearFaceClipWarning();
     setCroppedAreaPixels(null);
+    userAdjustedCropRef.current = false;
   }, [imageUrl, clearFaceClipWarning]);
 
   useEffect(() => {
@@ -192,6 +212,7 @@ export function MobileImageEditor({
           onCropAreaChange={onCropAreaChange}
           onInteractionStart={() => {
             if (isSaving) return;
+            userAdjustedCropRef.current = true;
             setIsInteracting(true);
             clearFaceClipWarning();
           }}
@@ -299,7 +320,10 @@ export function MobileImageEditor({
                   max={3}
                   step={0.01}
                   value={zoom}
-                  onChange={(e) => setZoom(Number(e.target.value))}
+                  onChange={(e) => {
+                    userAdjustedCropRef.current = true;
+                    setZoom(Number(e.target.value));
+                  }}
                   className="h-1.5 w-full cursor-pointer accent-primary-orange"
                   aria-label={t("framedArt.upload.zoomSlider")}
                 />

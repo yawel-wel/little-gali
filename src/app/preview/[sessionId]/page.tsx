@@ -1591,15 +1591,26 @@ export default function PreviewPage() {
         });
         const data = await response.json();
         if (ac.signal.aborted) return;
-        setReplaceEditorFaceBoxes(
-          Array.isArray(data.faceBoxes) ? data.faceBoxes : [],
-        );
+        const faceBoxes = Array.isArray(data.faceBoxes) ? data.faceBoxes : [];
+        setReplaceEditorFaceBoxes(faceBoxes);
         const pixels = data.croppedAreaPixels as Area | undefined;
-        const hasValidSuggestion =
-          !data.fallback && pixels && pixels.width > 0 && pixels.height > 0;
+        const hasValidSuggestion = Boolean(
+          !data.fallback && pixels && pixels.width > 0 && pixels.height > 0,
+        );
         setReplaceSmartCropArea(hasValidSuggestion ? pixels : undefined);
+        track(ANALYTICS_EVENTS.CROP_SUGGESTION_RESULT, {
+          flow: "replace",
+          outcome: hasValidSuggestion ? "suggested" : "no_suggestion",
+          reason: typeof data.reason === "string" ? data.reason : undefined,
+          face_count: faceBoxes.length,
+        });
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
+        track(ANALYTICS_EVENTS.CROP_SUGGESTION_RESULT, {
+          flow: "replace",
+          outcome: "failed",
+          face_count: 0,
+        });
         if (!ac.signal.aborted) {
           setReplaceEditorFaceBoxes([]);
           setReplaceSmartCropArea(undefined);
@@ -2949,6 +2960,7 @@ export default function PreviewPage() {
           isSmartCropLoading={replaceSmartCropLoading}
           initialSmartCropPixels={replaceSmartCropArea}
           referenceFaceBoxes={replaceEditorFaceBoxes}
+          analyticsFlow="replace"
           onSave={(croppedUrl) => {
             void handleReplaceCropSave(croppedUrl);
           }}

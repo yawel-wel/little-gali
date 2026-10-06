@@ -24,6 +24,10 @@ export const ANALYTICS_EVENTS = {
   FRAME_STYLE_SELECTED: "frame_style_selected",
   FRAME_REGENERATED: "frame_regenerated",
   FRAME_ADDED_TO_CART: "frame_added_to_cart",
+  // Crop editor (tracks whether the suggest-crop feature is worth keeping)
+  CROP_SUGGESTION_RESULT: "crop_suggestion_result",
+  CROP_FACE_WARNING_SHOWN: "crop_face_warning_shown",
+  CROP_SAVED: "crop_saved",
   // General
   PURCHASE_COMPLETED: "purchase_completed",
   CART_ABANDONED: "cart_abandoned",
@@ -38,6 +42,9 @@ export type ProductType = "booklet" | "frame";
 export type PreviewLimitType =
   | "preview_rate_limit"
   | "generation_rate_limit";
+
+/** Where the crop editor was opened from. */
+export type CropFlow = "upload_crop" | "upload_re_edit" | "replace";
 
 export type EventProperties = {
   booklet_flow_started: { book_color: BookColor };
@@ -58,6 +65,19 @@ export type EventProperties = {
   frame_style_selected: { style_name: string };
   frame_regenerated: Record<string, never>;
   frame_added_to_cart: Record<string, never>;
+  crop_suggestion_result: {
+    flow: CropFlow;
+    outcome: "suggested" | "no_suggestion" | "failed";
+    reason?: string;
+    face_count: number;
+  };
+  crop_face_warning_shown: { flow: CropFlow };
+  crop_saved: {
+    flow: CropFlow;
+    had_suggestion: boolean;
+    adjusted: boolean;
+    saved_despite_face_warning: boolean;
+  };
   purchase_completed: { product_type: ProductType; amount: number };
   cart_abandoned: Record<string, never>;
 };

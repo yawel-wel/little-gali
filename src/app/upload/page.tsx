@@ -277,18 +277,28 @@ function UploadPageContent() {
         });
         const data = await res.json();
         if (ac.signal.aborted) return;
-        setEditorFaceBoxes(Array.isArray(data.faceBoxes) ? data.faceBoxes : []);
+        const faceBoxes = Array.isArray(data.faceBoxes) ? data.faceBoxes : [];
+        setEditorFaceBoxes(faceBoxes);
+        const pixels = data.croppedAreaPixels as Area | undefined;
+        const hasValidSuggestion = Boolean(
+          !data.fallback && pixels && pixels.width > 0 && pixels.height > 0,
+        );
         if (isInCroppingFlow) {
-          const pixels = data.croppedAreaPixels as Area | undefined;
-          const hasValidSuggestion =
-            !data.fallback &&
-            pixels &&
-            pixels.width > 0 &&
-            pixels.height > 0;
           setSmartCropArea(hasValidSuggestion ? pixels : undefined);
         }
+        track(ANALYTICS_EVENTS.CROP_SUGGESTION_RESULT, {
+          flow: isInCroppingFlow ? "upload_crop" : "upload_re_edit",
+          outcome: hasValidSuggestion ? "suggested" : "no_suggestion",
+          reason: typeof data.reason === "string" ? data.reason : undefined,
+          face_count: faceBoxes.length,
+        });
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
+        track(ANALYTICS_EVENTS.CROP_SUGGESTION_RESULT, {
+          flow: isInCroppingFlow ? "upload_crop" : "upload_re_edit",
+          outcome: "failed",
+          face_count: 0,
+        });
         if (!ac.signal.aborted) {
           setEditorFaceBoxes([]);
           if (isInCroppingFlow) setSmartCropArea(undefined);
@@ -1405,6 +1415,7 @@ function UploadPageContent() {
             isInCroppingFlow ? smartCropArea : undefined
           }
           referenceFaceBoxes={editorFaceBoxes}
+          analyticsFlow={isInCroppingFlow ? "upload_crop" : "upload_re_edit"}
           onSave={handleSaveCrop}
           onCancel={handleCancelCrop}
           onChangeImage={isInCroppingFlow ? handleChangeImage : undefined}
