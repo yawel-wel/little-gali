@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    "/**": ["./src/lib/preview-session/assets/**/*.ttf"],
+    "/**": ["./src/lib/preview-session/assets/**/*.ttf", "./prompts/**/*"],
   },
   // Client bundles: recent deps that ship untranspiled ESM (Sentry, Motion, MUI, Swiper, dnd-kit, etc.)
   transpilePackages: [

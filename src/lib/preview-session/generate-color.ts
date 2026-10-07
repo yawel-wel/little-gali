@@ -2,13 +2,12 @@ import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
 import type { StyleType } from "@/components/style-selector";
 import {
-  CARTOON_COLOR_PROMPT,
-  COLORFUL_BOOK_PROMPT,
-  FRAMED_ART_PENCIL_PROMPT,
-  FRAMED_ART_WATERCOLOR_PROMPT,
-  PENCIL_COLOR_PROMPT,
-  PENS_COLOR_PROMPT,
-  WATERCOLOR_COLOR_PROMPT,
+  getFramedArtPencilPrompt,
+  getFramedArtWatercolorPrompt,
+  getImageModel,
+  getPencilColorPrompt,
+  getPensColorPrompt,
+  getWatercolorColorPrompt,
 } from "@/lib/prompts/constants";
 import { classifyGenerationError, shouldStopGeminiRetry } from "./generation-errors";
 import {
@@ -20,24 +19,13 @@ import {
 import { fetchStorageBuffer } from "@/lib/storage/objects";
 import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
-const DEFAULT_COLOR_IMAGE_MODEL = "gemini-3.1-flash-lite-image";
 const MAX_RETRIES = 2;
-
-const DEFAULT_FRAMED_ART_IMAGE_MODEL = "gemini-3.1-flash-lite-image";
 
 export type ColorGenerationProduct = "book" | "framed_art";
 
-/**
- * Color image model. Override via GEMINI_COLOR_IMAGE_MODEL, or
- * GEMINI_FRAMED_ART_IMAGE_MODEL for framed art.
- */
+/** Color image model, from prompts/models.json. */
 function getColorImageModel(product: ColorGenerationProduct): string {
-  if (product === "framed_art") {
-    const configured = process.env.GEMINI_FRAMED_ART_IMAGE_MODEL?.trim();
-    return configured || DEFAULT_FRAMED_ART_IMAGE_MODEL;
-  }
-  const configured = process.env.GEMINI_COLOR_IMAGE_MODEL?.trim();
-  return configured || DEFAULT_COLOR_IMAGE_MODEL;
+  return getImageModel(product === "framed_art" ? "framedArt" : "color");
 }
 
 let _geminiClient: GoogleGenAI | undefined;
@@ -48,33 +36,34 @@ function getGeminiClient(): GoogleGenAI {
   return _geminiClient;
 }
 
-const STYLE_PROMPTS: Record<StyleType, string> = {
-  pencil: PENCIL_COLOR_PROMPT,
-  cartoon: CARTOON_COLOR_PROMPT,
-  watercolor: WATERCOLOR_COLOR_PROMPT,
-  colorful: COLORFUL_BOOK_PROMPT,
-  pens: PENS_COLOR_PROMPT,
+/** Prompt per booklet style (prompts/*.txt). `cartoon` was dropped and has no prompt. */
+const STYLE_PROMPTS: Partial<Record<StyleType, () => string>> = {
+  pencil: getPencilColorPrompt,
+  watercolor: getWatercolorColorPrompt,
+  pens: getPensColorPrompt,
+  /** Legacy alias of `pens`. */
+  colorful: getPensColorPrompt,
 };
 
 /** Framed-art prompts; styles not listed use STYLE_PROMPTS. */
-const FRAMED_ART_STYLE_PROMPTS: Partial<Record<StyleType, string>> = {
-  pencil: FRAMED_ART_PENCIL_PROMPT,
-  watercolor: FRAMED_ART_WATERCOLOR_PROMPT,
+const FRAMED_ART_STYLE_PROMPTS: Partial<Record<StyleType, () => string>> = {
+  pencil: getFramedArtPencilPrompt,
+  watercolor: getFramedArtWatercolorPrompt,
 };
 
 function resolveColorPrompt(
   style: StyleType,
   product: ColorGenerationProduct,
 ): string {
-  const prompt =
+  const getPrompt =
     (product === "framed_art" ? FRAMED_ART_STYLE_PROMPTS[style] : undefined) ??
     STYLE_PROMPTS[style];
-  if (!prompt) {
+  if (!getPrompt) {
     throw new Error(
       `Color generation prompt for style "${style}" is not configured.`,
     );
   }
-  return prompt;
+  return getPrompt();
 }
 
 function isMockGenerationEnabled(): boolean {

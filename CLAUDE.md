@@ -42,8 +42,10 @@ change. Skip this for trivial changes.
 ## Where things live
 - All texts: `src/lib/LanguageContext.tsx` (`hebrewTranslations`, `englishTranslations`)
 - Colors: `src/theme/colors.ts` and brand classes in `src/app/globals.css`
-- Prompts: env vars (`BLACK_AND_WHITE_PROMPT`, `PENCIL_COLOR_PROMPT`, ...) and
-  `src/lib/prompts/constants.ts`. Models: `GEMINI_*_IMAGE_MODEL` env vars
+- Prompts and models: `prompts/` (one `.txt` per prompt, `models.json`), the single
+  source of truth, read by `src/lib/prompts/constants.ts`. No env overrides, no
+  defaults: a missing file fails loudly. The processing admin reads the same files.
+  Changing a prompt or model changes production; ask first.
 - Prices: `NEXT_PUBLIC_*_PRICE` env vars. Feature flags: `src/lib/feature-flags.ts`
 - Images: all new uploads and generated images go to Cloudflare R2 (`src/lib/storage/`).
   Cloudinary remains only as a fallback and for old order URLs; many functions still

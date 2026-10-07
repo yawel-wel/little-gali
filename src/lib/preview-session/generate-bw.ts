@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
-import { BLACK_AND_WHITE_PROMPT } from "@/lib/prompts/constants";
+import { getBlackAndWhitePrompt, getImageModel } from "@/lib/prompts/constants";
 import {
   classifyGenerationError,
   shouldStopGeminiRetry,
@@ -14,12 +14,11 @@ import {
 import { fetchStorageBuffer } from "@/lib/storage/objects";
 import { downloadImageAsBase64ForGemini } from "./prepare-gemini-input";
 
-const DEFAULT_BW_IMAGE_MODEL = "gemini-3.1-flash-image";
 const MAX_RETRIES = 2;
 
+/** B&W image model, from prompts/models.json. */
 function getBwImageModel(): string {
-  const configured = process.env.GEMINI_BW_IMAGE_MODEL?.trim();
-  return configured || DEFAULT_BW_IMAGE_MODEL;
+  return getImageModel("bw");
 }
 
 let _geminiClient: GoogleGenAI | undefined;
@@ -83,7 +82,7 @@ async function generateWithGemini(
         "bw",
         {
           model: bwModel,
-          userPrompt: BLACK_AND_WHITE_PROMPT,
+          userPrompt: getBlackAndWhitePrompt(),
           attempt: attempt + 1,
         },
         generationContext,
@@ -109,7 +108,7 @@ async function generateWithGemini(
                   mimeType,
                 },
               },
-              { text: BLACK_AND_WHITE_PROMPT },
+              { text: getBlackAndWhitePrompt() },
             ],
           },
         ],

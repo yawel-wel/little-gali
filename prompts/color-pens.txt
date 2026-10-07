@@ -1,0 +1,4 @@
+Redraw this photo by hand as a colored pencil drawing: same framing, same crop, same scale, nothing cut off. Every subject must be instantly recognizable, exactly as in the photo.
+Style: smooth, evenly layered colored pencil with a fine pencil grain, in clear, natural colors. Very dark areas are lifted one step lighter: dark clothing becomes a soft medium tone that is still clearly its own color (navy becomes a soft medium blue), and the deepest shadows are drawn in deep colored pencil rather than black. All other colors match the photo exactly: natural skin tones with a soft rosy warmth, hair in its true color and darkness, light clothing in its real colors. Faces are lifelike, with gentle shading. Edges are defined by thin colored pencil outlines.
+It looks like a finished hand-drawn colored pencil illustration, not a filtered photo: clear, sharp detail in the faces, eyes and hair.
+Replace the background with white (#FFFFFF).
