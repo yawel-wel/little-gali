@@ -4,6 +4,81 @@ import { GIFT_MESSAGE_MAX_LENGTH } from "@/lib/shopify/cart-gift-note";
 
 export const runtime = "nodejs";
 
+/**
+ * Gift card lines carry a copy of the gift message, because Shopify's "New gift card"
+ * email can read the gift card's line attributes but not the order note.
+ */
+const GIFT_CARD_MESSAGE_KEY = "_gift_card_message";
+
+type CartLineNode = {
+  id: string;
+  attributes: Array<{ key: string; value: string | null }>;
+};
+
+/** add-gift-card always sets `_type: gift_card`. */
+function isGiftCardLine(line: CartLineNode): boolean {
+  return line.attributes.some((a) => a.key === "_type" && a.value === "gift_card");
+}
+
+/** Copy the gift message onto gift card lines. Best effort: never blocks checkout. */
+async function syncGiftCardMessage(
+  endpoint: string,
+  accessToken: string,
+  cartId: string,
+  lines: CartLineNode[],
+  note: string,
+): Promise<void> {
+  const message = note.trim();
+  const updates = lines
+    .filter(isGiftCardLine)
+    .map((line) => {
+      const current =
+        line.attributes.find((a) => a.key === GIFT_CARD_MESSAGE_KEY)?.value ?? "";
+      if (current === message) return null;
+      const attributes = line.attributes
+        .filter((a) => a.key !== GIFT_CARD_MESSAGE_KEY)
+        .map((a) => ({ key: a.key, value: a.value ?? "" }));
+      if (message) {
+        attributes.push({ key: GIFT_CARD_MESSAGE_KEY, value: message });
+      }
+      return { id: line.id, attributes };
+    })
+    .filter((update) => update !== null);
+
+  if (updates.length === 0) return;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": accessToken,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+            cartLinesUpdate(cartId: $cartId, lines: $lines) {
+              userErrors { code field message }
+            }
+          }
+        `,
+        variables: { cartId, lines: updates },
+      }),
+    });
+    const result = await response.json();
+    const userErrors = result.data?.cartLinesUpdate?.userErrors ?? [];
+    if (result.errors || userErrors.length > 0) {
+      reportError(
+        "Copy gift message to gift card failed",
+        result.errors ?? userErrors,
+        { area: "cart" },
+      );
+    }
+  } catch (error) {
+    reportError("Copy gift message to gift card failed", error, { area: "cart" });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -38,6 +113,14 @@ export async function POST(request: NextRequest) {
             id
             note
             checkoutUrl
+            lines(first: 100) {
+              edges {
+                node {
+                  id
+                  attributes { key value }
+                }
+              }
+            }
           }
           userErrors {
             code
@@ -48,8 +131,9 @@ export async function POST(request: NextRequest) {
       }
     `;
 
+    const endpoint = `https://${storeDomain}/api/2024-01/graphql.json`;
     const response = await fetch(
-      `https://${storeDomain}/api/2024-01/graphql.json`,
+      endpoint,
       {
         method: "POST",
         headers: {
@@ -107,6 +191,11 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    const lines: CartLineNode[] = (cart.lines?.edges ?? []).map(
+      (edge: { node: CartLineNode }) => edge.node,
+    );
+    await syncGiftCardMessage(endpoint, accessToken, cartId, lines, cart.note ?? "");
 
     return NextResponse.json({
       success: true,
