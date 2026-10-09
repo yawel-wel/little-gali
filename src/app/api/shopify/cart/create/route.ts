@@ -24,10 +24,14 @@ import {
   primaryImageUrlsShopifyAttributes,
   type PreviewGenerationStats,
   previewStatsShopifyAttributes,
+  promptVersionsShopifyAttributes,
 } from "@/lib/preview-session/generation-stats";
 import { parseBookFlow, bookFlowFromLineAttributes, type BookFlow } from "@/lib/preview-session/book-flow";
 import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
-import { markPreviewSessionCartAdded } from "@/lib/preview-session/store";
+import {
+  loadPreviewSessionForPromptVersions,
+  markPreviewSessionCartAdded,
+} from "@/lib/preview-session/store";
 import { resetFullGenerationLimitAfterBookCart } from "@/lib/preview-session/reset-full-generation-after-cart";
 import { promoteBookCartImagesToFulfillment } from "@/lib/storage/fulfillment";
 
@@ -143,6 +147,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Read before promotion: prompt versions are matched by the session's own image URLs.
+    const promptVersionAttributes = promptVersionsShopifyAttributes(
+      await loadPreviewSessionForPromptVersions(previewSessionId),
+      urls,
+      generatedColorUrls,
+    );
+
     const promoted = await promoteBookCartImagesToFulfillment({
       sessionId: previewSessionId,
       imageUrls: urls,
@@ -245,6 +256,7 @@ export async function POST(request: NextRequest) {
               ),
               ...originalUrlsShopifyAttributes(fulfillmentOriginalUrls),
               ...generatedColorUrlsShopifyAttributes(fulfillmentColorUrls),
+            ...promptVersionAttributes,
               ...birthPackageShopifyAttributes({
                 isBirthPackage: giftSet,
                 blanketPattern: resolvedPattern,

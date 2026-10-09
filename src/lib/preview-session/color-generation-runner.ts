@@ -18,7 +18,11 @@ import {
   enqueuePendingColorRegen,
   slotNeedsAllStylesColorRegen,
 } from "./pending-color-regen";
-import { generateColorImageBuffer, downloadImageAsBase64ForGemini } from "./generate-color";
+import {
+  colorPromptVersion,
+  generateColorImageBuffer,
+  downloadImageAsBase64ForGemini,
+} from "./generate-color";
 import { toGenerationError } from "./generate-bw";
 import {
   colorGenerationClaimKey,
@@ -176,6 +180,7 @@ async function buildColorPreview(
       sourceUrl,
       version,
       createdAt: new Date().toISOString(),
+      promptVersion: colorPromptVersion(style),
     };
 
     try {

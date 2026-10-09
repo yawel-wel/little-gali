@@ -14,6 +14,8 @@ export type FramedArtFulfillmentPayload = {
   printImageUrl: string;
   printPublicId: string | null;
   style: StyleType;
+  /** Fingerprint of the prompt + model the print image was generated with. */
+  promptVersion?: string;
 };
 
 export function resolveFramedArtFulfillment(
@@ -54,6 +56,7 @@ export function resolveFramedArtFulfillment(
       printImageUrl,
       printPublicId,
       style,
+      promptVersion: candidate?.promptVersion,
     },
   };
 }
@@ -87,6 +90,7 @@ export function framedArtShopifyLineAttributes(
     shopifyLineAttr("_image", fulfillment.printImageUrl),
     { key: "_style", value: fulfillment.style },
     { key: "style", value: fulfillment.style },
+    shopifyLineAttr("_image_prompt_version", fulfillment.promptVersion),
   ];
 
   return attrs.filter(

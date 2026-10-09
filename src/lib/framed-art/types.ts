@@ -32,6 +32,8 @@ export interface FramedArtStyleCandidate {
   cropState?: FramedArtCropState;
   createdAt: string;
   error?: GenerationError;
+  /** Fingerprint of the prompt + model it was generated with (promptFingerprint). */
+  promptVersion?: string;
 }
 
 export interface FramedArtSession {

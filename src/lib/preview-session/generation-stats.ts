@@ -1,4 +1,5 @@
 import type { PreviewSession, PreviewSessionPublicView } from "./types";
+import { SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH } from "@/lib/storage/urls";
 
 export interface PreviewGenerationStats {
   /** Explicit Regenerate clicks during the preview session. */
@@ -119,4 +120,44 @@ export function hasInvalidHttpImageUrls(urls: string[]): boolean {
   return urls.some(
     (url) => !url.startsWith("http://") && !url.startsWith("https://"),
   );
+}
+
+/**
+ * Which prompt version made each image, for the processing admin. Comma-separated
+ * fingerprints in the same order as `_image_N` / `_color_image_N` (empty where unknown),
+ * matched by the clean URLs the client sent (before promotion to fulfillment).
+ */
+export function promptVersionsShopifyAttributes(
+  session: Pick<PreviewSession, "slots"> | null,
+  imageUrls: string[],
+  generatedColorUrls?: string[],
+): Array<{ key: string; value: string }> {
+  if (!session) return [];
+
+  const versionByUrl = new Map<string, string>();
+  for (const slot of session.slots) {
+    const candidates = [
+      ...slot.candidates,
+      ...(slot.colorCandidates ?? []),
+      ...(slot.colorPreview ? [slot.colorPreview] : []),
+    ];
+    for (const candidate of candidates) {
+      if (candidate.cleanUrl && candidate.promptVersion) {
+        versionByUrl.set(candidate.cleanUrl, candidate.promptVersion);
+      }
+    }
+  }
+
+  const attribute = (key: string, urls?: string[]) => {
+    if (!urls) return [];
+    const versions = urls.map((url) => versionByUrl.get(url) ?? "");
+    const value = versions.join(",");
+    if (!versions.some(Boolean) || value.length > SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH) return [];
+    return [{ key, value }];
+  };
+
+  return [
+    ...attribute("_image_prompt_versions", imageUrls),
+    ...attribute("_color_image_prompt_versions", generatedColorUrls),
+  ];
 }

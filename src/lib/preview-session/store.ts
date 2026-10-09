@@ -15,6 +15,7 @@ import type {
   PreviewSlot,
 } from "./types";
 import { kvGet, kvSet } from "./kv";
+import { reportError } from "@/lib/report-error";
 import { PREVIEW_SESSION_TTL_SECONDS, previewSessionKey } from "./redis";
 
 /** Serverless kills can leave colorInFlight=true forever; clear after this window. */
@@ -112,6 +113,25 @@ export async function loadPreviewSession(
     ensureColorCandidatesPersisted(slot);
   }
   return data;
+}
+
+/**
+ * For the cart's prompt-version attributes only: never throws, since a missing prompt
+ * version must not block adding to cart.
+ */
+export async function loadPreviewSessionForPromptVersions(
+  sessionId: string | undefined,
+): Promise<PreviewSession | null> {
+  if (!sessionId) return null;
+  try {
+    return await loadPreviewSession(sessionId);
+  } catch (error) {
+    reportError("Loading preview session for prompt versions failed", error, {
+      area: "cart",
+      sessionId,
+    });
+    return null;
+  }
 }
 
 /** Mark a soft-book preview as ordered so it no longer shows in resume lists. */

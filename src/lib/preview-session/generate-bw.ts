@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
-import { getBlackAndWhitePrompt, getImageModel } from "@/lib/prompts/constants";
+import { getBlackAndWhitePrompt, getImageModel, promptFingerprint } from "@/lib/prompts/constants";
 import {
   classifyGenerationError,
   shouldStopGeminiRetry,
@@ -27,6 +27,19 @@ function getGeminiClient(): GoogleGenAI {
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
   if (!_geminiClient) _geminiClient = new GoogleGenAI({ apiKey });
   return _geminiClient;
+}
+
+/**
+ * Fingerprint of the B&W prompt + model, saved on the candidate. Undefined in mock mode,
+ * or if the prompt can't be read (generation itself then fails and reports the error).
+ */
+export function bwPromptVersion(): string | undefined {
+  if (isMockGenerationEnabled()) return undefined;
+  try {
+    return promptFingerprint(getBwImageModel(), getBlackAndWhitePrompt());
+  } catch {
+    return undefined;
+  }
 }
 
 function isMockGenerationEnabled(): boolean {

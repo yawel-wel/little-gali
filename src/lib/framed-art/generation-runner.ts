@@ -1,6 +1,9 @@
 import { randomUUID } from "crypto";
 import type { StyleType } from "@/components/style-selector";
-import { generateColorImageBuffer } from "@/lib/preview-session/generate-color";
+import {
+  colorPromptVersion,
+  generateColorImageBuffer,
+} from "@/lib/preview-session/generate-color";
 import { toGenerationError } from "@/lib/preview-session/generate-bw";
 import { uploadFramedArtOutputs } from "./upload-outputs";
 import {
@@ -32,6 +35,7 @@ async function buildFramedStyleCandidate(
     sourceUrl,
     version,
     createdAt: new Date().toISOString(),
+    promptVersion: colorPromptVersion(style, "framed_art"),
   };
 
   try {

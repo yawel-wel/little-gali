@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -45,4 +46,13 @@ export function getImageModel(key: ModelKey): string {
     throw new Error(`Model "${key}" is missing in prompts/models.json.`);
   }
   return model.trim();
+}
+
+/**
+ * Identifies the exact prompt text + model an image was generated with. Saved on each
+ * generated image and sent to Shopify, so the processing admin can name the prompt
+ * version (it computes the same value from git history; keep both copies identical).
+ */
+export function promptFingerprint(model: string, promptText: string): string {
+  return createHash("sha256").update(`${model.trim()}\n${promptText.trim()}`).digest("hex").slice(0, 10);
 }

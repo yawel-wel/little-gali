@@ -38,6 +38,8 @@ export interface PreviewCandidate {
   cropRevision?: number;
   createdAt: string;
   error?: GenerationError;
+  /** Fingerprint of the prompt + model it was generated with (promptFingerprint). */
+  promptVersion?: string;
 }
 
 export interface PreviewSlot {

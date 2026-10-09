@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { nextBwVersion } from "./cloudinary-paths";
 import { uploadCleanAndWatermarkedOutputs } from "./upload-preview-outputs";
-import { generateBwImageBuffer, toGenerationError } from "./generate-bw";
+import { bwPromptVersion, generateBwImageBuffer, toGenerationError } from "./generate-bw";
 import {
   bwGenerationClaimKey,
   releaseGenerationClaim,
@@ -70,6 +70,7 @@ async function buildCandidate(
     sourceUrl,
     version,
     createdAt: new Date().toISOString(),
+    promptVersion: bwPromptVersion(),
   };
 
   try {

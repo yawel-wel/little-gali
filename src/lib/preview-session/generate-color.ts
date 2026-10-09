@@ -8,6 +8,7 @@ import {
   getPencilColorPrompt,
   getPensColorPrompt,
   getWatercolorColorPrompt,
+  promptFingerprint,
 } from "@/lib/prompts/constants";
 import { classifyGenerationError, shouldStopGeminiRetry } from "./generation-errors";
 import {
@@ -64,6 +65,22 @@ function resolveColorPrompt(
     );
   }
   return getPrompt();
+}
+
+/**
+ * Fingerprint of the color prompt + model for this style, saved on the candidate.
+ * Undefined in mock mode, or if the prompt can't be read (generation then fails).
+ */
+export function colorPromptVersion(
+  style: StyleType,
+  product: ColorGenerationProduct = "book",
+): string | undefined {
+  if (isMockGenerationEnabled()) return undefined;
+  try {
+    return promptFingerprint(getColorImageModel(product), resolveColorPrompt(style, product));
+  } catch {
+    return undefined;
+  }
 }
 
 function isMockGenerationEnabled(): boolean {
