@@ -17,7 +17,12 @@ import {
   extractColorUrlsFromAttributes,
   extractImagesFromLineAttributes,
 } from "./cart-line-images";
-import { FRAMED_ART_UNIT_PRICE, BLANKET_PRICE, BIRTH_PACKAGE_PRICE } from "./constants";
+import {
+  FRAMED_ART_UNIT_PRICE,
+  BLANKET_PRICE,
+  BIRTH_PACKAGE_PRICE,
+  GIFT_SET_BLANKET_UPGRADE_PRICE,
+} from "./constants";
 import { isValidBookCartImageCount, isValidBookCartStyle } from "./preview-session/generation-stats";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
 import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
@@ -129,6 +134,12 @@ interface CartContextType {
     style: "cartoon" | "pencil" | "watercolor",
   ) => Promise<void>;
   addBlanketToCart: (pattern: BlanketPattern) => Promise<void>;
+  /** Cart upsell: turns a soft book line into a gift set with the matching blanket. */
+  upgradeBookToGiftSet: (lineId: string) => Promise<void>;
+  /** Removes the blanket from a gift set line; it becomes a plain soft book. */
+  downgradeGiftSetToBook: (lineId: string) => Promise<void>;
+  /** Cart upsell: framed art printed from one color page of a book line. */
+  addFramedArtFromBook: (lineId: string, imageIndex: number) => Promise<void>;
   removeFromCart: (lineIds: string[]) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   fetchCart: (cartId: string, options?: { silent?: boolean }) => Promise<void>;
@@ -850,6 +861,74 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const postBookUpsell = async (
+    path: string,
+    body: Record<string, unknown>,
+  ): Promise<void> => {
+    if (!cart?.id) {
+      throw new Error("No cart");
+    }
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cartId: cart.id, ...body }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Cart upsell failed");
+    }
+    await fetchCart(data.cart?.id ?? cart.id, { silent: true });
+  };
+
+  const upgradeBookToGiftSet = async (lineId: string) => {
+    setIsLoading(true);
+    try {
+      await postBookUpsell("/api/shopify/cart/upgrade-to-gift-set", { lineId });
+      try {
+        trackAddToCart("Birth Package upgrade", lineId, GIFT_SET_BLANKET_UPGRADE_PRICE, 1);
+      } catch (err) {
+        console.error("Error tracking gift set upgrade AddToCart:", err);
+      }
+    } catch (error) {
+      reportError("Upgrade to gift set failed in browser", error, { area: "cart" });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const downgradeGiftSetToBook = async (lineId: string) => {
+    setIsLoading(true);
+    try {
+      await postBookUpsell("/api/shopify/cart/downgrade-gift-set", { lineId });
+    } catch (error) {
+      reportError("Remove blanket from gift set failed in browser", error, { area: "cart" });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addFramedArtFromBook = async (lineId: string, imageIndex: number) => {
+    setIsLoading(true);
+    try {
+      await postBookUpsell("/api/shopify/cart/add-framed-art-from-book", {
+        lineId,
+        imageIndex,
+      });
+      try {
+        trackAddToCart("איור ממוסגר", lineId, FRAMED_ART_UNIT_PRICE, 1);
+      } catch (err) {
+        console.error("Error tracking framed art AddToCart:", err);
+      }
+    } catch (error) {
+      reportError("Add framed art from book failed in browser", error, { area: "cart" });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const updateQuantity = async (lineId: string, quantity: number) => {
     if (!cart?.id) return;
 
@@ -1038,6 +1117,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         addGiftCardToCart,
         addFramedArtToCart,
         addBlanketToCart,
+        upgradeBookToGiftSet,
+        downgradeGiftSetToBook,
+        addFramedArtFromBook,
         removeFromCart,
         updateQuantity,
         fetchCart,

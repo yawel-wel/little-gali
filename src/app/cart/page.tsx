@@ -20,12 +20,19 @@ import {
 } from "@/lib/book-color";
 import { ArrowRight, Loader2, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Fragment, useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
 import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avatars";
 import { CartSuggestProducts } from "@/components/cart-suggest-products";
+import {
+  CartBookLineUpsell,
+  CartBookUpsells,
+  getBlanketOffers,
+  getFrameablePages,
+  isCartBookItem,
+} from "@/components/cart-book-upsells";
 import { CartOrderSummary } from "@/components/cart-order-summary";
 import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
 import { QuantityControls } from "@/components/quantity-controls";
@@ -137,6 +144,8 @@ export default function CartPage() {
   const giftMessageRef = useRef("");
   const addGiftMessageRef = useRef(false);
   const isPendingAdd = isOptimisticAdding || readAddingToCartFlag();
+  const upsellsPerBook =
+    (cart?.items.filter((item) => isCartBookItem(item)).length ?? 0) > 1;
 
   // Refresh cart when opening /cart. Defer fetch while an add is in flight so we
   // don't overwrite the cart with stale data or clear the pending UI too early.
@@ -409,7 +418,7 @@ export default function CartPage() {
                 </div>
               ) : cart && cart.items.length > 0 ? (
                 <div className="md:flex md:gap-6 md:items-start">
-                  {/* Left Column: Cart Items */}
+                  {/* Left Column: Cart Items. With 2+ books, each book gets its own upsells below it. */}
                   <div className="md:flex-1 space-y-4">
                     {[...cart.items].reverse().map((item, reversedIndex) => {
                       // Count only paper books for display index (skip gift cards)
@@ -427,8 +436,8 @@ export default function CartPage() {
                       const lineId = getLineId(item);
                       const isLineBusy = busyLineId === lineId;
                       return (
+                        <Fragment key={item.id}>
                         <div
-                          key={item.id}
                           className="bg-white border border-gray-200 rounded-lg p-4 md:px-5 md:pt-5 md:pb-4 shadow-sm relative"
                         >
                           {isLineBusy && (
@@ -615,21 +624,35 @@ export default function CartPage() {
                                           )
                                         : t("cart.book")
                                     }
+                                    subtitle={
+                                      item.isBirthPackage
+                                        ? t("cart.birthPackageSubtitle")
+                                        : undefined
+                                    }
                                     unitPrice={pricing.unitPrice}
                                     locale={locale}
                                   />
                                   {details}
+                                  <CartBookLineUpsell item={item} />
                                 </>
                               );
                             })()}
                           </div>
                         </div>
+                        {upsellsPerBook && isCartBookItem(item) ? (
+                          <CartBookUpsells items={cart.items} book={item} />
+                        ) : null}
+                        </Fragment>
                       );
                     })}
                     {isPendingAdd && (
                       <CartAddingItemRow label={t("cart.addingItem")} />
                     )}
-                    <CartSuggestProducts />
+                    {!upsellsPerBook ? <CartBookUpsells items={cart.items} /> : null}
+                    <CartSuggestProducts
+                      hideFramedArt={getFrameablePages(cart.items).length > 0}
+                      hideBlanket={getBlanketOffers(cart.items).length > 0}
+                    />
                     <div className="pt-2 text-center">
                       <button
                         type="button"

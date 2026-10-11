@@ -65,6 +65,8 @@ export function FramedArtFrameMockup({
                 >
                   <img
                     src={imageUrl}
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
                     alt=""
                     className={cn(
                       "h-full w-full object-cover",
@@ -75,6 +77,8 @@ export function FramedArtFrameMockup({
               ) : (
                 <img
                   src={imageUrl}
+                  draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
                   alt=""
                   className={cn(
                     "h-full w-full object-cover",

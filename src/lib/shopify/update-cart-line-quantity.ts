@@ -10,16 +10,16 @@ import {
 } from "@/lib/shopify/cart-line-group";
 import { cartLineIdKey } from "@/lib/shopify/normalize-cart-line-id";
 
-type ShopifyAttribute = { key: string; value: string };
+export type ShopifyAttribute = { key: string; value: string };
 
-type ShopifyCartLineNode = {
+export type ShopifyCartLineNode = {
   id: string;
   quantity: number;
   attributes?: ShopifyAttribute[];
   merchandise?: { id?: string };
 };
 
-type ShopifyCartSnapshot = {
+export type ShopifyCartSnapshot = {
   id: string;
   checkoutUrl: string;
   totalQuantity: number;
@@ -56,7 +56,7 @@ function shopifyHeaders(accessToken: string) {
   };
 }
 
-async function shopifyGraphql<T>(
+export async function shopifyGraphql<T>(
   storeDomain: string,
   accessToken: string,
   query: string,
@@ -77,7 +77,7 @@ async function shopifyGraphql<T>(
   return result.data as T;
 }
 
-function parseCartLines(
+export function parseCartLines(
   cart: {
     lines?: {
       edges?: Array<{ node: ShopifyCartLineNode }>;
@@ -104,7 +104,7 @@ function snapshotFromCart(cart: {
   };
 }
 
-function findLineByKey(
+export function findLineByKey(
   lines: ShopifyCartLineNode[],
   lineId: string,
 ): ShopifyCartLineNode | undefined {

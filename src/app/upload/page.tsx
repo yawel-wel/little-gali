@@ -1262,40 +1262,6 @@ function UploadPageContent() {
                         </div>
                       )}
 
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={
-                          showWithoutPreviewCartPath || !previewEnabled
-                            ? handleAddToCart
-                            : handleContinueToPreview
-                        }
-                        disabled={isSubmitting}
-                        className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        sx={{
-                          borderRadius: "12px",
-                          textTransform: "none",
-                          fontSize: "1rem",
-                          fontWeight: 700,
-                          py: { xs: 1.5, sm: 2 },
-                          boxShadow: "none",
-                        }}
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : showWithoutPreviewCartPath ? (
-                          t("upload.continueWithoutPreview")
-                        ) : previewEnabled ? (
-                          t("upload.continueToPreview")
-                        ) : (
-                          t("upload.addToCart")
-                        )}
-                      </Button>
-                      {showWithoutPreviewCartPath && (
-                        <p className="text-center font-body text-sm text-medium-gray -mt-2">
-                          {t("upload.withoutPreviewReassurance")}
-                        </p>
-                      )}
                       {/* Status Message */}
                       {(submitStatus.type ||
                         previewBlockedCode === "preview_rate_limit") && (
@@ -1335,6 +1301,40 @@ function UploadPageContent() {
                             submitStatus.message
                           )}
                         </div>
+                      )}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={
+                          showWithoutPreviewCartPath || !previewEnabled
+                            ? handleAddToCart
+                            : handleContinueToPreview
+                        }
+                        disabled={isSubmitting}
+                        className="w-full cursor-pointer relative z-10 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        sx={{
+                          borderRadius: "12px",
+                          textTransform: "none",
+                          fontSize: "1rem",
+                          fontWeight: 700,
+                          py: { xs: 1.5, sm: 2 },
+                          boxShadow: "none",
+                        }}
+                      >
+                        {isSubmitting ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : showWithoutPreviewCartPath ? (
+                          t("upload.continueWithoutPreview")
+                        ) : previewEnabled ? (
+                          t("upload.continueToPreview")
+                        ) : (
+                          t("upload.addToCart")
+                        )}
+                      </Button>
+                      {showWithoutPreviewCartPath && (
+                        <p className="text-center font-body text-sm text-medium-gray -mt-2">
+                          {t("upload.withoutPreviewReassurance")}
+                        </p>
                       )}
                     </div>
                   )}

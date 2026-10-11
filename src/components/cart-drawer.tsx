@@ -441,6 +441,11 @@ export function CartDrawer() {
                                       )
                                     : t("cart.book")
                                 }
+                                subtitle={
+                                  item.isBirthPackage
+                                    ? t("cart.birthPackageSubtitle")
+                                    : undefined
+                                }
                                 unitPrice={pricing.unitPrice}
                                 locale={locale}
                               />

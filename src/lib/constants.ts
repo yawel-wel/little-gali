@@ -44,6 +44,8 @@ export const BIRTH_PACKAGE_PRICE = priceFromEnv(
   process.env.NEXT_PUBLIC_GIFT_SET_PRICE,
   269,
 );
+/** Book → gift set upgrade in the cart: what the matching blanket costs on top of the book. */
+export const GIFT_SET_BLANKET_UPGRADE_PRICE = BIRTH_PACKAGE_PRICE - BOOK_PRICE;
 export const BIRTH_PACKAGE_PRODUCT_ID = "7751448199271";
 export const BIRTH_PACKAGE_VARIANT_IDS = {
   dots: "44525569704039",

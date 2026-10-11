@@ -1,4 +1,5 @@
 import { BLANKET_VARIANT_IDS } from "@/lib/constants";
+import type { BookColor } from "@/lib/book-color";
 
 export type BlanketPattern = keyof typeof BLANKET_VARIANT_IDS;
 
@@ -58,4 +59,9 @@ export function blanketPatternFromVariantId(
   if (numeric === BLANKET_VARIANT_IDS.dots) return "dots";
   if (numeric === BLANKET_VARIANT_IDS.leopard) return "leopard";
   return undefined;
+}
+
+/** Blanket that matches a book's fabric: black book → leopard, bright book → dots. */
+export function matchingBlanketPattern(bookColor: BookColor): BlanketPattern {
+  return bookColor === "dark" ? "leopard" : "dots";
 }

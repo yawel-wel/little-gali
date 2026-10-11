@@ -61,6 +61,16 @@ export function resolveFramedArtFulfillment(
   };
 }
 
+/** Shopify variant for framed art (env override, numeric ids normalized to a gid). */
+export function framedArtVariantGid(): string {
+  const productVariantId =
+    process.env.SHOPIFY_FRAMED_ART_VARIANT_ID?.trim() || "43836272607335";
+  if (/^\d+$/.test(productVariantId)) {
+    return `gid://shopify/ProductVariant/${productVariantId}`;
+  }
+  return productVariantId;
+}
+
 function shopifyLineAttr(
   key: string,
   value: string | null | undefined,

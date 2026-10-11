@@ -26,6 +26,10 @@ export const ANALYTICS_EVENTS = {
   FRAME_STYLE_SELECTED: "frame_style_selected",
   FRAME_REGENERATED: "frame_regenerated",
   FRAME_ADDED_TO_CART: "frame_added_to_cart",
+  // Cart upsells for a book in the cart (matching blanket, framed page)
+  BOOK_UPSELL_SHOWN: "book_upsell_shown",
+  BOOK_UPSELL_ADDED: "book_upsell_added",
+  BOOK_UPSELL_REMOVED: "book_upsell_removed",
   // Crop editor (tracks whether the suggest-crop feature is worth keeping)
   CROP_SUGGESTION_RESULT: "crop_suggestion_result",
   CROP_FACE_WARNING_SHOWN: "crop_face_warning_shown",
@@ -46,6 +50,8 @@ export type PreviewLimitType =
   | "generation_rate_limit";
 
 export type BookletSide = "bw" | "color";
+
+export type BookUpsellProduct = "blanket" | "framed_art";
 
 /** Where the crop editor was opened from. */
 export type CropFlow = "upload_crop" | "upload_re_edit" | "replace";
@@ -75,6 +81,9 @@ export type EventProperties = {
   frame_style_selected: { style_name: string };
   frame_regenerated: Record<string, never>;
   frame_added_to_cart: Record<string, never>;
+  book_upsell_shown: { product: BookUpsellProduct };
+  book_upsell_added: { product: BookUpsellProduct; page?: number };
+  book_upsell_removed: { product: BookUpsellProduct };
   crop_suggestion_result: {
     flow: CropFlow;
     outcome: "suggested" | "no_suggestion" | "failed";

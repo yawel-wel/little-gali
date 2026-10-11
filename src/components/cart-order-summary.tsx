@@ -188,7 +188,7 @@ export function CartOrderSummary({
           disabled={isCheckingOut || isLoading}
           className="w-full cursor-pointer"
           sx={{
-            borderRadius: "9999px",
+            borderRadius: "5px",
             textTransform: "none",
             fontSize: "0.95rem",
             fontWeight: 700,

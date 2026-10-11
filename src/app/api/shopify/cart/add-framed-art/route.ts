@@ -4,6 +4,7 @@ import type { StyleType } from "@/components/style-selector";
 import { assertFramedArtEnabled, requireFramedArtSession } from "@/lib/framed-art/auth";
 import {
   framedArtShopifyLineAttributes,
+  framedArtVariantGid,
   resolveFramedArtFulfillment,
 } from "@/lib/framed-art/fulfillment";
 import { saveFramedArtSession } from "@/lib/framed-art/store";
@@ -12,19 +13,6 @@ import { nudgeShopifyCartDiscounts } from "@/lib/shopify/nudge-cart-discounts";
 import { promoteFramedArtUrlsToFulfillment } from "@/lib/storage/fulfillment";
 
 export const runtime = "nodejs";
-
-function resolveVariantId(): string | null {
-  let productVariantId =
-    process.env.SHOPIFY_FRAMED_ART_VARIANT_ID?.trim() ||
-    "43836272607335";
-
-  if (!productVariantId.startsWith("gid://shopify/ProductVariant/")) {
-    if (/^\d+$/.test(productVariantId)) {
-      productVariantId = `gid://shopify/ProductVariant/${productVariantId}`;
-    }
-  }
-  return productVariantId;
-}
 
 function parseLineAttributes(
   attributes: Array<{ key: string; value: string }> | undefined,
@@ -144,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     const storeDomain = process.env.SHOPIFY_STORE_DOMAIN;
     const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-    const productVariantId = resolveVariantId();
+    const productVariantId = framedArtVariantGid();
 
     if (!storeDomain || !accessToken || !productVariantId) {
       return NextResponse.json(

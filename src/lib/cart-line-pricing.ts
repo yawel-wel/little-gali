@@ -5,6 +5,8 @@ import {
   FRAMED_ART_UNIT_PRICE,
   BLANKET_PRICE,
   BIRTH_PACKAGE_PRICE,
+  FRAMED_ART_TWO_PRICE,
+  FRAMED_ART_THREE_PRICE,
 } from "@/lib/constants";
 import { resolveCartLinePrice } from "@/components/cart-line-price";
 
@@ -77,4 +79,14 @@ export function cartLineHasDiscount(
   const qty = quantity > 0 ? quantity : 1;
   const listTotal = unitPrice * qty;
   return lineTotal < listTotal - 0.009;
+}
+
+/**
+ * What one more framed art adds to the cart. Frame pricing repeats every 3 frames
+ * (1 / 2 / 3 for ₪119 / ₪219 / ₪299), so the 4th frame is full price again.
+ */
+export function nextFramedArtPrice(framedCountInCart: number): number {
+  const tierTotals = [0, FRAMED_ART_UNIT_PRICE, FRAMED_ART_TWO_PRICE, FRAMED_ART_THREE_PRICE];
+  const position = (framedCountInCart % 3) + 1;
+  return tierTotals[position] - tierTotals[position - 1];
 }

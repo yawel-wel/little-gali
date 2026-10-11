@@ -13,7 +13,7 @@ function SuggestProductButton({
   onClick,
 }: {
   title: string;
-  promo: string;
+  promo?: string;
   icon: React.ReactNode;
   onClick: () => void;
 }) {
@@ -33,7 +33,9 @@ function SuggestProductButton({
           <p className="truncate font-body-bold text-sm text-dark-gray">
             {title}
           </p>
-          <p className="font-body text-xs text-medium-gray">{promo}</p>
+          {promo ? (
+            <p className="font-body text-xs text-medium-gray">{promo}</p>
+          ) : null}
         </div>
         <div className="shrink-0 text-accent-burgundy" aria-hidden>
           {icon}
@@ -43,7 +45,15 @@ function SuggestProductButton({
   );
 }
 
-export function CartSuggestProducts() {
+export function CartSuggestProducts({
+  hideFramedArt = false,
+  hideBlanket = false,
+}: {
+  /** True when the cart already offers framing a book page (avoids a duplicate offer). */
+  hideFramedArt?: boolean;
+  /** True when the cart already offers the matching blanket for a book. */
+  hideBlanket?: boolean;
+}) {
   const router = useRouter();
   const { t, locale } = useLanguage();
   const isHe = locale === "he";
@@ -71,20 +81,21 @@ export function CartSuggestProducts() {
           icon={<BookOpen className={iconClass} strokeWidth={iconStroke} />}
           onClick={() => router.push("/choose")}
         />
-        {isFramedArtEnabled() && (
+        {isFramedArtEnabled() && !hideFramedArt && (
           <SuggestProductButton
             title={t("cart.suggest.framedArtTitle")}
-            promo={t("cart.suggest.framedArtPromo")}
             icon={<Frame className={iconClass} strokeWidth={iconStroke} />}
             onClick={() => router.push("/framed-art/upload")}
           />
         )}
-        <SuggestProductButton
-          title={t("cart.suggest.blanketTitle")}
-          promo={t("cart.suggest.blanketPromo")}
-          icon={<Layers className={iconClass} strokeWidth={iconStroke} />}
-          onClick={() => router.push("/bamboo-blanket")}
-        />
+        {!hideBlanket && (
+          <SuggestProductButton
+            title={t("cart.suggest.blanketTitle")}
+            promo={t("cart.suggest.blanketPromo")}
+            icon={<Layers className={iconClass} strokeWidth={iconStroke} />}
+            onClick={() => router.push("/bamboo-blanket")}
+          />
+        )}
       </div>
     </section>
   );
