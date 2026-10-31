@@ -58,12 +58,34 @@ export function birthPackageVariantGid(
   return `gid://shopify/ProductVariant/${BIRTH_PACKAGE_VARIANT_IDS[pattern]}`;
 }
 
+/** Gift card for the gift set (soft book + large bamboo blanket). */
+export const GIFT_CARD_GIFT_SET_PRICE = priceFromEnv(
+  process.env.NEXT_PUBLIC_GIFT_CARD_GIFT_SET_PRICE,
+  309,
+);
+
 // Gift Card Configuration
-export const GIFT_CARD_OPTIONS = [
+// variantId: default Shopify variant; SHOPIFY_GIFT_CARD_VARIANT_ID_<ID> env var overrides it.
+export const GIFT_CARD_OPTIONS: ReadonlyArray<{
+  id: string;
+  price: number;
+  labelKey: string;
+  /** Optional smaller line under the label (e.g. "includes shipping"). */
+  noteKey?: string;
+  variantId?: string;
+}> = [
   {
-    id: "one_with_shipping" as const,
+    id: "one_with_shipping",
     price: GIFT_CARD_PRICE,
-    labelKey: "giftCard.option2" as const,
+    labelKey: "giftCard.optionBook",
+    noteKey: "giftCard.includesShipping",
+  },
+  {
+    id: "gift_set",
+    price: GIFT_CARD_GIFT_SET_PRICE,
+    labelKey: "giftCard.optionGiftSet",
+    noteKey: "giftCard.includesShipping",
+    variantId: "43869388079207",
   },
 ];
 

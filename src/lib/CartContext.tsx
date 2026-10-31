@@ -22,6 +22,7 @@ import {
   BLANKET_PRICE,
   BIRTH_PACKAGE_PRICE,
   GIFT_SET_BLANKET_UPGRADE_PRICE,
+  GIFT_CARD_OPTIONS,
 } from "./constants";
 import { isValidBookCartImageCount, isValidBookCartStyle } from "./preview-session/generation-stats";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
@@ -736,8 +737,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           // Track Meta Pixel AddToCart event for gift card
           try {
-            // Extract gift card value from optionId (format: gid://shopify/ProductVariant/...)
-            const giftCardValue = 100; // Default fallback
+            const giftCardValue =
+              GIFT_CARD_OPTIONS.find((opt) => opt.id === optionId)?.price ?? 0;
             trackAddToCart(
               "Little Gali Gift Card",
               optionId,

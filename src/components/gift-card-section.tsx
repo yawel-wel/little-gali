@@ -72,7 +72,9 @@ export function GiftCardSection() {
   const reveal = useScrollReveal(easeOwlet);
   const { addGiftCardToCart } = useCart();
   
-  const selectedOption = GIFT_CARD_OPTIONS[0].id;
+  const [selectedOption, setSelectedOption] = useState<string>(
+    GIFT_CARD_OPTIONS[0].id,
+  );
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = async () => {
@@ -168,37 +170,86 @@ export function GiftCardSection() {
               },
             }}
           >
-            <div className="mx-auto grid max-w-md grid-cols-1 gap-3">
-              {GIFT_CARD_OPTIONS.map((option) => (
-                <div
-                  key={option.id}
-                  className="rounded-[20px] border border-[#D4C0A8] bg-[#FBF8F4] px-4 py-3 sm:px-5 sm:py-3.5"
-                >
-                  <div className="flex items-center gap-3.5" dir="ltr">
+            <div
+              className="mx-auto grid max-w-lg grid-cols-2 gap-3 sm:gap-4"
+              role="radiogroup"
+              aria-label={t("giftCard.selectOption")}
+            >
+              {GIFT_CARD_OPTIONS.map((option) => {
+                const isSelected = option.id === selectedOption;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => setSelectedOption(option.id)}
+                    className={`relative flex h-full w-full cursor-pointer flex-col items-center rounded-[20px] border-2 px-3 pb-5 pt-6 text-center transition-all duration-200 sm:px-5 sm:pb-6 sm:pt-7 ${
+                      isSelected
+                        ? "border-accent-burgundy bg-white shadow-md"
+                        : "border-[#D4C0A8]/60 bg-[#FBF8F4] hover:-translate-y-0.5 hover:border-[#D4C0A8] hover:shadow-sm"
+                    }`}
+                  >
+                    {/* Selection indicator */}
+                    <span
+                      className={`absolute top-3 start-3 flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+                        isSelected
+                          ? "border-accent-burgundy bg-accent-burgundy"
+                          : "border-[#D4C0A8] bg-white"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {isSelected && (
+                        <svg
+                          viewBox="0 0 16 16"
+                          className="h-3 w-3 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3.5 8.5l3 3 6-7" />
+                        </svg>
+                      )}
+                    </span>
+
                     <GiftCardSparkles
-                      className={`h-10 w-10 shrink-0 sm:h-11 sm:w-11 ${PRICE_CARD_ACCENT_CLASS}`}
+                      className={`absolute top-3 end-3 h-6 w-6 ${PRICE_CARD_ACCENT_CLASS}`}
                     />
-                    <div className="h-11 w-px shrink-0 bg-[#D4C0A8] sm:h-12" />
-                    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1">
+
+                    <GiftCardIcon
+                      className={`mb-3 h-10 w-10 sm:h-12 sm:w-12 ${PRICE_CARD_ACCENT_CLASS}`}
+                    />
+
+                    <span
+                      className="font-heading text-3xl font-bold leading-none text-accent-burgundy tabular-nums sm:text-[2.5rem]"
+                      dir="ltr"
+                    >
+                      ₪{option.price}
+                    </span>
+
+                    <span className="my-3 h-px w-10 bg-[#D4C0A8]" aria-hidden="true" />
+
+                    {/* Label fills the remaining height so the notes line up across cards */}
+                    <span
+                      className="flex flex-1 items-center justify-center font-body-bold text-sm leading-snug text-accent-burgundy sm:text-base"
+                      dir={locale === "he" ? "rtl" : "ltr"}
+                    >
+                      {t(option.labelKey)}
+                    </span>
+
+                    {option.noteKey && (
                       <span
-                        className="font-heading text-4xl font-bold leading-none text-accent-burgundy tabular-nums sm:text-[2.5rem]"
-                        dir="ltr"
-                      >
-                        ₪{option.price}
-                      </span>
-                      <span
-                        className="text-center font-body text-sm leading-tight text-accent-burgundy sm:text-base"
+                        className="mt-2 font-body text-xs text-medium-gray sm:text-sm"
                         dir={locale === "he" ? "rtl" : "ltr"}
                       >
-                        {t(option.labelKey)}
+                        {t(option.noteKey)}
                       </span>
-                    </div>
-                    <GiftCardIcon
-                      className={`h-10 w-10 shrink-0 sm:h-11 sm:w-11 ${PRICE_CARD_ACCENT_CLASS}`}
-                    />
-                  </div>
-                </div>
-              ))}
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
 

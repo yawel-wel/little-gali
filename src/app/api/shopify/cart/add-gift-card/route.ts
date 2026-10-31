@@ -22,14 +22,20 @@ export async function POST(request: NextRequest) {
 
     // Get the gift card amount from the option
     const giftCardOption = GIFT_CARD_OPTIONS.find((opt) => opt.id === optionId);
-    const giftCardAmount = giftCardOption?.price || 0;
+    if (!giftCardOption) {
+      return NextResponse.json(
+        { error: "Unknown gift card option" },
+        { status: 400 }
+      );
+    }
+    const giftCardAmount = giftCardOption.price;
 
     const storeDomain = process.env.SHOPIFY_STORE_DOMAIN;
     const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
     // Get the variant ID based on the option
     const variantKey = `SHOPIFY_GIFT_CARD_VARIANT_ID_${optionId.toUpperCase()}`;
-    let productVariantId = process.env[variantKey];
+    let productVariantId = process.env[variantKey] || giftCardOption.variantId;
 
     if (!storeDomain || !accessToken) {
       return NextResponse.json(
