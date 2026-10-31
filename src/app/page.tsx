@@ -614,7 +614,7 @@ export default function Home() {
         <QaPreviewSection />
       </main>
 
-      <Footer bouncyTop />
+      <Footer />
     </div>
   );
 }

@@ -34,6 +34,196 @@
   }
 }
 
+/* Loading photos on a tilted 3D ring (preview-initial-loading-screen).
+   Each photo travels the ring on its own (rotateY → translateZ → undo the
+   rotation so it always faces the viewer); perspective makes it grow at the
+   front and shrink at the back. The angle follows
+   θ(p) = 360·p − 22.9°·sin(2πp), so photos move at ~0.6× speed while passing
+   the front and ~1.4× round the back (generated stops, linear in between).
+   All photos share one wall clock, set from JS via --orbit-clock, so
+   re-rendering never makes them jump or restart. */
+@keyframes preview-orbit-move {
+  0% {
+    transform: rotateY(0.00deg) translateZ(var(--orbit-radius))
+      rotateY(-0.00deg) rotateX(var(--orbit-tilt));
+  }
+  4.167% {
+    transform: rotateY(9.07deg) translateZ(var(--orbit-radius))
+      rotateY(-9.07deg) rotateX(var(--orbit-tilt));
+  }
+  8.333% {
+    transform: rotateY(18.54deg) translateZ(var(--orbit-radius))
+      rotateY(-18.54deg) rotateX(var(--orbit-tilt));
+  }
+  12.5% {
+    transform: rotateY(28.79deg) translateZ(var(--orbit-radius))
+      rotateY(-28.79deg) rotateX(var(--orbit-tilt));
+  }
+  16.667% {
+    transform: rotateY(40.15deg) translateZ(var(--orbit-radius))
+      rotateY(-40.15deg) rotateX(var(--orbit-tilt));
+  }
+  20.833% {
+    transform: rotateY(52.86deg) translateZ(var(--orbit-radius))
+      rotateY(-52.86deg) rotateX(var(--orbit-tilt));
+  }
+  25% {
+    transform: rotateY(67.08deg) translateZ(var(--orbit-radius))
+      rotateY(-67.08deg) rotateX(var(--orbit-tilt));
+  }
+  29.167% {
+    transform: rotateY(82.86deg) translateZ(var(--orbit-radius))
+      rotateY(-82.86deg) rotateX(var(--orbit-tilt));
+  }
+  33.333% {
+    transform: rotateY(100.15deg) translateZ(var(--orbit-radius))
+      rotateY(-100.15deg) rotateX(var(--orbit-tilt));
+  }
+  37.5% {
+    transform: rotateY(118.79deg) translateZ(var(--orbit-radius))
+      rotateY(-118.79deg) rotateX(var(--orbit-tilt));
+  }
+  41.667% {
+    transform: rotateY(138.54deg) translateZ(var(--orbit-radius))
+      rotateY(-138.54deg) rotateX(var(--orbit-tilt));
+  }
+  45.833% {
+    transform: rotateY(159.07deg) translateZ(var(--orbit-radius))
+      rotateY(-159.07deg) rotateX(var(--orbit-tilt));
+  }
+  50% {
+    transform: rotateY(180.00deg) translateZ(var(--orbit-radius))
+      rotateY(-180.00deg) rotateX(var(--orbit-tilt));
+  }
+  54.167% {
+    transform: rotateY(200.93deg) translateZ(var(--orbit-radius))
+      rotateY(-200.93deg) rotateX(var(--orbit-tilt));
+  }
+  58.333% {
+    transform: rotateY(221.46deg) translateZ(var(--orbit-radius))
+      rotateY(-221.46deg) rotateX(var(--orbit-tilt));
+  }
+  62.5% {
+    transform: rotateY(241.21deg) translateZ(var(--orbit-radius))
+      rotateY(-241.21deg) rotateX(var(--orbit-tilt));
+  }
+  66.667% {
+    transform: rotateY(259.85deg) translateZ(var(--orbit-radius))
+      rotateY(-259.85deg) rotateX(var(--orbit-tilt));
+  }
+  70.833% {
+    transform: rotateY(277.14deg) translateZ(var(--orbit-radius))
+      rotateY(-277.14deg) rotateX(var(--orbit-tilt));
+  }
+  75% {
+    transform: rotateY(292.92deg) translateZ(var(--orbit-radius))
+      rotateY(-292.92deg) rotateX(var(--orbit-tilt));
+  }
+  79.167% {
+    transform: rotateY(307.14deg) translateZ(var(--orbit-radius))
+      rotateY(-307.14deg) rotateX(var(--orbit-tilt));
+  }
+  83.333% {
+    transform: rotateY(319.85deg) translateZ(var(--orbit-radius))
+      rotateY(-319.85deg) rotateX(var(--orbit-tilt));
+  }
+  87.5% {
+    transform: rotateY(331.21deg) translateZ(var(--orbit-radius))
+      rotateY(-331.21deg) rotateX(var(--orbit-tilt));
+  }
+  91.667% {
+    transform: rotateY(341.46deg) translateZ(var(--orbit-radius))
+      rotateY(-341.46deg) rotateX(var(--orbit-tilt));
+  }
+  95.833% {
+    transform: rotateY(350.93deg) translateZ(var(--orbit-radius))
+      rotateY(-350.93deg) rotateX(var(--orbit-tilt));
+  }
+  100% {
+    transform: rotateY(360.00deg) translateZ(var(--orbit-radius))
+      rotateY(-360.00deg) rotateX(var(--orbit-tilt));
+  }
+}
+
+/* Depth haze, in step with the angle above: clear at the front, 0.45 at the back. */
+@keyframes preview-orbit-haze {
+  0% {
+    opacity: 0.000;
+  }
+  4.167% {
+    opacity: 0.003;
+  }
+  8.333% {
+    opacity: 0.012;
+  }
+  12.5% {
+    opacity: 0.028;
+  }
+  16.667% {
+    opacity: 0.053;
+  }
+  20.833% {
+    opacity: 0.089;
+  }
+  25% {
+    opacity: 0.137;
+  }
+  29.167% {
+    opacity: 0.197;
+  }
+  33.333% {
+    opacity: 0.265;
+  }
+  37.5% {
+    opacity: 0.333;
+  }
+  41.667% {
+    opacity: 0.394;
+  }
+  45.833% {
+    opacity: 0.435;
+  }
+  50% {
+    opacity: 0.450;
+  }
+  54.167% {
+    opacity: 0.435;
+  }
+  58.333% {
+    opacity: 0.394;
+  }
+  62.5% {
+    opacity: 0.333;
+  }
+  66.667% {
+    opacity: 0.265;
+  }
+  70.833% {
+    opacity: 0.197;
+  }
+  75% {
+    opacity: 0.137;
+  }
+  79.167% {
+    opacity: 0.089;
+  }
+  83.333% {
+    opacity: 0.053;
+  }
+  87.5% {
+    opacity: 0.028;
+  }
+  91.667% {
+    opacity: 0.012;
+  }
+  95.833% {
+    opacity: 0.003;
+  }
+  100% {
+    opacity: 0.000;
+  }
+}
+
 @keyframes preview-initial-progress {
   0% {
     transform: scaleX(0);
@@ -392,6 +582,38 @@
   .preview-loading-avatar {
     animation: preview-loading-avatar-breathe 2.8s ease-in-out infinite;
     will-change: transform;
+  }
+
+  .preview-orbit-stage {
+    --orbit-tilt: 0deg;
+    perspective: 520px;
+  }
+
+  .preview-orbit-tilt {
+    transform: rotateX(calc(var(--orbit-tilt) * -1));
+    transform-style: preserve-3d;
+  }
+
+  .preview-orbit-item {
+    --orbit-delay: calc(var(--orbit-clock, 0ms) + var(--orbit-offset, 0ms));
+    transform: rotateY(var(--orbit-angle)) translateZ(var(--orbit-radius))
+      rotateY(calc(var(--orbit-angle) * -1)) rotateX(var(--orbit-tilt));
+    animation: preview-orbit-move var(--orbit-turn, 7s) linear
+      var(--orbit-delay) infinite;
+    will-change: transform;
+  }
+
+  .preview-orbit-haze {
+    opacity: 0;
+    animation: preview-orbit-haze var(--orbit-turn, 7s) linear
+      var(--orbit-delay) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preview-orbit-item,
+    .preview-orbit-haze {
+      animation: none;
+    }
   }
 
   .preview-initial-progress {

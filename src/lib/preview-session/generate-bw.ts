@@ -46,6 +46,18 @@ function isMockGenerationEnabled(): boolean {
   return process.env.MOCK_AI_GENERATION === "true";
 }
 
+/**
+ * Mock mode only: wait as long again as the mock took, so the loading screen
+ * stays up about twice as long (closer to a real Gemini call).
+ */
+async function doubleMockDuration<T>(work: () => Promise<T>): Promise<T> {
+  const startedAt = Date.now();
+  const result = await work();
+  const elapsedMs = Date.now() - startedAt;
+  await new Promise<void>((resolve) => setTimeout(resolve, elapsedMs));
+  return result;
+}
+
 async function createMockBwImage(sourceUrl: string): Promise<Buffer> {
   const { buffer: sourceBuffer } = await fetchStorageBuffer(sourceUrl);
   return sharp(sourceBuffer)
@@ -186,7 +198,7 @@ export async function generateBwImageBuffer(
   generationContext?: PreviewGenerationContext,
 ): Promise<Buffer> {
   if (isMockGenerationEnabled()) {
-    return createMockBwImage(imageUrl);
+    return doubleMockDuration(() => createMockBwImage(imageUrl));
   }
   return generateWithGemini(imageUrl, generationContext);
 }
