@@ -124,7 +124,6 @@ export default function Home() {
         },
       ];
   const reveal = useScrollReveal(easeOwlet);
-  const specialScrollRef = useRef<HTMLDivElement>(null);
   const [heroSlide, setHeroSlide] = useState(0);
   const heroTouchStartX = useRef<number | null>(null);
 
@@ -138,27 +137,6 @@ export default function Home() {
 
     return () => window.clearInterval(id);
   }, [prefersReducedMotion, heroSlide]);
-
-  useEffect(() => {
-    const container = specialScrollRef.current;
-    if (!container || window.innerWidth >= 1024) return;
-
-    const firstSlide = container.querySelector<HTMLElement>(
-      '[data-special-slide="0"]',
-    );
-    if (!firstSlide) return;
-
-    // Center the first slide horizontally without scrolling the page vertically.
-    requestAnimationFrame(() => {
-      const containerRect = container.getBoundingClientRect();
-      const slideRect = firstSlide.getBoundingClientRect();
-      const delta =
-        slideRect.left +
-        slideRect.width / 2 -
-        (containerRect.left + containerRect.width / 2);
-      container.scrollBy({ left: delta, top: 0 });
-    });
-  }, [locale]);
 
   // Handle hash scrolling on page load and when hash changes
   useEffect(() => {
@@ -519,19 +497,16 @@ export default function Home() {
             </div>
 
             <motion.div
-              ref={specialScrollRef}
               dir={locale === "he" ? "rtl" : "ltr"}
-              className="mx-auto flex max-w-5xl snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 hide-scrollbar scroll-pl-[15vw] -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-auto lg:grid lg:snap-none lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:scroll-pl-0 lg:px-0"
+              className="mx-auto grid max-w-5xl grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-6 lg:grid-cols-4 lg:gap-8"
               {...reveal.staggerContainer({ amount: 0.2, staggerChildren: 0.1 })}
             >
-              <div className="w-[4vw] shrink-0 lg:hidden" aria-hidden="true" />
-              {specialSteps.map((step, index) => {
+              {specialSteps.map((step) => {
                 const Icon = step.icon;
                 return (
                   <motion.div
                     key={step.titleKey}
-                    data-special-slide={index}
-                    className="flex w-[58vw] shrink-0 snap-center flex-col items-center px-2 text-center sm:w-[56vw] lg:w-auto lg:min-w-0 lg:snap-normal lg:shrink lg:px-3"
+                    className="flex min-w-0 flex-col items-center px-1 text-center sm:px-2 lg:px-3"
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       show: {
@@ -542,7 +517,7 @@ export default function Home() {
                     }}
                   >
                     <div
-                      className={`mb-5 flex h-[5.2rem] w-[5.2rem] items-center justify-center rounded-full sm:h-[5.75rem] sm:w-[5.75rem] ${SPECIAL_ICON_BG}`}
+                      className={`mb-5 flex h-[4.16rem] w-[4.16rem] items-center justify-center rounded-full sm:h-[4.6rem] sm:w-[4.6rem] ${SPECIAL_ICON_BG}`}
                       aria-hidden="true"
                     >
                       <Icon
@@ -560,7 +535,6 @@ export default function Home() {
                   </motion.div>
                 );
               })}
-              <div className="w-[34vw] shrink-0 lg:hidden" aria-hidden="true" />
             </motion.div>
           </div>
         </motion.section>
@@ -640,7 +614,7 @@ export default function Home() {
         <QaPreviewSection />
       </main>
 
-      <Footer />
+      <Footer bouncyTop />
     </div>
   );
 }
