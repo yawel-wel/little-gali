@@ -239,7 +239,7 @@
   .border-primary-orange {
     border-color: #e1b093;
   }
-  
+
   /* Accent Color (Burgundy) */
   .text-accent-burgundy {
     color: #693430;
@@ -305,22 +305,22 @@
   .bg-soft-green-light {
     background-color: #f0fdf4;
   }
-  
+
   /* New Warm Neutral Backgrounds */
   .bg-warm-light {
-    background-color: #F7F5F2;
+    background-color: #f7f5f2;
   }
   .bg-warm-cream {
-    background-color: #F1ECE7;
+    background-color: #f1ece7;
   }
   .bg-warm-tan {
-    background-color: #E0D5C9;
+    background-color: #e0d5c9;
   }
   .bg-warm-taupe {
-    background-color: #CABCB3;
+    background-color: #cabcb3;
   }
   .text-warm-taupe {
-    color: #CABCB3;
+    color: #cabcb3;
   }
 
   /* Text Colors */
@@ -408,5 +408,58 @@
 
   .preview-loading-subtitle-fade {
     animation: preview-loading-subtitle-fade 3.5s ease-in-out both;
+  }
+}
+
+/* Header entrance: pure CSS so it starts on first paint, before JS hydrates.
+   The bar itself is visible immediately; the logo drops in with a gentle
+   bounce and the side controls follow. Transform/opacity only. */
+@keyframes header-logo-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.94);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(5px) scale(1.01);
+  }
+  78% {
+    transform: translateY(-1px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes header-side-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@layer utilities {
+  .header-enter-logo {
+    animation: header-logo-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .header-enter-side {
+    animation: header-side-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+  }
+
+  .header-enter-side-late {
+    animation-delay: 0.2s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-enter-logo,
+    .header-enter-side {
+      animation: none;
+    }
   }
 }
