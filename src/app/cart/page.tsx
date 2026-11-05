@@ -25,6 +25,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import Button from "@mui/material/Button";
 import { trackInitiateCheckout } from "@/lib/meta-pixel-events";
 import { CartItemGeneratedAvatars } from "@/components/cart-item-generated-avatars";
+import { CartItemImagesDialog } from "@/components/cart-item-images-dialog";
 import { CartSuggestProducts } from "@/components/cart-suggest-products";
 import {
   CartBookLineUpsell,
@@ -448,11 +449,15 @@ export default function CartPage() {
                           {!item.isFramedArt &&
                             !item.isBambooBlanket &&
                             getCartItemAvatarPreview(item).expectedCount > 0 && (
-                            <CartItemGeneratedAvatars
+                            <CartItemImagesDialog
                               item={item}
-                              locale={locale}
-                              className="mb-4"
-                            />
+                              className="mx-auto mb-4 w-fit"
+                            >
+                              <CartItemGeneratedAvatars
+                                item={item}
+                                locale={locale}
+                              />
+                            </CartItemImagesDialog>
                           )}
 
                           <div>
@@ -589,7 +594,10 @@ export default function CartPage() {
                                     </div>
                                     {(item.framedImageUrl ??
                                       item.imageUrls?.[0]) && (
-                                      <div className="shrink-0 w-[5.4rem] md:self-start">
+                                      <CartItemImagesDialog
+                                        item={item}
+                                        className="shrink-0 w-[5.4rem] md:self-start"
+                                      >
                                         <FramedArtFrameMockup
                                           imageUrl={
                                             item.framedImageUrl ??
@@ -597,7 +605,7 @@ export default function CartPage() {
                                           }
                                           maxWidthClassName="w-full"
                                         />
-                                      </div>
+                                      </CartItemImagesDialog>
                                     )}
                                     {locale === "he" ? (
                                       <div
