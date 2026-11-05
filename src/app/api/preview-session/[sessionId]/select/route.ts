@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import type { StyleType } from "@/components/style-selector";
 import { requirePreviewSession } from "@/lib/preview-session/auth";
 import { getColorCandidateForStyle } from "@/lib/preview-session/color-by-style";
-import {
-  clearSlotColorPreview,
-  enqueuePendingColorRegen,
-} from "@/lib/preview-session/color-generation-runner";
 import { logPreviewCandidateReselected } from "@/lib/preview-session/generation-log";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
 
@@ -89,9 +85,9 @@ export async function POST(
         previousCandidateId: previousActiveId,
         candidateId,
       });
-      clearSlotColorPreview(session, slotIndex);
-      enqueuePendingColorRegen(session, slotIndex);
     }
+    // B&W and color are both generated from the original photo, so picking
+    // another B&W version leaves the color side untouched (no hidden regen).
     slot.activeCandidateId = candidateId;
   }
 

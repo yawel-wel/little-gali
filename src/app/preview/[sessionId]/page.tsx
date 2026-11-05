@@ -427,12 +427,8 @@ export default function PreviewPage() {
     () => new Set(),
   );
   const [isColorStripPrefetching, setIsColorStripPrefetching] = useState(false);
-  const [slotsPendingColorRegen, setSlotsPendingColorRegen] = useState<Set<number>>(
-    () => new Set(),
-  );
   const stripThumbPrefetchRunningRef = useRef(false);
   const styleResumeRunningRef = useRef(false);
-  const pendingColorRegenProcessingRef = useRef(false);
   const mutationInProgressRef = useRef(false);
   const bwGenerateStartedRef = useRef(false);
   const initialGenerationCompletedRef = useRef(false);
@@ -477,7 +473,8 @@ export default function PreviewPage() {
   const [failureStatus, setFailureStatus] = useState<number | undefined>();
   const failureReportedRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [busySlotIndexes, setBusySlotIndexes] = useState<Set<number>>(
+  /** Slots with a regenerate/replace request running, per side ("bw:2", "color:2"). */
+  const [busySlotKeys, setBusySlotKeys] = useState<Set<string>>(
     () => new Set(),
   );
   const [failedPreviewUrls, setFailedPreviewUrls] = useState<Set<string>>(
@@ -774,9 +771,6 @@ export default function PreviewPage() {
 
     if (!pollRef.current) {
       pollRef.current = setInterval(() => {
-        if (pendingColorRegenProcessingRef.current) {
-          return;
-        }
         refreshSession().catch(() => undefined);
       }, 2500);
     }
@@ -843,10 +837,10 @@ export default function PreviewPage() {
     if (!keepColorLoadingVisible) {
       return;
     }
+    // Only fades out the loader. Never switch sides here: this also fires when
+    // a background color fill finishes while the user is on the B&W side.
     const timeout = setTimeout(() => {
       setKeepColorLoadingVisible(false);
-      setBookSide("color");
-      setDisplayedBookSide("color");
     }, 400);
     return () => clearTimeout(timeout);
   }, [isColorGenerating, keepColorLoadingVisible]);
@@ -1140,74 +1134,6 @@ export default function PreviewPage() {
     [applySession, sessionId, t],
   );
 
-  const fetchSlotAllStylesColor = useCallback(
-    async (slotIndex: number) => {
-      const response = await fetch(
-        `/api/preview-session/${sessionId}/generate-color`,
-        withAnalyticsHeaders({
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            slotIndexes: [slotIndex],
-            allStylesForSlot: true,
-          }),
-        }),
-      );
-      const data = (await response.json()) as {
-        session?: PreviewSessionPublicView;
-        error?: string;
-      };
-      if (!response.ok) {
-        throwIfGenerationRateLimited(response, data);
-        throw new Error(data.error || t("preview.sessionError"));
-      }
-      applySession(data.session as PreviewSessionPublicView);
-      setSlotsPendingColorRegen((current) => {
-        const next = new Set(current);
-        next.delete(slotIndex);
-        return next;
-      });
-      return data.session as PreviewSessionPublicView;
-    },
-    [applySession, sessionId, t],
-  );
-
-  const processPendingColorRegenSlots = useCallback(
-    async (targetSession: PreviewSessionPublicView) => {
-      const pending = targetSession.pendingColorRegenSlotIndexes ?? [];
-      if (pending.length === 0 || pendingColorRegenProcessingRef.current) {
-        return;
-      }
-
-      pendingColorRegenProcessingRef.current = true;
-      setSlotsPendingColorRegen((current) => {
-        const next = new Set(current);
-        for (const slotIndex of pending) {
-          next.add(slotIndex);
-        }
-        return next;
-      });
-      setError(null);
-
-      try {
-        for (const slotIndex of pending) {
-          await fetchSlotAllStylesColor(slotIndex);
-        }
-      } catch (err) {
-        setGenerationError(err);
-      } finally {
-        pendingColorRegenProcessingRef.current = false;
-      }
-    },
-    [fetchSlotAllStylesColor, setGenerationError],
-  );
-
-  useEffect(() => {
-    if (bookSide === "color" && session) {
-      void processPendingColorRegenSlots(session);
-    }
-  }, [bookSide, session, processPendingColorRegenSlots]);
-
   useEffect(() => {
     if (stripThumbnailsAreReady) {
       setIsColorStripPrefetching(false);
@@ -1414,36 +1340,63 @@ export default function PreviewPage() {
     router.push(`/upload?${params.toString()}`);
   };
 
-  const markSlotBusy = (slotIndex: number) => {
-    setBusySlotIndexes((current) => new Set(current).add(slotIndex));
-  };
+  const slotBusyKey = (side: PreviewBookSide, slotIndex: number) =>
+    `${side}:${slotIndex}`;
 
-  const clearSlotBusy = (slotIndex: number) => {
-    setBusySlotIndexes((current) => {
+  const markSlotBusy = (sides: PreviewBookSide[], slotIndex: number) => {
+    setBusySlotKeys((current) => {
       const next = new Set(current);
-      next.delete(slotIndex);
+      for (const side of sides) {
+        next.add(slotBusyKey(side, slotIndex));
+      }
       return next;
     });
   };
 
-  const runBwRegenerate = async (slotIndex: number, freeRetry: boolean) => {
-    if (!freeRetry && !session?.canRegenerate) return;
+  const clearSlotBusy = (sides: PreviewBookSide[], slotIndex: number) => {
+    setBusySlotKeys((current) => {
+      const next = new Set(current);
+      for (const side of sides) {
+        next.delete(slotBusyKey(side, slotIndex));
+      }
+      return next;
+    });
+  };
+
+  /**
+   * One regenerate path for both sides. The side is fixed at click time, so the
+   * loader and the new version always land on the image the user clicked.
+   * The server takes one change credit (not for free retries after an error).
+   */
+  const runRegenerate = async (
+    side: PreviewBookSide,
+    slotIndex: number,
+    freeRetry: boolean,
+  ) => {
+    if (!session || mutationInProgressRef.current) return;
+    const allowed =
+      side === "bw" ? session.canRegenerate : session.canRegenerateColor;
+    if (!freeRetry && !allowed) return;
     if (!freeRetry) {
-      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED, { side: "bw" });
+      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED, { side });
     }
-    markSlotBusy(slotIndex);
+    markSlotBusy([side], slotIndex);
     mutationInProgressRef.current = true;
     setIsSubmitting(true);
     setError(null);
     try {
       const response = await fetch(
-        `/api/preview-session/${sessionId}/regenerate`,
+        side === "bw"
+          ? `/api/preview-session/${sessionId}/regenerate`
+          : `/api/preview-session/${sessionId}/regenerate-color`,
         withAnalyticsHeaders({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             slotIndex,
-            idempotencyKey: createIdempotencyKey(),
+            ...(side === "bw"
+              ? { idempotencyKey: createIdempotencyKey() }
+              : { style: activeColorStyle }),
             ...(freeRetry ? { freeRetry: true } : {}),
           }),
         }),
@@ -1467,79 +1420,26 @@ export default function PreviewPage() {
     } catch (err) {
       setGenerationError(err);
     } finally {
-      clearSlotBusy(slotIndex);
+      clearSlotBusy([side], slotIndex);
       mutationInProgressRef.current = false;
       setIsSubmitting(false);
     }
   };
 
   const handleRegenerate = (slotIndex: number) => {
-    void runBwRegenerate(slotIndex, false);
+    void runRegenerate("bw", slotIndex, false);
   };
 
   const handleRetryBwSlot = (slotIndex: number) => {
-    void runBwRegenerate(slotIndex, true);
-  };
-
-  const runColorRegenerate = async (slotIndex: number, freeRetry: boolean) => {
-    if (!session) return;
-    if (!freeRetry && !session.canRegenerateColor) return;
-    if (!freeRetry) {
-      track(ANALYTICS_EVENTS.BOOKLET_REGENERATED, { side: "color" });
-    }
-    markSlotBusy(slotIndex);
-    mutationInProgressRef.current = true;
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        `/api/preview-session/${sessionId}/regenerate-color`,
-        withAnalyticsHeaders({
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            slotIndex,
-            style: activeColorStyle,
-            ...(freeRetry ? { freeRetry: true } : {}),
-          }),
-        }),
-      );
-      const data = (await response.json()) as {
-        session?: PreviewSessionPublicView;
-        error?: string;
-      };
-      if (!response.ok) {
-        throwIfGenerationRateLimited(response, data);
-        throw new Error(data.error || t("preview.sessionError"));
-      }
-      const updatedSession = data.session as PreviewSessionPublicView;
-      applySession(updatedSession);
-      setFailedPreviewUrls((current) =>
-        clearFailedPreviewUrlsForSlot(
-          current,
-          updatedSession.slots.find((item) => item.index === slotIndex),
-        ),
-      );
-      setSlotsPendingColorRegen((current) => {
-        const next = new Set(current);
-        next.delete(slotIndex);
-        return next;
-      });
-    } catch (err) {
-      setGenerationError(err);
-    } finally {
-      clearSlotBusy(slotIndex);
-      mutationInProgressRef.current = false;
-      setIsSubmitting(false);
-    }
+    void runRegenerate("bw", slotIndex, true);
   };
 
   const handleRegenerateColor = (slotIndex: number) => {
-    void runColorRegenerate(slotIndex, false);
+    void runRegenerate("color", slotIndex, false);
   };
 
   const handleRetryColorSlot = (slotIndex: number) => {
-    void runColorRegenerate(slotIndex, true);
+    void runRegenerate("color", slotIndex, true);
   };
 
   const clearReplaceCropState = useCallback(() => {
@@ -1690,7 +1590,7 @@ export default function PreviewPage() {
     }
 
     dismissReplaceCropEditor();
-    markSlotBusy(slotIndex);
+    markSlotBusy(["bw", "color"], slotIndex);
     mutationInProgressRef.current = true;
     setIsSubmitting(true);
     setError(null);
@@ -1743,7 +1643,7 @@ export default function PreviewPage() {
     } catch (err) {
       setGenerationError(err);
     } finally {
-      clearSlotBusy(slotIndex);
+      clearSlotBusy(["bw", "color"], slotIndex);
       mutationInProgressRef.current = false;
       setIsSubmitting(false);
       replaceSlotRef.current = null;
@@ -2005,7 +1905,6 @@ export default function PreviewPage() {
 
     if (nextSide === "color" && session) {
       void prefetchStripThumbnailsIfNeeded();
-      void processPendingColorRegenSlots(session);
     }
 
     const prefersReducedMotion =
@@ -2308,7 +2207,8 @@ export default function PreviewPage() {
                           (candidate) => candidate.id === slot.activeCandidateId,
                         );
                         const isSlotBusy =
-                          slot.inFlight || busySlotIndexes.has(slot.index);
+                          slot.inFlight ||
+                          busySlotKeys.has(slotBusyKey("bw", slot.index));
                         // Never fall back to another style's colorPreview — that made
                         // pencil look "ready" while add-to-cart stayed disabled.
                         const activeColorCandidate =
@@ -2320,35 +2220,19 @@ export default function PreviewPage() {
                           slot,
                           displayColorStyle,
                         );
-                        const isSlotPendingColorRegen =
-                          (session.pendingColorRegenSlotIndexes?.includes(
-                            slot.index,
-                          ) ??
-                            false) || slotsPendingColorRegen.has(slot.index);
                         const isColorSlotBusy =
                           slot.colorInFlight ||
-                          (isSlotPendingColorRegen &&
-                            !activeColorCandidate?.previewUrl) ||
-                          (displayedBookSide === "color" &&
-                            isActiveStyleStripLoading &&
-                            !activeColorCandidate?.previewUrl) ||
-                          (displayedBookSide === "color" &&
-                            busySlotIndexes.has(slot.index));
+                          busySlotKeys.has(slotBusyKey("color", slot.index)) ||
+                          (isActiveStyleStripLoading &&
+                            !activeColorCandidate?.previewUrl);
                         const isVisibleSideBusy =
                           displayedBookSide === "bw"
                             ? isSlotBusy
                             : isColorSlotBusy;
-                        const showColorBwInterim =
-                          displayedBookSide === "color" &&
-                          isSlotPendingColorRegen &&
-                          !activeColorCandidate?.previewUrl &&
-                          Boolean(active?.previewUrl);
                         const currentPreviewUrl =
                           displayedBookSide === "bw"
                             ? active?.previewUrl
-                            : showColorBwInterim
-                              ? active?.previewUrl
-                              : activeColorCandidate?.previewUrl;
+                            : activeColorCandidate?.previewUrl;
                         const previewUrlFailed = Boolean(
                           currentPreviewUrl &&
                             failedPreviewUrls.has(currentPreviewUrl),
@@ -2718,12 +2602,6 @@ export default function PreviewPage() {
                                       {t("preview.slotBusy")}
                                     </p>
                                   </div>
-                                ) : showColorBwInterim && active?.previewUrl ? (
-                                  <PreviewSlotFadeImage
-                                    key={`${slot.index}-bw-interim-${slot.activeCandidateId}`}
-                                    src={active.previewUrl}
-                                    alt={`${t("preview.tabBw")} ${pageNum}`}
-                                  />
                                 ) : activeColorCandidate?.previewUrl &&
                                   !previewUrlFailed ? (
                                   <PreviewSlotFadeImage

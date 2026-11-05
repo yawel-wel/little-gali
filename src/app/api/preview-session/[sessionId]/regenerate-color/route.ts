@@ -10,7 +10,6 @@ import {
   hasChangeCredits,
   recordRegenerateClick,
 } from "@/lib/preview-session/credits";
-import { parseBookFlow } from "@/lib/preview-session/book-flow";
 import { getDefaultColorStyle, getPreviewColorStyles } from "@/lib/preview-session/color-by-style";
 import { slotColorActiveHasRetryableError } from "@/lib/preview-session/retryable-slot-error";
 import { savePreviewSession, toPublicView } from "@/lib/preview-session/store";
@@ -37,7 +36,6 @@ export async function POST(
     freeRetry?: boolean;
   };
   const { slotIndex } = body;
-  const isColorful = parseBookFlow(auth.session.bookFlow) === "colorful";
   const style =
     body.style ??
     auth.session.selectedColorStyle ??
@@ -71,18 +69,9 @@ export async function POST(
   const freeRetry =
     requestedFreeRetry && slotColorActiveHasRetryableError(slot, style);
 
-  if (!isColorful) {
-    const active = slot.candidates.find(
-      (candidate) =>
-        candidate.kind === "bw" && candidate.id === slot.activeCandidateId,
-    );
-    if (!active?.previewUrl || active.error) {
-      return NextResponse.json(
-        { error: "B&W preview is not ready for color generation" },
-        { status: 409 },
-      );
-    }
-  } else if (!slot.originalUrl) {
+  // Color is generated from the original photo in both flows, so it does not
+  // depend on the B&W side (the user may regenerate color before opening B&W).
+  if (!slot.originalUrl) {
     return NextResponse.json(
       { error: "Original image is not ready for color generation" },
       { status: 409 },
