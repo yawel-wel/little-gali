@@ -2184,8 +2184,8 @@ export default function PreviewPage() {
                         <div
                           className={cn(
                             isColorfulFlow
-                              ? "flex flex-col items-center gap-3 overflow-x-auto pb-2"
-                              : "overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0",
+                              ? "flex flex-col gap-3 overflow-x-auto pb-2"
+                              : "overflow-x-auto pb-2 snap-x snap-mandatory scroll-ps-1 hide-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0",
                           )}
                         >
                           {illustrationSlotRows.map((rowSlots, rowIndex) => (
@@ -2194,7 +2194,7 @@ export default function PreviewPage() {
                             className={cn(
                               "flex items-start gap-3 md:gap-3.5",
                               isColorfulFlow
-                                ? "flex-nowrap justify-center"
+                                ? "w-max min-w-full flex-nowrap justify-center"
                                 : "w-max lg:mx-auto lg:justify-center lg:gap-3",
                             )}
                           >
@@ -2343,7 +2343,7 @@ export default function PreviewPage() {
                         return (
                           <div
                             key={slot.index}
-                            className="w-[9rem] flex-shrink-0 snap-center sm:w-[10.5rem] lg:w-[11rem]"
+                            className="w-[9rem] flex-shrink-0 snap-start sm:w-[10.5rem] lg:w-[11rem]"
                           >
                           <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-[#E5DDD4]">
                             <div

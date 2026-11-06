@@ -177,6 +177,10 @@ export function PreviewBookLightbox({
     goToPrevious();
   };
 
+  const stopClosePropagation = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
+
   const navButtonClass =
     "absolute top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-dark-gray shadow-[0_1px_4px_rgba(0,0,0,0.1)] transition hover:bg-white/95";
 
@@ -193,6 +197,7 @@ export function PreviewBookLightbox({
           aria-modal="true"
           aria-label={activeSlide.alt}
           dir="ltr"
+          onClick={onClose}
         >
           <motion.div
             initial={
@@ -217,7 +222,10 @@ export function PreviewBookLightbox({
                 <>
                   <button
                     type="button"
-                    onClick={goToPrevious}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      goToPrevious();
+                    }}
                     className={cn(navButtonClass, "left-1.5 sm:left-3")}
                     aria-label={previousLabel}
                   >
@@ -225,7 +233,10 @@ export function PreviewBookLightbox({
                   </button>
                   <button
                     type="button"
-                    onClick={goToNext}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      goToNext();
+                    }}
                     className={cn(navButtonClass, "right-1.5 sm:right-3")}
                     aria-label={nextLabel}
                   >
@@ -242,6 +253,7 @@ export function PreviewBookLightbox({
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchEnd={handleTouchEnd}
+                  onClick={stopClosePropagation}
                 >
                   <AnimatePresence initial={false} custom={direction}>
                     <motion.img
@@ -277,7 +289,10 @@ export function PreviewBookLightbox({
             </div>
 
             {slides.length > 1 ? (
-              <div className="shrink-0 bg-white px-3 py-3 sm:px-5 sm:py-5">
+              <div
+                className="shrink-0 bg-white px-3 py-3 sm:px-5 sm:py-5"
+                onClick={stopClosePropagation}
+              >
                 <div className="flex justify-center gap-2 overflow-x-auto hide-scrollbar">
                   {slides.map((slide, index) => {
                     const isActive = index === activeIndex;
