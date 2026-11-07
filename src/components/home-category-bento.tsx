@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
 import { isFramedArtEnabled } from "@/lib/feature-flags";
 import { cn } from "@/lib/utils";
@@ -56,10 +57,21 @@ export function HomeCategoryBento() {
 
   return (
     <section
-      aria-label={t("home.categories.ariaLabel")}
-      className="w-full bg-[#FAF7F4] py-6 sm:py-8 lg:py-10"
+      aria-labelledby="home-categories-heading"
+      className="w-full bg-[#FAF7F4] pt-6 pb-4 sm:py-8 lg:py-10"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-6">
+          <Title
+            as="h2"
+            id="home-categories-heading"
+            highlightText={t("home.categories.titleHighlight")}
+            size="lg"
+          >
+            {t("home.categories.title")}
+          </Title>
+        </div>
+
         <div
           dir="ltr"
           className={cn(

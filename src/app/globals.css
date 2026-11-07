@@ -685,3 +685,38 @@
     }
   }
 }
+
+/* Home "book in use" section: two rows that scroll on an endless loop.
+   Each track holds two identical copies, so moving it by -50% lands on a
+   frame that looks exactly like the start. */
+@keyframes book-in-use-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer utilities {
+  .book-in-use-marquee {
+    animation: book-in-use-marquee 50s linear infinite;
+    will-change: transform;
+  }
+
+  .book-in-use-marquee-reverse {
+    animation-direction: reverse;
+  }
+
+  @media (hover: hover) {
+    .book-in-use-marquee:hover {
+      animation-play-state: paused;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .book-in-use-marquee {
+      animation: none;
+    }
+  }
+}
