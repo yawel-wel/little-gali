@@ -13,11 +13,14 @@ import { QaPreviewSection } from "@/components/qa-preview-section";
 import { LooxProductRating } from "@/components/loox-widget-section";
 import { SoftBookFeatureHighlights } from "@/components/soft-book-feature-highlights";
 import { PickupAvailabilityBox } from "@/components/pickup-availability-box";
+import { OutOfStockBadge } from "@/components/out-of-stock-badge";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
+  BOOK_COLORS,
   DEFAULT_BOOK_COLOR,
   BOOK_COLOR_LABEL_KEYS,
+  isBookColorOutOfStock,
   BOOK_COLOR_SWATCHES,
   BOOK_PRODUCT_GALLERY,
   getPreferredBookColor,
@@ -85,6 +88,7 @@ export default function SoftBookProductPage() {
   const currentImageSrc = colorImages[imageIndex];
 
   const selectColor = (color: BookColor) => {
+    if (isBookColorOutOfStock(color)) return;
     setSelectedColor(color);
     setPreferredBookColor(color);
     setImageIndex(0);
@@ -258,31 +262,46 @@ export default function SoftBookProductPage() {
                     className="flex w-full flex-wrap justify-start gap-3"
                     dir={isHe ? "rtl" : "ltr"}
                   >
-                    {(["light", "dark"] as BookColor[]).map((color) => {
+                    {BOOK_COLORS.map((color) => {
                       const isSelected = selectedColor === color;
+                      const isOutOfStock = isBookColorOutOfStock(color);
                       const label = t(BOOK_COLOR_LABEL_KEYS[color]);
                       return (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => selectColor(color)}
-                          aria-pressed={isSelected}
-                          aria-label={label}
-                          className={cn(
-                            "relative size-[calc(2.7rem+14px)] cursor-pointer overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[62px]",
-                            isSelected
-                              ? "border-2 border-[#2d3748]"
-                              : "border border-[#E8DFD4] hover:border-primary-orange/60",
-                          )}
-                        >
-                          <Image
-                            src={BOOK_COLOR_SWATCHES[color]}
-                            alt={label}
-                            fill
-                            className="object-contain p-1"
-                            sizes="62px"
-                          />
-                        </button>
+                        <div key={color} className="relative">
+                          <button
+                            type="button"
+                            onClick={() => selectColor(color)}
+                            disabled={isOutOfStock}
+                            aria-pressed={isSelected}
+                            aria-label={
+                              isOutOfStock
+                                ? t("product.outOfStockAria").replace("{option}", label)
+                                : label
+                            }
+                            className={cn(
+                              "relative size-[calc(2.7rem+14px)] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[62px]",
+                              isOutOfStock
+                                ? "cursor-not-allowed border border-[#E8DFD4]"
+                                : isSelected
+                                  ? "cursor-pointer border-2 border-[#2d3748]"
+                                  : "cursor-pointer border border-[#E8DFD4] hover:border-primary-orange/60",
+                            )}
+                          >
+                            <Image
+                              src={BOOK_COLOR_SWATCHES[color]}
+                              alt={label}
+                              fill
+                              className={cn(
+                                "object-contain p-1",
+                                isOutOfStock && "opacity-40 grayscale",
+                              )}
+                              sizes="62px"
+                            />
+                          </button>
+                          {isOutOfStock ? (
+                            <OutOfStockBadge className="absolute inset-x-0 -bottom-2 z-10 mx-auto" />
+                          ) : null}
+                        </div>
                       );
                     })}
                   </div>

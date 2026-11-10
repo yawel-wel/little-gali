@@ -9,7 +9,7 @@ import {
   type BookColor,
 } from "@/lib/book-color";
 import {
-  DEFAULT_BLANKET_PATTERN,
+  DEFAULT_GIFT_SET_PATTERN,
   isBlanketPattern,
   type BlanketPattern,
 } from "@/lib/blanket";
@@ -41,7 +41,7 @@ export function resolveCartMerchandiseGid(options: {
   if (options.isBirthPackage) {
     const pattern = isBlanketPattern(options.blanketPattern)
       ? options.blanketPattern
-      : DEFAULT_BLANKET_PATTERN;
+      : DEFAULT_GIFT_SET_PATTERN;
     return birthPackageVariantGid(pattern);
   }
   return resolveBookVariantGid(

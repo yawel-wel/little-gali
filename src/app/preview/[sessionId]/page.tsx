@@ -49,6 +49,7 @@ import {
 } from "@/lib/preview-session/display-order";
 import {
   getPreferredBookColor,
+  isBookColorOutOfStock,
   setPreferredBookColor,
   type BookColor,
 } from "@/lib/book-color";
@@ -58,7 +59,9 @@ import {
   setGiftSetBlanketPattern,
 } from "@/lib/gift-set";
 import {
-  DEFAULT_BLANKET_PATTERN,
+  DEFAULT_GIFT_SET_PATTERN,
+  bookColorForGiftSetPattern,
+  isGiftSetPatternOutOfStock,
   type BlanketPattern,
 } from "@/lib/blanket";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -422,7 +425,7 @@ export default function PreviewPage() {
   const [bookColorError, setBookColorError] = useState(false);
   const [isGiftSet, setIsGiftSet] = useState(false);
   const [giftSetBlanketPattern, setGiftSetBlanketPatternState] =
-    useState<BlanketPattern>(DEFAULT_BLANKET_PATTERN);
+    useState<BlanketPattern>(DEFAULT_GIFT_SET_PATTERN);
   const [styleStripLoading, setStyleStripLoading] = useState<Set<StyleType>>(
     () => new Set(),
   );
@@ -441,7 +444,7 @@ export default function PreviewPage() {
       const pattern = getGiftSetBlanketPattern();
       setGiftSetBlanketPatternState(pattern);
       // Gift-set UI pairs package type with book fabric: dots→light, leopard→dark
-      const pairedColor: BookColor = pattern === "leopard" ? "dark" : "light";
+      const pairedColor = bookColorForGiftSetPattern(pattern);
       setSelectedBookColor(pairedColor);
       setPreferredBookColor(pairedColor);
       return;
@@ -1791,7 +1794,7 @@ export default function PreviewPage() {
 
   const handleContinueToCart = async () => {
     if (!session) return;
-    if (!selectedBookColor) {
+    if (!selectedBookColor || isBookColorOutOfStock(selectedBookColor)) {
       setBookColorError(true);
       return;
     }
@@ -2721,11 +2724,12 @@ export default function PreviewPage() {
                                   pattern={giftSetBlanketPattern}
                                   labelKey="product.birthPackage.packageTypeLabel"
                                   align="center"
+                                  isPatternOutOfStock={isGiftSetPatternOutOfStock}
                                   onPatternChange={(pattern) => {
                                     setGiftSetBlanketPatternState(pattern);
                                     setGiftSetBlanketPattern(pattern);
-                                    const pairedColor: BookColor =
-                                      pattern === "leopard" ? "dark" : "light";
+                                    const pairedColor =
+                                      bookColorForGiftSetPattern(pattern);
                                     setSelectedBookColor(pairedColor);
                                     setPreferredBookColor(pairedColor);
                                     setBookColorError(false);

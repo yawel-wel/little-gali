@@ -15,15 +15,20 @@ import { PickupAvailabilityBox } from "@/components/pickup-availability-box";
 import { PrintPatternPicker } from "@/components/print-pattern-picker";
 import { BIRTH_PACKAGE_PRICE } from "@/lib/constants";
 import {
-  DEFAULT_BLANKET_PATTERN,
+  DEFAULT_GIFT_SET_PATTERN,
   BLANKET_PATTERN_LABEL_KEYS,
+  isGiftSetPatternOutOfStock,
   type BlanketPattern,
 } from "@/lib/blanket";
 import {
   getGiftSetBlanketPattern,
   startGiftSetFlow,
 } from "@/lib/gift-set";
-import { getPreferredBookColor, setPreferredBookColor } from "@/lib/book-color";
+import {
+  DEFAULT_BOOK_COLOR,
+  getPreferredBookColor,
+  setPreferredBookColor,
+} from "@/lib/book-color";
 import { useLanguage } from "@/lib/LanguageContext";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
@@ -91,7 +96,7 @@ export default function BirthPackagesProductPage() {
   const textAlign = isHe ? "text-right" : "text-left";
   const [imageIndex, setImageIndex] = useState(0);
   const [printPattern, setPrintPattern] = useState<BlanketPattern>(
-    DEFAULT_BLANKET_PATTERN,
+    DEFAULT_GIFT_SET_PATTERN,
   );
   const [activeTab, setActiveTab] = useState<ProductTab>("description");
 
@@ -103,6 +108,7 @@ export default function BirthPackagesProductPage() {
   const currentImageSrc = patternImages[imageIndex] ?? patternImages[0];
 
   const selectPrint = (pattern: BlanketPattern) => {
+    if (isGiftSetPatternOutOfStock(pattern)) return;
     setPrintPattern(pattern);
     setImageIndex(0);
   };
@@ -117,7 +123,7 @@ export default function BirthPackagesProductPage() {
     if (preferred) setPreferredBookColor(preferred);
     startGiftSetFlow(printPattern);
     track(ANALYTICS_EVENTS.BOOKLET_FLOW_STARTED, {
-      book_color: preferred ?? "light",
+      book_color: preferred ?? DEFAULT_BOOK_COLOR,
     });
   };
 
@@ -258,6 +264,7 @@ export default function BirthPackagesProductPage() {
                   <PrintPatternPicker
                     pattern={printPattern}
                     onPatternChange={selectPrint}
+                    isPatternOutOfStock={isGiftSetPatternOutOfStock}
                   />
                 </div>
 

@@ -1,6 +1,7 @@
 import {
-  DEFAULT_BLANKET_PATTERN,
+  DEFAULT_GIFT_SET_PATTERN,
   isBlanketPattern,
+  isGiftSetPatternOutOfStock,
   type BlanketPattern,
 } from "@/lib/blanket";
 
@@ -30,14 +31,15 @@ export function setGiftSetFlow(active: boolean): void {
 }
 
 export function getGiftSetBlanketPattern(): BlanketPattern {
-  if (typeof window === "undefined") return DEFAULT_BLANKET_PATTERN;
+  if (typeof window === "undefined") return DEFAULT_GIFT_SET_PATTERN;
   try {
     const raw = localStorage.getItem(GIFT_SET_BLANKET_PATTERN_KEY);
-    if (isBlanketPattern(raw)) return raw;
+    // A saved package that is now out of stock falls back to the default.
+    if (isBlanketPattern(raw) && !isGiftSetPatternOutOfStock(raw)) return raw;
   } catch {
     // ignore
   }
-  return DEFAULT_BLANKET_PATTERN;
+  return DEFAULT_GIFT_SET_PATTERN;
 }
 
 export function setGiftSetBlanketPattern(pattern: BlanketPattern): void {

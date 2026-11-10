@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { OutOfStockBadge } from "@/components/out-of-stock-badge";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
   BLANKET_PATTERNS,
@@ -18,6 +19,8 @@ export type PrintPatternPickerProps = {
   /** i18n key for the option label (default: product.birthPackage.printLabel). */
   labelKey?: string;
   align?: "start" | "center";
+  /** Sold-out options stay visible with a badge but can't be selected. */
+  isPatternOutOfStock?: (pattern: BlanketPattern) => boolean;
 };
 
 /** Simple הדפס / Print swatch row (gift-set PDP + preview). */
@@ -28,6 +31,7 @@ export function PrintPatternPicker({
   className,
   labelKey = "product.birthPackage.printLabel",
   align = "start",
+  isPatternOutOfStock,
 }: PrintPatternPickerProps) {
   const { t, locale } = useLanguage();
   const isHe = locale === "he";
@@ -55,34 +59,53 @@ export function PrintPatternPicker({
       >
         {BLANKET_PATTERNS.map((p) => {
           const isSelected = pattern === p;
+          const isOutOfStock = isPatternOutOfStock?.(p) ?? false;
           const label = t(BLANKET_PATTERN_LABEL_KEYS[p]);
+          const ariaLabel = t("product.blanket.patternAria").replace(
+            "{pattern}",
+            label,
+          );
           return (
-            <button
-              key={p}
-              type="button"
-              disabled={disabled}
-              onClick={() => onPatternChange(p)}
-              aria-pressed={isSelected}
-              aria-label={t("product.blanket.patternAria").replace(
-                "{pattern}",
-                label,
-              )}
-              className={cn(
-                "relative size-[calc(2.7rem+20px)] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[68px]",
-                disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
-                isSelected
-                  ? "border-2 border-[#2d3748]"
-                  : "border border-[#E8DFD4] hover:border-primary-orange/60",
-              )}
-            >
-              <Image
-                src={BLANKET_SWATCH_IMAGES[p]}
-                alt={label}
-                fill
-                className="object-contain p-1"
-                sizes="68px"
-              />
-            </button>
+            <div key={p} className="relative">
+              <button
+                type="button"
+                disabled={disabled || isOutOfStock}
+                onClick={() => {
+                  if (!isOutOfStock) onPatternChange(p);
+                }}
+                aria-pressed={isSelected}
+                aria-label={
+                  isOutOfStock
+                    ? t("product.outOfStockAria").replace("{option}", ariaLabel)
+                    : ariaLabel
+                }
+                className={cn(
+                  "relative size-[calc(2.7rem+20px)] overflow-hidden rounded-md bg-white p-0.5 transition-colors sm:size-[68px]",
+                  isOutOfStock
+                    ? "cursor-not-allowed border border-[#E8DFD4]"
+                    : cn(
+                        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+                        isSelected
+                          ? "border-2 border-[#2d3748]"
+                          : "border border-[#E8DFD4] hover:border-primary-orange/60",
+                      ),
+                )}
+              >
+                <Image
+                  src={BLANKET_SWATCH_IMAGES[p]}
+                  alt={label}
+                  fill
+                  className={cn(
+                    "object-contain p-1",
+                    isOutOfStock && "opacity-40 grayscale",
+                  )}
+                  sizes="68px"
+                />
+              </button>
+              {isOutOfStock ? (
+                <OutOfStockBadge className="absolute inset-x-0 -bottom-2 z-10 mx-auto" />
+              ) : null}
+            </div>
           );
         })}
       </div>

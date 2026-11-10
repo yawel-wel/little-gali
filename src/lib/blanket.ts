@@ -1,5 +1,9 @@
 import { BLANKET_VARIANT_IDS } from "@/lib/constants";
-import type { BookColor } from "@/lib/book-color";
+import {
+  DEFAULT_BOOK_COLOR,
+  isBookColorOutOfStock,
+  type BookColor,
+} from "@/lib/book-color";
 
 export type BlanketPattern = keyof typeof BLANKET_VARIANT_IDS;
 
@@ -65,3 +69,17 @@ export function blanketPatternFromVariantId(
 export function matchingBlanketPattern(bookColor: BookColor): BlanketPattern {
   return bookColor === "dark" ? "leopard" : "dots";
 }
+
+/** Gift set pairs the print with the book fabric: leopard → black book, dots → bright book. */
+export function bookColorForGiftSetPattern(pattern: BlanketPattern): BookColor {
+  return pattern === "leopard" ? "dark" : "light";
+}
+
+/** A gift-set package is sold out when its paired book color is. */
+export function isGiftSetPatternOutOfStock(pattern: BlanketPattern): boolean {
+  return isBookColorOutOfStock(bookColorForGiftSetPattern(pattern));
+}
+
+/** Default gift-set package: the one matching the default (in-stock) book color. */
+export const DEFAULT_GIFT_SET_PATTERN: BlanketPattern =
+  matchingBlanketPattern(DEFAULT_BOOK_COLOR);

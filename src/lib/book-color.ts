@@ -2,7 +2,23 @@ import { BOOK_VARIANT_IDS } from "@/lib/constants";
 
 export type BookColor = "dark" | "light";
 
-export const DEFAULT_BOOK_COLOR: BookColor = "light";
+/** Display order of the color options (soft book PDP + preview picker). */
+export const BOOK_COLORS: readonly BookColor[] = ["light", "dark"];
+
+/**
+ * Sold-out book colors: still shown with a "נגמר המלאי" badge, but can't be
+ * selected. Remove a color from this list when it's back in stock — the
+ * default color and the gift-set package follow automatically.
+ */
+export const OUT_OF_STOCK_BOOK_COLORS: readonly BookColor[] = ["light"];
+
+export function isBookColorOutOfStock(color: BookColor): boolean {
+  return OUT_OF_STOCK_BOOK_COLORS.includes(color);
+}
+
+/** First in-stock color (light when everything is in stock). */
+export const DEFAULT_BOOK_COLOR: BookColor =
+  BOOK_COLORS.find((color) => !isBookColorOutOfStock(color)) ?? "light";
 
 export const BOOK_COLOR_SWATCHES: Record<BookColor, string> = {
   dark: "/book-color-swatch-dark.png",
@@ -61,7 +77,7 @@ export function bookColorFromVariantId(
 }
 
 export function resolveBookVariantGid(bookColor?: BookColor | null): string {
-  const color = bookColor === "dark" ? "dark" : "light";
+  const color = isValidBookColor(bookColor) ? bookColor : DEFAULT_BOOK_COLOR;
   return `gid://shopify/ProductVariant/${BOOK_VARIANT_IDS[color]}`;
 }
 
@@ -71,14 +87,17 @@ export function isValidBookColor(value: unknown): value is BookColor {
 
 const PREFERRED_BOOK_COLOR_KEY = "lg_preferred_book_color";
 
-/** Persist product-page color choice for preview / cart. */
+/**
+ * Persist product-page color choice for preview / cart.
+ * A saved choice that is now out of stock is ignored (falls back to default).
+ */
 export function getPreferredBookColor(): BookColor | null {
   if (typeof window === "undefined") {
     return null;
   }
   try {
     const raw = localStorage.getItem(PREFERRED_BOOK_COLOR_KEY);
-    return isValidBookColor(raw) ? raw : null;
+    return isValidBookColor(raw) && !isBookColorOutOfStock(raw) ? raw : null;
   } catch {
     return null;
   }
