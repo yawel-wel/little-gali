@@ -16,9 +16,10 @@ import {
   GIFT_SET_BLANKET_UPGRADE_PRICE,
 } from "@/lib/constants";
 import { isFramedArtEnabled } from "@/lib/feature-flags";
+import { COLORFUL_SLOT_COUNT } from "@/lib/preview-session/book-flow";
 import { FramedArtFrameMockup } from "@/components/framed-art-frame-mockup";
 
-const MAX_BOOK_PAGES = 9;
+const MAX_BOOK_PAGES = COLORFUL_SLOT_COUNT;
 
 /** Soft book or gift set line (the lines these upsells are about). */
 export function isCartBookItem(item: CartItem): boolean {

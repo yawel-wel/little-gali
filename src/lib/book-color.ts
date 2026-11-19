@@ -10,7 +10,7 @@ export const BOOK_COLORS: readonly BookColor[] = ["light", "dark"];
  * selected. Remove a color from this list when it's back in stock — the
  * default color and the gift-set package follow automatically.
  */
-export const OUT_OF_STOCK_BOOK_COLORS: readonly BookColor[] = ["light"];
+export const OUT_OF_STOCK_BOOK_COLORS: readonly BookColor[] = [];
 
 export function isBookColorOutOfStock(color: BookColor): boolean {
   return OUT_OF_STOCK_BOOK_COLORS.includes(color);
@@ -85,7 +85,11 @@ export function isValidBookColor(value: unknown): value is BookColor {
   return value === "dark" || value === "light";
 }
 
-const PREFERRED_BOOK_COLOR_KEY = "lg_preferred_book_color";
+/**
+ * v2: light came back in stock (new model). Choices saved while light was
+ * sold out were almost always "dark" by necessity, so they're ignored.
+ */
+const PREFERRED_BOOK_COLOR_KEY = "lg_preferred_book_color_v2";
 
 /**
  * Persist product-page color choice for preview / cart.

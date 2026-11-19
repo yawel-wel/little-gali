@@ -64,7 +64,7 @@ export function SoftBookFeatureHighlights({
             )}
             aria-hidden
           />
-          <span className="font-body text-sm leading-snug text-dark-gray">
+          <span className="whitespace-pre-line font-body text-sm leading-snug text-dark-gray">
             {t(key)}
           </span>
         </li>

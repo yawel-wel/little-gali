@@ -369,10 +369,6 @@ export default function BirthPackagesProductPage() {
                     ))}
                   </div>
                   <p className="mt-8 font-body text-sm leading-relaxed text-medium-gray sm:text-base">
-                    <span className="font-body-bold">
-                      {t("product.book.goodToKnow.mirrorNoteTitle")}
-                    </span>
-                    <br />
                     <span className="whitespace-pre-line">
                       {t("product.book.goodToKnow.mirrorNote")}
                     </span>

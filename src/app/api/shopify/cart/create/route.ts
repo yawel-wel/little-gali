@@ -26,7 +26,12 @@ import {
   previewStatsShopifyAttributes,
   promptVersionsShopifyAttributes,
 } from "@/lib/preview-session/generation-stats";
-import { parseBookFlow, bookFlowFromLineAttributes, type BookFlow } from "@/lib/preview-session/book-flow";
+import {
+  parseBookFlow,
+  bookFlowFromLineAttributes,
+  isColorfulImageCount,
+  type BookFlow,
+} from "@/lib/preview-session/book-flow";
 import { resolveMixpanelDistinctIdForCart } from "@/lib/analytics-purchase";
 import {
   loadPreviewSessionForPromptVersions,
@@ -84,7 +89,8 @@ export async function POST(request: NextRequest) {
     }
 
     const bookFlow = parseBookFlow(
-      bookFlowRaw ?? (imageUrls.length === 9 ? "colorful" : "classic"),
+      bookFlowRaw ??
+        (isColorfulImageCount(imageUrls.length) ? "colorful" : "classic"),
     );
 
     const resolvedMixpanelDistinctId = await resolveMixpanelDistinctIdForCart({

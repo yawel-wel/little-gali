@@ -278,9 +278,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              bookFlow === "colorful"
-                ? "Exactly nine images are required"
-                : "Exactly five images are required",
+              `Exactly ${expectedCount} images are required`,
           },
           { status: 400 },
         );
@@ -394,9 +392,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            bookFlow === "colorful"
-              ? "Exactly nine original image URLs are required"
-              : "Exactly five original image URLs are required",
+            `Exactly ${expectedCount} original image URLs are required`,
         },
         { status: 400 },
       );

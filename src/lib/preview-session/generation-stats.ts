@@ -1,5 +1,6 @@
 import type { PreviewSession, PreviewSessionPublicView } from "./types";
 import { SHOPIFY_LINE_ATTRIBUTE_MAX_LENGTH } from "@/lib/storage/urls";
+import { CLASSIC_SLOT_COUNT, isColorfulImageCount } from "./book-flow";
 
 export interface PreviewGenerationStats {
   /** Explicit Regenerate clicks during the preview session. */
@@ -62,10 +63,7 @@ export function bookFlowShopifyAttributes(
 export function originalUrlsShopifyAttributes(
   originalUrls?: string[],
 ): Array<{ key: string; value: string }> {
-  if (
-    !originalUrls ||
-    (originalUrls.length !== 5 && originalUrls.length !== 9)
-  ) {
+  if (!originalUrls || !isValidBookCartImageCount(originalUrls.length)) {
     return [];
   }
 
@@ -78,10 +76,7 @@ export function originalUrlsShopifyAttributes(
 export function generatedColorUrlsShopifyAttributes(
   generatedColorUrls?: string[],
 ): Array<{ key: string; value: string }> {
-  if (
-    !generatedColorUrls ||
-    (generatedColorUrls.length !== 5 && generatedColorUrls.length !== 9)
-  ) {
+  if (!generatedColorUrls || !isValidBookCartImageCount(generatedColorUrls.length)) {
     return [];
   }
 
@@ -101,7 +96,7 @@ export function primaryImageUrlsShopifyAttributes(
 }
 
 export function isValidBookCartImageCount(count: number): boolean {
-  return count === 5 || count === 9;
+  return count === CLASSIC_SLOT_COUNT || isColorfulImageCount(count);
 }
 
 export function isValidBookCartStyle(

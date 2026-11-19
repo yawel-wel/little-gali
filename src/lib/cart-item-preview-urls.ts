@@ -1,11 +1,17 @@
 import type { CartItem } from "@/lib/CartContext";
 import { isValidBookCartImageCount } from "@/lib/preview-session/generation-stats";
+import {
+  COLORFUL_SLOT_COUNT,
+  isColorfulImageCount,
+} from "@/lib/preview-session/book-flow";
 
 export type CartItemAvatarSlot = string | null;
 
 export function getCartItemAvatarPreview(item: CartItem): {
   slots: CartItemAvatarSlot[];
   expectedCount: number;
+  /** Colorful book (9 legacy or 10 color pages), not classic B&W + color. */
+  isColorful?: boolean;
 } {
   if (item.isBambooBlanket || item.isGiftCard) {
     return { slots: [], expectedCount: 0 };
@@ -22,27 +28,32 @@ export function getCartItemAvatarPreview(item: CartItem): {
   const isColorful =
     item.bookFlow === "colorful" ||
     item.style === "colorful" ||
-    item.generatedColorUrls?.length === 9 ||
-    item.imageUrls?.length === 9;
+    isColorfulImageCount(item.generatedColorUrls?.length ?? 0) ||
+    isColorfulImageCount(item.imageUrls?.length ?? 0);
 
   if (isColorful) {
-    const color =
-      item.generatedColorUrls?.length === 9
-        ? item.generatedColorUrls
-        : item.imageUrls?.length === 9
-          ? item.imageUrls
-          : [];
-    if (color.length === 9) {
-      return { slots: [...color], expectedCount: 9 };
+    const generatedColor = item.generatedColorUrls ?? [];
+    const imageUrls = item.imageUrls ?? [];
+    const color = isColorfulImageCount(generatedColor.length)
+      ? generatedColor
+      : isColorfulImageCount(imageUrls.length)
+        ? imageUrls
+        : [];
+    if (color.length > 0) {
+      return { slots: [...color], expectedCount: color.length, isColorful: true };
     }
     const partial = item.imageUrls?.length
-      ? item.imageUrls.slice(0, 9)
+      ? item.imageUrls.slice(0, COLORFUL_SLOT_COUNT)
       : color;
     const slots: CartItemAvatarSlot[] = partial.map((url) => url);
-    while (slots.length < 9) {
+    while (slots.length < COLORFUL_SLOT_COUNT) {
       slots.push(null);
     }
-    return { slots: slots.slice(0, 9), expectedCount: 9 };
+    return {
+      slots: slots.slice(0, COLORFUL_SLOT_COUNT),
+      expectedCount: COLORFUL_SLOT_COUNT,
+      isColorful: true,
+    };
   }
 
   const bw =

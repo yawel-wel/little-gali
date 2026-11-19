@@ -1,7 +1,17 @@
 export type BookFlow = "classic" | "colorful";
 
 export const CLASSIC_SLOT_COUNT = 5;
-export const COLORFUL_SLOT_COUNT = 9;
+export const COLORFUL_SLOT_COUNT = 10;
+/**
+ * Colorful books made before the 10-photo book (5 per side) had 9 photos.
+ * Their sessions, carts and orders must keep working.
+ */
+export const LEGACY_COLORFUL_SLOT_COUNT = 9;
+
+/** 9 (legacy) or 10 images = a colorful book. Classic books have 5. */
+export function isColorfulImageCount(count: number): boolean {
+  return count === COLORFUL_SLOT_COUNT || count === LEGACY_COLORFUL_SLOT_COUNT;
+}
 
 export function isBookFlow(value: unknown): value is BookFlow {
   return value === "classic" || value === "colorful";

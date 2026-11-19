@@ -83,8 +83,10 @@ export function urlsInDisplayOrder(
   session: PreviewSession,
   pickUrl: (slot: PreviewSession["slots"][number]) => string,
 ): string[] {
-  const flow = parseBookFlow(session.bookFlow);
-  const order = normalizeDisplayOrder(session.displayOrder, flow);
+  const order = normalizeDisplayOrder(
+    session.displayOrder,
+    sessionSlotCount(session),
+  );
   return order.map((slotIndex) => {
     const slot = session.slots[slotIndex];
     if (!slot) {

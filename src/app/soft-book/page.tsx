@@ -14,6 +14,7 @@ import { LooxProductRating } from "@/components/loox-widget-section";
 import { SoftBookFeatureHighlights } from "@/components/soft-book-feature-highlights";
 import { PickupAvailabilityBox } from "@/components/pickup-availability-box";
 import { OutOfStockBadge } from "@/components/out-of-stock-badge";
+import { NewVersionBadge } from "@/components/new-version-badge";
 import { BOOK_PRICE } from "@/lib/constants";
 import {
   type BookColor,
@@ -221,6 +222,7 @@ export default function SoftBookProductPage() {
                 )}
               >
                 <div className="order-1 space-y-1.5">
+                  <NewVersionBadge />
                   <h1 className="text-2xl font-heading font-bold text-dark-gray sm:text-3xl lg:text-4xl leading-tight">
                     {t("product.book.name")}
                   </h1>
@@ -407,10 +409,6 @@ export default function SoftBookProductPage() {
                       ))}
                     </div>
                     <p className="mt-8 font-body text-sm leading-relaxed text-medium-gray sm:text-base">
-                      <span className="font-body-bold">
-                        {t("product.book.goodToKnow.mirrorNoteTitle")}
-                      </span>
-                      <br />
                       <span className="whitespace-pre-line">
                         {t("product.book.goodToKnow.mirrorNote")}
                       </span>

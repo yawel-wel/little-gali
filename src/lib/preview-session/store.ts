@@ -6,7 +6,11 @@ import {
 } from "./color-by-style";
 import { effectiveChangeCreditsRemaining } from "./credits";
 import { parseBookFlow } from "./book-flow";
-import { normalizeDisplayOrder, urlsInDisplayOrder } from "./display-order";
+import {
+  normalizeDisplayOrder,
+  sessionSlotCount,
+  urlsInDisplayOrder,
+} from "./display-order";
 import { isPreviewLimitsBypassed } from "./preview-limits-bypass";
 import type {
   PreviewGenerationStatus,
@@ -233,7 +237,10 @@ export function toPublicView(session: PreviewSession): PreviewSessionPublicView 
     phase: session.phase,
     generationStatus,
     bookFlow,
-    displayOrder: normalizeDisplayOrder(session.displayOrder, bookFlow),
+    displayOrder: normalizeDisplayOrder(
+      session.displayOrder,
+      sessionSlotCount(session),
+    ),
     changeCreditsRemaining: effectiveChangeCreditsRemaining(session),
     regenerateCount: session.regenerateCount ?? 0,
     slots: session.slots.map((slot, index) => ({

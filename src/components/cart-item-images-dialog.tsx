@@ -35,11 +35,11 @@ export function CartItemImagesDialog({
   const framedUrl = item.isFramedArt
     ? (item.framedImageUrl ?? item.imageUrls?.[0] ?? null)
     : null;
-  const bookUrls = item.isFramedArt
-    ? []
-    : getCartItemAvatarPreview(item).slots.filter(
-        (url): url is string => Boolean(url),
-      );
+  const bookPreview = item.isFramedArt ? null : getCartItemAvatarPreview(item);
+  const isColorfulBook = Boolean(bookPreview?.isColorful);
+  const bookUrls = bookPreview
+    ? bookPreview.slots.filter((url): url is string => Boolean(url))
+    : [];
 
   if (item.isFramedArt ? !framedUrl : bookUrls.length === 0) {
     return <div className={className}>{children}</div>;
@@ -80,10 +80,12 @@ export function CartItemImagesDialog({
           ) : (
             <div
               className={cn(
-                // Mobile: 2 big columns. With 10 pages the first column is the
-                // B&W side and the second the color side, so each row is one page.
+                // Mobile: 2 big columns. A classic book's 10 pages: the first
+                // column is the B&W side and the second the color side, so each
+                // row is one page. Colorful books (9 legacy / 10) just wrap.
                 "mx-auto grid w-56 grid-cols-2 gap-3 md:w-full",
-                bookUrls.length === 10 &&
+                !isColorfulBook &&
+                  bookUrls.length === 10 &&
                   "grid-flow-col grid-rows-5 md:grid-flow-row md:grid-rows-none",
                 bookUrls.length === 9 ? "md:grid-cols-3" : "md:grid-cols-5",
               )}

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Title } from "@/components/title";
+import { NewVersionBadge } from "@/components/new-version-badge";
 import { useLanguage } from "@/lib/LanguageContext";
 import { isFramedArtEnabled } from "@/lib/feature-flags";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ type CategoryItem = {
   className: string;
   minHeight: string;
   framedOnly?: boolean;
+  showNewVersionBadge?: boolean;
 };
 
 const CATEGORIES: CategoryItem[] = [
@@ -36,6 +38,7 @@ const CATEGORIES: CategoryItem[] = [
     ariaKey: "home.categories.softBookAria",
     className: "md:col-start-2 md:row-start-1 md:min-h-[200px]",
     minHeight: "min-h-[200px] sm:min-h-[220px]",
+    showNewVersionBadge: true,
   },
   {
     id: "framed-art",
@@ -50,7 +53,7 @@ const CATEGORIES: CategoryItem[] = [
 ];
 
 export function HomeCategoryBento() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const framedOn = isFramedArtEnabled();
 
   const items = CATEGORIES.filter((item) => !item.framedOnly || framedOn);
@@ -102,6 +105,14 @@ export function HomeCategoryBento() {
                 className="pointer-events-none absolute inset-0 bg-black/25"
                 aria-hidden
               />
+              {item.showNewVersionBadge ? (
+                <div
+                  dir={locale === "he" ? "rtl" : "ltr"}
+                  className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-start p-3"
+                >
+                  <NewVersionBadge />
+                </div>
+              ) : null}
               <span className="absolute inset-0 z-10 flex items-center justify-center px-4 text-center font-heading text-base font-bold tracking-wide text-white sm:px-5 sm:text-lg lg:text-xl">
                 {t(item.labelKey)}
               </span>

@@ -1,9 +1,10 @@
 import { getLineGroupId } from "@/lib/shopify/cart-line-group";
 import { isValidBookCartImageCount } from "@/lib/preview-session/generation-stats";
+import { COLORFUL_SLOT_COUNT } from "@/lib/preview-session/book-flow";
 
 type LineAttribute = { key: string; value: string };
 
-const MAX_BOOK_IMAGE_SLOTS = 9;
+const MAX_BOOK_IMAGE_SLOTS = COLORFUL_SLOT_COUNT;
 
 export function extractImagesFromLineAttributes(
   attributes: LineAttribute[] | undefined,

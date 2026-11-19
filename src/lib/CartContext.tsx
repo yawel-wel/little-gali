@@ -25,6 +25,7 @@ import {
   GIFT_CARD_OPTIONS,
 } from "./constants";
 import { isValidBookCartImageCount, isValidBookCartStyle } from "./preview-session/generation-stats";
+import { isColorfulImageCount } from "./preview-session/book-flow";
 import { mergeCartItemsByLineGroup } from "./shopify/merge-cart-items-by-group";
 import { normalizeCartLineId } from "./shopify/normalize-cart-line-id";
 import type { BookColor } from "./book-color";
@@ -318,7 +319,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 : bookFlowFromAttr ??
                   (style === "colorful"
                     ? ("colorful" as const)
-                    : imageUrls.length === 9
+                    : isColorfulImageCount(imageUrls.length)
                       ? ("colorful" as const)
                       : ("classic" as const));
 

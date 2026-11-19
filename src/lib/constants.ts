@@ -9,16 +9,16 @@ function priceFromEnv(value: string | undefined, fallback: number): number {
 }
 
 /** List price shown on the soft-book page. Checkout still charges the Shopify variant price. */
-export const BOOK_PRICE = priceFromEnv(process.env.NEXT_PUBLIC_BOOK_PRICE, 220);
+export const BOOK_PRICE = priceFromEnv(process.env.NEXT_PUBLIC_BOOK_PRICE, 240);
 /** Second-book promo price. Shopify applies the actual discount at checkout. */
 export const DISCOUNTED_BOOK_PRICE = priceFromEnv(
   process.env.NEXT_PUBLIC_SECOND_BOOK_PRICE,
-  189,
+  199,
 );
 /** Gift card shown on the site. The charged amount is the Shopify gift-card variant. */
 export const GIFT_CARD_PRICE = priceFromEnv(
   process.env.NEXT_PUBLIC_GIFT_CARD_PRICE,
-  250,
+  270,
 );
 
 /** Single framed-art line item (Shopify discount may reduce multi-item carts). */
@@ -42,7 +42,7 @@ export const BLANKET_VARIANT_IDS = {
 /** Soft book + bamboo blanket birth package (gift set). */
 export const BIRTH_PACKAGE_PRICE = priceFromEnv(
   process.env.NEXT_PUBLIC_GIFT_SET_PRICE,
-  279,
+  299,
 );
 /** Book → gift set upgrade in the cart: what the matching blanket costs on top of the book. */
 export const GIFT_SET_BLANKET_UPGRADE_PRICE = BIRTH_PACKAGE_PRICE - BOOK_PRICE;
@@ -61,7 +61,7 @@ export function birthPackageVariantGid(
 /** Gift card for the gift set (soft book + large bamboo blanket). */
 export const GIFT_CARD_GIFT_SET_PRICE = priceFromEnv(
   process.env.NEXT_PUBLIC_GIFT_CARD_GIFT_SET_PRICE,
-  309,
+  329,
 );
 
 // Gift Card Configuration
@@ -97,7 +97,7 @@ export const GIFT_CARD_OPTIONS: ReadonlyArray<{
 // SHOPIFY_GIFT_CARD_VARIANT_ID_TWO_WITH_SHIPPING=gid://shopify/ProductVariant/YOUR_VARIANT_ID
 // SHOPIFY_FRAMED_ART_VARIANT_ID=43836272607335
 // NEXT_PUBLIC_FRAMED_ART_ENABLED=true
-// NEXT_PUBLIC_BOOK_PRICE=220
-// NEXT_PUBLIC_SECOND_BOOK_PRICE=189
-// NEXT_PUBLIC_GIFT_CARD_PRICE=250
-// NEXT_PUBLIC_GIFT_SET_PRICE=279
+// NEXT_PUBLIC_BOOK_PRICE=240
+// NEXT_PUBLIC_SECOND_BOOK_PRICE=199
+// NEXT_PUBLIC_GIFT_CARD_PRICE=270
+// NEXT_PUBLIC_GIFT_SET_PRICE=299

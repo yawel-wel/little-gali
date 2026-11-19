@@ -76,7 +76,7 @@ interface UploadImageItemProps {
   onRemove: (index: number) => void;
   isSubmitting: boolean;
   onTap: (index: number) => void;
-  /** Smaller thumbs so 5 fit in one row on mobile (colorful 9-photo layout). */
+  /** Smaller thumbs so 5 fit in one row on mobile (colorful 10-photo layout, 5 per side). */
   compact?: boolean;
 }
 
@@ -801,7 +801,7 @@ function UploadPageContent() {
       setSubmitStatus({
         type: "error",
         message: isColorfulFlow
-          ? t("upload.selectExactly9")
+          ? t("upload.selectExactlyColorful")
           : t("upload.selectExactly5"),
       });
       return;
@@ -930,7 +930,7 @@ function UploadPageContent() {
         setSubmitStatus({
           type: "error",
           message: isColorfulFlow
-            ? t("upload.selectExactly9")
+            ? t("upload.selectExactlyColorful")
             : t("upload.selectExactly5"),
         });
         setIsSubmitting(false);
@@ -1162,7 +1162,7 @@ function UploadPageContent() {
                       {images.length}
                     </span>{" "}
                     {isColorfulFlow
-                      ? t("upload.imagesCount9")
+                      ? t("upload.imagesCountColorful")
                       : t("upload.imagesCount")}
                   </span>
                 </div>
