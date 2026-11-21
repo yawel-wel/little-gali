@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { Title } from "@/components/title";
 import { useLanguage } from "@/lib/LanguageContext";
+import { MARQUEE_TILE_CLASS, MarqueeRow } from "@/components/marquee-row";
 
-type BookInUseItem = {
+export type BookInUseItem = {
   num: number;
   /** Must match the file in /public exactly: Vercel is case-sensitive (jpg ≠ JPG). */
   ext: string;
@@ -34,6 +35,13 @@ const ROW_TWO: readonly BookInUseItem[] = [
   { num: 18, ext: "jpg" },
 ];
 
+/** All book-in-use photos, both rows, in order. */
+export const BOOK_IN_USE_ITEMS: readonly BookInUseItem[] = [...ROW_ONE, ...ROW_TWO];
+
+export function bookInUseSrc(item: BookInUseItem): string {
+  return `/book-in-use-${item.num}.${item.ext}`;
+}
+
 function BookInUseTile({
   item,
   alt,
@@ -42,56 +50,15 @@ function BookInUseTile({
   alt: string;
 }) {
   return (
-    <div className="relative aspect-[3/4] w-[27vw] shrink-0 overflow-hidden rounded-[5px] bg-warm-cream lg:w-[15vw] lg:max-w-64">
+    <div className={`${MARQUEE_TILE_CLASS} bg-warm-cream`}>
       <Image
-        src={`/book-in-use-${item.num}.${item.ext}`}
+        src={bookInUseSrc(item)}
         alt={alt}
         fill
         draggable={false}
         className="object-cover"
         sizes="(max-width: 1024px) 27vw, 15vw"
       />
-    </div>
-  );
-}
-
-function MarqueeRow({
-  items,
-  reverse = false,
-  imageAlt,
-}: {
-  items: readonly BookInUseItem[];
-  reverse?: boolean;
-  imageAlt: (num: number) => string;
-}) {
-  return (
-    // Fixed LTR so the -50% loop math is the same in Hebrew and English.
-    <div
-      dir="ltr"
-      className="overflow-hidden motion-reduce:overflow-x-auto"
-    >
-      <div
-        className={`book-in-use-marquee flex w-max ${
-          reverse ? "book-in-use-marquee-reverse" : ""
-        }`}
-      >
-        {/* Two identical copies: when the first has scrolled out, the second is in its place. */}
-        {[0, 1].map((copy) => (
-          <div
-            key={copy}
-            className="flex gap-2.5 pe-2.5 lg:gap-3.5 lg:pe-3.5"
-            aria-hidden={copy === 1 ? true : undefined}
-          >
-            {items.map((item) => (
-              <BookInUseTile
-                key={item.num}
-                item={item}
-                alt={copy === 1 ? "" : imageAlt(item.num)}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -120,8 +87,17 @@ export function BookInUseSection() {
       </div>
 
       <div className="flex flex-col gap-2.5 lg:gap-3.5">
-        <MarqueeRow items={ROW_ONE} imageAlt={imageAlt} />
-        <MarqueeRow items={ROW_TWO} reverse imageAlt={imageAlt} />
+        {[ROW_ONE, ROW_TWO].map((row, index) => (
+          <MarqueeRow
+            key={index}
+            items={row}
+            reverse={index === 1}
+            getKey={(item) => item.num}
+            renderItem={(item, isCopy) => (
+              <BookInUseTile item={item} alt={isCopy ? "" : imageAlt(item.num)} />
+            )}
+          />
+        ))}
       </div>
     </section>
   );

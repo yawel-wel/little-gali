@@ -34,6 +34,9 @@ export const ANALYTICS_EVENTS = {
   CROP_SUGGESTION_RESULT: "crop_suggestion_result",
   CROP_FACE_WARNING_SHOWN: "crop_face_warning_shown",
   CROP_SAVED: "crop_saved",
+  // Home page
+  HOME_REVIEWS_VIEWED: "home_reviews_viewed",
+  HOME_REVIEW_EXPANDED: "home_review_expanded",
   // General
   PURCHASE_COMPLETED: "purchase_completed",
   CART_ABANDONED: "cart_abandoned",
@@ -97,6 +100,8 @@ export type EventProperties = {
     adjusted: boolean;
     saved_despite_face_warning: boolean;
   };
+  home_reviews_viewed: { review_count: number; highlight_count: number };
+  home_review_expanded: { has_photo: boolean };
   purchase_completed: { product_type: ProductType; amount: number };
   cart_abandoned: Record<string, never>;
 };

@@ -36,3 +36,16 @@ export interface Testimonial {
   name: string;
   imageUrl?: string;
 }
+
+/** A review card on the home page (from Loox's widget feed, see fetch-widget-reviews.ts). */
+export interface HomeReview {
+  id: string;
+  rating: number;
+  text: string;
+  name: string;
+  verified: boolean;
+  /** The AI-picked sentence. Usually found inside `text`, but spacing can differ. */
+  highlight?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+}

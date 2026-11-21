@@ -13,8 +13,12 @@ import {
 } from "@/components/loox-widget-section";
 import { GiftCardSection } from "@/components/gift-card-section";
 import { BookInUseSection } from "@/components/book-in-use-section";
+import { HomeReviewsSection } from "@/components/home-reviews-section";
 import { useScrollReveal } from "@/lib/use-scroll-reveal";
-import { isAiPreviewEnabled } from "@/lib/feature-flags";
+import {
+  isAiPreviewEnabled,
+  isHomeReviewsMarqueeEnabled,
+} from "@/lib/feature-flags";
 import { QaPreviewSection } from "@/components/qa-preview-section";
 import { useLanguage } from "@/lib/LanguageContext";
 import { HomeCtaButton } from "@/components/home-cta-button";
@@ -78,6 +82,7 @@ export default function Home() {
   const easeOwlet: any = [0.16, 1, 0.3, 1];
   const { t, locale } = useLanguage();
   const previewOn = isAiPreviewEnabled();
+  const homeReviewsMarquee = isHomeReviewsMarqueeEnabled();
   const howItWorksSteps = previewOn
     ? [
         {
@@ -376,15 +381,17 @@ export default function Home() {
           </div>
         </section>
 
-        <BookInUseSection />
+        {homeReviewsMarquee ? <HomeReviewsSection /> : <BookInUseSection />}
 
         <HomeCategoryBento />
 
-        <LooxWidgetSection
-          variant="cards-carousel"
-          productId={LOOX_PRODUCT_ID}
-          showComparisonLabel={false}
-        />
+        {!homeReviewsMarquee && (
+          <LooxWidgetSection
+            variant="cards-carousel"
+            productId={LOOX_PRODUCT_ID}
+            showComparisonLabel={false}
+          />
+        )}
 
         {/* How It Works Section */}
         <motion.section
